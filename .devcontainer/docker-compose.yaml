@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  devcontainer:
+    build: .
+    command: free --human --seconds 60
+    init: true
+    ports:
+      - 3000:3000
+    volumes:
+      - ..:/workspaces/monadoc:cached
+      - cabal:/home/haskell/.cabal:cached
+      - cabal-store:/cabal:cached
+    working_dir: /workspaces/monadoc
+volumes:
+  cabal: null
+  cabal-store:
+    external: true

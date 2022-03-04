@@ -1,0 +1,11 @@
+{
+  "dockerComposeFile": "docker-compose.yaml",
+  "extensions": [
+    "dramforever.vscode-ghc-simple",
+    "Edka.haskutil"
+  ],
+  "initializeCommand": "docker volume create cabal-store",
+  "postCreateCommand": "cabal update",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/monadoc"
+}
