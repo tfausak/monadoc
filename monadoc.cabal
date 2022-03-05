@@ -1,7 +1,7 @@
 cabal-version: 2.0
 
 name: monadoc
-version: 0.2022.3.3
+version: 0.2022.3.4
 synopsis: Worse Haskell documentation.
 description:
   Monadoc is a web service that provides Haskell documentation. It is meant as
@@ -10,7 +10,7 @@ description:
 build-type: Simple
 category: Documentation
 data-dir: data
-data-files: bootstrap.css
+data-files: bootstrap.css logo.svg robots.txt
 extra-source-files: README.markdown
 license-file: LICENSE.txt
 license: MIT
@@ -22,35 +22,50 @@ source-repository head
 
 flag pedantic
   default: False
-  description: Enables @-Werror@ to turn warnings into errors.
+  description: Changes warnings into errors.
   manual: True
 
 library
   autogen-modules: Paths_monadoc
   build-depends:
     base >= 4.16.0 && < 4.17
+    , async >= 2.2.4 && < 2.3
     , bytestring >= 0.11.1 && < 0.12
+    , case-insensitive >= 1.2.1 && < 1.3
     , exceptions >= 0.10.4 && < 0.11
     , http-client >= 0.7.11 && < 0.8
     , http-client-tls >= 0.3.6 && < 0.4
     , http-types >= 0.12.3 && < 0.13
+    , say >= 0.1.0 && < 0.2
+    , sqlite-simple >= 0.4.18 && < 0.5
+    , time >= 1.11.1 && < 1.12
     , wai >= 3.2.3 && < 3.3
     , warp >= 3.3.19 && < 3.4
+    , witch >= 1.0.0 && < 1.1
     -- , Cabal >= 3.6.0 && < 3.7
     -- , ghc >= 9.2.1 && < 9.3
-    -- , sqlite-simple >= 0.4.18 && < 0.5
+    -- , text >= 1.2.5 && < 1.3
     -- , zlib >= 0.6.2 && < 0.7
   default-language: Haskell2010
   exposed-modules:
+    Monadoc.Application
     Monadoc.Exception.InvalidOption
     Monadoc.Exception.InvalidPort
     Monadoc.Exception.UnexpectedArgument
     Monadoc.Exception.UnknownOption
+    Monadoc.Extra.Witch
     Monadoc.Main
+    Monadoc.Middleware
+    Monadoc.Middleware.AddHeaders
+    Monadoc.Middleware.HandleExceptions
+    Monadoc.Middleware.LogResponses
     Monadoc.Server
     Monadoc.Type.Config
     Monadoc.Type.Context
     Monadoc.Type.Flag
+    Monadoc.Type.Route
+    Monadoc.Vendor.Witch
+    Monadoc.Worker
   ghc-options:
     -Weverything
     -Wno-all-missed-specialisations

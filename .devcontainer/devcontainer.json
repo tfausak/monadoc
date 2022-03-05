@@ -2,10 +2,14 @@
   "dockerComposeFile": "docker-compose.yaml",
   "extensions": [
     "dramforever.vscode-ghc-simple",
-    "Edka.haskutil"
+    "Edka.haskutil",
+    "sjurmillidahl.ormolu-vscode"
   ],
   "initializeCommand": "docker volume create cabal-store",
   "postCreateCommand": "cabal update",
   "service": "devcontainer",
+  "settings": {
+    "editor.formatOnSave": true
+  },
   "workspaceFolder": "/workspaces/monadoc"
 }

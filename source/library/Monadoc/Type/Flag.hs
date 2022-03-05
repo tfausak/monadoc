@@ -1,7 +1,8 @@
 module Monadoc.Type.Flag where
 
 data Flag
-  = Help
+  = Database String
+  | Help
   | Host String
   | Port String
   | Version

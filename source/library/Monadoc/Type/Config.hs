@@ -4,7 +4,8 @@ import qualified Data.String as String
 import qualified Network.Wai.Handler.Warp as Warp
 
 data Config = Config
-  { help :: Bool,
+  { database :: String,
+    help :: Bool,
     host :: Warp.HostPreference,
     port :: Warp.Port,
     version :: Bool
@@ -14,7 +15,8 @@ data Config = Config
 initial :: Config
 initial =
   Config
-    { help = False,
+    { database = "monadoc.sqlite",
+      help = False,
       host = String.fromString "127.0.0.1",
       port = 3000,
       version = False
