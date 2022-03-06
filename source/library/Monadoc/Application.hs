@@ -1,36 +1,52 @@
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Application where
 
-import qualified Data.ByteString as ByteString
-import qualified Data.ByteString.Lazy as LazyByteString
-import qualified Monadoc.Vendor.Witch as Witch
-import qualified Network.HTTP.Types as Http
+import qualified Control.Monad.Catch as Exception
+import qualified Monadoc.Exception.InvalidMethod as InvalidMethod
+import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
+import qualified Monadoc.Handler.AppleTouchIcon.Get as AppleTouchIcon.Get
+import qualified Monadoc.Handler.Bootstrap.Get as Bootstrap.Get
+import qualified Monadoc.Handler.Favicon.Get as Favicon.Get
+import qualified Monadoc.Handler.Health.Get as Health.Get
+import qualified Monadoc.Handler.Home.Get as Home.Get
+import qualified Monadoc.Handler.Robots.Get as Robots.Get
+import qualified Monadoc.Type.App as App
+import qualified Monadoc.Type.Context as Context
+import qualified Monadoc.Type.Route as Route
+import qualified Monadoc.Vendor.HttpTypes as Http
 import qualified Network.Wai as Wai
-import qualified Paths_monadoc as Monadoc
 
-application :: Wai.Application
-application request respond =
-  case fmap (Witch.into @String) $ Wai.pathInfo request of
-    ["favicon.ico"] -> do
-      filePath <- Monadoc.getDataFileName "logo.svg"
-      respond $
-        Wai.responseFile
-          Http.ok200
-          [(Http.hContentType, Witch.into @ByteString.ByteString "image/svg+xml")]
-          filePath
-          Nothing
-    ["robots.txt"] -> do
-      filePath <- Monadoc.getDataFileName "robots.txt"
-      respond $
-        Wai.responseFile
-          Http.ok200
-          [(Http.hContentType, Witch.into @ByteString.ByteString "text/plain;charset=utf-8")]
-          filePath
-          Nothing
-    _ ->
-      respond $
-        Wai.responseLBS
-          Http.notFound404
-          [(Http.hContentType, Witch.into @ByteString.ByteString "text/plain;charset=utf-8")]
-          (Witch.into @LazyByteString.ByteString "404 Not Found")
+application :: Context.Context -> Wai.Application
+application context request respond = do
+  method <-
+    either (Exception.throwM . InvalidMethod.InvalidMethod) pure
+      . Http.parseMethod
+      $ Wai.requestMethod request
+  route <- Route.parse $ Wai.pathInfo request
+  handler <- getHandler method route
+  response <- App.run (handler request) context
+  respond response
+
+getHandler ::
+  Exception.MonadThrow m =>
+  Http.StdMethod ->
+  Route.Route ->
+  m (Wai.Request -> App.App Wai.Response)
+getHandler method route = case route of
+  Route.AppleTouchIcon -> case method of
+    Http.GET -> pure AppleTouchIcon.Get.handler
+    _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
+  Route.Bootstrap -> case method of
+    Http.GET -> pure Bootstrap.Get.handler
+    _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
+  Route.Favicon -> case method of
+    Http.GET -> pure Favicon.Get.handler
+    _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
+  Route.Health -> case method of
+    Http.GET -> pure Health.Get.handler
+    _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
+  Route.Home -> case method of
+    Http.GET -> pure Home.Get.handler
+    _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
+  Route.Robots -> case method of
+    Http.GET -> pure Robots.Get.handler
+    _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route

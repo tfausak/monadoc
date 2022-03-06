@@ -3,29 +3,32 @@
 module Monadoc.Middleware.AddHeaders where
 
 import qualified Data.ByteString as ByteString
+import qualified Data.Function as Function
+import qualified Monadoc.Vendor.HttpTypes as Http
 import qualified Monadoc.Vendor.Witch as Witch
-import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 
 middleware :: Wai.Middleware
 middleware =
   Wai.modifyResponse . Wai.mapResponseHeaders $
-    addHeader "Content-Security-Policy" "default-src 'self'"
-      . addHeader "Referrer-Policy" "no-referrer"
-      . addHeader "X-Content-Type-Options" "nosniff"
-      . addHeader "X-Frame-Options" "DENY"
-      . addHeader "X-XSS-Protection" "1; mode=block"
+    addHeader Http.hContentSecurityPolicy "default-src 'self'"
+      . addHeader Http.hReferrerPolicy "no-referrer"
+      . addHeader Http.hXContentTypeOptions "nosniff"
+      . addHeader Http.hXFrameOptions "DENY"
+      . addHeader Http.hXXssProtection "1; mode=block"
 
-addHeader :: String -> String -> Http.ResponseHeaders -> Http.ResponseHeaders
+addHeader :: Http.HeaderName -> String -> Http.ResponseHeaders -> Http.ResponseHeaders
 addHeader k = addIfMissing . makeHeader k
 
-makeHeader :: String -> String -> Http.Header
-makeHeader k v = (Witch.via @ByteString.ByteString k, Witch.into @ByteString.ByteString v)
+makeHeader :: Http.HeaderName -> String -> Http.Header
+makeHeader k = (,) k . Witch.into @ByteString.ByteString
 
-addIfMissing :: Http.Header -> Http.ResponseHeaders -> Http.ResponseHeaders
-addIfMissing header responseHeaders = case responseHeaders of
-  [] -> [header]
-  x : ys ->
-    if fst x == fst header
-      then x : ys
-      else x : addIfMissing header ys
+addIfMissing :: Eq a => (a, b) -> [(a, b)] -> [(a, b)]
+addIfMissing = addIfMissingBy $ Function.on (==) fst
+
+addIfMissingBy :: (a -> a -> Bool) -> a -> [a] -> [a]
+addIfMissingBy p x xs = case xs of
+  [] -> [x]
+  h : t
+    | p x h -> h : t
+    | otherwise -> h : addIfMissingBy p x t

@@ -11,15 +11,16 @@ import qualified Say as Say
 
 server :: Context.Context -> IO ()
 server context =
-  Warp.runSettings (getSettings $ Context.config context) $
-    Middleware.middleware Application.application
+  Warp.runSettings (getSettings $ Context.config context)
+    . Middleware.middleware
+    $ Application.application context
 
 getSettings :: Config.Config -> Warp.Settings
 getSettings config =
   Warp.setBeforeMainLoop (beforeMainLoop config)
     . Warp.setHost (Config.host config)
     . Warp.setOnException (const HandleExceptions.onException)
-    . Warp.setOnExceptionResponse (const HandleExceptions.onExceptionResponse)
+    . Warp.setOnExceptionResponse HandleExceptions.onExceptionResponse
     . Warp.setPort (Config.port config)
     $ Warp.setServerName ByteString.empty Warp.defaultSettings
 

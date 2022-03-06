@@ -5,11 +5,17 @@
     "Edka.haskutil",
     "sjurmillidahl.ormolu-vscode"
   ],
-  "initializeCommand": "docker volume create cabal-store",
-  "postCreateCommand": "cabal update",
+  "initializeCommand": [
+    ".devcontainer/initialize.sh"
+  ],
+  "postCreateCommand": [
+    ".devcontainer/postCreate.sh"
+  ],
   "service": "devcontainer",
   "settings": {
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "haskutil.alignExtensions": false,
+    "haskutil.alignImports": false
   },
   "workspaceFolder": "/workspaces/monadoc"
 }
