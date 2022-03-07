@@ -1,4 +1,4 @@
-module Monadoc.Application where
+module Monadoc.Server.Application where
 
 import qualified Control.Monad.Catch as Exception
 import qualified Monadoc.Exception.InvalidMethod as InvalidMethod
@@ -6,8 +6,9 @@ import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Handler.AppleTouchIcon.Get as AppleTouchIcon.Get
 import qualified Monadoc.Handler.Bootstrap.Get as Bootstrap.Get
 import qualified Monadoc.Handler.Favicon.Get as Favicon.Get
-import qualified Monadoc.Handler.Health.Get as Health.Get
+import qualified Monadoc.Handler.HealthCheck.Get as HealthCheck.Get
 import qualified Monadoc.Handler.Home.Get as Home.Get
+import qualified Monadoc.Handler.Manifest.Get as Manifest.Get
 import qualified Monadoc.Handler.Robots.Get as Robots.Get
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Context as Context
@@ -41,11 +42,14 @@ getHandler method route = case route of
   Route.Favicon -> case method of
     Http.GET -> pure Favicon.Get.handler
     _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
-  Route.Health -> case method of
-    Http.GET -> pure Health.Get.handler
+  Route.HealthCheck -> case method of
+    Http.GET -> pure HealthCheck.Get.handler
     _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
   Route.Home -> case method of
     Http.GET -> pure Home.Get.handler
+    _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
+  Route.Manifest -> case method of
+    Http.GET -> pure Manifest.Get.handler
     _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
   Route.Robots -> case method of
     Http.GET -> pure Robots.Get.handler

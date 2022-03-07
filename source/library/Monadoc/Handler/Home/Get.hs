@@ -27,6 +27,7 @@ handler _ = do
         Lucid.meta_ [Lucid.name_ "viewport", Lucid.content_ "initial-scale = 1, width = device-width"]
         Lucid.title_ "Monadoc"
         Lucid.link_ [Lucid.rel_ "stylesheet", Lucid.href_ $ route context Route.Bootstrap]
+        Lucid.link_ [Lucid.rel_ "manifest", Lucid.href_ $ route context Route.Manifest]
       Lucid.body_ $ do
         Lucid.div_ [Lucid.class_ "bg-dark mb-3 navbar navbar-dark"] $ do
           Lucid.div_ [Lucid.class_ "container"] $ do
@@ -36,11 +37,11 @@ handler _ = do
             "TODO"
         Lucid.div_ [Lucid.class_ "my-3 text-muted"] $ do
           Lucid.div_ [Lucid.class_ "border-top container pt-3"] $ do
-            "\x1f516 Powered by "
+            "Powered by "
             Lucid.a_ [Lucid.href_ "https://github.com/tfausak/monadoc"] "Monadoc"
             " version "
             Lucid.toHtml $ Version.showVersion Monadoc.version
-            "."
+            ". \x1f516"
 
 route :: Context.Context -> Route.Route -> Text.Text
 route context =

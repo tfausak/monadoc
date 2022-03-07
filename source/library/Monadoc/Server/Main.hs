@@ -1,18 +1,18 @@
-module Monadoc.Server where
+module Monadoc.Server.Main where
 
 import qualified Data.ByteString as ByteString
-import qualified Monadoc.Application as Application
-import qualified Monadoc.Middleware as Middleware
+import qualified Monadoc.Class.MonadSay as MonadSay
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
+import qualified Monadoc.Server.Application as Application
+import qualified Monadoc.Server.Middleware as Middleware
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Network.Wai.Handler.Warp as Warp
-import qualified Say as Say
 
 server :: Context.Context -> IO ()
 server context =
   Warp.runSettings (getSettings $ Context.config context)
-    . Middleware.middleware
+    . Middleware.middleware context
     $ Application.application context
 
 getSettings :: Config.Config -> Warp.Settings
@@ -24,9 +24,9 @@ getSettings config =
     . Warp.setPort (Config.port config)
     $ Warp.setServerName ByteString.empty Warp.defaultSettings
 
-beforeMainLoop :: Config.Config -> IO ()
+beforeMainLoop :: MonadSay.MonadSay m => Config.Config -> m ()
 beforeMainLoop config = do
-  Say.sayString $
+  MonadSay.sayString $
     "listening on "
       <> show (Config.host config)
       <> " port "

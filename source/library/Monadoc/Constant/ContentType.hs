@@ -14,6 +14,9 @@ html = Witch.into @ByteString.ByteString "text/html;charset=utf-8"
 ico :: ByteString.ByteString
 ico = Witch.into @ByteString.ByteString "image/x-icon"
 
+json :: ByteString.ByteString
+json = Witch.into @ByteString.ByteString "application/json;charset=utf-8"
+
 png :: ByteString.ByteString
 png = Witch.into @ByteString.ByteString "image/png"
 

@@ -11,8 +11,9 @@ data Route
   = AppleTouchIcon
   | Bootstrap
   | Favicon
-  | Health
+  | HealthCheck
   | Home
+  | Manifest
   | Robots
   deriving (Eq, Show)
 
@@ -21,7 +22,8 @@ parse texts = case fmap (Witch.into @String) texts of
   [] -> pure Home
   ["apple-touch-icon.png"] -> pure AppleTouchIcon
   ["favicon.ico"] -> pure Favicon
-  ["health"] -> pure Health
+  ["health-check"] -> pure HealthCheck
+  ["manifest.json"] -> pure Manifest
   ["robots.txt"] -> pure Robots
   ["static", "bootstrap.css"] -> pure Bootstrap
   _ -> Exception.throwM $ UnknownRoute.UnknownRoute texts
@@ -31,6 +33,7 @@ render route = fmap (Witch.into @Text.Text) $ case route of
   AppleTouchIcon -> ["apple-touch-icon.png"]
   Bootstrap -> ["static", "bootstrap.css"]
   Favicon -> ["favicon.ico"]
-  Health -> ["health"]
+  HealthCheck -> ["health-check"]
   Home -> []
+  Manifest -> ["manifest.json"]
   Robots -> ["robots.txt"]

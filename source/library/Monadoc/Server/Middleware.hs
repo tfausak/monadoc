@@ -1,14 +1,15 @@
-module Monadoc.Middleware where
+module Monadoc.Server.Middleware where
 
 import qualified Monadoc.Middleware.AddHeaders as AddHeaders
+import qualified Monadoc.Middleware.CompressResponses as CompressResponses
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
 import qualified Monadoc.Middleware.LogResponses as LogResponses
+import qualified Monadoc.Type.Context as Context
 import qualified Network.Wai as Wai
-import qualified Network.Wai.Middleware.Gzip as Gzip
 
-middleware :: Wai.Middleware
-middleware =
+middleware :: Context.Context -> Wai.Middleware
+middleware context =
   LogResponses.middleware
-    . Gzip.gzip Gzip.def
+    . CompressResponses.middleware context
     . AddHeaders.middleware
     . HandleExceptions.middleware

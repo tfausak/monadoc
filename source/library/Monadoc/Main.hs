@@ -7,13 +7,14 @@ import qualified Control.Monad.Catch as Exception
 import qualified Data.Pool as Pool
 import qualified Database.SQLite.Simple as Sql
 import qualified GHC.Conc as Conc
+import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
-import qualified Monadoc.Server as Server
+import qualified Monadoc.Server.Main as Server
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Flag as Flag
 import qualified Monadoc.Vendor.Witch as Witch
-import qualified Monadoc.Worker as Worker
+import qualified Monadoc.Worker.Main as Worker
 import qualified System.Environment as Environment
 
 defaultMain :: IO ()
@@ -33,8 +34,8 @@ mainWith name arguments = do
   runMigrations context
   Async.race_ (Server.server context) (Worker.worker context)
 
-runMigrations :: Context.Context -> IO ()
+runMigrations :: Context.Context -> IO () -- TODO: MonadSql
 runMigrations context =
   Pool.withResource (Context.pool context) $ \connection ->
-    Sql.execute_ connection $
+    MonadSql.execute_ connection $
       Witch.into @Sql.Query "pragma journal_mode = wal"
