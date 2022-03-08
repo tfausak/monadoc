@@ -28,6 +28,7 @@ handler _ = do
         Lucid.title_ "Monadoc"
         Lucid.link_ [Lucid.rel_ "stylesheet", Lucid.href_ $ route context Route.Bootstrap]
         Lucid.link_ [Lucid.rel_ "manifest", Lucid.href_ $ route context Route.Manifest]
+        Lucid.link_ [Lucid.rel_ "canonical", Lucid.href_ $ route context Route.Home]
       Lucid.body_ $ do
         Lucid.div_ [Lucid.class_ "bg-dark mb-3 navbar navbar-dark"] $ do
           Lucid.div_ [Lucid.class_ "container"] $ do

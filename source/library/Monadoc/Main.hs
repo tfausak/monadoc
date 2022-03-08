@@ -34,7 +34,7 @@ mainWith name arguments = do
   runMigrations context
   Async.race_ (Server.server context) (Worker.worker context)
 
-runMigrations :: Context.Context -> IO () -- TODO: MonadSql
+runMigrations :: Context.Context -> IO ()
 runMigrations context =
   Pool.withResource (Context.pool context) $ \connection ->
     MonadSql.execute_ connection $

@@ -1,5 +1,23 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'>
-  <rect width='16' height='16' fill='#5e2ca5' />
-  <path d='M 2 2 l 6 2 l 6 -2 v 2 l -6 2 l -6 -2 z M 2 5 l 6 2 l 6 -2 v 2 l -6 2 l -6 -2 z M 2 7 h 2 v 7 h -2 z M 12 7 h 2 v 7 h -2 z' fill='#ffffff'/>
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 2200 2200" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <defs>
+    <linearGradient id="color-0" bx:pinned="true">
+      <title>purple</title>
+      <stop style="stop-color: rgb(94, 44, 165)"/>
+    </linearGradient>
+  </defs>
+  <g transform="matrix(1, 0, 0, 1, 300, 300)">
+    <path d="M 200 200 L 800 400 L 1400 200 L 1400 400 L 800 600 L 200 400 L 200 200 Z" style="fill: rgb(94, 44, 165);">
+      <title>top chevron</title>
+    </path>
+    <path d="M 200 500 L 800 700 L 1400 500 L 1400 700 L 800 900 L 200 700 L 200 500 Z" style="fill: url(#color-0);">
+      <title>bottom chevron</title>
+    </path>
+    <rect x="200" y="600" width="200" height="800" style="fill: url(#color-0);">
+      <title>left leg</title>
+    </rect>
+    <rect x="1200" y="600" width="200" height="800" style="fill: url(#color-0);">
+      <title>right leg</title>
+    </rect>
+  </g>
 </svg>
