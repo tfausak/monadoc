@@ -3,7 +3,7 @@ services:
   devcontainer:
     build: .
     command: sh -c 'while :; do sleep 60; done'
-    image: monadoc
+    image: monadoc/devcontainer
     init: true
     ports:
       - 3000:3000

@@ -7,12 +7,12 @@ import qualified Monadoc.Exception.UnknownOption as UnknownOption
 import qualified System.Console.GetOpt as Console
 
 data Flag
-  = BaseUrl String
-  | Database String
-  | DataDirectory String
+  = Base String
+  | Data String
   | Help
   | Host String
   | Port String
+  | Sql String
   | Version
   deriving (Eq, Show)
 
@@ -39,18 +39,13 @@ options =
       "Prints the version number, then exits.",
     Console.Option
       []
-      ["base-url"]
-      (Console.ReqArg BaseUrl "URL")
+      ["base"]
+      (Console.ReqArg Base "URL")
       "Sets the base URL prefix.\nDefault: /",
     Console.Option
       []
-      ["database"]
-      (Console.ReqArg Database "FILE")
-      "Sets the database file to use.\nDefault: monadoc.sqlite",
-    Console.Option
-      []
-      ["data-directory"]
-      (Console.ReqArg DataDirectory "DIRECTORY")
+      ["data"]
+      (Console.ReqArg Data "DIRECTORY")
       "Sets the directory to read data files from.\nDefault: monadoc_datadir environment variable",
     Console.Option
       []
@@ -61,5 +56,10 @@ options =
       []
       ["port"]
       (Console.ReqArg Port "NUMBER")
-      "Sets the port number to listen on.\nDefault: 3000"
+      "Sets the port number to listen on.\nDefault: 3000",
+    Console.Option
+      []
+      ["sql"]
+      (Console.ReqArg Sql "FILE")
+      "Sets the database file to use.\nDefault: monadoc.sqlite"
   ]

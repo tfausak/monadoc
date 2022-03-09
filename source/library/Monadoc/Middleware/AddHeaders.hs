@@ -4,18 +4,19 @@ module Monadoc.Middleware.AddHeaders where
 
 import qualified Data.ByteString as ByteString
 import qualified Data.Function as Function
-import qualified Monadoc.Vendor.HttpTypes as Http
+import qualified Monadoc.Constant.Header as Header
 import qualified Monadoc.Vendor.Witch as Witch
+import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 
 middleware :: Wai.Middleware
 middleware =
   Wai.modifyResponse . Wai.mapResponseHeaders $
-    addHeader Http.hContentSecurityPolicy "default-src 'self'"
-      . addHeader Http.hReferrerPolicy "no-referrer"
-      . addHeader Http.hXContentTypeOptions "nosniff"
-      . addHeader Http.hXFrameOptions "DENY"
-      . addHeader Http.hXXssProtection "1; mode=block"
+    addHeader Header.contentSecurityPolicy "default-src 'self'"
+      . addHeader Header.referrerPolicy "no-referrer"
+      . addHeader Header.contentTypeOptions "nosniff"
+      . addHeader Header.frameOptions "DENY"
+      . addHeader Header.xssProtection "1; mode=block"
 
 addHeader :: Http.HeaderName -> String -> Http.ResponseHeaders -> Http.ResponseHeaders
 addHeader k = addIfMissing . makeHeader k

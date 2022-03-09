@@ -9,8 +9,8 @@ import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Route as Route
-import qualified Monadoc.Vendor.HttpTypes as Http
 import qualified Monadoc.Vendor.Witch as Witch
+import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 
 handler :: Wai.Request -> App.App Wai.Response
@@ -22,7 +22,7 @@ handler _ = do
     $ Aeson.object
       [ pair "$schema" "https://json.schemastore.org/web-manifest-combined.json",
         pair "name" "Monadoc",
-        pair "start_url" . Config.baseUrl $ Context.config context,
+        pair "start_url" . Config.base $ Context.config context,
         pair "display" "minimal-ui",
         pair
           "icons"

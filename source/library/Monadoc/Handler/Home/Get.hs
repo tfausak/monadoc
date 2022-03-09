@@ -11,8 +11,8 @@ import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Route as Route
-import qualified Monadoc.Vendor.HttpTypes as Http
 import qualified Monadoc.Vendor.Witch as Witch
+import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 import qualified Paths_monadoc as Monadoc
 
@@ -46,7 +46,7 @@ handler _ = do
 
 route :: Context.Context -> Route.Route -> Text.Text
 route context =
-  mappend (Witch.into @Text.Text . Config.baseUrl $ Context.config context)
+  mappend (Witch.into @Text.Text . Config.base $ Context.config context)
     . Text.intercalate "/"
     . Route.render
 

@@ -9,15 +9,15 @@ import qualified Control.Monad.Catch as Exception
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Maybe as Maybe
-import qualified Monadoc.Class.MonadSay as MonadSay
 import qualified Monadoc.Constant.ContentType as ContentType
 import qualified Monadoc.Exception.InvalidMethod as InvalidMethod
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
-import qualified Monadoc.Vendor.HttpTypes as Http
 import qualified Monadoc.Vendor.Witch as Witch
+import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 import qualified Network.Wai.Handler.Warp as Warp
+import qualified Say
 
 middleware :: Wai.Middleware
 middleware handle request respond =
@@ -26,29 +26,28 @@ middleware handle request respond =
     $ respond
 
 handler ::
-  MonadSay.MonadSay m =>
-  (Wai.Response -> m Wai.ResponseReceived) ->
+  (Wai.Response -> IO Wai.ResponseReceived) ->
   Exception.SomeException ->
-  m Wai.ResponseReceived
+  IO Wai.ResponseReceived
 handler respond someException = do
   onException someException
   respond $ onExceptionResponse someException
 
-onException :: MonadSay.MonadSay m => Exception.SomeException -> m ()
+onException :: Exception.SomeException -> IO ()
 onException someException =
   Monad.when (Warp.defaultShouldDisplayException someException)
-    . MonadSay.sayErrString
+    . Say.sayErrString
     $ Exception.displayException someException
 
 onExceptionResponse :: Exception.SomeException -> Wai.Response
 onExceptionResponse e
-  | isException @InvalidMethod.InvalidMethod e = statusResponse Http.methodNotAllowed405 []
-  | isException @UnknownRoute.UnknownRoute e = statusResponse Http.notFound404 []
-  | isException @MethodNotAllowed.MethodNotAllowed e = statusResponse Http.methodNotAllowed405 []
+  | isType @InvalidMethod.InvalidMethod e = statusResponse Http.methodNotAllowed405 []
+  | isType @UnknownRoute.UnknownRoute e = statusResponse Http.notFound404 []
+  | isType @MethodNotAllowed.MethodNotAllowed e = statusResponse Http.methodNotAllowed405 []
   | otherwise = statusResponse Http.internalServerError500 []
 
-isException :: forall e. Exception.Exception e => Exception.SomeException -> Bool
-isException = Maybe.isJust . Exception.fromException @e
+isType :: forall e. Exception.Exception e => Exception.SomeException -> Bool
+isType = Maybe.isJust . Exception.fromException @e
 
 statusResponse :: Http.Status -> Http.ResponseHeaders -> Wai.Response
 statusResponse status headers =

@@ -13,7 +13,7 @@ import qualified Monadoc.Handler.Robots.Get as Robots.Get
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Route as Route
-import qualified Monadoc.Vendor.HttpTypes as Http
+import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 
 application :: Context.Context -> Wai.Application

@@ -7,7 +7,6 @@ import qualified Control.Monad.Catch as Exception
 import qualified Data.Pool as Pool
 import qualified Database.SQLite.Simple as Sql
 import qualified GHC.Conc as Conc
-import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
 import qualified Monadoc.Server.Main as Server
 import qualified Monadoc.Type.Config as Config
@@ -37,5 +36,5 @@ mainWith name arguments = do
 runMigrations :: Context.Context -> IO ()
 runMigrations context =
   Pool.withResource (Context.pool context) $ \connection ->
-    MonadSql.execute_ connection $
+    Sql.execute_ connection $
       Witch.into @Sql.Query "pragma journal_mode = wal"

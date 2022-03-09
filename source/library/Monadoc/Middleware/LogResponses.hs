@@ -4,10 +4,10 @@ module Monadoc.Middleware.LogResponses where
 
 import qualified Data.Time as Time
 import qualified GHC.Clock as Clock
-import qualified Monadoc.Class.MonadSay as MonadSay
-import qualified Monadoc.Vendor.HttpTypes as Http
 import qualified Monadoc.Vendor.Witch as Witch
+import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
+import qualified Say
 import qualified Text.Printf as Printf
 
 middleware :: Wai.Middleware
@@ -16,7 +16,7 @@ middleware handle request respond = do
   handle request $ \response -> do
     after <- Clock.getMonotonicTime
     now <- Time.getCurrentTime
-    MonadSay.sayString $
+    Say.sayString $
       unwords
         [ Time.formatTime Time.defaultTimeLocale "%Y-%m-%dT%H:%M:%S%3QZ" now,
           show . Http.statusCode $ Wai.responseStatus response,

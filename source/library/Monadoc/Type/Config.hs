@@ -9,12 +9,12 @@ import qualified Network.Wai.Handler.Warp as Warp
 import qualified Text.Read as Read
 
 data Config = Config
-  { baseUrl :: String,
-    database :: FilePath,
-    dataDirectory :: Maybe FilePath,
+  { base :: String,
+    data_ :: Maybe FilePath,
     help :: Bool,
     host :: Warp.HostPreference,
     port :: Warp.Port,
+    sql :: FilePath,
     version :: Bool
   }
   deriving (Eq, Show)
@@ -22,9 +22,9 @@ data Config = Config
 initial :: Config
 initial =
   Config
-    { baseUrl = "/",
-      database = "monadoc.sqlite",
-      dataDirectory = Nothing,
+    { base = "/",
+      sql = "monadoc.sqlite",
+      data_ = Nothing,
       help = False,
       host = String.fromString "127.0.0.1",
       port = 3000,
@@ -33,9 +33,8 @@ initial =
 
 applyFlag :: Exception.MonadThrow m => Config -> Flag.Flag -> m Config
 applyFlag config flag = case flag of
-  Flag.BaseUrl str -> pure config {baseUrl = str}
-  Flag.Database str -> pure config {database = str}
-  Flag.DataDirectory str -> pure config {dataDirectory = Just str}
+  Flag.Base str -> pure config {base = str}
+  Flag.Data str -> pure config {data_ = Just str}
   Flag.Help -> pure config {help = True}
   Flag.Host str -> pure config {host = String.fromString str}
   Flag.Port str -> do
@@ -43,6 +42,7 @@ applyFlag config flag = case flag of
       either (Exception.throwM . InvalidPort.InvalidPort) pure $
         Read.readEither str
     pure config {port = int}
+  Flag.Sql str -> pure config {sql = str}
   Flag.Version -> pure config {version = True}
 
 fromFlags :: Exception.MonadThrow m => [Flag.Flag] -> m Config

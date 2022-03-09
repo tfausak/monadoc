@@ -3,7 +3,7 @@ module Monadoc.Handler.Favicon.Get where
 import qualified Monadoc.Constant.ContentType as ContentType
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Context as Context
-import qualified Monadoc.Vendor.HttpTypes as Http
+import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 import qualified System.FilePath as FilePath
 
@@ -14,5 +14,5 @@ handler _ = do
     Wai.responseFile
       Http.ok200
       [(Http.hContentType, ContentType.ico)]
-      (FilePath.combine (Context.dataDirectory context) "favicon.ico")
+      (FilePath.combine (Context.data_ context) "favicon.ico")
       Nothing
