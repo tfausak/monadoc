@@ -18,7 +18,7 @@ jobs:
 
       - if: matrix.platform == 'ubuntu'
         run: |
-          cp -R -v data LICENSE.txt README.md artifact
+          cp -R -v data LICENSE.txt README.markdown artifact
           cabal sdist --output-dir artifact
 
       - id: artifact
