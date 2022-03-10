@@ -1,24 +1,25 @@
 name: Workflow
 on: push
 jobs:
-  job:
+  build:
     strategy:
       matrix:
-        platform:
-          - macos
-          - ubuntu
-          - windows
+        include:
+          - { platform: macos }
+          - { platform: ubuntu }
+          - { platform: windows, extension: .exe }
     runs-on: ${{ matrix.platform }}-latest
-    name: Job on ${{ matrix.platform }}
+    name: Build on ${{ matrix.platform }}
     steps:
 
       - uses: actions/checkout@v2
 
       - run: mkdir artifact
 
-      - run: cp -v LICENSE.txt artifact
-
-      - run: cp -R -v data artifact
+      - if: matrix.platform == 'ubuntu'
+        run: |
+          cp -R -v data LICENSE.txt README.md artifact
+          cabal sdist --output-dir artifact
 
       - id: artifact
         run: echo '::set-output name=directory::artifact/${{ matrix.platform }}'
@@ -48,14 +49,42 @@ jobs:
 
       - run: cp -v "$( cabal list-bin monadoc )" ${{ steps.artifact.outputs.directory }}
 
-      - shell: bash
-        run: $( cabal list-bin monadoc-test-suite )
+      - uses: svenstaro/upx-action@v2
+        with:
+          file: ${{ steps.artifact.outputs.directory }}/monadoc${{ matrix.extension }}
 
-      - run: cabal sdist --output-dir ${{ steps.artifact.outputs.directory }}
+      - run: cp -v "$( cabal list-bin monadoc-test-suite )" ${{ steps.artifact.outputs.directory }}
 
-      - run: cabal check
+      - uses: svenstaro/upx-action@v2
+        with:
+          file: ${{ steps.artifact.outputs.directory }}/monadoc-test-suite${{ matrix.extension }}
 
       - uses: actions/upload-artifact@v2
         with:
           name: monadoc-${{ github.sha }}
           path: artifact
+
+  test:
+    needs: build
+    strategy:
+      matrix:
+        include:
+          - { platform: macos }
+          - { platform: ubuntu }
+          - { platform: windows, extension: .exe }
+    runs-on: ${{ matrix.platform }}-latest
+    name: Test on ${{ matrix.platform }}
+    env:
+      monadoc_datadir: artifact/data
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - run: cabal check
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: monadoc-${{ github.sha }}
+          path: artifact
+
+      - run: artifact/${{ matrix.platform }}/monadoc-test-suite${{ matrix.extension }}
