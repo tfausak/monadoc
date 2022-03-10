@@ -15,9 +15,10 @@ jobs:
       - uses: actions/checkout@v2
 
       - id: artifact
-        run: echo '::set-output name=directory::artifact/${{ matrix.platform }}-${{ matrix.ghc }}'
-
-      - run: mkdir --parents ${{ steps.artifact.outputs.directory }}
+        run: |
+          mkdir artifact
+          mkdir artifact/${{ matrix.platform }}
+          echo '::set-output name=directory::artifact/${{ matrix.platform }}'
 
       - id: setup-haskell
         uses: haskell/actions/setup@v1
