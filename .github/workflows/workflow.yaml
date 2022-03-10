@@ -1,7 +1,7 @@
 name: Workflow
 on: push
 jobs:
-  build:
+  job:
     strategy:
       matrix:
         platform:
@@ -9,7 +9,7 @@ jobs:
           - ubuntu
           - windows
     runs-on: ${{ matrix.platform }}-latest
-    name: Build on ${{ matrix.platform }}
+    name: Job on ${{ matrix.platform }}
     steps:
 
       - uses: actions/checkout@v2
@@ -17,7 +17,7 @@ jobs:
       - id: setup-haskell
         uses: haskell/actions/setup@v1
         with:
-          ghc-version: 9.2.2
+          ghc-version: 9.2.1
 
       - uses: actions/cache@v2
         with:
