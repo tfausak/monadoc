@@ -1,6 +1,13 @@
 name: Workflow
 on: push
 jobs:
+  ormolu:
+    runs-on: ubuntu-latest
+    name: Ormolu
+    steps:
+      - uses: actions/checkout@v2
+      - uses: mrkkrp/ormolu-action@v5
+
   build:
     strategy:
       matrix:
