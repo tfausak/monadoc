@@ -87,4 +87,6 @@ jobs:
           name: monadoc-${{ github.sha }}
           path: artifact
 
+      - run: chmod +x artifact/${{ matrix.platform }}/monadoc-test-suite${{ matrix.extension }}
+
       - run: artifact/${{ matrix.platform }}/monadoc-test-suite${{ matrix.extension }}
