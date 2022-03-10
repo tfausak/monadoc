@@ -14,13 +14,29 @@ jobs:
 
       - uses: actions/checkout@v2
 
+      - id: artifact
+        run: echo '::set-output name=directory::artifact/${{ matrix.platform }}-${{ matrix.ghc }}'
+
+      - run: mkdir --parents ${{ steps.artifact.outputs.directory }}
+
       - id: setup-haskell
         uses: haskell/actions/setup@v1
         with:
           ghc-version: 9.2.1
+
+      - run: cabal freeze
+
+      - run: cat cabal.project.freeze
+
+      - run: cp cabal.project.freeze ${{ steps.artifact.outputs.directory }}
 
       - uses: actions/cache@v2
         with:
           path: ${{ steps.setup-haskell.outputs.cabal-store }}
           key: ${{ matrix.platform }}-${{ hashFiles('cabal.project.freeze') }}
           restore-keys: ${{ matrix.platform }}-
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: monadoc-${{ github.sha }}
+          path: artifact
