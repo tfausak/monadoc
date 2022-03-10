@@ -5,13 +5,13 @@ module Monadoc.Main where
 import qualified Control.Concurrent.Async as Async
 import qualified Control.Monad.Catch as Exception
 import qualified Data.Pool as Pool
-import qualified Database.SQLite.Simple as Sql
 import qualified GHC.Conc as Conc
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
 import qualified Monadoc.Server.Main as Server
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Flag as Flag
+import qualified Monadoc.Vendor.SqliteSimple as Sql
 import qualified Monadoc.Vendor.Witch as Witch
 import qualified Monadoc.Worker.Main as Worker
 import qualified System.Environment as Environment

@@ -1,0 +1,16 @@
+module Monadoc.Type.Model where
+
+import qualified Monadoc.Type.Key as Key
+import qualified Monadoc.Vendor.SqliteSimple as Sql
+
+data Model a = Model
+  { key :: Key.Key a,
+    value :: a
+  }
+  deriving (Eq, Show)
+
+instance Sql.FromRow a => Sql.FromRow (Model a) where
+  fromRow = Model <$> Sql.field <*> Sql.fromRow
+
+instance Sql.ToRow a => Sql.ToRow (Model a) where
+  toRow model = Sql.toField (key model) : Sql.toRow (value model)
