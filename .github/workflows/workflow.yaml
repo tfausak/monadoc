@@ -74,8 +74,6 @@ jobs:
           - { platform: windows, extension: .exe }
     runs-on: ${{ matrix.platform }}-latest
     name: Test on ${{ matrix.platform }}
-    env:
-      monadoc_datadir: artifact/data
     steps:
 
       - uses: actions/checkout@v2
@@ -90,3 +88,5 @@ jobs:
       - run: chmod +x artifact/${{ matrix.platform }}/monadoc-test-suite${{ matrix.extension }}
 
       - run: artifact/${{ matrix.platform }}/monadoc-test-suite${{ matrix.extension }}
+        env:
+          monadoc_datadir: artifact/data
