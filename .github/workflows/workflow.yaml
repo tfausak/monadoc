@@ -25,6 +25,10 @@ jobs:
         with:
           ghc-version: 9.2.1
 
+      - run: cabal configure --enable-tests --flags pedantic --jobs
+
+      - run: cp cabal.project.local ${{ steps.artifact.outputs.directory }}
+
       - run: cabal freeze
 
       - run: cat cabal.project.freeze
@@ -36,6 +40,17 @@ jobs:
           path: ${{ steps.setup-haskell.outputs.cabal-store }}
           key: ${{ matrix.platform }}-${{ hashFiles('cabal.project.freeze') }}
           restore-keys: ${{ matrix.platform }}-
+
+      - run: cabal build
+
+      - run: cp "$( cabal list-bin monadoc )" ${{ steps.artifact.outputs.directory }}
+
+      - shell: bash
+        run: $( cabal list-bin monadoc-test-suite )
+
+      - run: cabal sdist --output-dir ${{ steps.artifact.outputs.directory }}
+
+      - run: cabal check
 
       - uses: actions/upload-artifact@v2
         with:
