@@ -1,0 +1,26 @@
+name: Workflow
+on: push
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform:
+          - macos
+          - ubuntu
+          - windows
+    runs-on: ${{ matrix.platform }}-latest
+    name: Build on ${{ matrix.platform }}
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - id: setup-haskell
+        uses: haskell/actions/setup@v1
+        with:
+          ghc-version: 9.2.2
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ steps.setup-haskell.outputs.cabal-store }}
+          key: ${{ matrix.platform }}-${{ hashFiles('cabal.project.freeze') }}
+          restore-keys: ${{ matrix.platform }}-
