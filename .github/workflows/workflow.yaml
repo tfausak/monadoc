@@ -14,11 +14,16 @@ jobs:
 
       - uses: actions/checkout@v2
 
+      - run: mkdir artifact
+
+      - run: cp -v LICENSE.txt artifact
+
+      - run: cp -R -v data artifact
+
       - id: artifact
-        run: |
-          mkdir artifact
-          mkdir artifact/${{ matrix.platform }}
-          echo '::set-output name=directory::artifact/${{ matrix.platform }}'
+        run: echo '::set-output name=directory::artifact/${{ matrix.platform }}'
+
+      - run: mkdir ${{ steps.artifact.outputs.directory }}
 
       - id: setup-haskell
         uses: haskell/actions/setup@v1
@@ -27,13 +32,11 @@ jobs:
 
       - run: cabal configure --enable-tests --flags pedantic --jobs
 
-      - run: cp cabal.project.local ${{ steps.artifact.outputs.directory }}
-
       - run: cabal freeze
 
       - run: cat cabal.project.freeze
 
-      - run: cp cabal.project.freeze ${{ steps.artifact.outputs.directory }}
+      - run: cp -v cabal.project.freeze ${{ steps.artifact.outputs.directory }}
 
       - uses: actions/cache@v2
         with:
@@ -43,7 +46,7 @@ jobs:
 
       - run: cabal build
 
-      - run: cp "$( cabal list-bin monadoc )" ${{ steps.artifact.outputs.directory }}
+      - run: cp -v "$( cabal list-bin monadoc )" ${{ steps.artifact.outputs.directory }}
 
       - shell: bash
         run: $( cabal list-bin monadoc-test-suite )
