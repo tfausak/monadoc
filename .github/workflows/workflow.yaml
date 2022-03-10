@@ -31,7 +31,7 @@ jobs:
         with:
           ghc-version: 9.2.1
 
-      - run: cabal configure --enable-tests --flags pedantic --jobs
+      - run: cabal configure --enable-split-sections --enable-tests --flags pedantic --jobs
 
       - run: cabal freeze
 
@@ -42,8 +42,8 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ${{ steps.setup-haskell.outputs.cabal-store }}
-          key: ${{ matrix.platform }}-${{ hashFiles('cabal.project.freeze') }}
-          restore-keys: ${{ matrix.platform }}-
+          key: ${{ matrix.platform }}/${{ hashFiles('cabal.project.freeze') }}
+          restore-keys: ${{ matrix.platform }}/
 
       - run: cabal build
 
