@@ -8,13 +8,14 @@ import qualified Data.Pool as Pool
 import qualified Database.SQLite.Simple as Sql
 import qualified GHC.Conc as Conc
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
+import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Server.Main as Server
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Flag as Flag
-import qualified Monadoc.Vendor.Witch as Witch
 import qualified Monadoc.Worker.Main as Worker
 import qualified System.Environment as Environment
+import qualified Witch
 
 defaultMain :: IO ()
 defaultMain = do
@@ -35,6 +36,10 @@ mainWith name arguments = do
 
 runMigrations :: Context.Context -> IO ()
 runMigrations context =
-  Pool.withResource (Context.pool context) $ \connection ->
+  Pool.withResource (Context.pool context) $ \connection -> do
     Sql.execute_ connection $
-      Witch.into @Sql.Query "pragma journal_mode = wal"
+      Witch.into @Sql.Query
+        "pragma journal_mode = wal"
+    Sql.execute_
+      connection
+      Migration.createTable

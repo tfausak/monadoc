@@ -5,13 +5,14 @@ module Monadoc.Handler.Manifest.Get where
 import qualified Data.Aeson as Aeson
 import qualified Monadoc.Constant.ContentType as ContentType
 import qualified Monadoc.Handler.Home.Get as Home.Get
+import Monadoc.Orphanage ()
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Route as Route
-import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
+import qualified Witch
 
 handler :: Wai.Request -> App.App Wai.Response
 handler _ = do

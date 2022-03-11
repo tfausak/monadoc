@@ -1,6 +1,7 @@
 FROM haskell:9.2.2-slim
 
-RUN apt-get update && apt-get install --assume-yes --no-install-recommends sudo
+RUN apt-get update && apt-get install --assume-yes --no-install-recommends \
+  nano openssh-client sudo
 
 ARG CABAL_STORE=/cabal-store
 RUN mkdir --parents "$CABAL_STORE"

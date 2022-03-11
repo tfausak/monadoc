@@ -2,7 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
-module Monadoc.Extra.Witch where
+module Monadoc.Orphanage where
 
 import qualified Data.Aeson.Key as Key
 import qualified Data.CaseInsensitive as CI
