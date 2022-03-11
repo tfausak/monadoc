@@ -6,9 +6,9 @@ import qualified Data.Char as Char
 import qualified Data.List as List
 import qualified Data.Pool as Pool
 import qualified Data.Version as Version
+import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Flag as Flag
-import qualified Monadoc.Vendor.SqliteSimple as Sql
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Client.TLS as Tls
 import qualified Paths_monadoc as Monadoc

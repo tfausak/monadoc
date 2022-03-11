@@ -4,11 +4,11 @@ module Monadoc.Middleware.LogResponses where
 
 import qualified Data.Time as Time
 import qualified GHC.Clock as Clock
-import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 import qualified Say
 import qualified Text.Printf as Printf
+import qualified Witch
 
 middleware :: Wai.Middleware
 middleware handle request respond = do

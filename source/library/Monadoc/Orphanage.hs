@@ -2,12 +2,12 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
-module Monadoc.Extra.Witch where
+module Monadoc.Orphanage where
 
 import qualified Data.Aeson.Key as Key
 import qualified Data.CaseInsensitive as CI
 import qualified Data.String as String
-import qualified Monadoc.Vendor.SqliteSimple as Sql
+import qualified Database.SQLite.Simple as Sql
 import qualified Witch
 
 instance CI.FoldCase a => Witch.From a (CI.CI a) where

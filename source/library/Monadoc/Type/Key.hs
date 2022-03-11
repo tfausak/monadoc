@@ -4,8 +4,9 @@
 module Monadoc.Type.Key where
 
 import qualified Data.Int as Int
-import qualified Monadoc.Vendor.SqliteSimple as Sql
-import qualified Monadoc.Vendor.Witch as Witch
+import qualified Database.SQLite.Simple.FromField as Sql
+import qualified Database.SQLite.Simple.ToField as Sql
+import qualified Witch
 
 newtype Key a
   = Key Int.Int64

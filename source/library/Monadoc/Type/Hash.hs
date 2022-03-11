@@ -5,9 +5,11 @@
 module Monadoc.Type.Hash where
 
 import qualified Crypto.Hash as Crypto
-import qualified Monadoc.Vendor.SqliteSimple as Sql
-import qualified Monadoc.Vendor.Witch as Witch
+import qualified Database.SQLite.Simple as Sql
+import qualified Database.SQLite.Simple.FromField as Sql
+import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Text.Read as Read
+import qualified Witch
 
 newtype Hash
   = Hash (Crypto.Digest Crypto.SHA256)

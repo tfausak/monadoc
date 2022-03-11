@@ -1,7 +1,8 @@
 module Monadoc.Type.Model where
 
+import qualified Database.SQLite.Simple as Sql
+import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Monadoc.Type.Key as Key
-import qualified Monadoc.Vendor.SqliteSimple as Sql
 
 data Model a = Model
   { key :: Key.Key a,
