@@ -1,0 +1,128 @@
+name: Workflow
+on: push
+jobs:
+  ormolu:
+    runs-on: ubuntu-latest
+    name: Ormolu
+    steps:
+      - uses: actions/checkout@v2
+      - uses: mrkkrp/ormolu-action@v5
+
+  build:
+    strategy:
+      matrix:
+        include:
+          - { platform: macos }
+          - { platform: ubuntu }
+          - { platform: windows, extension: .exe }
+    runs-on: ${{ matrix.platform }}-latest
+    name: Build on ${{ matrix.platform }}
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - run: mkdir artifact
+
+      - if: matrix.platform == 'ubuntu'
+        run: |
+          cp -R data LICENSE.txt README.markdown artifact
+          cabal sdist --output-dir artifact
+
+      - id: artifact
+        run: echo '::set-output name=directory::artifact/${{ matrix.platform }}'
+
+      - run: mkdir ${{ steps.artifact.outputs.directory }}
+
+      - id: setup-haskell
+        uses: haskell/actions/setup@v1
+        with:
+          ghc-version: 9.2.1
+
+      - run: cabal configure --enable-tests --flags pedantic --jobs
+
+      - run: cabal freeze
+
+      - run: cat cabal.project.freeze
+
+      - run: cp cabal.project.freeze ${{ steps.artifact.outputs.directory }}
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ steps.setup-haskell.outputs.cabal-store }}
+          key: ${{ matrix.platform }}/${{ hashFiles('cabal.project.freeze') }}
+          restore-keys: ${{ matrix.platform }}/
+
+      - run: cabal build
+
+      - run: cp "$( cabal list-bin monadoc )" ${{ steps.artifact.outputs.directory }}
+
+      - uses: svenstaro/upx-action@v2
+        with:
+          file: ${{ steps.artifact.outputs.directory }}/monadoc${{ matrix.extension }}
+
+      - run: cp "$( cabal list-bin monadoc-test-suite )" ${{ steps.artifact.outputs.directory }}
+
+      - uses: svenstaro/upx-action@v2
+        with:
+          file: ${{ steps.artifact.outputs.directory }}/monadoc-test-suite${{ matrix.extension }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: monadoc-${{ github.sha }}
+          path: artifact
+
+  test:
+    needs: build
+    strategy:
+      matrix:
+        include:
+          - { platform: macos }
+          - { platform: ubuntu }
+          - { platform: windows, extension: .exe }
+    runs-on: ${{ matrix.platform }}-latest
+    name: Test on ${{ matrix.platform }}
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - run: cabal check
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: monadoc-${{ github.sha }}
+          path: artifact
+
+      - run: chmod +x artifact/${{ matrix.platform }}/monadoc-test-suite${{ matrix.extension }}
+
+      - run: artifact/${{ matrix.platform }}/monadoc-test-suite${{ matrix.extension }}
+        env:
+          monadoc_datadir: artifact/data
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    name: Docker
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: monadoc-${{ github.sha }}
+          path: artifact
+
+      - run: mv artifact/data docker
+
+      - run: mv artifact/ubuntu/monadoc docker
+
+      - uses: docker/login-action@v1 
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v2
+        with:
+          context: docker
+          push: true
+          tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
