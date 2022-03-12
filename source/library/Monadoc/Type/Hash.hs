@@ -5,10 +5,11 @@
 module Monadoc.Type.Hash where
 
 import qualified Crypto.Hash as Crypto
+import qualified Data.ByteArray as ByteArray
+import qualified Data.ByteString as ByteString
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
-import qualified Text.Read as Read
 import qualified Witch
 
 newtype Hash
@@ -19,20 +20,19 @@ instance Witch.From (Crypto.Digest Crypto.SHA256) Hash
 
 instance Witch.From Hash (Crypto.Digest Crypto.SHA256)
 
-instance Witch.TryFrom String Hash where
+instance Witch.TryFrom ByteString.ByteString Hash where
   tryFrom =
     Witch.maybeTryFrom $
-      fmap (Witch.from @(Crypto.Digest Crypto.SHA256))
-        . Read.readMaybe
+      fmap Witch.from . Crypto.digestFromByteString @Crypto.SHA256
 
-instance Witch.From Hash String where
-  from = show . Witch.into @(Crypto.Digest Crypto.SHA256)
+instance Witch.From Hash ByteString.ByteString where
+  from = ByteArray.convert . Witch.into @(Crypto.Digest Crypto.SHA256)
 
 instance Sql.FromField Hash where
   fromField field = do
-    string <- Sql.fromField field
+    byteString <- Sql.fromField @ByteString.ByteString field
     either (Sql.returnError Sql.ConversionFailed field . show) pure $
-      Witch.tryFrom @String string
+      Witch.tryFrom byteString
 
 instance Sql.ToField Hash where
-  toField = Sql.toField . Witch.into @String
+  toField = Sql.toField . Witch.into @ByteString.ByteString

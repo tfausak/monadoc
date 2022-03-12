@@ -1,7 +1,7 @@
 cabal-version: 2.0
 
 name: monadoc
-version: 0.2022.3.10
+version: 0.2022.3.11
 
 build-type: Simple
 category: Documentation
@@ -42,6 +42,7 @@ library
     , http-client-tls >= 0.3.6 && < 0.4
     , http-types >= 0.12.3 && < 0.13
     , lucid >= 2.11.0 && < 2.12
+    , memory >= 0.16.0 && < 0.17
     , resource-pool >= 0.2.3 && < 0.3
     , say >= 0.1.0 && < 0.2
     , sqlite-simple >= 0.4.18 && < 0.5
@@ -60,6 +61,7 @@ library
     Monadoc.Exception.InvalidOption
     Monadoc.Exception.InvalidPort
     Monadoc.Exception.MethodNotAllowed
+    Monadoc.Exception.MigrationMismatch
     Monadoc.Exception.Sick
     Monadoc.Exception.UnexpectedArgument
     Monadoc.Exception.UnknownOption

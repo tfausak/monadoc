@@ -1,5 +1,7 @@
 # [Monadoc](http://github.com/tfausak/monadoc)
 
+[![Workflow](https://github.com/tfausak/monadoc/actions/workflows/workflow.yaml/badge.svg)](https://github.com/tfausak/monadoc/actions/workflows/workflow.yaml)
+
 :bookmark: Worse Haskell documentation.
 
 - https://github.com/tfausak/monadoc-7/tree/f91bbd2007d71c8bea8ff2bc82cd505000034ca5
