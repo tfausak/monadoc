@@ -36,7 +36,7 @@ createTable :: Sql.Query
 createTable =
   Witch.from
     "create table if not exists migration \
-    \ ( key integer not null primary key \
+    \ ( key integer primary key \
     \ , createdAt text not null unique \
     \ , query text not null )"
 

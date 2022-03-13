@@ -1,23 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<svg viewBox="0 0 2200 2200" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
-  <defs>
-    <linearGradient id="color-0" bx:pinned="true">
-      <title>purple</title>
-      <stop style="stop-color: rgb(94, 44, 165)"/>
-    </linearGradient>
-  </defs>
-  <g transform="matrix(1, 0, 0, 1, 300, 300)">
-    <path d="M 200 200 L 800 400 L 1400 200 L 1400 400 L 800 600 L 200 400 L 200 200 Z" style="fill: rgb(94, 44, 165);">
-      <title>top chevron</title>
-    </path>
-    <path d="M 200 500 L 800 700 L 1400 500 L 1400 700 L 800 900 L 200 700 L 200 500 Z" style="fill: url(#color-0);">
-      <title>bottom chevron</title>
-    </path>
-    <rect x="200" y="600" width="200" height="800" style="fill: url(#color-0);">
-      <title>left leg</title>
-    </rect>
-    <rect x="1200" y="600" width="200" height="800" style="fill: url(#color-0);">
-      <title>right leg</title>
-    </rect>
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22' width='1024' height='1024'>
+  <rect fill='#5e2ca5' x='0' y='0' width='22' height='22' />
+  <g fill='#ffffff'>
+    <polygon points='5,5 11,7 17,5 17,7 11,9 5,7' />
+    <polygon points='5,8 11,10 17,8 17,10 11,12 5,10' />
+    <rect x='5' y='9' width='2' height='8' />
+    <rect x='15' y='9' width='2' height='8' />
   </g>
 </svg>

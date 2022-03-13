@@ -25,14 +25,19 @@ handler _ = do
       Lucid.head_ $ do
         Lucid.meta_ [Lucid.charset_ "utf-8"]
         Lucid.meta_ [Lucid.name_ "viewport", Lucid.content_ "initial-scale = 1, width = device-width"]
+        Lucid.meta_ [Lucid.name_ "description", Lucid.content_ "Worse Haskell documentation."]
         Lucid.title_ "Monadoc"
         Lucid.link_ [Lucid.rel_ "stylesheet", Lucid.href_ $ route context Route.Bootstrap]
         Lucid.link_ [Lucid.rel_ "manifest", Lucid.href_ $ route context Route.Manifest]
         Lucid.link_ [Lucid.rel_ "canonical", Lucid.href_ $ route context Route.Home]
       Lucid.body_ $ do
-        Lucid.div_ [Lucid.class_ "bg-dark mb-3 navbar navbar-dark"] $ do
+        Lucid.div_ [Lucid.class_ "bg-dark navbar navbar-dark"] $ do
           Lucid.div_ [Lucid.class_ "container"] $ do
             Lucid.a_ [Lucid.class_ "navbar-brand", Lucid.href_ $ route context Route.Home] "Monadoc"
+        Lucid.div_ [Lucid.class_ "bg-light mb-3 navbar navbar-light"] $ do
+          Lucid.div_ [Lucid.class_ "container"] $ do
+            Lucid.ol_ [Lucid.class_ "breadcrumb my-1"] $ do
+              Lucid.li_ [Lucid.class_ "active breadcrumb-item"] "Home"
         Lucid.div_ [Lucid.class_ "my-3"] $ do
           Lucid.div_ [Lucid.class_ "container"] $ do
             "TODO"

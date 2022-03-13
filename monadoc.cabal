@@ -1,7 +1,7 @@
 cabal-version: 2.0
 
 name: monadoc
-version: 0.2022.3.11
+version: 0.2022.3.12
 
 build-type: Simple
 category: Documentation
@@ -53,15 +53,20 @@ library
     , wai-extra >= 3.1.8 && < 3.2
     , warp >= 3.3.19 && < 3.4
     , witch >= 1.0.0 && < 1.1
+    , zlib >= 0.6.2 && < 0.7
   default-language: Haskell2010
   exposed-modules:
+    Monadoc.Action.InitializeDatabase
+    Monadoc.Action.UpdateIndex
     Monadoc.Constant.ContentType
     Monadoc.Constant.Header
     Monadoc.Exception.InvalidMethod
     Monadoc.Exception.InvalidOption
     Monadoc.Exception.InvalidPort
+    Monadoc.Exception.InvalidSize
     Monadoc.Exception.MethodNotAllowed
     Monadoc.Exception.MigrationMismatch
+    Monadoc.Exception.MissingSize
     Monadoc.Exception.Sick
     Monadoc.Exception.UnexpectedArgument
     Monadoc.Exception.UnknownOption
@@ -78,6 +83,7 @@ library
     Monadoc.Middleware.CompressResponses
     Monadoc.Middleware.HandleExceptions
     Monadoc.Middleware.LogResponses
+    Monadoc.Model.HackageIndex
     Monadoc.Model.Migration
     Monadoc.Orphanage
     Monadoc.Server.Application

@@ -23,7 +23,7 @@ parse texts = case fmap (Witch.into @String) texts of
   ["apple-touch-icon.png"] -> pure AppleTouchIcon
   ["favicon.ico"] -> pure Favicon
   ["health-check"] -> pure HealthCheck
-  ["manifest.json"] -> pure Manifest
+  ["monadoc.webmanifest"] -> pure Manifest
   ["robots.txt"] -> pure Robots
   ["static", "bootstrap.css"] -> pure Bootstrap
   _ -> Exception.throwM $ UnknownRoute.UnknownRoute texts
@@ -35,5 +35,5 @@ render route = fmap (Witch.into @Text.Text) $ case route of
   Favicon -> ["favicon.ico"]
   HealthCheck -> ["health-check"]
   Home -> []
-  Manifest -> ["manifest.json"]
+  Manifest -> ["monadoc.webmanifest"]
   Robots -> ["robots.txt"]

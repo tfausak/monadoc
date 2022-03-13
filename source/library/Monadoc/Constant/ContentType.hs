@@ -17,6 +17,9 @@ ico = Witch.into @ByteString.ByteString "image/x-icon"
 json :: ByteString.ByteString
 json = Witch.into @ByteString.ByteString "application/json;charset=utf-8"
 
+manifest :: ByteString.ByteString
+manifest = Witch.into @ByteString.ByteString "application/manifest+json;charset=utf-8"
+
 png :: ByteString.ByteString
 png = Witch.into @ByteString.ByteString "image/png"
 

@@ -11,6 +11,7 @@ import qualified Text.Read as Read
 data Config = Config
   { base :: String,
     data_ :: Maybe FilePath,
+    hackage :: String,
     help :: Bool,
     host :: Warp.HostPreference,
     port :: Warp.Port,
@@ -23,6 +24,7 @@ initial :: Config
 initial =
   Config
     { base = "/",
+      hackage = "https://hackage.haskell.org",
       sql = "monadoc.sqlite",
       data_ = Nothing,
       help = False,
@@ -35,6 +37,7 @@ applyFlag :: Exception.MonadThrow m => Config -> Flag.Flag -> m Config
 applyFlag config flag = case flag of
   Flag.Base str -> pure config {base = str}
   Flag.Data str -> pure config {data_ = Just str}
+  Flag.Hackage str -> pure config {hackage = str}
   Flag.Help -> pure config {help = True}
   Flag.Host str -> pure config {host = String.fromString str}
   Flag.Port str -> do

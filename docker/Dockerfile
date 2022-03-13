@@ -14,6 +14,6 @@ VOLUME "/home/$USER_NAME/volume"
 COPY data data
 ENV monadoc_datadir="/home/$USER_NAME/data"
 
-COPY monadoc .
+COPY monadoc /usr/local/bin
 
-ENTRYPOINT [ "./monadoc", "--host=*", "--sql=volume/monadoc.sqlite" ]
+ENTRYPOINT [ "monadoc", "--host=*", "--sql=volume/monadoc.sqlite" ]

@@ -18,7 +18,7 @@ handler :: Wai.Request -> App.App Wai.Response
 handler _ = do
   context <- App.ask
   pure
-    . Wai.responseLBS Http.ok200 [(Http.hContentType, ContentType.json)]
+    . Wai.responseLBS Http.ok200 [(Http.hContentType, ContentType.manifest)]
     . Aeson.encode
     $ Aeson.object
       [ pair "$schema" "https://json.schemastore.org/web-manifest-combined.json",
@@ -29,11 +29,13 @@ handler _ = do
           "icons"
           [ Aeson.object
               [ pair "sizes" "192x192",
+                pair "purpose" "any maskable",
                 pair "src" $ Home.Get.route context Route.AppleTouchIcon,
                 pair "type" "image/png"
               ],
             Aeson.object
               [ pair "sizes" "512x512",
+                pair "purpose" "any maskable",
                 pair "src" $ Home.Get.route context Route.AppleTouchIcon,
                 pair "type" "image/png"
               ]

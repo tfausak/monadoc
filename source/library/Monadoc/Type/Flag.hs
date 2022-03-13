@@ -9,6 +9,7 @@ import qualified System.Console.GetOpt as Console
 data Flag
   = Base String
   | Data String
+  | Hackage String
   | Help
   | Host String
   | Port String
@@ -47,6 +48,11 @@ options =
       ["data"]
       (Console.ReqArg Data "DIRECTORY")
       "Sets the directory to read data files from.\nDefault: monadoc_datadir environment variable",
+    Console.Option
+      []
+      ["hackage"]
+      (Console.ReqArg Host "URL")
+      "Sets the base Hackage URL to use.\nDefault: https://hackage.haskell.org",
     Console.Option
       []
       ["host"]
