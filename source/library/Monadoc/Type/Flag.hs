@@ -32,12 +32,12 @@ options =
       ['h', '?']
       ["help"]
       (Console.NoArg Help)
-      "Prints this help message, then exits.",
+      "Shows this help message, then exits.",
     Console.Option
       ['v']
       ["version"]
       (Console.NoArg Version)
-      "Prints the version number, then exits.",
+      "Shows the version number, then exits.",
     Console.Option
       []
       ["base"]

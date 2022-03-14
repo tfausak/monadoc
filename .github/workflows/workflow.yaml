@@ -113,6 +113,8 @@ jobs:
 
       - run: mv artifact/data docker
 
+      - run: chmod +x artifact/ubuntu/monadoc
+
       - run: mv artifact/ubuntu/monadoc docker
 
       - id: meta

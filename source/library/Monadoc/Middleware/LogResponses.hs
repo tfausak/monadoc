@@ -6,8 +6,8 @@ import qualified Data.Time as Time
 import qualified GHC.Clock as Clock
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
+import qualified Numeric
 import qualified Say
-import qualified Text.Printf as Printf
 import qualified Witch
 
 middleware :: Wai.Middleware
@@ -22,6 +22,6 @@ middleware handle request respond = do
           show . Http.statusCode $ Wai.responseStatus response,
           Witch.unsafeInto @String $ Wai.requestMethod request,
           Witch.unsafeInto @String $ Wai.rawPathInfo request,
-          Printf.printf "%.3f" $ after - before
+          Numeric.showFFloat (Just 3) (after - before) ""
         ]
     respond response

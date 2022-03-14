@@ -1,7 +1,7 @@
 cabal-version: 2.0
 
 name: monadoc
-version: 0.2022.3.12
+version: 0.2022.3.13
 
 build-type: Simple
 category: Documentation
@@ -33,8 +33,10 @@ library
     , aeson >= 2.0.3 && < 2.1
     , async >= 2.2.4 && < 2.3
     , bytestring >= 0.11.1 && < 0.12
+    , Cabal >= 3.6.3 && < 3.7
     , case-insensitive >= 1.2.1 && < 1.3
-    , cryptonite >= 0.29 && < 0.30
+    , containers >= 0.6.5 && < 0.7
+    , cryptonite >= 0.30 && < 0.31
     , directory >= 1.3.6 && < 1.4
     , exceptions >= 0.10.4 && < 0.11
     , filepath >= 1.4.2 && < 1.5
@@ -42,10 +44,12 @@ library
     , http-client-tls >= 0.3.6 && < 0.4
     , http-types >= 0.12.3 && < 0.13
     , lucid >= 2.11.0 && < 2.12
-    , memory >= 0.16.0 && < 0.17
+    , memory >= 0.17.0 && < 0.18
     , resource-pool >= 0.2.3 && < 0.3
     , say >= 0.1.0 && < 0.2
     , sqlite-simple >= 0.4.18 && < 0.5
+    , stm >= 2.5.0 && < 2.6
+    , tar >= 0.5.1 && < 0.6
     , text >= 1.2.5 && < 1.3
     , time >= 1.11.1 && < 1.12
     , transformers >= 0.5.6 && < 0.6
@@ -56,8 +60,11 @@ library
     , zlib >= 0.6.2 && < 0.7
   default-language: Haskell2010
   exposed-modules:
+    Monadoc.Action.HackageIndex.Insert
+    Monadoc.Action.HackageIndex.Process
+    Monadoc.Action.HackageIndex.Update
+    Monadoc.Action.HackageIndex.Upsert
     Monadoc.Action.InitializeDatabase
-    Monadoc.Action.UpdateIndex
     Monadoc.Constant.ContentType
     Monadoc.Constant.Header
     Monadoc.Exception.InvalidMethod
@@ -67,6 +74,7 @@ library
     Monadoc.Exception.MethodNotAllowed
     Monadoc.Exception.MigrationMismatch
     Monadoc.Exception.MissingSize
+    Monadoc.Exception.NotFound
     Monadoc.Exception.Sick
     Monadoc.Exception.UnexpectedArgument
     Monadoc.Exception.UnknownOption
