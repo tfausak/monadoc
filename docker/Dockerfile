@@ -3,6 +3,8 @@ FROM ubuntu:20.04
 ENV LANG=C.UTF-8
 EXPOSE 3000
 
+RUN apt-get update && apt-get install --assume-yes ca-certificates
+
 ARG USER_NAME=monadoc
 RUN useradd --create-home "$USER_NAME"
 USER "$USER_NAME"

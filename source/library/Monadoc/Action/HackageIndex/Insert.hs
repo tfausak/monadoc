@@ -12,6 +12,7 @@ import Monadoc.Orphanage ()
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
+import qualified Monadoc.Type.Model as Model
 import qualified Network.HTTP.Client as Client
 import qualified Witch
 
@@ -29,7 +30,7 @@ run = do
   App.withConnection $ \connection ->
     App.lift $ do
       Sql.execute connection (Witch.from "insert into hackageIndex (contents, size) values (?, ?)") hackageIndex
-      rows <- Sql.query_ connection $ Witch.from "select * from hackageIndex"
+      rows <- Sql.query_ connection $ Witch.from "select key from hackageIndex"
       case rows of
         [] -> Exception.throwM $ NotFound.NotFound "failed to find hackage index after inserting"
-        row : _ -> pure row
+        Sql.Only key : _ -> pure $ Model.Model {Model.key = key, Model.value = hackageIndex}

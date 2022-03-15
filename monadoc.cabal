@@ -1,7 +1,7 @@
 cabal-version: 2.0
 
 name: monadoc
-version: 0.2022.3.13
+version: 0.2022.3.14
 
 build-type: Simple
 category: Documentation
@@ -77,6 +77,7 @@ library
     Monadoc.Exception.NotFound
     Monadoc.Exception.Sick
     Monadoc.Exception.UnexpectedArgument
+    Monadoc.Exception.UnexpectedEntry
     Monadoc.Exception.UnknownOption
     Monadoc.Exception.UnknownRoute
     Monadoc.Handler.AppleTouchIcon.Get
@@ -104,6 +105,7 @@ library
     Monadoc.Type.Hash
     Monadoc.Type.Key
     Monadoc.Type.Model
+    Monadoc.Type.Revision
     Monadoc.Type.Route
     Monadoc.Worker.Main
   ghc-options:
