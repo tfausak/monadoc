@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeApplications #-}
+
 module Monadoc.Server.Main where
 
 import qualified Data.ByteString as ByteString
@@ -8,6 +10,7 @@ import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Network.Wai.Handler.Warp as Warp
 import qualified Say
+import qualified Witch as Witch
 
 server :: Context.Context -> IO ()
 server context =
@@ -21,7 +24,7 @@ getSettings config =
     . Warp.setHost (Config.host config)
     . Warp.setOnException (const HandleExceptions.onException)
     . Warp.setOnExceptionResponse HandleExceptions.onExceptionResponse
-    . Warp.setPort (Config.port config)
+    . Warp.setPort (Witch.into @Int $ Config.port config)
     $ Warp.setServerName ByteString.empty Warp.defaultSettings
 
 beforeMainLoop :: Config.Config -> IO ()

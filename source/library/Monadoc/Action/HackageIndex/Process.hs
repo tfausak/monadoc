@@ -6,10 +6,10 @@ import qualified Codec.Archive.Tar as Tar
 import qualified Control.Concurrent.STM as Stm
 import qualified Control.Monad.Catch as Exception
 import qualified Data.ByteString.Lazy as LazyByteString
-import qualified Data.Function as Function
+import qualified Data.List as List
 import qualified Data.Map as Map
+import qualified Data.Ord as Ord
 import qualified Distribution.Package as Cabal
-import qualified Distribution.Parsec as Cabal
 import qualified Distribution.Types.PackageVersionConstraint as Cabal
 import qualified Distribution.Version as Cabal
 import qualified Monadoc.Exception.UnexpectedEntry as UnexpectedEntry
@@ -30,6 +30,7 @@ run hackageIndex = do
     . Witch.into @LazyByteString.ByteString
     . HackageIndex.contents
     $ Model.value hackageIndex
+  App.lift $ print . List.maximumBy (Ord.comparing snd) . Map.toList =<< Stm.readTVarIO revisions
 
 -- TODO
 
@@ -48,41 +49,31 @@ handleEntry ::
   App.App ()
 handleEntry preferredVersions revisions entry =
   case FilePath.splitDirectories $ Tar.entryPath entry of
-    [package, "preferred-versions"] -> do
-      packageName <- case Cabal.simpleParsec @Cabal.PackageName package of
-        Just packageName -> pure packageName
-        Nothing -> Exception.throwM $ userError "TODO: invalid package name"
+    [pkg, "preferred-versions"] -> do
+      packageName <- either Exception.throwM pure $ Witch.tryInto @Cabal.PackageName pkg
       lazyByteString <- case Tar.entryContent entry of
         Tar.NormalFile lazyByteString _ -> pure lazyByteString
         _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
-      string <- case Witch.tryInto @String lazyByteString of
-        Right string -> pure string
-        Left e -> Exception.throwM e
-      versionRange <- case Cabal.simpleParsec string of
-        Just (Cabal.PackageVersionConstraint _ versionRange) -> pure versionRange
-        Nothing
+      string <- either Exception.throwM pure $ Witch.tryInto @String lazyByteString
+      versionRange <- case Witch.tryInto @Cabal.PackageVersionConstraint string of
+        Right (Cabal.PackageVersionConstraint _ versionRange) -> pure versionRange
+        Left tryFromException
           | null string -> pure Cabal.anyVersion
-          | otherwise -> Exception.throwM $ userError "TODO: invalid preferred version range"
+          | otherwise -> Exception.throwM tryFromException
       App.lift . Stm.atomically . Stm.modifyTVar preferredVersions $ Map.insert packageName versionRange
-    [package, version, base] -> case FilePath.splitExtensions base of
+    [pkg, ver, base] -> case FilePath.splitExtensions base of
       ("package", ".json") -> pure ()
-      (p, ".cabal") | p == package -> do
-        packageName <- case Cabal.simpleParsec @Cabal.PackageName package of
-          Just packageName -> pure packageName
-          Nothing -> Exception.throwM $ userError "TODO: invalid package name"
-        ver <- case Cabal.simpleParsec @Cabal.Version version of
-          Just ver -> pure ver
-          Nothing -> Exception.throwM $ userError "TODO: invalid version number"
+      (p, ".cabal") | p == pkg -> do
+        packageName <- either Exception.throwM pure $ Witch.tryInto @Cabal.PackageName pkg
+        version <- either Exception.throwM pure $ Witch.tryInto @Cabal.Version ver
         let packageIdentifier =
               Cabal.PackageIdentifier
                 { Cabal.pkgName = packageName,
-                  Cabal.pkgVersion = ver
+                  Cabal.pkgVersion = version
                 }
-        App.lift
-          . Stm.atomically
-          . Stm.modifyTVar' revisions
-          . Map.insertWith (\x -> Witch.from @Int . Function.on (+) Witch.from x) packageIdentifier
-          $ Witch.from @Int 1
+        _revision <- App.lift . Stm.atomically . Stm.stateTVar revisions $ \m ->
+          let revision = Map.findWithDefault Revision.zero packageIdentifier m
+           in (revision, Map.insert packageIdentifier (Revision.increment revision) m)
         pure () -- TODO
       _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
     _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry

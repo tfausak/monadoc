@@ -10,7 +10,6 @@ import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Maybe as Maybe
 import qualified Monadoc.Constant.ContentType as ContentType
-import qualified Monadoc.Exception.InvalidMethod as InvalidMethod
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
 import qualified Network.HTTP.Types as Http
@@ -41,7 +40,6 @@ onException someException =
 
 onExceptionResponse :: Exception.SomeException -> Wai.Response
 onExceptionResponse e
-  | isType @InvalidMethod.InvalidMethod e = statusResponse Http.methodNotAllowed405 []
   | isType @UnknownRoute.UnknownRoute e = statusResponse Http.notFound404 []
   | isType @MethodNotAllowed.MethodNotAllowed e = statusResponse Http.methodNotAllowed405 []
   | otherwise = statusResponse Http.internalServerError500 []

@@ -1,7 +1,8 @@
+{-# LANGUAGE TypeApplications #-}
+
 module Monadoc.Server.Application where
 
 import qualified Control.Monad.Catch as Exception
-import qualified Monadoc.Exception.InvalidMethod as InvalidMethod
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Handler.AppleTouchIcon.Get as AppleTouchIcon.Get
 import qualified Monadoc.Handler.Bootstrap.Get as Bootstrap.Get
@@ -10,17 +11,19 @@ import qualified Monadoc.Handler.HealthCheck.Get as HealthCheck.Get
 import qualified Monadoc.Handler.Home.Get as Home.Get
 import qualified Monadoc.Handler.Manifest.Get as Manifest.Get
 import qualified Monadoc.Handler.Robots.Get as Robots.Get
+import Monadoc.Orphanage ()
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Route as Route
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
+import qualified Witch
 
 application :: Context.Context -> Wai.Application
 application context request respond = do
   method <-
-    either (Exception.throwM . InvalidMethod.InvalidMethod) pure
-      . Http.parseMethod
+    either Exception.throwM pure
+      . Witch.tryInto @Http.StdMethod
       $ Wai.requestMethod request
   route <- Route.parse $ Wai.pathInfo request
   handler <- getHandler method route

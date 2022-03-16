@@ -5,10 +5,16 @@
 module Monadoc.Orphanage where
 
 import qualified Data.Aeson.Key as Key
+import qualified Data.ByteString as ByteString
 import qualified Data.CaseInsensitive as CI
 import qualified Data.String as String
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
+import qualified Distribution.Package as Cabal
+import qualified Distribution.Parsec as Cabal
+import qualified Distribution.Types.PackageVersionConstraint as Cabal
+import qualified Distribution.Types.Version as Cabal
+import qualified Network.HTTP.Types as Http
 import qualified Witch
 
 instance CI.FoldCase a => Witch.From a (CI.CI a) where
@@ -25,3 +31,15 @@ instance Witch.From Text.Text Sql.Query where
 
 instance Witch.From String Key.Key where
   from = Key.fromString
+
+instance Witch.TryFrom ByteString.ByteString Http.StdMethod where
+  tryFrom = Witch.maybeTryFrom $ either (const Nothing) Just . Http.parseMethod
+
+instance Witch.TryFrom String Cabal.PackageName where
+  tryFrom = Witch.maybeTryFrom Cabal.simpleParsec
+
+instance Witch.TryFrom String Cabal.PackageVersionConstraint where
+  tryFrom = Witch.maybeTryFrom Cabal.simpleParsec
+
+instance Witch.TryFrom String Cabal.Version where
+  tryFrom = Witch.maybeTryFrom Cabal.simpleParsec
