@@ -7,11 +7,10 @@ import qualified Control.Monad.Catch as Exception
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Exception.Sick as Sick
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
-import Monadoc.Orphanage ()
 import qualified Monadoc.Type.App as App
+import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
-import qualified Witch
 
 handler :: Wai.Request -> App.App Wai.Response
 handler _ = do

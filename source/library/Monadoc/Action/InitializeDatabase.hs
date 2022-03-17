@@ -5,16 +5,36 @@ import qualified Control.Monad.Catch as Exception
 import qualified Data.List as List
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Exception.MigrationMismatch as MigrationMismatch
+import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Model as Model
-import qualified Witch
+import qualified Monadoc.Vendor.Witch as Witch
+
+pragmas :: [String]
+pragmas =
+  [ "pragma auto_vacuum = 'incremental'",
+    "pragma foreign_keys = true",
+    "pragma journal_mode = 'wal'"
+  ]
+
+migrations :: [Migration.Migration]
+migrations =
+  List.sortOn Migration.createdAt $
+    mconcat
+      [ Blob.migrations,
+        HackageIndex.migrations,
+        Migration.migrations
+      ]
 
 run :: App.App ()
 run = do
+  App.sayString "running pragmas"
   runPragmas
+  App.sayString "running migrations"
   runMigrations
+  App.sayString "done initializing database"
 
 runPragmas :: App.App ()
 runPragmas = mapM_ runPragma pragmas
@@ -23,13 +43,6 @@ runPragma :: String -> App.App ()
 runPragma pragma = do
   App.withConnection $ \connection ->
     App.lift . Sql.execute_ connection $ Witch.from pragma
-
-pragmas :: [String]
-pragmas =
-  [ "pragma auto_vacuum = 'incremental'",
-    "pragma foreign_keys = true",
-    "pragma journal_mode = 'wal'"
-  ]
 
 runMigrations :: App.App ()
 runMigrations = do
@@ -60,11 +73,3 @@ runMigration migration = do
         Monad.when (oldQuery /= query)
           . Exception.throwM
           $ MigrationMismatch.MigrationMismatch createdAt oldQuery query
-
-migrations :: [Migration.Migration]
-migrations =
-  List.sortOn Migration.createdAt $
-    mconcat
-      [ HackageIndex.migrations,
-        Migration.migrations
-      ]

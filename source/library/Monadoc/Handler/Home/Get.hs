@@ -11,10 +11,10 @@ import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Route as Route
+import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 import qualified Paths_monadoc as Monadoc
-import qualified Witch
 
 handler :: Wai.Request -> App.App Wai.Response
 handler _ = do

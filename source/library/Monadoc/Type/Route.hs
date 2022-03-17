@@ -5,7 +5,7 @@ module Monadoc.Type.Route where
 import qualified Control.Monad.Catch as Exception
 import qualified Data.Text as Text
 import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
-import qualified Witch
+import qualified Monadoc.Vendor.Witch as Witch
 
 data Route
   = AppleTouchIcon

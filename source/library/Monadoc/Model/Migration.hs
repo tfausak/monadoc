@@ -5,10 +5,9 @@ import qualified Data.Text as Text
 import qualified Data.Time as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
-import Monadoc.Orphanage ()
 import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
-import qualified Witch
+import qualified Monadoc.Vendor.Witch as Witch
 
 type Model = Model.Model Migration
 

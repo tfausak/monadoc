@@ -11,13 +11,12 @@ import qualified Monadoc.Handler.HealthCheck.Get as HealthCheck.Get
 import qualified Monadoc.Handler.Home.Get as Home.Get
 import qualified Monadoc.Handler.Manifest.Get as Manifest.Get
 import qualified Monadoc.Handler.Robots.Get as Robots.Get
-import Monadoc.Orphanage ()
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Route as Route
+import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
-import qualified Witch
 
 application :: Context.Context -> Wai.Application
 application context request respond = do

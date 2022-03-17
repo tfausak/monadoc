@@ -5,9 +5,9 @@ module Monadoc.Middleware.AddHeaders where
 import qualified Data.ByteString as ByteString
 import qualified Data.Function as Function
 import qualified Monadoc.Constant.Header as Header
+import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
-import qualified Witch
 
 middleware :: Wai.Middleware
 middleware =

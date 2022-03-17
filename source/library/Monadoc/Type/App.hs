@@ -4,9 +4,11 @@ import qualified Control.Monad.Trans.Class as Trans
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Pool as Pool
+import qualified Data.Time as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Type.Context as Context
 import qualified Network.HTTP.Client as Client
+import qualified Say
 
 type App = Reader.ReaderT Context.Context IO
 
@@ -23,6 +25,13 @@ lift = Trans.lift
 
 run :: App a -> Context.Context -> IO a
 run = Reader.runReaderT
+
+sayString :: String -> App ()
+sayString string = do
+  now <- lift Time.getCurrentTime
+  lift
+    . Say.sayString
+    $ Time.formatTime Time.defaultTimeLocale "%Y-%m-%dT%H:%M:%S%3QZ " now <> string
 
 withConnection :: (Sql.Connection -> App a) -> App a
 withConnection f = do

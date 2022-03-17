@@ -7,8 +7,8 @@ import qualified Control.Monad.Catch as Exception
 import qualified Data.String as String
 import qualified Monadoc.Type.Flag as Flag
 import qualified Monadoc.Type.Port as Port
+import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.Wai.Handler.Warp as Warp
-import qualified Witch as Witch
 
 data Config = Config
   { base :: String,
@@ -26,7 +26,7 @@ initial :: Config
 initial =
   Config
     { base = "/",
-      hackage = "https://hackage.haskell.org",
+      hackage = "https://hackage.haskell.org/",
       sql = "monadoc.sqlite",
       data_ = Nothing,
       help = False,
@@ -37,9 +37,9 @@ initial =
 
 applyFlag :: Exception.MonadThrow m => Config -> Flag.Flag -> m Config
 applyFlag config flag = case flag of
-  Flag.Base str -> pure config {base = str}
+  Flag.Base str -> pure config {base = ensureTrailing '/' str}
   Flag.Data str -> pure config {data_ = Just str}
-  Flag.Hackage str -> pure config {hackage = str}
+  Flag.Hackage str -> pure config {hackage = ensureTrailing '/' str}
   Flag.Help -> pure config {help = True}
   Flag.Host str -> pure config {host = String.fromString str}
   Flag.Port str -> do
@@ -50,3 +50,9 @@ applyFlag config flag = case flag of
 
 fromFlags :: Exception.MonadThrow m => [Flag.Flag] -> m Config
 fromFlags = Monad.foldM applyFlag initial
+
+ensureTrailing :: Eq a => a -> [a] -> [a]
+ensureTrailing z xs = case xs of
+  [] -> []
+  [x] -> if x == z then xs else [x, z]
+  x : ys -> x : ensureTrailing z ys

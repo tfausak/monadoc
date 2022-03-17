@@ -3,7 +3,7 @@
 
 module Monadoc.Type.Revision where
 
-import qualified Witch
+import qualified Monadoc.Vendor.Witch as Witch
 
 newtype Revision
   = Revision Int

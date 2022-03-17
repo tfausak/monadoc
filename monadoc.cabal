@@ -1,7 +1,7 @@
 cabal-version: 2.0
 
 name: monadoc
-version: 0.2022.3.15
+version: 0.2022.3.16
 
 build-type: Simple
 category: Documentation
@@ -60,6 +60,7 @@ library
     , zlib >= 0.6.2 && < 0.7
   default-language: Haskell2010
   exposed-modules:
+    Monadoc.Action.Blob.Upsert
     Monadoc.Action.HackageIndex.Insert
     Monadoc.Action.HackageIndex.Process
     Monadoc.Action.HackageIndex.Update
@@ -78,6 +79,7 @@ library
     Monadoc.Exception.UnexpectedEntry
     Monadoc.Exception.UnknownOption
     Monadoc.Exception.UnknownRoute
+    Monadoc.Extra.Witch
     Monadoc.Handler.AppleTouchIcon.Get
     Monadoc.Handler.Bootstrap.Get
     Monadoc.Handler.Favicon.Get
@@ -90,9 +92,9 @@ library
     Monadoc.Middleware.CompressResponses
     Monadoc.Middleware.HandleExceptions
     Monadoc.Middleware.LogResponses
+    Monadoc.Model.Blob
     Monadoc.Model.HackageIndex
     Monadoc.Model.Migration
-    Monadoc.Orphanage
     Monadoc.Server.Application
     Monadoc.Server.Main
     Monadoc.Server.Middleware
@@ -106,6 +108,7 @@ library
     Monadoc.Type.Port
     Monadoc.Type.Revision
     Monadoc.Type.Route
+    Monadoc.Vendor.Witch
     Monadoc.Worker.Main
   ghc-options:
     -Weverything

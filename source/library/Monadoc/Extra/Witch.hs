@@ -2,7 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
-module Monadoc.Orphanage where
+module Monadoc.Extra.Witch where
 
 import qualified Data.Aeson.Key as Key
 import qualified Data.ByteString as ByteString

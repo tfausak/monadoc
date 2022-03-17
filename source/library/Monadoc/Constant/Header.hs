@@ -3,9 +3,8 @@
 module Monadoc.Constant.Header where
 
 import qualified Data.ByteString as ByteString
-import Monadoc.Orphanage ()
+import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.HTTP.Types as Http
-import qualified Witch
 
 contentSecurityPolicy :: Http.HeaderName
 contentSecurityPolicy = Witch.via @ByteString.ByteString "Content-Security-Policy"

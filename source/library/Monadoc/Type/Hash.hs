@@ -10,7 +10,7 @@ import qualified Data.ByteString as ByteString
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
-import qualified Witch
+import qualified Monadoc.Vendor.Witch as Witch
 
 newtype Hash
   = Hash (Crypto.Digest Crypto.SHA256)
@@ -36,3 +36,6 @@ instance Sql.FromField Hash where
 
 instance Sql.ToField Hash where
   toField = Sql.toField . Witch.into @ByteString.ByteString
+
+new :: ByteString.ByteString -> Hash
+new = Witch.from @(Crypto.Digest Crypto.SHA256) . Crypto.hash

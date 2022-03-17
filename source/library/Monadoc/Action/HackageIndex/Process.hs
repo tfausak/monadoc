@@ -4,21 +4,24 @@ module Monadoc.Action.HackageIndex.Process where
 
 import qualified Codec.Archive.Tar as Tar
 import qualified Control.Concurrent.STM as Stm
+import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
+import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.List as List
 import qualified Data.Map as Map
-import qualified Data.Ord as Ord
 import qualified Distribution.Package as Cabal
 import qualified Distribution.Types.PackageVersionConstraint as Cabal
 import qualified Distribution.Version as Cabal
+import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
 import qualified Monadoc.Exception.UnexpectedEntry as UnexpectedEntry
+import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Revision as Revision
+import qualified Monadoc.Vendor.Witch as Witch
 import qualified System.FilePath as FilePath
-import qualified Witch
 
 run :: HackageIndex.Model -> App.App ()
 run hackageIndex = do
@@ -30,9 +33,7 @@ run hackageIndex = do
     . Witch.into @LazyByteString.ByteString
     . HackageIndex.contents
     $ Model.value hackageIndex
-  App.lift $ print . List.maximumBy (Ord.comparing snd) . Map.toList =<< Stm.readTVarIO revisions
-
--- TODO
+  pure () -- TODO
 
 handleItem ::
   Stm.TVar (Map.Map Cabal.PackageName Cabal.VersionRange) ->
@@ -71,9 +72,17 @@ handleEntry preferredVersions revisions entry =
                 { Cabal.pkgName = packageName,
                   Cabal.pkgVersion = version
                 }
-        _revision <- App.lift . Stm.atomically . Stm.stateTVar revisions $ \m ->
+        revision <- App.lift . Stm.atomically . Stm.stateTVar revisions $ \m ->
           let revision = Map.findWithDefault Revision.zero packageIdentifier m
            in (revision, Map.insert packageIdentifier (Revision.increment revision) m)
+        byteString <- case Tar.entryContent entry of
+          Tar.NormalFile lazyByteString _ -> pure $ Witch.into @ByteString.ByteString lazyByteString
+          _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
+        blob <- Blob.Upsert.run $ Blob.new byteString
+        let hash = show . Blob.hash $ Model.value blob
+        Monad.when (List.isPrefixOf "Hash 0000" hash)
+          . App.sayString
+          $ unwords [show packageName, show version, show revision, hash]
         pure () -- TODO
       _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
     _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry

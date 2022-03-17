@@ -8,20 +8,19 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Exception.InvalidSize as InvalidSize
 import qualified Monadoc.Exception.MissingSize as MissingSize
 import qualified Monadoc.Model.HackageIndex as HackageIndex
-import Monadoc.Orphanage ()
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
+import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Types as Http
 import qualified Text.Read as Read
-import qualified Witch
 
 run :: HackageIndex.Model -> App.App HackageIndex.Model
 run hackageIndex = do
   context <- App.ask
-  request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "/01-index.tar"
+  request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar"
   headResponse <- App.httpLbs request {Client.method = Http.methodHead}
   newSize <- maybe (Exception.throwM $ MissingSize.MissingSize headResponse) pure $ do
     byteString <- lookup Http.hContentLength $ Client.responseHeaders headResponse

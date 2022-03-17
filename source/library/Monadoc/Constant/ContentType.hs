@@ -3,7 +3,7 @@
 module Monadoc.Constant.ContentType where
 
 import qualified Data.ByteString as ByteString
-import qualified Witch
+import qualified Monadoc.Vendor.Witch as Witch
 
 css :: ByteString.ByteString
 css = Witch.into @ByteString.ByteString "text/css;charset=utf-8"
