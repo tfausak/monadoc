@@ -14,11 +14,14 @@ import qualified Distribution.Package as Cabal
 import qualified Distribution.Types.PackageVersionConstraint as Cabal
 import qualified Distribution.Version as Cabal
 import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
+import qualified Monadoc.Action.Package.Upsert as Package.Upsert
 import qualified Monadoc.Exception.UnexpectedEntry as UnexpectedEntry
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
+import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Model as Model
+import qualified Monadoc.Type.PackageName as PackageName
 import qualified Monadoc.Type.Revision as Revision
 import qualified Monadoc.Vendor.Witch as Witch
 import qualified System.FilePath as FilePath
@@ -36,7 +39,7 @@ run hackageIndex = do
   pure () -- TODO
 
 handleItem ::
-  Stm.TVar (Map.Map Cabal.PackageName Cabal.VersionRange) ->
+  Stm.TVar (Map.Map PackageName.PackageName Cabal.VersionRange) ->
   Stm.TVar (Map.Map Cabal.PackageId Revision.Revision) ->
   Either Tar.FormatError Tar.Entry ->
   App.App ()
@@ -44,14 +47,14 @@ handleItem preferredVersions =
   either Exception.throwM . handleEntry preferredVersions
 
 handleEntry ::
-  Stm.TVar (Map.Map Cabal.PackageName Cabal.VersionRange) ->
+  Stm.TVar (Map.Map PackageName.PackageName Cabal.VersionRange) ->
   Stm.TVar (Map.Map Cabal.PackageId Revision.Revision) ->
   Tar.Entry ->
   App.App ()
 handleEntry preferredVersions revisions entry =
   case FilePath.splitDirectories $ Tar.entryPath entry of
     [pkg, "preferred-versions"] -> do
-      packageName <- either Exception.throwM pure $ Witch.tryInto @Cabal.PackageName pkg
+      packageName <- either Exception.throwM pure $ Witch.tryInto @PackageName.PackageName pkg
       lazyByteString <- case Tar.entryContent entry of
         Tar.NormalFile lazyByteString _ -> pure lazyByteString
         _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
@@ -65,11 +68,11 @@ handleEntry preferredVersions revisions entry =
     [pkg, ver, base] -> case FilePath.splitExtensions base of
       ("package", ".json") -> pure ()
       (p, ".cabal") | p == pkg -> do
-        packageName <- either Exception.throwM pure $ Witch.tryInto @Cabal.PackageName pkg
+        packageName <- either Exception.throwM pure $ Witch.tryInto @PackageName.PackageName pkg
         version <- either Exception.throwM pure $ Witch.tryInto @Cabal.Version ver
         let packageIdentifier =
               Cabal.PackageIdentifier
-                { Cabal.pkgName = packageName,
+                { Cabal.pkgName = Witch.into @Cabal.PackageName packageName,
                   Cabal.pkgVersion = version
                 }
         revision <- App.lift . Stm.atomically . Stm.stateTVar revisions $ \m ->
@@ -79,10 +82,11 @@ handleEntry preferredVersions revisions entry =
           Tar.NormalFile lazyByteString _ -> pure $ Witch.into @ByteString.ByteString lazyByteString
           _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
         blob <- Blob.Upsert.run $ Blob.new byteString
+        package <- Package.Upsert.run Package.Package {Package.name = packageName}
         let hash = show . Blob.hash $ Model.value blob
         Monad.when (List.isPrefixOf "Hash 0000" hash)
           . App.sayString
-          $ unwords [show packageName, show version, show revision, hash]
+          $ unwords [show . Package.name $ Model.value package, show version, show revision, hash]
         pure () -- TODO
       _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
     _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry

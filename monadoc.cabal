@@ -1,7 +1,7 @@
 cabal-version: 2.0
 
 name: monadoc
-version: 0.2022.3.16
+version: 0.2022.3.17
 
 build-type: Simple
 category: Documentation
@@ -66,6 +66,7 @@ library
     Monadoc.Action.HackageIndex.Update
     Monadoc.Action.HackageIndex.Upsert
     Monadoc.Action.InitializeDatabase
+    Monadoc.Action.Package.Upsert
     Monadoc.Constant.ContentType
     Monadoc.Constant.Header
     Monadoc.Exception.InvalidOption
@@ -95,6 +96,7 @@ library
     Monadoc.Model.Blob
     Monadoc.Model.HackageIndex
     Monadoc.Model.Migration
+    Monadoc.Model.Package
     Monadoc.Server.Application
     Monadoc.Server.Main
     Monadoc.Server.Middleware
@@ -105,6 +107,7 @@ library
     Monadoc.Type.Hash
     Monadoc.Type.Key
     Monadoc.Type.Model
+    Monadoc.Type.PackageName
     Monadoc.Type.Port
     Monadoc.Type.Revision
     Monadoc.Type.Route

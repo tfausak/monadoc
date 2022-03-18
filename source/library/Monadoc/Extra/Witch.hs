@@ -10,7 +10,6 @@ import qualified Data.CaseInsensitive as CI
 import qualified Data.String as String
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
-import qualified Distribution.Package as Cabal
 import qualified Distribution.Parsec as Cabal
 import qualified Distribution.Types.PackageVersionConstraint as Cabal
 import qualified Distribution.Types.Version as Cabal
@@ -34,9 +33,6 @@ instance Witch.From String Key.Key where
 
 instance Witch.TryFrom ByteString.ByteString Http.StdMethod where
   tryFrom = Witch.maybeTryFrom $ either (const Nothing) Just . Http.parseMethod
-
-instance Witch.TryFrom String Cabal.PackageName where
-  tryFrom = Witch.maybeTryFrom Cabal.simpleParsec
 
 instance Witch.TryFrom String Cabal.PackageVersionConstraint where
   tryFrom = Witch.maybeTryFrom Cabal.simpleParsec
