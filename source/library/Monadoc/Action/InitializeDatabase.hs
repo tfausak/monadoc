@@ -7,8 +7,10 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Exception.MigrationMismatch as MigrationMismatch
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
+import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Model.Package as Package
+import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Vendor.Witch as Witch
@@ -26,8 +28,10 @@ migrations =
     mconcat
       [ Blob.migrations,
         HackageIndex.migrations,
+        HackageUser.migrations,
         Migration.migrations,
-        Package.migrations
+        Package.migrations,
+        Version.migrations
       ]
 
 run :: App.App ()

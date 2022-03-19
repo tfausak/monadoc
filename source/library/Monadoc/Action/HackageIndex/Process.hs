@@ -3,6 +3,7 @@
 module Monadoc.Action.HackageIndex.Process where
 
 import qualified Codec.Archive.Tar as Tar
+import qualified Codec.Archive.Tar.Entry as Tar
 import qualified Control.Concurrent.STM as Stm
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
@@ -10,19 +11,28 @@ import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.List as List
 import qualified Data.Map as Map
+import qualified Data.Time as Time
+import qualified Data.Time.Clock.POSIX as Time
 import qualified Distribution.Package as Cabal
 import qualified Distribution.Types.PackageVersionConstraint as Cabal
 import qualified Distribution.Version as Cabal
 import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
+import qualified Monadoc.Action.HackageUser.Upsert as HackageUser.Upsert
 import qualified Monadoc.Action.Package.Upsert as Package.Upsert
+import qualified Monadoc.Action.Version.Upsert as Version.Upsert
 import qualified Monadoc.Exception.UnexpectedEntry as UnexpectedEntry
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
+import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
+import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.App as App
+import qualified Monadoc.Type.HackageUserId as HackageUserId
+import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
 import qualified Monadoc.Type.Revision as Revision
+import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Monadoc.Vendor.Witch as Witch
 import qualified System.FilePath as FilePath
 
@@ -69,11 +79,11 @@ handleEntry preferredVersions revisions entry =
       ("package", ".json") -> pure ()
       (p, ".cabal") | p == pkg -> do
         packageName <- either Exception.throwM pure $ Witch.tryInto @PackageName.PackageName pkg
-        version <- either Exception.throwM pure $ Witch.tryInto @Cabal.Version ver
+        versionNumber <- either Exception.throwM pure $ Witch.tryInto @VersionNumber.VersionNumber ver
         let packageIdentifier =
               Cabal.PackageIdentifier
                 { Cabal.pkgName = Witch.into @Cabal.PackageName packageName,
-                  Cabal.pkgVersion = version
+                  Cabal.pkgVersion = Witch.into @Cabal.Version versionNumber
                 }
         revision <- App.lift . Stm.atomically . Stm.stateTVar revisions $ \m ->
           let revision = Map.findWithDefault Revision.zero packageIdentifier m
@@ -83,10 +93,27 @@ handleEntry preferredVersions revisions entry =
           _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
         blob <- Blob.Upsert.run $ Blob.new byteString
         package <- Package.Upsert.run Package.Package {Package.name = packageName}
+        version <- Version.Upsert.run Version.Version {Version.number = versionNumber}
+        hackageUser <-
+          HackageUser.Upsert.run
+            HackageUser.HackageUser
+              { HackageUser.id = Witch.into @HackageUserId.HackageUserId . Tar.ownerId $ Tar.entryOwnership entry,
+                HackageUser.name = Witch.into @HackageUserName.HackageUserName . Tar.ownerName $ Tar.entryOwnership entry
+              }
         let hash = show . Blob.hash $ Model.value blob
         Monad.when (List.isPrefixOf "Hash 0000" hash)
           . App.sayString
-          $ unwords [show . Package.name $ Model.value package, show version, show revision, hash]
+          $ unwords
+            [ hash,
+              show . Package.name $ Model.value package,
+              show . Version.number $ Model.value version,
+              show revision,
+              show . epochTimeToUtcTime $ Tar.entryTime entry,
+              show hackageUser
+            ]
         pure () -- TODO
       _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
     _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
+
+epochTimeToUtcTime :: Tar.EpochTime -> Time.UTCTime
+epochTimeToUtcTime = Time.posixSecondsToUTCTime . fromIntegral

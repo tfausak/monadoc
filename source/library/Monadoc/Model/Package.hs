@@ -22,8 +22,8 @@ instance Sql.FromRow Package where
       <$> Sql.field
 
 instance Sql.ToRow Package where
-  toRow blob =
-    [ Sql.toField $ name blob
+  toRow package =
+    [ Sql.toField $ name package
     ]
 
 migrations :: [Migration.Migration]

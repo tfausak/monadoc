@@ -9,13 +9,12 @@ import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Vendor.Witch as Witch
 
 run :: Package.Package -> App.App Package.Model
-run package = do
-  App.withConnection $ \connection -> App.lift $ do
-    rows <- Sql.query connection (Witch.into @Sql.Query "select key from package where name = ?") [Package.name package]
-    key <- case rows of
-      [] -> do
-        Sql.execute connection (Witch.into @Sql.Query "insert into package (name) values (?)") package
-        [Sql.Only key] <- Sql.query connection (Witch.into @Sql.Query "select key from package where name = ?") [Package.name package]
-        pure key
-      Sql.Only key : _ -> pure key
-    pure Model.Model {Model.key = key, Model.value = package}
+run package = App.withConnection $ \connection -> App.lift $ do
+  rows <- Sql.query connection (Witch.into @Sql.Query "select key from package where name = ?") [Package.name package]
+  key <- case rows of
+    [] -> do
+      Sql.execute connection (Witch.into @Sql.Query "insert into package (name) values (?)") package
+      [Sql.Only key] <- Sql.query connection (Witch.into @Sql.Query "select key from package where name = ?") [Package.name package]
+      pure key
+    Sql.Only key : _ -> pure key
+  pure Model.Model {Model.key = key, Model.value = package}
