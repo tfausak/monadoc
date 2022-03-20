@@ -3,10 +3,8 @@
 module Monadoc.Action.HackageIndex.Insert where
 
 import qualified Codec.Compression.GZip as Gzip
-import qualified Control.Monad.Catch as Exception
 import qualified Data.ByteString as ByteString
 import qualified Database.SQLite.Simple as Sql
-import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
@@ -29,7 +27,5 @@ run = do
   App.withConnection $ \connection ->
     App.lift $ do
       Sql.execute connection (Witch.from "insert into hackageIndex (contents, size) values (?, ?)") hackageIndex
-      rows <- Sql.query_ connection $ Witch.from "select key from hackageIndex"
-      case rows of
-        [] -> Exception.throwM $ NotFound.NotFound "failed to find hackage index after inserting"
-        Sql.Only key : _ -> pure $ Model.Model {Model.key = key, Model.value = hackageIndex}
+      [Sql.Only key] <- Sql.query_ connection $ Witch.from "select key from hackageIndex"
+      pure $ Model.Model {Model.key = key, Model.value = hackageIndex}

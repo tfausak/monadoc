@@ -1,7 +1,7 @@
 cabal-version: 2.0
 
 name: monadoc
-version: 0.2022.3.18
+version: 0.2022.3.19
 
 build-type: Simple
 category: Documentation
@@ -68,6 +68,8 @@ library
     Monadoc.Action.HackageUser.Upsert
     Monadoc.Action.InitializeDatabase
     Monadoc.Action.Package.Upsert
+    Monadoc.Action.PreferredVersions.Upsert
+    Monadoc.Action.Release.Upsert
     Monadoc.Action.Version.Upsert
     Monadoc.Constant.ContentType
     Monadoc.Constant.Header
@@ -76,7 +78,6 @@ library
     Monadoc.Exception.MethodNotAllowed
     Monadoc.Exception.MigrationMismatch
     Monadoc.Exception.MissingSize
-    Monadoc.Exception.NotFound
     Monadoc.Exception.Sick
     Monadoc.Exception.UnexpectedArgument
     Monadoc.Exception.UnexpectedEntry
@@ -100,6 +101,8 @@ library
     Monadoc.Model.HackageUser
     Monadoc.Model.Migration
     Monadoc.Model.Package
+    Monadoc.Model.PreferredVersions
+    Monadoc.Model.Release
     Monadoc.Model.Version
     Monadoc.Server.Application
     Monadoc.Server.Main
@@ -118,6 +121,7 @@ library
     Monadoc.Type.Revision
     Monadoc.Type.Route
     Monadoc.Type.VersionNumber
+    Monadoc.Type.VersionRange
     Monadoc.Vendor.Witch
     Monadoc.Worker.Main
   ghc-options:
