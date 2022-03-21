@@ -17,7 +17,7 @@ import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Types as Http
 import qualified Text.Read as Read
 
-run :: HackageIndex.Model -> App.App HackageIndex.Model
+run :: HackageIndex.Model -> App.App ()
 run hackageIndex = do
   context <- App.ask
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar"
@@ -32,7 +32,7 @@ run hackageIndex = do
       range = Witch.into @ByteString.ByteString $ "bytes=" <> show start <> "-" <> show end
   case compare oldSize newSize of
     GT -> Exception.throwM $ InvalidSize.InvalidSize oldSize newSize
-    EQ -> pure hackageIndex
+    EQ -> pure ()
     LT -> do
       rangeResponse <-
         App.httpLbs
@@ -49,11 +49,3 @@ run hackageIndex = do
             connection
             (Witch.from "update hackageIndex set contents = ?, size = ? where key = ?")
             (contents, size, Model.key hackageIndex)
-      pure
-        hackageIndex
-          { Model.value =
-              HackageIndex.HackageIndex
-                { HackageIndex.contents = contents,
-                  HackageIndex.size = size
-                }
-          }

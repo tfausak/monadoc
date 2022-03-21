@@ -4,11 +4,10 @@ import qualified Data.Maybe as Maybe
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Action.HackageIndex.Insert as Insert
 import qualified Monadoc.Action.HackageIndex.Update as Update
-import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Vendor.Witch as Witch
 
-run :: App.App HackageIndex.Model
+run :: App.App ()
 run = do
   hackageIndex <- App.withConnection $ \connection ->
     fmap Maybe.listToMaybe

@@ -44,7 +44,7 @@ jobs:
       - id: setup-haskell
         uses: haskell/actions/setup@v1
         with:
-          ghc-version: 9.2.1
+          ghc-version: 9.2.2
 
       - run: cabal configure --enable-tests --flags pedantic --jobs
 
@@ -117,11 +117,11 @@ jobs:
           name: monadoc-${{ github.sha }}
           path: artifact
 
-      - run: mv artifact/data docker
+      - run: mv artifact/data docker/monadoc
 
       - run: chmod +x artifact/ubuntu/monadoc
 
-      - run: mv artifact/ubuntu/monadoc docker
+      - run: mv artifact/ubuntu/monadoc docker/monadoc
 
       - id: meta
         uses: docker/metadata-action@v3
@@ -140,7 +140,7 @@ jobs:
 
       - uses: docker/build-push-action@v2
         with:
-          context: docker
+          context: docker/monadoc
           labels: ${{ steps.meta.outputs.labels }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}

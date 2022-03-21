@@ -1,4 +1,4 @@
-module Monadoc.Action.InitializeDatabase where
+module Monadoc.Action.Database.Initialize where
 
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
@@ -8,6 +8,7 @@ import qualified Monadoc.Exception.MigrationMismatch as MigrationMismatch
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Model.HackageUser as HackageUser
+import qualified Monadoc.Model.Job as Job
 import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PreferredVersions as PreferredVersions
@@ -31,6 +32,7 @@ migrations =
       [ Blob.migrations,
         HackageIndex.migrations,
         HackageUser.migrations,
+        Job.migrations,
         Migration.migrations,
         Package.migrations,
         PreferredVersions.migrations,
@@ -64,15 +66,14 @@ runMigration :: Migration.Migration -> App.App ()
 runMigration migration = do
   let createdAt = Migration.createdAt migration
       query = Migration.query migration
-  App.withConnection $ \connection -> do
+  App.withConnection $ \connection -> App.lift $ do
     models <-
-      App.lift $
-        Sql.query
-          connection
-          (Witch.from "select * from migration where createdAt = ?")
-          [createdAt]
+      Sql.query
+        connection
+        (Witch.from "select * from migration where createdAt = ?")
+        [createdAt]
     case models of
-      [] -> App.lift . Sql.withTransaction connection $ do
+      [] -> Sql.withTransaction connection $ do
         Sql.execute_ connection $ Witch.from query
         Sql.execute
           connection

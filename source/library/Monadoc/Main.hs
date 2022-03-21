@@ -4,7 +4,7 @@ import qualified Control.Concurrent.Async as Async
 import qualified Control.Monad.Catch as Exception
 import qualified Data.Pool as Pool
 import qualified GHC.Conc as Conc
-import qualified Monadoc.Action.InitializeDatabase as InitializeDatabase
+import qualified Monadoc.Action.Database.Initialize as Database.Initialize
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
 import qualified Monadoc.Server.Main as Server
 import qualified Monadoc.Type.App as App
@@ -32,7 +32,7 @@ mainWith name arguments = do
 
 start :: Context.Context -> IO ()
 start context = do
-  App.run InitializeDatabase.run context
+  App.run Database.Initialize.run context
   Async.race_ (Server.server context) (Worker.worker context)
 
 stop :: Context.Context -> IO ()

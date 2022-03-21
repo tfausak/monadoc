@@ -1,7 +1,7 @@
 cabal-version: 2.0
 
 name: monadoc
-version: 0.2022.3.19
+version: 0.2022.3.20
 
 build-type: Simple
 category: Documentation
@@ -61,12 +61,14 @@ library
   default-language: Haskell2010
   exposed-modules:
     Monadoc.Action.Blob.Upsert
+    Monadoc.Action.Database.Initialize
+    Monadoc.Action.Database.Vacuum
     Monadoc.Action.HackageIndex.Insert
     Monadoc.Action.HackageIndex.Process
     Monadoc.Action.HackageIndex.Update
     Monadoc.Action.HackageIndex.Upsert
     Monadoc.Action.HackageUser.Upsert
-    Monadoc.Action.InitializeDatabase
+    Monadoc.Action.Job.Enqueue
     Monadoc.Action.Package.Upsert
     Monadoc.Action.PreferredVersions.Upsert
     Monadoc.Action.Release.Upsert
@@ -99,6 +101,7 @@ library
     Monadoc.Model.Blob
     Monadoc.Model.HackageIndex
     Monadoc.Model.HackageUser
+    Monadoc.Model.Job
     Monadoc.Model.Migration
     Monadoc.Model.Package
     Monadoc.Model.PreferredVersions
@@ -120,6 +123,8 @@ library
     Monadoc.Type.Port
     Monadoc.Type.Revision
     Monadoc.Type.Route
+    Monadoc.Type.Status
+    Monadoc.Type.Task
     Monadoc.Type.VersionNumber
     Monadoc.Type.VersionRange
     Monadoc.Vendor.Witch

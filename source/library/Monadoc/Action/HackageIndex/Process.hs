@@ -41,8 +41,10 @@ import qualified Monadoc.Type.VersionRange as VersionRange
 import qualified Monadoc.Vendor.Witch as Witch
 import qualified System.FilePath as FilePath
 
-run :: HackageIndex.Model -> App.App ()
-run hackageIndex = do
+run :: App.App ()
+run = do
+  [hackageIndex] <- App.withConnection $ \connection ->
+    App.lift . Sql.query_ connection $ Witch.into @Sql.Query "select * from hackageIndex"
   preferredVersions <- App.lift $ Stm.newTVarIO Map.empty
   revisions <- App.lift $ Stm.newTVarIO Map.empty
   mapM_ (handleItem preferredVersions revisions)
