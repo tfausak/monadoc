@@ -10,7 +10,7 @@ import qualified Control.Monad.Catch as Exception
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Int as Int
-import qualified Data.Map as Map
+import qualified Data.Map.Strict as Map
 import qualified Data.Time.Clock.POSIX as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Distribution.Package as Cabal
@@ -102,7 +102,7 @@ handlePreferredVersions preferredVersions entry pkg = do
           . Exception.throwM
           $ UnexpectedEntry.UnexpectedEntry entry
         pure range
-  App.lift . Stm.atomically . Stm.modifyTVar preferredVersions
+  App.lift . Stm.atomically . Stm.modifyTVar' preferredVersions
     . Map.insert packageName
     $ Witch.into @VersionRange.VersionRange versionRange
 

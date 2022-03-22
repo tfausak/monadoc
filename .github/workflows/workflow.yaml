@@ -1,6 +1,10 @@
 name: Workflow
-on: push
+on:
+  push: null
+  schedule:
+    - cron: '0 0 * * *'
 jobs:
+
   ormolu:
     runs-on: ubuntu-latest
     name: Ormolu
@@ -107,6 +111,7 @@ jobs:
 
   docker:
     needs: build
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     name: Docker
     steps:

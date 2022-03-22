@@ -5,6 +5,7 @@ module Monadoc.Worker.Main where
 import qualified Control.Concurrent as Concurrent
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
+import qualified Data.Int as Int
 import qualified Data.Time as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Action.Database.Vacuum as Database.Vacuum
@@ -64,8 +65,9 @@ runJob :: Maybe Job.Model -> App.App ()
 runJob maybeJob = case maybeJob of
   Nothing -> App.lift $ Concurrent.threadDelay 1000000
   Just job -> do
-    App.sayString $ show job
+    App.sayString $ unwords ["starting job", show . Witch.into @Int.Int64 $ Model.key job, show . Job.task $ Model.value job]
     case Job.task $ Model.value job of
       Task.ProcessHackageIndex -> HackageIndex.Process.run
       Task.UpsertHackageIndex -> HackageIndex.Upsert.run
       Task.Vacuum -> Database.Vacuum.run
+    App.sayString $ unwords ["finished job", show . Witch.into @Int.Int64 $ Model.key job]
