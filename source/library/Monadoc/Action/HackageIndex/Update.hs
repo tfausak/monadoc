@@ -21,7 +21,7 @@ run :: HackageIndex.Model -> App.App ()
 run hackageIndex = do
   context <- App.ask
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar"
-  headResponse <- App.httpLbs request {Client.method = Http.methodHead}
+  headResponse <- App.lift . Client.httpNoBody request {Client.method = Http.methodHead} $ Context.manager context
   newSize <- maybe (Exception.throwM $ MissingSize.MissingSize headResponse) pure $ do
     byteString <- lookup Http.hContentLength $ Client.responseHeaders headResponse
     string <- either (const Nothing) Just $ Witch.tryInto @String byteString
