@@ -78,14 +78,6 @@ jobs:
 
       - run: cp "$( cabal list-bin monadoc-test-suite )" ${{ steps.artifact.outputs.directory }}
 
-      - uses: svenstaro/upx-action@v2
-        with:
-          file: ${{ steps.artifact.outputs.directory }}/monadoc${{ matrix.extension }}
-
-      - uses: svenstaro/upx-action@v2
-        with:
-          file: ${{ steps.artifact.outputs.directory }}/monadoc-test-suite${{ matrix.extension }}
-
       - uses: actions/upload-artifact@v2
         with:
           name: monadoc-${{ github.sha }}
