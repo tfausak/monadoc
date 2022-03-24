@@ -21,6 +21,14 @@ jobs:
 
       - run: cabal check
 
+  outdated:
+    runs-on: ubuntu-latest
+    name: Outdated
+    steps:
+      - uses: actions/checkout@v2
+
+      - run: cabal outdated
+
   build:
     strategy:
       matrix:

@@ -9,9 +9,10 @@ import qualified Monadoc.Vendor.Witch as Witch
 
 run :: App.App ()
 run = do
+  App.sayString "upserting hackage index"
   hackageIndex <- App.withConnection $ \connection ->
     fmap Maybe.listToMaybe
       . App.lift
       . Sql.query_ connection
-      $ Witch.from "select * from hackageIndex"
-  maybe Insert.run Update.run hackageIndex
+      $ Witch.from "select key, size from hackageIndex order by key asc limit 1"
+  maybe Insert.run (uncurry Update.run) hackageIndex

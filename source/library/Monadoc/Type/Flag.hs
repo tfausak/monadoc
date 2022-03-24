@@ -51,7 +51,7 @@ options =
     Console.Option
       []
       ["hackage"]
-      (Console.ReqArg Host "URL")
+      (Console.ReqArg Hackage "URL")
       "Sets the base Hackage URL to use.\nDefault: https://hackage.haskell.org/",
     Console.Option
       []

@@ -11,12 +11,15 @@ import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Int as Int
 import qualified Data.Map.Strict as Map
+import qualified Data.Text as Text
 import qualified Data.Time.Clock.POSIX as Time
 import qualified Database.SQLite.Simple as Sql
+import qualified Database.SQLite3 as Sqlite
 import qualified Distribution.Package as Cabal
 import qualified Distribution.Types.PackageVersionConstraint as Cabal
 import qualified Distribution.Version as Cabal
 import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
+import qualified Monadoc.Action.HackageIndex.Insert as HackageIndex.Insert
 import qualified Monadoc.Action.HackageUser.Upsert as HackageUser.Upsert
 import qualified Monadoc.Action.Package.Upsert as Package.Upsert
 import qualified Monadoc.Action.PreferredVersions.Upsert as PreferredVersions.Upsert
@@ -24,7 +27,6 @@ import qualified Monadoc.Action.Release.Upsert as Release.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
 import qualified Monadoc.Exception.UnexpectedEntry as UnexpectedEntry
 import qualified Monadoc.Model.Blob as Blob
-import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PreferredVersions as PreferredVersions
@@ -40,20 +42,30 @@ import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Monadoc.Type.VersionRange as VersionRange
 import qualified Monadoc.Vendor.Witch as Witch
 import qualified System.FilePath as FilePath
+import qualified System.IO.Unsafe as Unsafe
 
 run :: App.App ()
-run = do
-  [hackageIndex] <- App.withConnection $ \connection ->
-    App.lift . Sql.query_ connection $ Witch.into @Sql.Query "select * from hackageIndex"
+run = App.withConnection $ \connection -> do
+  [(key, size)] <- App.lift . Sql.query_ connection $ Witch.into @Sql.Query "select key, size from hackageIndex order by key asc limit 1"
   preferredVersions <- App.lift $ Stm.newTVarIO Map.empty
   revisions <- App.lift $ Stm.newTVarIO Map.empty
-  mapM_ (handleItem preferredVersions revisions)
-    . Tar.foldEntries ((:) . Right) [] (pure . Left)
-    . Tar.read
-    . Witch.into @LazyByteString.ByteString
-    . HackageIndex.contents
-    $ Model.value hackageIndex
+  context <- App.ask
+  App.lift . HackageIndex.Insert.withBlob connection (Witch.into @Text.Text "hackageIndex") (Witch.into @Text.Text "contents") key False $ \blob -> do
+    contents <- unsafeBlobRead blob size 0
+    mapM_ (flip App.run context . handleItem preferredVersions revisions)
+      . Tar.foldEntries ((:) . Right) [] (pure . Left)
+      . Tar.read
+      $ LazyByteString.fromChunks contents
   upsertPreferredVersions preferredVersions
+
+unsafeBlobRead :: Sqlite.Blob -> Int -> Int -> IO [ByteString.ByteString]
+unsafeBlobRead blob total offset = do
+  let size = min 8192 (total - offset)
+  if size > 0
+    then Unsafe.unsafeInterleaveIO $ do
+      chunk <- Sqlite.blobRead blob size offset
+      (chunk :) <$> unsafeBlobRead blob total (offset + size)
+    else pure []
 
 handleItem ::
   Stm.TVar (Map.Map PackageName.PackageName VersionRange.VersionRange) ->
