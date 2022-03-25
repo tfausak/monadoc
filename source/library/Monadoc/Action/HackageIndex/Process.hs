@@ -7,6 +7,8 @@ import qualified Codec.Archive.Tar.Entry as Tar
 import qualified Control.Concurrent.STM as Stm
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
+import qualified Control.Monad.Reader as Reader
+import qualified Control.Monad.Trans as Trans
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Int as Int
@@ -14,18 +16,17 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import qualified Data.Time.Clock.POSIX as Time
 import qualified Database.SQLite.Simple as Sql
-import qualified Database.SQLite3 as Sqlite
 import qualified Distribution.Package as Cabal
 import qualified Distribution.Types.PackageVersionConstraint as Cabal
 import qualified Distribution.Version as Cabal
 import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
-import qualified Monadoc.Action.HackageIndex.Insert as HackageIndex.Insert
 import qualified Monadoc.Action.HackageUser.Upsert as HackageUser.Upsert
 import qualified Monadoc.Action.Package.Upsert as Package.Upsert
 import qualified Monadoc.Action.PreferredVersions.Upsert as PreferredVersions.Upsert
 import qualified Monadoc.Action.Release.Upsert as Release.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
 import qualified Monadoc.Exception.UnexpectedEntry as UnexpectedEntry
+import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
@@ -41,31 +42,22 @@ import qualified Monadoc.Type.Revision as Revision
 import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Monadoc.Type.VersionRange as VersionRange
 import qualified Monadoc.Vendor.Witch as Witch
+import qualified Say
 import qualified System.FilePath as FilePath
-import qualified System.IO.Unsafe as Unsafe
 
 run :: App.App ()
 run = App.withConnection $ \connection -> do
-  [(key, size)] <- App.lift . Sql.query_ connection $ Witch.into @Sql.Query "select key, size from hackageIndex order by key asc limit 1"
-  preferredVersions <- App.lift $ Stm.newTVarIO Map.empty
-  revisions <- App.lift $ Stm.newTVarIO Map.empty
-  context <- App.ask
-  App.lift . HackageIndex.Insert.withBlob connection (Witch.into @Text.Text "hackageIndex") (Witch.into @Text.Text "contents") key False $ \blob -> do
-    contents <- unsafeBlobRead blob size 0
-    mapM_ (flip App.run context . handleItem preferredVersions revisions)
+  [(key, size)] <- Trans.lift . Sql.query_ connection $ Witch.into @Sql.Query "select key, size from hackageIndex order by key asc limit 1"
+  preferredVersions <- Trans.lift $ Stm.newTVarIO Map.empty
+  revisions <- Trans.lift $ Stm.newTVarIO Map.empty
+  context <- Reader.ask
+  Trans.lift . Sqlite.withBlob (Sql.connectionHandle connection) (Witch.into @Text.Text "hackageIndex") (Witch.into @Text.Text "contents") key False $ \blob -> do
+    contents <- Sqlite.unsafeBlobRead blob size 0
+    mapM_ (flip Reader.runReaderT context . handleItem preferredVersions revisions)
       . Tar.foldEntries ((:) . Right) [] (pure . Left)
       . Tar.read
       $ LazyByteString.fromChunks contents
   upsertPreferredVersions preferredVersions
-
-unsafeBlobRead :: Sqlite.Blob -> Int -> Int -> IO [ByteString.ByteString]
-unsafeBlobRead blob total offset = do
-  let size = min 8192 (total - offset)
-  if size > 0
-    then Unsafe.unsafeInterleaveIO $ do
-      chunk <- Sqlite.blobRead blob size offset
-      (chunk :) <$> unsafeBlobRead blob total (offset + size)
-    else pure []
 
 handleItem ::
   Stm.TVar (Map.Map PackageName.PackageName VersionRange.VersionRange) ->
@@ -114,7 +106,7 @@ handlePreferredVersions preferredVersions entry pkg = do
           . Exception.throwM
           $ UnexpectedEntry.UnexpectedEntry entry
         pure range
-  App.lift . Stm.atomically . Stm.modifyTVar' preferredVersions
+  Trans.lift . Stm.atomically . Stm.modifyTVar' preferredVersions
     . Map.insert packageName
     $ Witch.into @VersionRange.VersionRange versionRange
 
@@ -135,7 +127,7 @@ handleCabal revisions entry pkg ver = do
     either Exception.throwM pure $
       Witch.tryInto @VersionNumber.VersionNumber ver
   let key = (packageName, versionNumber)
-  revision <- App.lift . Stm.atomically . Stm.stateTVar revisions $ \m ->
+  revision <- Trans.lift . Stm.atomically . Stm.stateTVar revisions $ \m ->
     let revision = Map.findWithDefault Revision.zero key m
      in (revision, Map.insert key (Revision.increment revision) m)
   byteString <- case Tar.entryContent entry of
@@ -171,21 +163,21 @@ handleCabal revisions entry pkg ver = do
           Release.uploadedBy = Model.key hackageUser,
           Release.version = Model.key version
         }
-  Monad.when (rem (Witch.into @Int.Int64 (Model.key release)) 100000 == 1)
-    . App.sayString
+  Monad.when (rem (Witch.into @Int.Int64 (Model.key release)) 10000 == 1)
+    . Say.sayString
     $ show release
 
 upsertPreferredVersions ::
   Stm.TVar (Map.Map PackageName.PackageName VersionRange.VersionRange) ->
   App.App ()
 upsertPreferredVersions var = do
-  preferredVersions <- App.lift $ Stm.readTVarIO var
+  preferredVersions <- Trans.lift $ Stm.readTVarIO var
   mapM_ (uncurry upsertPreferredVersion) $ Map.toList preferredVersions
 
 upsertPreferredVersion :: PackageName.PackageName -> VersionRange.VersionRange -> App.App ()
 upsertPreferredVersion packageName versionRange = do
   [Sql.Only package] <- App.withConnection $ \connection ->
-    App.lift $
+    Trans.lift $
       Sql.query
         connection
         (Witch.into @Sql.Query "select key from package where name = ?")

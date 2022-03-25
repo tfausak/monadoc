@@ -2,12 +2,12 @@ module Monadoc.Main where
 
 import qualified Control.Concurrent.Async as Async
 import qualified Control.Monad.Catch as Exception
+import qualified Control.Monad.Reader as Reader
 import qualified Data.Pool as Pool
 import qualified GHC.Conc as Conc
 import qualified Monadoc.Action.Database.Initialize as Database.Initialize
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
 import qualified Monadoc.Server.Main as Server
-import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Flag as Flag
@@ -32,7 +32,7 @@ mainWith name arguments = do
 
 start :: Context.Context -> IO ()
 start context = do
-  App.run Database.Initialize.run context
+  Reader.runReaderT Database.Initialize.run context
   Async.race_ (Server.server context) (Worker.worker context)
 
 stop :: Context.Context -> IO ()

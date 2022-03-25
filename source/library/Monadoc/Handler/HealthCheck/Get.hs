@@ -4,6 +4,7 @@ module Monadoc.Handler.HealthCheck.Get where
 
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
+import qualified Control.Monad.Trans as Trans
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Exception.Sick as Sick
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
@@ -15,7 +16,7 @@ import qualified Network.Wai as Wai
 handler :: Wai.Request -> App.App Wai.Response
 handler _ = do
   rows <- App.withConnection $ \connection ->
-    App.lift . Sql.query_ connection $
+    Trans.lift . Sql.query_ connection $
       Witch.into @Sql.Query "select 1"
   Monad.when (rows /= [Sql.Only @Int 1]) $ Exception.throwM Sick.Sick
   pure $ HandleExceptions.statusResponse Http.ok200 []

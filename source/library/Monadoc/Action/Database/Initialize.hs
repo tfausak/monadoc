@@ -2,6 +2,7 @@ module Monadoc.Action.Database.Initialize where
 
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
+import qualified Control.Monad.Trans as Trans
 import qualified Data.List as List
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Exception.MigrationMismatch as MigrationMismatch
@@ -17,6 +18,7 @@ import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Vendor.Witch as Witch
+import qualified Say
 
 pragmas :: [String]
 pragmas =
@@ -42,11 +44,11 @@ migrations =
 
 run :: App.App ()
 run = do
-  App.sayString "running pragmas"
+  Say.sayString "running pragmas"
   runPragmas
-  App.sayString "running migrations"
+  Say.sayString "running migrations"
   runMigrations
-  App.sayString "done initializing database"
+  Say.sayString "done initializing database"
 
 runPragmas :: App.App ()
 runPragmas = mapM_ runPragma pragmas
@@ -54,19 +56,19 @@ runPragmas = mapM_ runPragma pragmas
 runPragma :: String -> App.App ()
 runPragma pragma = do
   App.withConnection $ \connection ->
-    App.lift . Sql.execute_ connection $ Witch.from pragma
+    Trans.lift . Sql.execute_ connection $ Witch.from pragma
 
 runMigrations :: App.App ()
 runMigrations = do
   App.withConnection $ \connection ->
-    App.lift $ Sql.execute_ connection Migration.createTable
+    Trans.lift $ Sql.execute_ connection Migration.createTable
   mapM_ runMigration migrations
 
 runMigration :: Migration.Migration -> App.App ()
 runMigration migration = do
   let createdAt = Migration.createdAt migration
       query = Migration.query migration
-  App.withConnection $ \connection -> App.lift $ do
+  App.withConnection $ \connection -> Trans.lift $ do
     models <-
       Sql.query
         connection

@@ -2,6 +2,7 @@
 
 module Monadoc.Handler.Manifest.Get where
 
+import qualified Control.Monad.Reader as Reader
 import qualified Data.Aeson as Aeson
 import qualified Monadoc.Constant.ContentType as ContentType
 import qualified Monadoc.Handler.Home.Get as Home.Get
@@ -15,7 +16,7 @@ import qualified Network.Wai as Wai
 
 handler :: Wai.Request -> App.App Wai.Response
 handler _ = do
-  context <- App.ask
+  context <- Reader.ask
   pure
     . Wai.responseLBS Http.ok200 [(Http.hContentType, ContentType.manifest)]
     . Aeson.encode

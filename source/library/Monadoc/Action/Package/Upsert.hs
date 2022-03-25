@@ -2,14 +2,16 @@
 
 module Monadoc.Action.Package.Upsert where
 
+import qualified Control.Monad.Trans as Trans
 import qualified Database.SQLite.Simple as Sql
+import qualified Monadoc.Extra.SqliteSimple as Sql
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Vendor.Witch as Witch
 
 run :: Package.Package -> App.App Package.Model
-run package = App.withConnection $ \connection -> App.lift $ do
+run package = App.withConnection $ \connection -> Trans.lift $ do
   rows <-
     Sql.query
       connection
@@ -21,11 +23,7 @@ run package = App.withConnection $ \connection -> App.lift $ do
         connection
         (Witch.into @Sql.Query "insert into package (name) values (?)")
         package
-      [Sql.Only key] <-
-        Sql.query
-          connection
-          (Witch.into @Sql.Query "select key from package where name = ?")
-          [Package.name package]
-      pure key
+      key <- Sql.selectLastInsertRowid connection
+      pure $ Witch.into @Package.Key key
     Sql.Only key : _ -> pure key
   pure Model.Model {Model.key = key, Model.value = package}

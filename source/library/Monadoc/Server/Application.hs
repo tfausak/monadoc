@@ -3,6 +3,7 @@
 module Monadoc.Server.Application where
 
 import qualified Control.Monad.Catch as Exception
+import qualified Control.Monad.Reader as Reader
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Handler.AppleTouchIcon.Get as AppleTouchIcon.Get
 import qualified Monadoc.Handler.Bootstrap.Get as Bootstrap.Get
@@ -26,7 +27,7 @@ application context request respond = do
       $ Wai.requestMethod request
   route <- Route.parse $ Wai.pathInfo request
   handler <- getHandler method route
-  response <- App.run (handler request) context
+  response <- Reader.runReaderT (handler request) context
   respond response
 
 getHandler ::

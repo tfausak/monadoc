@@ -2,8 +2,10 @@
 
 module Monadoc.Action.Job.Enqueue where
 
+import qualified Control.Monad.Trans as Trans
 import qualified Data.Time as Time
 import qualified Database.SQLite.Simple as Sql
+import qualified Monadoc.Extra.SqliteSimple as Sql
 import qualified Monadoc.Model.Job as Job
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Model as Model
@@ -12,7 +14,7 @@ import qualified Monadoc.Type.Task as Task
 import qualified Monadoc.Vendor.Witch as Witch
 
 run :: Task.Task -> App.App Job.Model
-run task = App.withConnection $ \connection -> App.lift $ do
+run task = App.withConnection $ \connection -> Trans.lift $ do
   now <- Time.getCurrentTime
   let job =
         Job.Job
@@ -26,5 +28,5 @@ run task = App.withConnection $ \connection -> App.lift $ do
     connection
     (Witch.into @Sql.Query "insert into job (createdAt, finishedAt, startedAt, status, task) values (?, ?, ?, ?, ?)")
     job
-  [Sql.Only key] <- Sql.query_ connection $ Witch.into @Sql.Query "select last_insert_rowid()"
-  pure Model.Model {Model.key = key, Model.value = job}
+  key <- Sql.selectLastInsertRowid connection
+  pure Model.Model {Model.key = Witch.into @Job.Key key, Model.value = job}

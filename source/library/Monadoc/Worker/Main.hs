@@ -5,6 +5,8 @@ module Monadoc.Worker.Main where
 import qualified Control.Concurrent as Concurrent
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
+import qualified Control.Monad.Reader as Reader
+import qualified Control.Monad.Trans as Trans
 import qualified Data.Int as Int
 import qualified Data.Time as Time
 import qualified Database.SQLite.Simple as Sql
@@ -19,9 +21,10 @@ import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Status as Status
 import qualified Monadoc.Type.Task as Task
 import qualified Monadoc.Vendor.Witch as Witch
+import qualified Say
 
 worker :: Context.Context -> IO ()
-worker = App.run $ do
+worker = Reader.runReaderT $ do
   Monad.void $ Job.Enqueue.run Task.Vacuum
   Monad.void $ Job.Enqueue.run Task.UpsertHackageIndex
   Monad.void $ Job.Enqueue.run Task.ProcessHackageIndex
@@ -31,7 +34,7 @@ worker = App.run $ do
 
 acquireJob :: App.App (Maybe Job.Model)
 acquireJob = App.withConnection $ \connection ->
-  App.lift . Sql.withTransaction connection $ do
+  Trans.lift . Sql.withTransaction connection $ do
     rows <-
       Sql.query
         connection
@@ -50,7 +53,7 @@ acquireJob = App.withConnection $ \connection ->
 releaseJob :: Maybe Job.Model -> Exception.ExitCase () -> App.App ()
 releaseJob maybeJob exitCase = case maybeJob of
   Nothing -> pure ()
-  Just job -> App.withConnection $ \connection -> App.lift $ do
+  Just job -> App.withConnection $ \connection -> Trans.lift $ do
     now <- Time.getCurrentTime
     let status = case exitCase of
           Exception.ExitCaseSuccess _ -> Status.Passed
@@ -63,11 +66,11 @@ releaseJob maybeJob exitCase = case maybeJob of
 
 runJob :: Maybe Job.Model -> App.App ()
 runJob maybeJob = case maybeJob of
-  Nothing -> App.lift $ Concurrent.threadDelay 1000000
+  Nothing -> Trans.lift $ Concurrent.threadDelay 1000000
   Just job -> do
-    App.sayString $ unwords ["starting job", show . Witch.into @Int.Int64 $ Model.key job, show . Job.task $ Model.value job]
+    Say.sayString $ unwords ["starting job", show . Witch.into @Int.Int64 $ Model.key job, show . Job.task $ Model.value job]
     case Job.task $ Model.value job of
       Task.ProcessHackageIndex -> HackageIndex.Process.run
       Task.UpsertHackageIndex -> HackageIndex.Upsert.run
       Task.Vacuum -> Database.Vacuum.run
-    App.sayString $ unwords ["finished job", show . Witch.into @Int.Int64 $ Model.key job]
+    Say.sayString $ unwords ["finished job", show . Witch.into @Int.Int64 $ Model.key job]

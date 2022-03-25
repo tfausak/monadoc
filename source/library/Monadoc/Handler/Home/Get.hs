@@ -3,6 +3,7 @@
 
 module Monadoc.Handler.Home.Get where
 
+import qualified Control.Monad.Reader as Reader
 import qualified Data.Text as Text
 import qualified Data.Version as Version
 import qualified Lucid
@@ -18,7 +19,7 @@ import qualified Paths_monadoc as Monadoc
 
 handler :: Wai.Request -> App.App Wai.Response
 handler _ = do
-  context <- App.ask
+  context <- Reader.ask
   pure . htmlResponse Http.ok200 [] $ do
     Lucid.doctype_
     Lucid.html_ [Lucid.lang_ "en-US"] $ do
