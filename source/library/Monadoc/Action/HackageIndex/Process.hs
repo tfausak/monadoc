@@ -13,6 +13,7 @@ import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Int as Int
 import qualified Data.Map.Strict as Map
+import qualified Data.Pool as Pool
 import qualified Data.Text as Text
 import qualified Data.Time.Clock.POSIX as Time
 import qualified Database.SQLite.Simple as Sql
@@ -34,6 +35,7 @@ import qualified Monadoc.Model.PreferredVersions as PreferredVersions
 import qualified Monadoc.Model.Release as Release
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.App as App
+import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.HackageUserId as HackageUserId
 import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Monadoc.Type.Model as Model
@@ -46,18 +48,19 @@ import qualified Say
 import qualified System.FilePath as FilePath
 
 run :: App.App ()
-run = App.withConnection $ \connection -> do
-  [(key, size)] <- Trans.lift . Sql.query_ connection $ Witch.into @Sql.Query "select key, size from hackageIndex order by key asc limit 1"
-  preferredVersions <- Trans.lift $ Stm.newTVarIO Map.empty
-  revisions <- Trans.lift $ Stm.newTVarIO Map.empty
+run = do
   context <- Reader.ask
-  Trans.lift . Sqlite.withBlob (Sql.connectionHandle connection) (Witch.into @Text.Text "hackageIndex") (Witch.into @Text.Text "contents") key False $ \blob -> do
-    contents <- Sqlite.unsafeBlobRead blob size 0
-    mapM_ (flip Reader.runReaderT context . handleItem preferredVersions revisions)
-      . Tar.foldEntries ((:) . Right) [] (pure . Left)
-      . Tar.read
-      $ LazyByteString.fromChunks contents
-  upsertPreferredVersions preferredVersions
+  Pool.withResource (Context.pool context) $ \connection -> do
+    [(key, size)] <- Trans.lift . Sql.query_ connection $ Witch.into @Sql.Query "select key, size from hackageIndex order by key asc limit 1"
+    preferredVersions <- Trans.lift $ Stm.newTVarIO Map.empty
+    revisions <- Trans.lift $ Stm.newTVarIO Map.empty
+    Trans.lift . Sqlite.withBlob (Sql.connectionHandle connection) (Witch.into @Text.Text "hackageIndex") (Witch.into @Text.Text "contents") key False $ \blob -> do
+      contents <- Sqlite.unsafeBlobRead blob size 0
+      mapM_ (flip Reader.runReaderT context . handleItem preferredVersions revisions)
+        . Tar.foldEntries ((:) . Right) [] (pure . Left)
+        . Tar.read
+        $ LazyByteString.fromChunks contents
+    upsertPreferredVersions preferredVersions
 
 handleItem ::
   Stm.TVar (Map.Map PackageName.PackageName VersionRange.VersionRange) ->
@@ -176,7 +179,8 @@ upsertPreferredVersions var = do
 
 upsertPreferredVersion :: PackageName.PackageName -> VersionRange.VersionRange -> App.App ()
 upsertPreferredVersion packageName versionRange = do
-  [Sql.Only package] <- App.withConnection $ \connection ->
+  context <- Reader.ask
+  [Sql.Only package] <- Pool.withResource (Context.pool context) $ \connection ->
     Trans.lift $
       Sql.query
         connection

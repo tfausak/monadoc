@@ -9,6 +9,7 @@ import qualified Control.Monad.Reader as Reader
 import qualified Control.Monad.Trans as Trans
 import qualified Data.ByteString as ByteString
 import qualified Data.IORef as IORef
+import qualified Data.Pool as Pool
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite3 as Sqlite
@@ -30,7 +31,7 @@ run :: App.App ()
 run = do
   Say.sayString "inserting hackage index"
   context <- Reader.ask
-  App.withConnection $ \connection -> do
+  Pool.withResource (Context.pool context) $ \connection -> do
     size <- getSize
     request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"
     Trans.lift . Client.withResponse request (Context.manager context) $ \response -> do

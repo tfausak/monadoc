@@ -2,8 +2,10 @@ module Monadoc.Action.Database.Initialize where
 
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
+import qualified Control.Monad.Reader as Reader
 import qualified Control.Monad.Trans as Trans
 import qualified Data.List as List
+import qualified Data.Pool as Pool
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Exception.MigrationMismatch as MigrationMismatch
 import qualified Monadoc.Model.Blob as Blob
@@ -16,6 +18,7 @@ import qualified Monadoc.Model.PreferredVersions as PreferredVersions
 import qualified Monadoc.Model.Release as Release
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.App as App
+import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Vendor.Witch as Witch
 import qualified Say
@@ -55,12 +58,14 @@ runPragmas = mapM_ runPragma pragmas
 
 runPragma :: String -> App.App ()
 runPragma pragma = do
-  App.withConnection $ \connection ->
+  context <- Reader.ask
+  Pool.withResource (Context.pool context) $ \connection ->
     Trans.lift . Sql.execute_ connection $ Witch.from pragma
 
 runMigrations :: App.App ()
 runMigrations = do
-  App.withConnection $ \connection ->
+  context <- Reader.ask
+  Pool.withResource (Context.pool context) $ \connection ->
     Trans.lift $ Sql.execute_ connection Migration.createTable
   mapM_ runMigration migrations
 
@@ -68,7 +73,8 @@ runMigration :: Migration.Migration -> App.App ()
 runMigration migration = do
   let createdAt = Migration.createdAt migration
       query = Migration.query migration
-  App.withConnection $ \connection -> Trans.lift $ do
+  context <- Reader.ask
+  Pool.withResource (Context.pool context) $ \connection -> Trans.lift $ do
     models <-
       Sql.query
         connection
