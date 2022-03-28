@@ -1,13 +1,18 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module Monadoc.Main where
 
 import qualified Control.Concurrent.Async as Async
+import qualified Control.Monad.Base as Base
 import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Reader as Reader
+import qualified Control.Monad.Trans.Control as Control
 import qualified Data.Pool as Pool
 import qualified GHC.Conc as Conc
 import qualified Monadoc.Action.Database.Initialize as Database.Initialize
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
 import qualified Monadoc.Server.Main as Server
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Flag as Flag
@@ -28,13 +33,18 @@ mainWith name arguments = do
   flags <- Flag.fromArguments arguments
   config <- Config.fromFlags flags
   context <- Context.fromConfig name config
-  Exception.finally (start context) (stop context)
+  Reader.runReaderT (App.runAppT $ Exception.finally start stop) context
 
-start :: Context.Context -> IO ()
-start context = do
-  Reader.runReaderT Database.Initialize.run context
-  Async.race_ (Server.server context) (Worker.worker context)
+start :: App.App ()
+start = do
+  Database.Initialize.run
+  Control.control $ \runInBase ->
+    Base.liftBase $
+      Async.race_
+        (runInBase Server.server)
+        (runInBase Worker.worker)
 
-stop :: Context.Context -> IO ()
-stop context = do
-  Pool.destroyAllResources $ Context.pool context
+stop :: (Base.MonadBase IO m, Reader.MonadReader Context.Context m) => m ()
+stop = do
+  context <- Reader.ask
+  Base.liftBase . Pool.destroyAllResources $ Context.pool context

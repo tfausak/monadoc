@@ -1,39 +1,22 @@
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Monadoc.Action.PreferredVersions.Upsert where
 
-import qualified Control.Monad.Reader as Reader
-import qualified Control.Monad.Trans as Trans
-import qualified Data.Pool as Pool
+import qualified Control.Monad.Catch as Exception
 import qualified Database.SQLite.Simple as Sql
-import qualified Monadoc.Extra.SqliteSimple as Sql
+import qualified Monadoc.Action.Key.SelectLastInsert as Key.SelectLastInsert
+import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Model.PreferredVersions as PreferredVersions
-import qualified Monadoc.Type.App as App
-import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
-import qualified Monadoc.Vendor.Witch as Witch
 
-run :: PreferredVersions.PreferredVersions -> App.App PreferredVersions.Model
+run :: (MonadSql.MonadSql m, Exception.MonadThrow m) => PreferredVersions.PreferredVersions -> m PreferredVersions.Model
 run preferredVersions = do
-  context <- Reader.ask
-  Pool.withResource (Context.pool context) $ \connection -> Trans.lift $ do
-    rows <-
-      Sql.query
-        connection
-        (Witch.into @Sql.Query "select key from preferredVersions where package = ?")
-        [PreferredVersions.package preferredVersions]
-    key <- case rows of
-      [] -> do
-        Sql.execute
-          connection
-          (Witch.into @Sql.Query "insert into preferredVersions (package, range) values (?, ?)")
-          preferredVersions
-        key <- Sql.selectLastInsertRowid connection
-        pure $ Witch.into @PreferredVersions.Key key
-      Sql.Only key : _ -> do
-        Sql.execute
-          connection
-          (Witch.into @Sql.Query "update preferredVersions set range = ? where package = ?")
-          (PreferredVersions.range preferredVersions, PreferredVersions.package preferredVersions)
-        pure key
-    pure Model.Model {Model.key = key, Model.value = preferredVersions}
+  rows <- MonadSql.query "select key from preferredVersions where package = ?" [PreferredVersions.package preferredVersions]
+  key <- case rows of
+    [] -> do
+      MonadSql.execute "insert into preferredVersions (package, range) values (?, ?)" preferredVersions
+      Key.SelectLastInsert.run
+    Sql.Only key : _ -> do
+      MonadSql.execute "update preferredVersions set range = ? where key = ?" (PreferredVersions.range preferredVersions, key)
+      pure key
+  pure Model.Model {Model.key = key, Model.value = preferredVersions}

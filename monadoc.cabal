@@ -1,7 +1,7 @@
 cabal-version: 2.0
 
 name: monadoc
-version: 0.2022.3.26
+version: 0.2022.3.27
 
 build-type: Simple
 category: Documentation
@@ -47,6 +47,7 @@ library
     , lucid >= 2.11.0 && < 2.12
     , memory >= 0.17.0 && < 0.18
     , mtl >= 2.2.2 && < 2.3
+    , monad-control >= 1.0.3 && < 1.1
     , resource-pool >= 0.2.3 && < 0.3
     , say >= 0.1.0 && < 0.2
     , sqlite-simple >= 0.4.18 && < 0.5
@@ -54,6 +55,7 @@ library
     , tar >= 0.5.1 && < 0.6
     , text >= 2.0 && < 2.1
     , time >= 1.11.1 && < 1.12
+    , transformers-base >= 0.4.6 && < 0.5
     , wai >= 3.2.3 && < 3.3
     , wai-extra >= 3.1.8 && < 3.2
     , warp >= 3.3.19 && < 3.4
@@ -70,16 +72,24 @@ library
     Monadoc.Action.HackageIndex.Upsert
     Monadoc.Action.HackageUser.Upsert
     Monadoc.Action.Job.Enqueue
+    Monadoc.Action.Key.SelectLastInsert
     Monadoc.Action.Package.Upsert
     Monadoc.Action.PreferredVersions.Upsert
     Monadoc.Action.Release.Upsert
     Monadoc.Action.Version.Upsert
+    Monadoc.Class.MonadHttp
+    Monadoc.Class.MonadLog
+    Monadoc.Class.MonadSay
+    Monadoc.Class.MonadSleep
+    Monadoc.Class.MonadSql
+    Monadoc.Class.MonadTime
     Monadoc.Constant.ContentType
     Monadoc.Constant.Header
     Monadoc.Exception.InvalidOption
     Monadoc.Exception.InvalidSize
     Monadoc.Exception.MethodNotAllowed
     Monadoc.Exception.MigrationMismatch
+    Monadoc.Exception.MissingHackageIndex
     Monadoc.Exception.MissingRowid
     Monadoc.Exception.MissingSize
     Monadoc.Exception.ReadFailure
@@ -90,7 +100,6 @@ library
     Monadoc.Exception.UnknownOption
     Monadoc.Exception.UnknownRoute
     Monadoc.Extra.DirectSqlite
-    Monadoc.Extra.SqliteSimple
     Monadoc.Extra.Witch
     Monadoc.Handler.AppleTouchIcon.Get
     Monadoc.Handler.Bootstrap.Get
@@ -129,6 +138,7 @@ library
     Monadoc.Type.Port
     Monadoc.Type.Revision
     Monadoc.Type.Route
+    Monadoc.Type.Severity
     Monadoc.Type.Status
     Monadoc.Type.Task
     Monadoc.Type.VersionNumber

@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Model.Version where
 
 import qualified Database.SQLite.Simple as Sql

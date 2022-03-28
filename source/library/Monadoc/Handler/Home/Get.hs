@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -8,16 +9,14 @@ import qualified Data.Text as Text
 import qualified Data.Version as Version
 import qualified Lucid
 import qualified Monadoc.Constant.ContentType as ContentType
-import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Route as Route
-import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 import qualified Paths_monadoc as Monadoc
 
-handler :: Wai.Request -> App.App Wai.Response
+handler :: Reader.MonadReader Context.Context m => Wai.Request -> m Wai.Response
 handler _ = do
   context <- Reader.ask
   pure . htmlResponse Http.ok200 [] $ do
@@ -52,7 +51,7 @@ handler _ = do
 
 route :: Context.Context -> Route.Route -> Text.Text
 route context =
-  mappend (Witch.into @Text.Text . Config.base $ Context.config context)
+  mappend (Text.pack . Config.base $ Context.config context)
     . Text.intercalate "/"
     . Route.render
 

@@ -1,11 +1,11 @@
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Monadoc.Type.Task where
 
 import qualified Data.Aeson as Aeson
+import qualified Data.Text as Text
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
-import qualified Monadoc.Vendor.Witch as Witch
 
 data Task
   = ProcessHackageIndex
@@ -15,18 +15,20 @@ data Task
 
 instance Aeson.FromJSON Task where
   parseJSON = Aeson.withObject "Task" $ \object -> do
-    tag <- object Aeson..: Witch.into @Aeson.Key "tag"
-    case tag of
+    tag <- object Aeson..: "tag"
+    case tag :: Text.Text of
       "ProcessHackageIndex" -> pure ProcessHackageIndex
       "UpsertHackageIndex" -> pure UpsertHackageIndex
       "Vacuum" -> pure Vacuum
       _ -> fail $ "unknown tag: " <> show tag
 
 instance Aeson.ToJSON Task where
-  toJSON task = case task of
-    ProcessHackageIndex -> Aeson.object [Witch.into @Aeson.Key "tag" Aeson..= "ProcessHackageIndex"]
-    UpsertHackageIndex -> Aeson.object [Witch.into @Aeson.Key "tag" Aeson..= "UpsertHackageIndex"]
-    Vacuum -> Aeson.object [Witch.into @Aeson.Key "tag" Aeson..= "Vacuum"]
+  toJSON task =
+    let tag = case task of
+          ProcessHackageIndex -> "ProcessHackageIndex"
+          UpsertHackageIndex -> "UpsertHackageIndex"
+          Vacuum -> "Vacuum" :: Text.Text
+     in Aeson.object ["tag" Aeson..= tag]
 
 instance Sql.FromField Task where
   fromField field = do

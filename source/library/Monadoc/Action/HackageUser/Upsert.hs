@@ -1,33 +1,20 @@
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Monadoc.Action.HackageUser.Upsert where
 
-import qualified Control.Monad.Reader as Reader
-import qualified Control.Monad.Trans as Trans
-import qualified Data.Pool as Pool
+import qualified Control.Monad.Catch as Exception
 import qualified Database.SQLite.Simple as Sql
-import qualified Monadoc.Extra.SqliteSimple as Sql
+import qualified Monadoc.Action.Key.SelectLastInsert as Key.SelectLastInsert
+import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Model.HackageUser as HackageUser
-import qualified Monadoc.Type.App as App
-import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
-import qualified Monadoc.Vendor.Witch as Witch
 
-run :: HackageUser.HackageUser -> App.App HackageUser.Model
+run :: (MonadSql.MonadSql m, Exception.MonadThrow m) => HackageUser.HackageUser -> m HackageUser.Model
 run hackageUser = do
-  context <- Reader.ask
-  Pool.withResource (Context.pool context) $ \connection -> Trans.lift $ do
-    rows <-
-      Sql.query
-        connection
-        (Witch.into @Sql.Query "select * from hackageUser where id = ? or name = ?")
-        (HackageUser.id hackageUser, HackageUser.name hackageUser)
-    case rows of
-      [] -> do
-        Sql.execute
-          connection
-          (Witch.into @Sql.Query "insert into hackageUser (id, name) values (?, ?)")
-          hackageUser
-        key <- Sql.selectLastInsertRowid connection
-        pure Model.Model {Model.key = Witch.into @HackageUser.Key key, Model.value = hackageUser}
-      model : _ -> pure model
+  rows <- MonadSql.query "select key from hackageUser where id = ? or name = ?" (HackageUser.id hackageUser, HackageUser.name hackageUser)
+  key <- case rows of
+    Sql.Only key : _ -> pure key
+    [] -> do
+      MonadSql.execute "insert into hackageUser (id, name) values (?, ?)" hackageUser
+      Key.SelectLastInsert.run
+  pure Model.Model {Model.key = key, Model.value = hackageUser}

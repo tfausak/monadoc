@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Model.HackageUser where
 
 import qualified Database.SQLite.Simple as Sql

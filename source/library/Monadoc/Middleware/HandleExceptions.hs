@@ -9,6 +9,8 @@ import qualified Control.Monad.Catch as Exception
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Maybe as Maybe
+import qualified Data.Text as Text
+import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Constant.ContentType as ContentType
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
@@ -16,7 +18,6 @@ import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 import qualified Network.Wai.Handler.Warp as Warp
-import qualified Say
 
 middleware :: Wai.Middleware
 middleware handle request respond =
@@ -25,17 +26,19 @@ middleware handle request respond =
     $ respond
 
 handler ::
-  (Wai.Response -> IO Wai.ResponseReceived) ->
+  MonadLog.MonadLog m =>
+  (Wai.Response -> m Wai.ResponseReceived) ->
   Exception.SomeException ->
-  IO Wai.ResponseReceived
+  m Wai.ResponseReceived
 handler respond someException = do
   onException someException
   respond $ onExceptionResponse someException
 
-onException :: Exception.SomeException -> IO ()
+onException :: MonadLog.MonadLog m => Exception.SomeException -> m ()
 onException someException =
   Monad.when (Warp.defaultShouldDisplayException someException)
-    . Say.sayErrString
+    . MonadLog.error
+    . Text.pack
     $ Exception.displayException someException
 
 onExceptionResponse :: Exception.SomeException -> Wai.Response

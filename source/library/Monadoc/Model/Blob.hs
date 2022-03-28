@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Model.Blob where
 
 import qualified Data.ByteString as ByteString

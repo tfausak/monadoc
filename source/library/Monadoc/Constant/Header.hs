@@ -1,25 +1,23 @@
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Monadoc.Constant.Header where
 
-import qualified Data.ByteString as ByteString
-import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.HTTP.Types as Http
 
 contentSecurityPolicy :: Http.HeaderName
-contentSecurityPolicy = Witch.via @ByteString.ByteString "Content-Security-Policy"
+contentSecurityPolicy = "Content-Security-Policy"
 
 contentTypeOptions :: Http.HeaderName
-contentTypeOptions = Witch.via @ByteString.ByteString "X-Content-Type-Options"
+contentTypeOptions = "X-Content-Type-Options"
 
 frameOptions :: Http.HeaderName
-frameOptions = Witch.via @ByteString.ByteString "X-Frame-Options"
+frameOptions = "X-Frame-Options"
 
 link :: Http.HeaderName
-link = Witch.via @ByteString.ByteString "Link"
+link = "Link"
 
 referrerPolicy :: Http.HeaderName
-referrerPolicy = Witch.via @ByteString.ByteString "Referrer-Policy"
+referrerPolicy = "Referrer-Policy"
 
 xssProtection :: Http.HeaderName
-xssProtection = Witch.via @ByteString.ByteString "X-XSS-Protection"
+xssProtection = "X-XSS-Protection"

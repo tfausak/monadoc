@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Model.Job where
 
 import qualified Data.Time as Time

@@ -1,8 +1,14 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Server.Main where
 
+import qualified Control.Monad.Base as Base
+import qualified Control.Monad.Reader as Reader
 import qualified Data.ByteString as ByteString
+import qualified Data.Text as Text
+import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
 import qualified Monadoc.Server.Application as Application
 import qualified Monadoc.Server.Middleware as Middleware
@@ -10,11 +16,12 @@ import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.Wai.Handler.Warp as Warp
-import qualified Say
 
-server :: Context.Context -> IO ()
-server context =
-  Warp.runSettings (getSettings $ Context.config context)
+server :: (Base.MonadBase IO m, Reader.MonadReader Context.Context m) => m ()
+server = do
+  context <- Reader.ask
+  Base.liftBase
+    . Warp.runSettings (getSettings $ Context.config context)
     . Middleware.middleware context
     $ Application.application context
 
@@ -27,10 +34,12 @@ getSettings config =
     . Warp.setPort (Witch.into @Int $ Config.port config)
     $ Warp.setServerName ByteString.empty Warp.defaultSettings
 
-beforeMainLoop :: Config.Config -> IO ()
+beforeMainLoop :: MonadLog.MonadLog m => Config.Config -> m ()
 beforeMainLoop config = do
-  Say.sayString $
-    "listening on "
-      <> show (Config.host config)
-      <> " port "
-      <> show (Config.port config)
+  MonadLog.info $
+    Text.unwords
+      [ "listening on",
+        Text.pack . show $ Config.host config,
+        "port",
+        Text.pack . show $ Config.port config
+      ]

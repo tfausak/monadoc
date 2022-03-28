@@ -27,7 +27,7 @@ application context request respond = do
       $ Wai.requestMethod request
   route <- Route.parse $ Wai.pathInfo request
   handler <- getHandler method route
-  response <- Reader.runReaderT (handler request) context
+  response <- Reader.runReaderT (App.runAppT $ handler request) context
   respond response
 
 getHandler ::

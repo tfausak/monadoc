@@ -1,11 +1,11 @@
 module Monadoc.Exception.MigrationMismatch where
 
 import qualified Control.Monad.Catch as Exception
-import qualified Data.Text as Text
 import qualified Data.Time as Time
+import qualified Database.SQLite.Simple as Sql
 
 data MigrationMismatch
-  = MigrationMismatch Time.UTCTime Text.Text Text.Text
+  = MigrationMismatch Time.UTCTime Sql.Query Sql.Query
   deriving (Eq, Show)
 
 instance Exception.Exception MigrationMismatch
