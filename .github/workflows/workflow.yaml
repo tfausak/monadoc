@@ -50,7 +50,7 @@ jobs:
         with:
           ghc-version: 9.2.2
 
-      - run: cabal configure --enable-tests --flags pedantic --jobs --test-show-details direct
+      - run: cabal configure --enable-tests --flags pedantic --jobs
 
       - run: cabal freeze
 
@@ -66,7 +66,11 @@ jobs:
           key: ${{ matrix.platform }}/${{ hashFiles('cabal.project.freeze') }}
           restore-keys: ${{ matrix.platform }}/
 
-      - run: cabal test
+      - run: cabal build --only-dependencies
+
+      - run: cabal build
+
+      - run: cabal run monadoc-test-suite
 
       - run: cp "$( cabal list-bin monadoc )" ${{ steps.artifact.outputs.directory }}
 
