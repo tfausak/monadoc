@@ -21,14 +21,6 @@ jobs:
 
       - run: cabal check
 
-  outdated:
-    runs-on: ubuntu-latest
-    name: Outdated
-    steps:
-      - uses: actions/checkout@v2
-
-      - run: cabal outdated
-
   build:
     strategy:
       matrix:
@@ -58,7 +50,7 @@ jobs:
         with:
           ghc-version: 9.2.2
 
-      - run: cabal configure --enable-tests --flags pedantic --jobs
+      - run: cabal configure --enable-tests --flags pedantic --jobs --test-show-details direct
 
       - run: cabal freeze
 
@@ -66,17 +58,17 @@ jobs:
 
       - run: cp cabal.project.freeze ${{ steps.artifact.outputs.directory }}
 
+      - run: cabal outdated --v2-freeze-file cabal.project.freeze
+
       - uses: actions/cache@v2
         with:
           path: ${{ steps.setup-haskell.outputs.cabal-store }}
           key: ${{ matrix.platform }}/${{ hashFiles('cabal.project.freeze') }}
           restore-keys: ${{ matrix.platform }}/
 
-      - run: cabal build
+      - run: cabal test
 
       - run: cp "$( cabal list-bin monadoc )" ${{ steps.artifact.outputs.directory }}
-
-      - run: cp "$( cabal list-bin monadoc-test-suite )" ${{ steps.artifact.outputs.directory }}
 
       - uses: svenstaro/upx-action@v2
         with:
@@ -90,32 +82,6 @@ jobs:
         with:
           name: monadoc-${{ github.sha }}
           path: artifact
-
-  test:
-    needs: build
-    strategy:
-      matrix:
-        include:
-          - { platform: macos }
-          - { platform: ubuntu }
-          - { platform: windows, extension: .exe }
-    runs-on: ${{ matrix.platform }}-latest
-    name: Test on ${{ matrix.platform }}
-    steps:
-      - uses: actions/checkout@v2
-
-      - run: cabal check
-
-      - uses: actions/download-artifact@v2
-        with:
-          name: monadoc-${{ github.sha }}
-          path: artifact
-
-      - run: chmod +x artifact/${{ matrix.platform }}/monadoc-test-suite${{ matrix.extension }}
-
-      - run: artifact/${{ matrix.platform }}/monadoc-test-suite${{ matrix.extension }}
-        env:
-          monadoc_datadir: artifact/data
 
   docker:
     needs: build

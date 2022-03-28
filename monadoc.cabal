@@ -1,7 +1,7 @@
 cabal-version: 2.0
 
 name: monadoc
-version: 0.2022.3.27
+version: 0.2022.3.28
 
 build-type: Simple
 category: Documentation
@@ -128,7 +128,6 @@ library
     Monadoc.Type.Config
     Monadoc.Type.Context
     Monadoc.Type.Flag
-    Monadoc.Type.HackageUserId
     Monadoc.Type.HackageUserName
     Monadoc.Type.Hash
     Monadoc.Type.Key

@@ -41,7 +41,6 @@ import qualified Monadoc.Model.PreferredVersions as PreferredVersions
 import qualified Monadoc.Model.Release as Release
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.Context as Context
-import qualified Monadoc.Type.HackageUserId as HackageUserId
 import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
@@ -158,11 +157,7 @@ handleCabal revisions entry pkg ver = do
   hackageUser <-
     HackageUser.Upsert.run
       HackageUser.HackageUser
-        { HackageUser.id =
-            Witch.into @HackageUserId.HackageUserId
-              . Tar.ownerId
-              $ Tar.entryOwnership entry,
-          HackageUser.name =
+        { HackageUser.name =
             Witch.into @HackageUserName.HackageUserName
               . Tar.ownerName
               $ Tar.entryOwnership entry
