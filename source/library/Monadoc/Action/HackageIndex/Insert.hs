@@ -20,16 +20,16 @@ import qualified Monadoc.Action.Key.SelectLastInsert as Key.SelectLastInsert
 import qualified Monadoc.Class.MonadHttp as MonadHttp
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
+import qualified Monadoc.Exception.ConversionFailure as ConversionFailure
 import qualified Monadoc.Exception.MissingSize as MissingSize
-import qualified Monadoc.Exception.ReadFailure as ReadFailure
 import qualified Monadoc.Exception.TrailingBytes as TrailingBytes
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
-import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Types as Http
 import qualified Text.Read as Read
+import qualified Witch
 
 run :: (Control.MonadBaseControl IO m, MonadHttp.MonadHttp m, MonadLog.MonadLog m, Exception.MonadMask m, Reader.MonadReader Context.Context m, MonadSql.MonadSql m) => m ()
 run = do
@@ -38,7 +38,7 @@ run = do
   context <- Reader.ask
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"
   MonadHttp.withResponse request $ \response -> do
-    MonadSql.execute "insert into hackageIndex (contents, size) values (zeroblob(?), ?)" (size, size)
+    MonadSql.execute "insert into hackageIndex (contents, processedAt, size) values (zeroblob(?), null, ?)" (size, size)
     key <- Key.SelectLastInsert.run
     Pool.withResource (Context.pool context) $ \connection -> Sqlite.withBlob (Sql.connectionHandle connection) "hackageIndex" "contents" (Witch.into @Int.Int64 key) True $ \blob -> do
       offsetRef <- Base.liftBase $ IORef.newIORef 0
@@ -73,4 +73,6 @@ getSize = do
       . lookup Http.hContentLength
       $ Client.responseHeaders response
   string <- either Exception.throwM pure $ Witch.tryInto @String byteString
-  either (Exception.throwM . ReadFailure.ReadFailure string) pure $ Read.readEither string
+  case Read.readMaybe string of
+    Nothing -> Exception.throwM $ ConversionFailure.new @Int string
+    Just int -> pure int

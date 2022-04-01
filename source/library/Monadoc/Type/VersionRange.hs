@@ -9,7 +9,7 @@ import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Distribution.Parsec as Cabal
 import qualified Distribution.Pretty as Cabal
 import qualified Distribution.Types.VersionRange as Cabal
-import qualified Monadoc.Vendor.Witch as Witch
+import qualified Witch
 
 newtype VersionRange
   = VersionRange Cabal.VersionRange

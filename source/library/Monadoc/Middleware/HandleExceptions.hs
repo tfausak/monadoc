@@ -14,10 +14,10 @@ import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Constant.ContentType as ContentType
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
-import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 import qualified Network.Wai.Handler.Warp as Warp
+import qualified Witch
 
 middleware :: Wai.Middleware
 middleware handle request respond =

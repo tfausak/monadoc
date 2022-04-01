@@ -10,7 +10,7 @@ import qualified Data.ByteString as ByteString
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
-import qualified Monadoc.Vendor.Witch as Witch
+import qualified Witch
 
 newtype Hash
   = Hash (Crypto.Digest Crypto.SHA256)

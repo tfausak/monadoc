@@ -1,7 +1,7 @@
 cabal-version: 2.0
 
 name: monadoc
-version: 0.2022.3.28
+version: 0.2022.3.31
 
 build-type: Simple
 category: Documentation
@@ -84,6 +84,7 @@ library
     Monadoc.Class.MonadTime
     Monadoc.Constant.ContentType
     Monadoc.Constant.Header
+    Monadoc.Exception.ConversionFailure
     Monadoc.Exception.InvalidOption
     Monadoc.Exception.InvalidSize
     Monadoc.Exception.MethodNotAllowed
@@ -91,7 +92,6 @@ library
     Monadoc.Exception.MissingHackageIndex
     Monadoc.Exception.MissingRowid
     Monadoc.Exception.MissingSize
-    Monadoc.Exception.ReadFailure
     Monadoc.Exception.Sick
     Monadoc.Exception.TrailingBytes
     Monadoc.Exception.UnexpectedArgument
@@ -99,13 +99,13 @@ library
     Monadoc.Exception.UnknownOption
     Monadoc.Exception.UnknownRoute
     Monadoc.Extra.DirectSqlite
-    Monadoc.Extra.Witch
     Monadoc.Handler.AppleTouchIcon.Get
     Monadoc.Handler.Bootstrap.Get
     Monadoc.Handler.Favicon.Get
     Monadoc.Handler.HealthCheck.Get
     Monadoc.Handler.Home.Get
     Monadoc.Handler.Manifest.Get
+    Monadoc.Handler.Package.Get
     Monadoc.Handler.Robots.Get
     Monadoc.Main
     Monadoc.Middleware.AddHeaders
@@ -141,7 +141,6 @@ library
     Monadoc.Type.Task
     Monadoc.Type.VersionNumber
     Monadoc.Type.VersionRange
-    Monadoc.Vendor.Witch
     Monadoc.Worker.Main
   ghc-options:
     -Weverything

@@ -4,8 +4,8 @@
 
 module Monadoc.Type.Port where
 
-import qualified Monadoc.Vendor.Witch as Witch
 import qualified Text.Read as Read
+import qualified Witch
 
 newtype Port
   = Port Int

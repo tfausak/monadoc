@@ -7,8 +7,8 @@ import qualified Control.Monad.Catch as Exception
 import qualified Data.String as String
 import qualified Monadoc.Type.Flag as Flag
 import qualified Monadoc.Type.Port as Port
-import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.Wai.Handler.Warp as Warp
+import qualified Witch
 
 data Config = Config
   { base :: String,

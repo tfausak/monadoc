@@ -18,9 +18,11 @@ import qualified Data.Int as Int
 import qualified Data.Map.Strict as Map
 import qualified Data.Pool as Pool
 import qualified Data.Text as Text
+import qualified Data.Time as Time
 import qualified Data.Time.Clock.POSIX as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Distribution.Package as Cabal
+import qualified Distribution.Parsec as Cabal
 import qualified Distribution.Types.PackageVersionConstraint as Cabal
 import qualified Distribution.Version as Cabal
 import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
@@ -31,6 +33,8 @@ import qualified Monadoc.Action.Release.Upsert as Release.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
+import qualified Monadoc.Class.MonadTime as MonadTime
+import qualified Monadoc.Exception.ConversionFailure as ConversionFailure
 import qualified Monadoc.Exception.MissingHackageIndex as MissingHackageIndex
 import qualified Monadoc.Exception.UnexpectedEntry as UnexpectedEntry
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
@@ -47,29 +51,34 @@ import qualified Monadoc.Type.PackageName as PackageName
 import qualified Monadoc.Type.Revision as Revision
 import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Monadoc.Type.VersionRange as VersionRange
-import qualified Monadoc.Vendor.Witch as Witch
 import qualified System.FilePath as FilePath
+import qualified Witch
 
 run ::
   (Control.MonadBaseControl IO m, MonadLog.MonadLog m, Exception.MonadMask m, Reader.MonadReader Context.Context m, MonadSql.MonadSql m) =>
   m ()
 run = do
-  (key, size) <- do
-    rows <- MonadSql.query_ "select key, size from hackageIndex order by key asc limit 1"
+  (key, maybeProcessedAt, size) <- do
+    rows <- MonadSql.query_ "select key, processedAt, size from hackageIndex order by key asc limit 1"
     case rows of
       [] -> Exception.throwM MissingHackageIndex.MissingHackageIndex
-      (key, size) : _ -> pure (key, size)
-  preferredVersions <- Base.liftBase $ Stm.newTVarIO Map.empty
-  revisions <- Base.liftBase $ Stm.newTVarIO Map.empty
-  context <- Reader.ask
-  Pool.withResource (Context.pool context) $ \connection ->
-    Sqlite.withBlob (Sql.connectionHandle connection) "hackageIndex" "contents" key False $ \blob -> do
-      contents <- Base.liftBase $ Sqlite.unsafeBlobRead blob size 0
-      mapM_ (handleItem preferredVersions revisions)
-        . Tar.foldEntries ((:) . Right) [] (pure . Left)
-        . Tar.read
-        $ LazyByteString.fromChunks contents
-  upsertPreferredVersions preferredVersions
+      (key, maybeProcessedAt, size) : _ -> pure (key, maybeProcessedAt, size)
+  case maybeProcessedAt :: Maybe Time.UTCTime of
+    Just _ -> MonadLog.info "index already processed, skipping"
+    Nothing -> do
+      preferredVersions <- Base.liftBase $ Stm.newTVarIO Map.empty
+      revisions <- Base.liftBase $ Stm.newTVarIO Map.empty
+      context <- Reader.ask
+      Pool.withResource (Context.pool context) $ \connection ->
+        Sqlite.withBlob (Sql.connectionHandle connection) "hackageIndex" "contents" key False $ \blob -> do
+          contents <- Base.liftBase $ Sqlite.unsafeBlobRead blob size 0
+          mapM_ (handleItem preferredVersions revisions)
+            . Tar.foldEntries ((:) . Right) [] (pure . Left)
+            . Tar.read
+            $ LazyByteString.fromChunks contents
+      upsertPreferredVersions preferredVersions
+      now <- MonadTime.getCurrentTime
+      MonadSql.execute "update hackageIndex set processedAt = ? where key = ?" (Just now, key)
 
 handleItem ::
   (Base.MonadBase IO m, MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
@@ -114,9 +123,9 @@ handlePreferredVersions preferredVersions entry pkg = do
     if null string
       then pure Cabal.anyVersion
       else do
-        Cabal.PackageVersionConstraint name range <-
-          either Exception.throwM pure $
-            Witch.tryInto @Cabal.PackageVersionConstraint string
+        Cabal.PackageVersionConstraint name range <- case Cabal.simpleParsec string of
+          Nothing -> Exception.throwM $ ConversionFailure.new @Cabal.PackageVersionConstraint string
+          Just x -> pure x
         Monad.when (name /= Witch.into @Cabal.PackageName packageName)
           . Exception.throwM
           $ UnexpectedEntry.UnexpectedEntry entry

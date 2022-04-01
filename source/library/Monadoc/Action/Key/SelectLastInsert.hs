@@ -9,7 +9,7 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Exception.MissingRowid as MissingRowid
 import qualified Monadoc.Type.Key as Key
-import qualified Monadoc.Vendor.Witch as Witch
+import qualified Witch
 
 run :: (MonadSql.MonadSql m, Exception.MonadThrow m) => m (Key.Key a)
 run = do

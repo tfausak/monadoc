@@ -14,8 +14,8 @@ import qualified Monadoc.Server.Application as Application
 import qualified Monadoc.Server.Middleware as Middleware
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
-import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.Wai.Handler.Warp as Warp
+import qualified Witch
 
 server :: (Base.MonadBase IO m, Reader.MonadReader Context.Context m) => m ()
 server = do

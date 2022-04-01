@@ -4,6 +4,7 @@
 
 module Monadoc.Type.PackageName where
 
+import qualified Data.Text as Text
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Distribution.Package as Cabal
@@ -24,6 +25,12 @@ instance Witch.TryFrom String PackageName where
 
 instance Witch.From PackageName String where
   from = Cabal.prettyShow . Witch.into @Cabal.PackageName
+
+instance Witch.TryFrom Text.Text PackageName where
+  tryFrom = Witch.eitherTryFrom $ Witch.tryInto @PackageName . Witch.into @String
+
+instance Witch.From PackageName Text.Text where
+  from = Witch.via @String
 
 instance Sql.FromField PackageName where
   fromField field = do

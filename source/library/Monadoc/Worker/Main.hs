@@ -24,7 +24,7 @@ import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Status as Status
 import qualified Monadoc.Type.Task as Task
-import qualified Monadoc.Vendor.Witch as Witch
+import qualified Witch
 
 worker :: (Control.MonadBaseControl IO m, MonadHttp.MonadHttp m, MonadLog.MonadLog m, Exception.MonadMask m, Reader.MonadReader Context.Context m, MonadSleep.MonadSleep m, MonadSql.MonadSql m) => m ()
 worker = do

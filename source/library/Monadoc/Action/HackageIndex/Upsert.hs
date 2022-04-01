@@ -25,5 +25,5 @@ run ::
   m ()
 run = do
   MonadLog.info "upserting hackage index"
-  hackageIndex <- fmap Maybe.listToMaybe $ MonadSql.query_ "select key, size from hackageIndex order by key asc limit 1"
+  hackageIndex <- Maybe.listToMaybe <$> MonadSql.query_ "select key, size from hackageIndex order by key asc limit 1"
   maybe Insert.run (uncurry Update.run) hackageIndex

@@ -4,6 +4,7 @@ module Monadoc.Server.Application where
 
 import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Reader as Reader
+import qualified Monadoc.Exception.ConversionFailure as ConversionFailure
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Handler.AppleTouchIcon.Get as AppleTouchIcon.Get
 import qualified Monadoc.Handler.Bootstrap.Get as Bootstrap.Get
@@ -11,19 +12,19 @@ import qualified Monadoc.Handler.Favicon.Get as Favicon.Get
 import qualified Monadoc.Handler.HealthCheck.Get as HealthCheck.Get
 import qualified Monadoc.Handler.Home.Get as Home.Get
 import qualified Monadoc.Handler.Manifest.Get as Manifest.Get
+import qualified Monadoc.Handler.Package.Get as Package.Get
 import qualified Monadoc.Handler.Robots.Get as Robots.Get
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Route as Route
-import qualified Monadoc.Vendor.Witch as Witch
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 
 application :: Context.Context -> Wai.Application
 application context request respond = do
   method <-
-    either Exception.throwM pure
-      . Witch.tryInto @Http.StdMethod
+    either (Exception.throwM . ConversionFailure.new @Http.StdMethod) pure
+      . Http.parseMethod
       $ Wai.requestMethod request
   route <- Route.parse $ Wai.pathInfo request
   handler <- getHandler method route
@@ -53,6 +54,9 @@ getHandler method route = case route of
     _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
   Route.Manifest -> case method of
     Http.GET -> pure Manifest.Get.handler
+    _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
+  Route.Package p -> case method of
+    Http.GET -> pure $ Package.Get.handler p
     _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
   Route.Robots -> case method of
     Http.GET -> pure Robots.Get.handler

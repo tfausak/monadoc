@@ -6,7 +6,7 @@ module Monadoc.Type.Status where
 
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
-import qualified Monadoc.Vendor.Witch as Witch
+import qualified Witch
 
 data Status
   = Failed
