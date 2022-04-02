@@ -1,6 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.HackageIndex.Upsert where
 
 import qualified Control.Monad.Catch as Exception
@@ -24,6 +21,6 @@ run ::
   ) =>
   m ()
 run = do
-  MonadLog.info "upserting hackage index"
+  MonadLog.debug "upserting hackage index"
   hackageIndex <- Maybe.listToMaybe <$> MonadSql.query_ "select key, size from hackageIndex order by key asc limit 1"
   maybe Insert.run (uncurry Update.run) hackageIndex

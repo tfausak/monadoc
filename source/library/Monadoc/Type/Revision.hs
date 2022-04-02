@@ -1,11 +1,8 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.Revision where
 
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
+import qualified Lucid
 import qualified Witch
 
 newtype Revision
@@ -24,6 +21,10 @@ instance Sql.ToField Revision where
 
 instance Witch.From Revision String where
   from = show . Witch.into @Int
+
+instance Lucid.ToHtml Revision where
+  toHtml = Lucid.toHtml . Witch.into @String
+  toHtmlRaw = Lucid.toHtml
 
 zero :: Revision
 zero = Witch.from @Int 0

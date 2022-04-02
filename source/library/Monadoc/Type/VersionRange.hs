@@ -1,7 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.VersionRange where
 
 import qualified Database.SQLite.Simple.FromField as Sql
@@ -9,6 +5,7 @@ import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Distribution.Parsec as Cabal
 import qualified Distribution.Pretty as Cabal
 import qualified Distribution.Types.VersionRange as Cabal
+import qualified Lucid
 import qualified Witch
 
 newtype VersionRange
@@ -33,3 +30,10 @@ instance Sql.FromField VersionRange where
 
 instance Sql.ToField VersionRange where
   toField = Sql.toField . Witch.into @String
+
+instance Lucid.ToHtml VersionRange where
+  toHtml = Lucid.toHtml . Witch.into @String
+  toHtmlRaw = Lucid.toHtml
+
+any :: VersionRange
+any = Witch.from @Cabal.VersionRange Cabal.anyVersion

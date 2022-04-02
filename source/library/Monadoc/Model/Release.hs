@@ -1,8 +1,5 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Model.Release where
 
-import qualified Data.Time as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Monadoc.Model.Blob as Blob
@@ -13,6 +10,7 @@ import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Revision as Revision
+import qualified Monadoc.Type.Timestamp as Timestamp
 
 type Model = Model.Model Release
 
@@ -22,7 +20,7 @@ data Release = Release
   { blob :: Blob.Key,
     package :: Package.Key,
     revision :: Revision.Revision,
-    uploadedAt :: Time.UTCTime,
+    uploadedAt :: Timestamp.Timestamp,
     uploadedBy :: HackageUser.Key,
     version :: Version.Key
   }

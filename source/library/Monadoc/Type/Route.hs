@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Type.Route where
 
 import qualified Control.Monad.Catch as Exception

@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Model.Migration where
 
 import qualified Data.Fixed as Fixed
@@ -8,13 +6,15 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
+import qualified Monadoc.Type.Timestamp as Timestamp
+import qualified Witch
 
 type Model = Model.Model Migration
 
 type Key = Key.Key Migration
 
 data Migration = Migration
-  { createdAt :: Time.UTCTime,
+  { createdAt :: Timestamp.Timestamp,
     query :: Sql.Query
   }
   deriving (Eq, Show)
@@ -42,12 +42,13 @@ new :: (Integer, Int, Int, Int, Int, Fixed.Pico) -> Sql.Query -> Migration
 new (year, month, day, h, m, s) q =
   Migration
     { createdAt =
-        Time.UTCTime
-          { Time.utctDay = Time.fromGregorian year month day,
-            Time.utctDayTime =
-              Time.timeOfDayToTime
-                Time.TimeOfDay {Time.todHour = h, Time.todMin = m, Time.todSec = s}
-          },
+        Witch.from
+          Time.UTCTime
+            { Time.utctDay = Time.fromGregorian year month day,
+              Time.utctDayTime =
+                Time.timeOfDayToTime
+                  Time.TimeOfDay {Time.todHour = h, Time.todMin = m, Time.todSec = s}
+            },
       query = q
     }
 

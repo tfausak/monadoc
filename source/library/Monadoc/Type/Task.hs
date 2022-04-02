@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Type.Task where
 
 import qualified Data.Aeson as Aeson

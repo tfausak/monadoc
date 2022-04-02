@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-
 module Monadoc.Handler.Bootstrap.Get where
 
 import qualified Control.Monad.Reader as Reader

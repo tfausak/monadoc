@@ -1,7 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Action.HackageIndex.Update where
 
 import qualified Control.Monad as Monad
@@ -35,17 +31,22 @@ run ::
   Int ->
   m ()
 run oldKey oldSize = do
-  MonadLog.info "updating hackage index"
+  MonadLog.debug "updating hackage index"
   newSize <- HackageIndex.Insert.getSize
   let start = oldSize - 1024
       end = newSize - 1
       range = Witch.into @ByteString.ByteString $ "bytes=" <> show start <> "-" <> show end
   case compare oldSize newSize of
-    GT -> Exception.throwM $ InvalidSize.InvalidSize oldSize newSize
-    EQ -> MonadLog.info "nothing to update"
+    GT ->
+      Exception.throwM $
+        InvalidSize.InvalidSize
+          { InvalidSize.old = oldSize,
+            InvalidSize.new = newSize
+          }
+    EQ -> MonadLog.debug "nothing to update"
     LT -> do
       context <- Reader.ask
-      MonadLog.info $ "new index to get: " <> Text.pack (show $ newSize - oldSize)
+      MonadLog.debug $ "new index to get: " <> Text.pack (show $ newSize - oldSize)
       request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar"
       let headers = (Http.hRange, range) : Client.requestHeaders request
       MonadSql.execute "insert into hackageIndex (contents, processedAt, size) values (zeroblob(?), null, ?)" (newSize, newSize)

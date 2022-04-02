@@ -1,8 +1,5 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Model.Job where
 
-import qualified Data.Time as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Monadoc.Model.Migration as Migration
@@ -10,15 +7,16 @@ import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Status as Status
 import qualified Monadoc.Type.Task as Task
+import qualified Monadoc.Type.Timestamp as Timestamp
 
 type Model = Model.Model Job
 
 type Key = Key.Key Job
 
 data Job = Job
-  { createdAt :: Time.UTCTime,
-    finishedAt :: Maybe Time.UTCTime,
-    startedAt :: Maybe Time.UTCTime,
+  { createdAt :: Timestamp.Timestamp,
+    finishedAt :: Maybe Timestamp.Timestamp,
+    startedAt :: Maybe Timestamp.Timestamp,
     status :: Status.Status,
     task :: Task.Task
   }

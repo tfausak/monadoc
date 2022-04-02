@@ -1,7 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Action.HackageIndex.Insert where
 
 import qualified Codec.Compression.Zlib.Internal as Zlib
@@ -33,7 +29,7 @@ import qualified Witch
 
 run :: (Control.MonadBaseControl IO m, MonadHttp.MonadHttp m, MonadLog.MonadLog m, Exception.MonadMask m, Reader.MonadReader Context.Context m, MonadSql.MonadSql m) => m ()
 run = do
-  MonadLog.info "inserting hackage index"
+  MonadLog.debug "inserting hackage index"
   size <- getSize
   context <- Reader.ask
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"

@@ -1,11 +1,8 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.HackageUserName where
 
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
+import qualified Lucid
 import qualified Witch
 
 newtype HackageUserName
@@ -21,3 +18,7 @@ instance Sql.FromField HackageUserName where
 
 instance Sql.ToField HackageUserName where
   toField = Sql.toField . Witch.into @String
+
+instance Lucid.ToHtml HackageUserName where
+  toHtml = Lucid.toHtml . Witch.into @String
+  toHtmlRaw = Lucid.toHtml

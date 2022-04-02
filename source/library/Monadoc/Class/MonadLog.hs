@@ -1,5 +1,6 @@
 module Monadoc.Class.MonadLog where
 
+import qualified Data.Char as Char
 import qualified Data.Text as Text
 import qualified Data.Time as Time
 import qualified Monadoc.Class.MonadSay as MonadSay
@@ -16,7 +17,7 @@ class (MonadSay.MonadSay m, MonadTime.MonadTime m) => MonadLog m where
     MonadSay.hSay handle $
       Text.unwords
         [ timestamp,
-          Text.pack $ show severity,
+          Text.pack . fmap Char.toLower $ "[" <> show severity <> "]",
           message
         ]
 

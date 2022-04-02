@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.Release.Upsert where
 
 import qualified Control.Monad.Catch as Exception
@@ -10,7 +8,7 @@ import qualified Monadoc.Type.Model as Model
 
 run :: (MonadSql.MonadSql m, Exception.MonadThrow m) => Release.Release -> m Release.Model
 run release = do
-  rows <- MonadSql.query "select key, blob, package, revision, uploadedAt, uploadedBy, version from release where package = ? and version = ? and revision = ?" (Release.package release, Release.version release, Release.revision release)
+  rows <- MonadSql.query "select * from release where package = ? and version = ? and revision = ?" (Release.package release, Release.version release, Release.revision release)
   case rows of
     model : _ -> pure model
     [] -> do

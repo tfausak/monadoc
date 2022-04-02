@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.Database.Initialize where
 
 import qualified Control.Monad as Monad
@@ -48,7 +46,7 @@ run = do
   MonadLog.info "initializing database"
   runPragmas
   runMigrations
-  MonadLog.info "initialized database"
+  MonadLog.debug "initialized database"
 
 runPragmas :: (MonadLog.MonadLog m, MonadSql.MonadSql m) => m ()
 runPragmas = do
@@ -57,7 +55,7 @@ runPragmas = do
 
 runPragma :: (MonadLog.MonadLog m, MonadSql.MonadSql m) => Sql.Query -> m ()
 runPragma pragma = do
-  MonadLog.info $ "executing pragma: " <> Text.pack (show pragma)
+  MonadLog.debug $ "executing pragma: " <> Text.pack (show pragma)
   MonadSql.execute_ pragma
 
 runMigrations :: (MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) => m ()
@@ -70,8 +68,8 @@ runMigration :: (MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow 
 runMigration migration = do
   let createdAt = Migration.createdAt migration
       query = Migration.query migration
-  MonadLog.info $ "running migration: " <> Text.pack (show createdAt)
-  models <- MonadSql.query "select key, createdAt, query from migration where createdAt = ?" [createdAt]
+  MonadLog.debug $ "running migration: " <> Text.pack (show createdAt)
+  models <- MonadSql.query "select * from migration where createdAt = ?" [createdAt]
   case models of
     [] -> do
       MonadSql.execute_ query
@@ -80,4 +78,8 @@ runMigration migration = do
       let oldQuery = Migration.query $ Model.value model
       Monad.when (oldQuery /= query)
         . Exception.throwM
-        $ MigrationMismatch.MigrationMismatch createdAt oldQuery query
+        $ MigrationMismatch.MigrationMismatch
+          { MigrationMismatch.createdAt = createdAt,
+            MigrationMismatch.expected = oldQuery,
+            MigrationMismatch.actual = query
+          }

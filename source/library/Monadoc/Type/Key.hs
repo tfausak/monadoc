@@ -1,6 +1,3 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.Key where
 
 import qualified Data.Int as Int
@@ -21,3 +18,6 @@ instance Sql.FromField (Key a) where
 
 instance Sql.ToField (Key a) where
   toField = Sql.toField . Witch.into @Int.Int64
+
+zero :: Key a
+zero = Witch.from @Int.Int64 0

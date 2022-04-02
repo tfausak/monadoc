@@ -1,14 +1,12 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.VersionNumber where
 
+import qualified Data.Version as Version
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Distribution.Parsec as Cabal
 import qualified Distribution.Pretty as Cabal
 import qualified Distribution.Types.Version as Cabal
+import qualified Lucid
 import qualified Witch
 
 newtype VersionNumber
@@ -33,3 +31,13 @@ instance Sql.FromField VersionNumber where
 
 instance Sql.ToField VersionNumber where
   toField = Sql.toField . Witch.into @String
+
+instance Lucid.ToHtml VersionNumber where
+  toHtml = Lucid.toHtml . Witch.into @String
+  toHtmlRaw = Lucid.toHtml
+
+instance Witch.From Version.Version VersionNumber where
+  from = Witch.from @Cabal.Version . Cabal.mkVersion'
+
+instance Witch.From VersionNumber Version.Version where
+  from = Version.makeVersion . Cabal.versionNumbers . Witch.into @Cabal.Version

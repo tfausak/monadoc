@@ -1,7 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.PackageName where
 
 import qualified Data.Text as Text
@@ -10,6 +6,7 @@ import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Distribution.Package as Cabal
 import qualified Distribution.Parsec as Cabal
 import qualified Distribution.Pretty as Cabal
+import qualified Lucid
 import qualified Witch
 
 newtype PackageName
@@ -40,3 +37,7 @@ instance Sql.FromField PackageName where
 
 instance Sql.ToField PackageName where
   toField = Sql.toField . Witch.into @String
+
+instance Lucid.ToHtml PackageName where
+  toHtml = Lucid.toHtml . Witch.into @String
+  toHtmlRaw = Lucid.toHtml

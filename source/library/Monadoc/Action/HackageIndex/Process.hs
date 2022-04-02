@@ -1,7 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Action.HackageIndex.Process where
 
 import qualified Codec.Archive.Tar as Tar
@@ -18,7 +14,6 @@ import qualified Data.Int as Int
 import qualified Data.Map.Strict as Map
 import qualified Data.Pool as Pool
 import qualified Data.Text as Text
-import qualified Data.Time as Time
 import qualified Data.Time.Clock.POSIX as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Distribution.Package as Cabal
@@ -49,6 +44,7 @@ import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
 import qualified Monadoc.Type.Revision as Revision
+import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Monadoc.Type.VersionRange as VersionRange
 import qualified System.FilePath as FilePath
@@ -63,8 +59,8 @@ run = do
     case rows of
       [] -> Exception.throwM MissingHackageIndex.MissingHackageIndex
       (key, maybeProcessedAt, size) : _ -> pure (key, maybeProcessedAt, size)
-  case maybeProcessedAt :: Maybe Time.UTCTime of
-    Just _ -> MonadLog.info "index already processed, skipping"
+  case maybeProcessedAt :: Maybe Timestamp.Timestamp of
+    Just _ -> MonadLog.debug "index already processed, skipping"
     Nothing -> do
       preferredVersions <- Base.liftBase $ Stm.newTVarIO Map.empty
       revisions <- Base.liftBase $ Stm.newTVarIO Map.empty
@@ -178,14 +174,15 @@ handleCabal revisions entry pkg ver = do
           Release.package = Model.key package,
           Release.revision = revision,
           Release.uploadedAt =
-            Time.posixSecondsToUTCTime
+            Witch.from
+              . Time.posixSecondsToUTCTime
               . fromIntegral
               $ Tar.entryTime entry,
           Release.uploadedBy = Model.key hackageUser,
           Release.version = Model.key version
         }
   Monad.when (rem (Witch.into @Int.Int64 (Model.key release)) 10000 == 1)
-    . MonadLog.info
+    . MonadLog.debug
     . Text.pack
     $ show release
 

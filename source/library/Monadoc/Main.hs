@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-
 module Monadoc.Main where
 
 import qualified Control.Concurrent.Async as Async

@@ -1,5 +1,3 @@
-{-# LANGUAGE ExplicitForAll #-}
-
 module Monadoc.Exception.ConversionFailure where
 
 import qualified Control.Monad.Catch as Exception

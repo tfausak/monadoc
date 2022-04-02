@@ -1,24 +1,20 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Handler.Home.Get where
 
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Reader as Reader
 import qualified Data.Text as Text
-import qualified Data.Time as Time
-import qualified Data.Version as Version
 import qualified Database.SQLite.Simple as Sql
 import qualified Lucid
 import qualified Lucid.Base as Lucid
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Constant.ContentType as ContentType
+import qualified Monadoc.Model.HackageUser as HackageUser
+import qualified Monadoc.Model.Package as Package
+import qualified Monadoc.Model.Release as Release
+import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
-import qualified Monadoc.Type.HackageUserName as HackageUserName
-import qualified Monadoc.Type.PackageName as PackageName
-import qualified Monadoc.Type.Revision as Revision
+import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Route as Route
 import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Network.HTTP.Types as Http
@@ -31,7 +27,7 @@ handler _ = do
   context <- Reader.ask
   rows <-
     MonadSql.query_
-      "select hackageUser.name, package.name, version.number, release.revision, release.uploadedAt \
+      "select * \
       \ from release \
       \ inner join package \
       \ on package.key = release.package \
@@ -64,55 +60,34 @@ handler _ = do
         Lucid.div_ [Lucid.class_ "bg-dark navbar navbar-dark"] $ do
           Lucid.div_ [Lucid.class_ "container"] $ do
             Lucid.a_ [Lucid.class_ "navbar-brand", Lucid.href_ $ route context Route.Home] "Monadoc"
-        Lucid.div_ [Lucid.class_ "bg-light mb-3 navbar navbar-light"] $ do
-          Lucid.div_ [Lucid.class_ "container"] $ do
-            Lucid.ol_ [Lucid.class_ "breadcrumb my-1"] $ do
-              Lucid.li_ [Lucid.class_ "active breadcrumb-item"] "Home"
         Lucid.div_ [Lucid.class_ "my-3"] $ do
           Lucid.div_ [Lucid.class_ "container"] $ do
             Lucid.h2_ "Recent Releases"
             Lucid.ul_ [] $ do
               Monad.forM_ rows $ \row -> Lucid.li_ [] $ do
+                let (release Sql.:. package Sql.:. version Sql.:. hackageUser) = row
                 "Package "
                 Lucid.a_
-                  [Lucid.href_ . route context . Route.Package $ rowPackage row]
+                  [Lucid.href_ . route context . Route.Package . Package.name $ Model.value package]
                   . Lucid.toHtml
-                  . Witch.into @String
-                  $ rowPackage row
+                  . Package.name
+                  $ Model.value package
                 " version "
-                Lucid.toHtml . Witch.into @String $ rowVersion row
+                Lucid.toHtml . Version.number $ Model.value version
                 " revision "
-                Lucid.toHtml . Witch.into @String $ rowRevision row
+                Lucid.toHtml . Release.revision $ Model.value release
                 " released at "
-                Lucid.toHtml . Time.formatTime Time.defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ" $ rowTime row
+                Lucid.toHtml . Release.uploadedAt $ Model.value release
                 " by "
-                Lucid.toHtml . Witch.into @String $ rowUser row
+                Lucid.toHtml . HackageUser.name $ Model.value hackageUser
                 "."
         Lucid.div_ [Lucid.class_ "my-3 text-muted"] $ do
           Lucid.div_ [Lucid.class_ "border-top container pt-3"] $ do
             "Powered by "
             Lucid.a_ [Lucid.href_ "https://github.com/tfausak/monadoc"] "Monadoc"
             " version "
-            Lucid.toHtml $ Version.showVersion Monadoc.version
+            Lucid.toHtml $ Witch.into @VersionNumber.VersionNumber Monadoc.version
             ". \x1f516"
-
-data Row = Row
-  { rowUser :: HackageUserName.HackageUserName,
-    rowPackage :: PackageName.PackageName,
-    rowVersion :: VersionNumber.VersionNumber,
-    rowRevision :: Revision.Revision,
-    rowTime :: Time.UTCTime
-  }
-  deriving (Eq, Show)
-
-instance Sql.FromRow Row where
-  fromRow =
-    Row
-      <$> Sql.field
-      <*> Sql.field
-      <*> Sql.field
-      <*> Sql.field
-      <*> Sql.field
 
 og :: Text.Text -> Text.Text -> Lucid.Html ()
 og property content =

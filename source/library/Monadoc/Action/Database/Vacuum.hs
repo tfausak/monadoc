@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.Database.Vacuum where
 
 import qualified Monadoc.Class.MonadSql as MonadSql

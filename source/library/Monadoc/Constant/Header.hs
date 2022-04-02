@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Constant.Header where
 
 import qualified Network.HTTP.Types as Http
