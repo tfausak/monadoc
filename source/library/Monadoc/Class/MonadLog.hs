@@ -1,12 +1,12 @@
 module Monadoc.Class.MonadLog where
 
-import qualified Data.Char as Char
 import qualified Data.Text as Text
 import qualified Data.Time as Time
 import qualified Monadoc.Class.MonadSay as MonadSay
 import qualified Monadoc.Class.MonadTime as MonadTime
 import qualified Monadoc.Type.Severity as Severity
 import qualified System.IO as IO
+import qualified Witch
 
 class (MonadSay.MonadSay m, MonadTime.MonadTime m) => MonadLog m where
   log :: Severity.Severity -> Text.Text -> m ()
@@ -17,7 +17,7 @@ class (MonadSay.MonadSay m, MonadTime.MonadTime m) => MonadLog m where
     MonadSay.hSay handle $
       Text.unwords
         [ timestamp,
-          Text.pack . fmap Char.toLower $ "[" <> show severity <> "]",
+          Text.pack $ "[" <> Witch.into @String severity <> "]",
           message
         ]
 

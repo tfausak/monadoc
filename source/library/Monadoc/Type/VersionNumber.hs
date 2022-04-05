@@ -34,7 +34,7 @@ instance Sql.ToField VersionNumber where
 
 instance Lucid.ToHtml VersionNumber where
   toHtml = Lucid.toHtml . Witch.into @String
-  toHtmlRaw = Lucid.toHtml
+  toHtmlRaw = Lucid.toHtmlRaw . Witch.into @String
 
 instance Witch.From Version.Version VersionNumber where
   from = Witch.from @Cabal.Version . Cabal.mkVersion'

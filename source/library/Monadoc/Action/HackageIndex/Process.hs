@@ -39,6 +39,7 @@ import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PreferredVersions as PreferredVersions
 import qualified Monadoc.Model.Release as Release
 import qualified Monadoc.Model.Version as Version
+import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Monadoc.Type.Model as Model
@@ -46,7 +47,6 @@ import qualified Monadoc.Type.PackageName as PackageName
 import qualified Monadoc.Type.Revision as Revision
 import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Monadoc.Type.VersionNumber as VersionNumber
-import qualified Monadoc.Type.VersionRange as VersionRange
 import qualified System.FilePath as FilePath
 import qualified Witch
 
@@ -78,7 +78,7 @@ run = do
 
 handleItem ::
   (Base.MonadBase IO m, MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
-  Stm.TVar (Map.Map PackageName.PackageName VersionRange.VersionRange) ->
+  Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->
   Stm.TVar (Map.Map (PackageName.PackageName, VersionNumber.VersionNumber) Revision.Revision) ->
   Either Tar.FormatError Tar.Entry ->
   m ()
@@ -87,7 +87,7 @@ handleItem preferredVersions =
 
 handleEntry ::
   (Base.MonadBase IO m, MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
-  Stm.TVar (Map.Map PackageName.PackageName VersionRange.VersionRange) ->
+  Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->
   Stm.TVar (Map.Map (PackageName.PackageName, VersionNumber.VersionNumber) Revision.Revision) ->
   Tar.Entry ->
   m ()
@@ -103,7 +103,7 @@ handleEntry preferredVersions revisions entry =
 
 handlePreferredVersions ::
   (Base.MonadBase IO m, Exception.MonadThrow m) =>
-  Stm.TVar (Map.Map PackageName.PackageName VersionRange.VersionRange) ->
+  Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->
   Tar.Entry ->
   String ->
   m ()
@@ -128,7 +128,7 @@ handlePreferredVersions preferredVersions entry pkg = do
         pure range
   Base.liftBase . Stm.atomically . Stm.modifyTVar' preferredVersions
     . Map.insert packageName
-    $ Witch.into @VersionRange.VersionRange versionRange
+    $ Witch.into @Constraint.Constraint versionRange
 
 handlePackageJson :: Applicative m => Tar.Entry -> m ()
 handlePackageJson _ = pure ()
@@ -188,18 +188,18 @@ handleCabal revisions entry pkg ver = do
 
 upsertPreferredVersions ::
   (Base.MonadBase IO m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
-  Stm.TVar (Map.Map PackageName.PackageName VersionRange.VersionRange) ->
+  Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->
   m ()
 upsertPreferredVersions var = do
   preferredVersions <- Base.liftBase $ Stm.readTVarIO var
   mapM_ (uncurry upsertPreferredVersion) $ Map.toList preferredVersions
 
-upsertPreferredVersion :: (MonadSql.MonadSql m, Exception.MonadThrow m) => PackageName.PackageName -> VersionRange.VersionRange -> m ()
-upsertPreferredVersion packageName versionRange = do
+upsertPreferredVersion :: (MonadSql.MonadSql m, Exception.MonadThrow m) => PackageName.PackageName -> Constraint.Constraint -> m ()
+upsertPreferredVersion packageName constraint = do
   package <- Package.Upsert.run Package.Package {Package.name = packageName}
   Monad.void $
     PreferredVersions.Upsert.run
       PreferredVersions.PreferredVersions
         { PreferredVersions.package = Model.key package,
-          PreferredVersions.range = versionRange
+          PreferredVersions.constraint = constraint
         }

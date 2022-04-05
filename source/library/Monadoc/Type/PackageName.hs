@@ -40,4 +40,4 @@ instance Sql.ToField PackageName where
 
 instance Lucid.ToHtml PackageName where
   toHtml = Lucid.toHtml . Witch.into @String
-  toHtmlRaw = Lucid.toHtml
+  toHtmlRaw = Lucid.toHtmlRaw . Witch.into @String

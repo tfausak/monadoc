@@ -24,7 +24,7 @@ instance Witch.From Revision String where
 
 instance Lucid.ToHtml Revision where
   toHtml = Lucid.toHtml . Witch.into @String
-  toHtmlRaw = Lucid.toHtml
+  toHtmlRaw = Lucid.toHtmlRaw . Witch.into @String
 
 zero :: Revision
 zero = Witch.from @Int 0

@@ -14,6 +14,11 @@ instance Witch.From Time.UTCTime Timestamp
 
 instance Witch.From Timestamp Time.UTCTime
 
+instance Witch.From Timestamp String where
+  from =
+    Time.formatTime Time.defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ"
+      . Witch.into @Time.UTCTime
+
 instance Sql.FromField Timestamp where
   fromField = fmap (Witch.from @Time.UTCTime) . Sql.fromField
 
@@ -21,5 +26,5 @@ instance Sql.ToField Timestamp where
   toField = Sql.toField . Witch.into @Time.UTCTime
 
 instance Lucid.ToHtml Timestamp where
-  toHtml = Lucid.toHtml . Time.formatTime Time.defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ" . Witch.into @Time.UTCTime
-  toHtmlRaw = Lucid.toHtml
+  toHtml = Lucid.toHtml . Witch.into @String
+  toHtmlRaw = Lucid.toHtmlRaw . Witch.into @String

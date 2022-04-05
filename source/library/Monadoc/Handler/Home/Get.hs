@@ -57,10 +57,10 @@ handler _ = do
         og "image" $ route context Route.AppleTouchIcon
         og "description" description
       Lucid.body_ $ do
-        Lucid.div_ [Lucid.class_ "bg-dark navbar navbar-dark"] $ do
+        Lucid.header_ [Lucid.class_ "bg-dark navbar navbar-dark"] $ do
           Lucid.div_ [Lucid.class_ "container"] $ do
             Lucid.a_ [Lucid.class_ "navbar-brand", Lucid.href_ $ route context Route.Home] "Monadoc"
-        Lucid.div_ [Lucid.class_ "my-3"] $ do
+        Lucid.main_ [Lucid.class_ "my-3"] $ do
           Lucid.div_ [Lucid.class_ "container"] $ do
             Lucid.h2_ "Recent Releases"
             Lucid.ul_ [] $ do
@@ -81,7 +81,7 @@ handler _ = do
                 " by "
                 Lucid.toHtml . HackageUser.name $ Model.value hackageUser
                 "."
-        Lucid.div_ [Lucid.class_ "my-3 text-muted"] $ do
+        Lucid.footer_ [Lucid.class_ "my-3 text-muted"] $ do
           Lucid.div_ [Lucid.class_ "border-top container pt-3"] $ do
             "Powered by "
             Lucid.a_ [Lucid.href_ "https://github.com/tfausak/monadoc"] "Monadoc"

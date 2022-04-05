@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.4.4
+version: 0.2022.4.5
 
 build-type: Simple
 category: Documentation
@@ -164,6 +164,7 @@ library
     Monadoc.Type.App
     Monadoc.Type.Config
     Monadoc.Type.Context
+    Monadoc.Type.Constraint
     Monadoc.Type.Flag
     Monadoc.Type.HackageUserName
     Monadoc.Type.Hash
@@ -178,7 +179,6 @@ library
     Monadoc.Type.Task
     Monadoc.Type.Timestamp
     Monadoc.Type.VersionNumber
-    Monadoc.Type.VersionRange
     Monadoc.Worker.Main
   hs-source-dirs: source/library
   other-modules: Paths_monadoc
@@ -198,7 +198,14 @@ test-suite monadoc-test-suite
   main-is: Main.hs
   other-modules:
     Monadoc.Test
+    Monadoc.Type.ConstraintSpec
+    Monadoc.Type.PackageNameSpec
     Monadoc.Type.PortSpec
+    Monadoc.Type.RevisionSpec
+    Monadoc.Type.RouteSpec
+    Monadoc.Type.SeveritySpec
     Monadoc.Type.StatusSpec
     Monadoc.Type.TaskSpec
+    Monadoc.Type.TimestampSpec
+    Monadoc.Type.VersionNumberSpec
   type: exitcode-stdio-1.0

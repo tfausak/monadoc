@@ -3,12 +3,16 @@ module Monadoc.Test where
 import qualified Control.Monad.Catch as Exception
 import qualified Data.Aeson as Aeson
 import qualified Data.ByteString.Lazy as LazyByteString
+import qualified Data.Fixed as Fixed
+import qualified Data.Text.Lazy as LazyText
+import qualified Data.Time as Time
 import qualified Data.Typeable as Typeable
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.Internal as Sql
 import qualified Database.SQLite.Simple.Ok as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
+import qualified Lucid
 import qualified Test.Hspec as Hspec
 import qualified Witch
 
@@ -79,3 +83,29 @@ expectTryFrom ::
 expectTryFrom s expected = case Witch.tryFrom s of
   Left e -> Hspec.expectationFailure $ Exception.displayException e
   Right actual -> expected `Hspec.shouldBe` actual
+
+expectHtml :: Lucid.ToHtml a => a -> LazyText.Text -> Hspec.Expectation
+expectHtml x html = Lucid.renderText (Lucid.toHtml x) `Hspec.shouldBe` html
+
+expectHtmlRaw :: Lucid.ToHtml a => a -> LazyText.Text -> Hspec.Expectation
+expectHtmlRaw x html = Lucid.renderText (Lucid.toHtmlRaw x) `Hspec.shouldBe` html
+
+makeUtcTime ::
+  Integer ->
+  Time.MonthOfYear ->
+  Time.DayOfMonth ->
+  Int ->
+  Int ->
+  Fixed.Pico ->
+  Time.UTCTime
+makeUtcTime year month day hour minute second =
+  Time.UTCTime
+    { Time.utctDay = Time.fromGregorian year month day,
+      Time.utctDayTime =
+        Time.timeOfDayToTime
+          Time.TimeOfDay
+            { Time.todHour = hour,
+              Time.todMin = minute,
+              Time.todSec = second
+            }
+    }

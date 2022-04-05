@@ -12,9 +12,9 @@ import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PreferredVersions as PreferredVersions
 import qualified Monadoc.Model.Release as Release
 import qualified Monadoc.Model.Version as Version
+import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
-import qualified Monadoc.Type.VersionRange as VersionRange
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 
@@ -25,11 +25,11 @@ handler packageName _ = do
     case rows of
       [] -> Exception.throwM NotFound.NotFound
       row : _ -> pure row
-  versionRange <- do
+  constraint <- do
     rows <- MonadSql.query "select * from preferredVersions where package = ?" [Model.key package]
     case rows of
-      [] -> pure VersionRange.any
-      row : _ -> pure . PreferredVersions.range $ Model.value row
+      [] -> pure Constraint.any
+      row : _ -> pure . PreferredVersions.constraint $ Model.value row
   rows <-
     MonadSql.query
       "select * \
@@ -48,7 +48,7 @@ handler packageName _ = do
         Lucid.p_ . Lucid.toHtml . Package.name $ Model.value package
         Lucid.p_ $ do
           "Preferred versions: "
-          Lucid.toHtml versionRange
+          Lucid.toHtml constraint
         Lucid.ul_ . Monad.forM_ rows $ \row -> Lucid.li_ $ do
           let (release Sql.:. version Sql.:. hackageUser) = row
           "Version "

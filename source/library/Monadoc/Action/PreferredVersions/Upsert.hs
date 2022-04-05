@@ -15,6 +15,6 @@ run preferredVersions = do
       MonadSql.execute "insert into preferredVersions (package, range) values (?, ?)" preferredVersions
       Key.SelectLastInsert.run
     Sql.Only key : _ -> do
-      MonadSql.execute "update preferredVersions set range = ? where key = ?" (PreferredVersions.range preferredVersions, key)
+      MonadSql.execute "update preferredVersions set range = ? where key = ?" (PreferredVersions.constraint preferredVersions, key)
       pure key
   pure Model.Model {Model.key = key, Model.value = preferredVersions}
