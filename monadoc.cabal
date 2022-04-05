@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.4.2
+version: 0.2022.4.4
 
 build-type: Simple
 category: Documentation
@@ -197,5 +197,8 @@ test-suite monadoc-test-suite
   hs-source-dirs: source/test-suite
   main-is: Main.hs
   other-modules:
+    Monadoc.Test
+    Monadoc.Type.PortSpec
+    Monadoc.Type.StatusSpec
     Monadoc.Type.TaskSpec
   type: exitcode-stdio-1.0

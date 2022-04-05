@@ -1,7 +1,7 @@
 FROM haskell:9.2.2-slim
 
 RUN apt-get update && apt-get install --assume-yes --no-install-recommends \
-  nano openssh-client sqlite3 sudo
+  fswatch nano openssh-client sqlite3 sudo
 
 ARG CABAL_STORE=/cabal-store
 RUN mkdir --parents "$CABAL_STORE"

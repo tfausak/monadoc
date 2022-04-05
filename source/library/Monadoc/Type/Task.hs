@@ -13,8 +13,8 @@ data Task
 
 instance Aeson.FromJSON Task where
   parseJSON = Aeson.withObject "Task" $ \object -> do
-    tag <- object Aeson..: "tag"
-    case tag :: Text.Text of
+    tag :: Text.Text <- object Aeson..: "tag"
+    case tag of
       "ProcessHackageIndex" -> pure ProcessHackageIndex
       "UpsertHackageIndex" -> pure UpsertHackageIndex
       "Vacuum" -> pure Vacuum
@@ -22,10 +22,10 @@ instance Aeson.FromJSON Task where
 
 instance Aeson.ToJSON Task where
   toJSON task =
-    let tag = case task of
+    let tag :: Text.Text = case task of
           ProcessHackageIndex -> "ProcessHackageIndex"
           UpsertHackageIndex -> "UpsertHackageIndex"
-          Vacuum -> "Vacuum" :: Text.Text
+          Vacuum -> "Vacuum"
      in Aeson.object ["tag" Aeson..= tag]
 
 instance Sql.FromField Task where

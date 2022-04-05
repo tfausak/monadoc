@@ -3,5 +3,5 @@
 /dist-newstyle/
 /monadoc.sqlite*
 
-/docker/monadoc/*
-!/docker/monadoc/Dockerfile
+/docker/*
+!/docker/Dockerfile
