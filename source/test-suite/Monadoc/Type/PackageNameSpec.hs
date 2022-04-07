@@ -20,7 +20,7 @@ spec = Hspec.describe "Monadoc.Type.PackageName" $ do
   Hspec.it "can be converted into text" $ do
     Test.expectFrom packageName ("example" :: Text.Text)
   Hspec.it "can be round-tripped through SQL" $ do
-    Test.expectSql packageName $ Sql.SQLText "example"
+    Test.expectSqlField packageName $ Sql.SQLText "example"
   Hspec.it "can be rendered as HTML" $ do
     Test.expectHtml packageName "example"
     Test.expectHtmlRaw packageName "example"

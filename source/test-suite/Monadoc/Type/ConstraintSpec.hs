@@ -12,7 +12,7 @@ spec = Hspec.describe "Monadoc.Type.Constraint" $ do
   Hspec.it "can be converted into a string" $ do
     Test.expectFrom Constraint.any (">=0" :: String)
   Hspec.it "can be round-tripped through SQL" $ do
-    Test.expectSql Constraint.any $ Sql.SQLText ">=0"
+    Test.expectSqlField Constraint.any $ Sql.SQLText ">=0"
   Hspec.it "can be rendered as HTML" $ do
     Test.expectHtml Constraint.any "&gt;=0"
     Test.expectHtmlRaw Constraint.any ">=0"

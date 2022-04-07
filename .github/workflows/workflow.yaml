@@ -79,7 +79,7 @@ jobs:
 
       - run: cabal build
 
-      - run: cabal run monadoc-test-suite
+      - run: cabal run -- monadoc-test-suite --fail-on-focused --randomize
 
       - run: cp "$( cabal list-bin monadoc )" ${{ steps.artifact.outputs.directory }}
 

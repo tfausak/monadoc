@@ -4,6 +4,7 @@ import qualified Data.Fixed as Fixed
 import qualified Data.Time as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
+import qualified Monadoc.Extra.Time as Time
 import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Timestamp as Timestamp
@@ -38,17 +39,13 @@ createTable =
   \ , createdAt text not null unique \
   \ , query text not null )"
 
-new :: (Integer, Int, Int, Int, Int, Fixed.Pico) -> Sql.Query -> Migration
-new (year, month, day, h, m, s) q =
+new ::
+  (Time.Year, Time.MonthOfYear, Time.DayOfMonth, Int, Int, Fixed.Pico) ->
+  Sql.Query ->
   Migration
-    { createdAt =
-        Witch.from
-          Time.UTCTime
-            { Time.utctDay = Time.fromGregorian year month day,
-              Time.utctDayTime =
-                Time.timeOfDayToTime
-                  Time.TimeOfDay {Time.todHour = h, Time.todMin = m, Time.todSec = s}
-            },
+new (dy, dm, dd, th, tm, ts) q =
+  Migration
+    { createdAt = Witch.from $ Time.makeUtcTime dy dm dd th tm ts,
       query = q
     }
 

@@ -21,4 +21,4 @@ instance Sql.ToField HackageUserName where
 
 instance Lucid.ToHtml HackageUserName where
   toHtml = Lucid.toHtml . Witch.into @String
-  toHtmlRaw = Lucid.toHtml
+  toHtmlRaw = Lucid.toHtmlRaw . Witch.into @String

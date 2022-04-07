@@ -41,3 +41,6 @@ instance Witch.From Version.Version VersionNumber where
 
 instance Witch.From VersionNumber Version.Version where
   from = Version.makeVersion . Cabal.versionNumbers . Witch.into @Cabal.Version
+
+zero :: VersionNumber
+zero = Witch.from Cabal.version0

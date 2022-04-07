@@ -12,6 +12,6 @@ spec = Hspec.describe "Monadoc.Type.Task" $ do
     Test.expectJson Task.UpsertHackageIndex "{\"tag\":\"UpsertHackageIndex\"}"
     Test.expectJson Task.Vacuum "{\"tag\":\"Vacuum\"}"
   Hspec.it "can be round-tripped through SQL" $ do
-    Test.expectSql Task.ProcessHackageIndex $ Sql.SQLBlob "{\"tag\":\"ProcessHackageIndex\"}"
-    Test.expectSql Task.UpsertHackageIndex $ Sql.SQLBlob "{\"tag\":\"UpsertHackageIndex\"}"
-    Test.expectSql Task.Vacuum $ Sql.SQLBlob "{\"tag\":\"Vacuum\"}"
+    Test.expectSqlField Task.ProcessHackageIndex $ Sql.SQLBlob "{\"tag\":\"ProcessHackageIndex\"}"
+    Test.expectSqlField Task.UpsertHackageIndex $ Sql.SQLBlob "{\"tag\":\"UpsertHackageIndex\"}"
+    Test.expectSqlField Task.Vacuum $ Sql.SQLBlob "{\"tag\":\"Vacuum\"}"

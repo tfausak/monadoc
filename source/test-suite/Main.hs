@@ -1,4 +1,11 @@
+import qualified Monadoc.Model.VersionSpec
+import qualified Monadoc.Type.ConfigSpec
 import qualified Monadoc.Type.ConstraintSpec
+import qualified Monadoc.Type.FlagSpec
+import qualified Monadoc.Type.HackageUserNameSpec
+import qualified Monadoc.Type.HashSpec
+import qualified Monadoc.Type.KeySpec
+import qualified Monadoc.Type.ModelSpec
 import qualified Monadoc.Type.PackageNameSpec
 import qualified Monadoc.Type.PortSpec
 import qualified Monadoc.Type.RevisionSpec
@@ -15,7 +22,14 @@ main = Hspec.hspec spec
 
 spec :: Hspec.Spec
 spec = do
+  Monadoc.Model.VersionSpec.spec
+  Monadoc.Type.ConfigSpec.spec
   Monadoc.Type.ConstraintSpec.spec
+  Monadoc.Type.FlagSpec.spec
+  Monadoc.Type.HackageUserNameSpec.spec
+  Monadoc.Type.HashSpec.spec
+  Monadoc.Type.KeySpec.spec
+  Monadoc.Type.ModelSpec.spec
   Monadoc.Type.PackageNameSpec.spec
   Monadoc.Type.PortSpec.spec
   Monadoc.Type.RevisionSpec.spec

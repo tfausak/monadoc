@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.4.5
+version: 0.2022.4.6
 
 build-type: Simple
 category: Documentation
@@ -136,6 +136,7 @@ library
     Monadoc.Exception.UnknownOption
     Monadoc.Exception.UnknownRoute
     Monadoc.Extra.DirectSqlite
+    Monadoc.Extra.Time
     Monadoc.Handler.AppleTouchIcon.Get
     Monadoc.Handler.Bootstrap.Get
     Monadoc.Handler.Favicon.Get
@@ -197,8 +198,15 @@ test-suite monadoc-test-suite
   hs-source-dirs: source/test-suite
   main-is: Main.hs
   other-modules:
+    Monadoc.Model.VersionSpec
     Monadoc.Test
+    Monadoc.Type.ConfigSpec
     Monadoc.Type.ConstraintSpec
+    Monadoc.Type.FlagSpec
+    Monadoc.Type.HackageUserNameSpec
+    Monadoc.Type.HashSpec
+    Monadoc.Type.KeySpec
+    Monadoc.Type.ModelSpec
     Monadoc.Type.PackageNameSpec
     Monadoc.Type.PortSpec
     Monadoc.Type.RevisionSpec

@@ -16,7 +16,7 @@ spec = Hspec.describe "Monadoc.Type.VersionNumber" $ do
   Hspec.it "can be converted into a string" $ do
     Test.expectFrom versionNumber ("1.2.3.4" :: String)
   Hspec.it "can be round-tripped through SQL" $ do
-    Test.expectSql versionNumber (Sql.SQLText "1.2.3.4")
+    Test.expectSqlField versionNumber (Sql.SQLText "1.2.3.4")
   Hspec.it "can be rendered as HTML" $ do
     Test.expectHtml versionNumber "1.2.3.4"
     Test.expectHtmlRaw versionNumber "1.2.3.4"

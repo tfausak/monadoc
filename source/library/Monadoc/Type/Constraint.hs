@@ -17,7 +17,10 @@ instance Witch.From Cabal.VersionRange Constraint
 instance Witch.From Constraint Cabal.VersionRange
 
 instance Witch.TryFrom String Constraint where
-  tryFrom = Witch.maybeTryFrom $ fmap (Witch.from @Cabal.VersionRange) . Cabal.simpleParsec
+  tryFrom =
+    Witch.maybeTryFrom $
+      fmap (Witch.from @Cabal.VersionRange)
+        . Cabal.simpleParsec
 
 instance Witch.From Constraint String where
   from = Cabal.prettyShow . Witch.into @Cabal.VersionRange
