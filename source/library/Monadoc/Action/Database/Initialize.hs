@@ -14,8 +14,8 @@ import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Job as Job
 import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Model.Package as Package
-import qualified Monadoc.Model.PreferredVersions as PreferredVersions
-import qualified Monadoc.Model.Release as Release
+import qualified Monadoc.Model.Preference as Preference
+import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.Model as Model
 
@@ -36,8 +36,8 @@ migrations =
         Job.migrations,
         Migration.migrations,
         Package.migrations,
-        PreferredVersions.migrations,
-        Release.migrations,
+        Preference.migrations,
+        Upload.migrations,
         Version.migrations
       ]
 

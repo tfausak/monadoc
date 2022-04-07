@@ -23,8 +23,8 @@ import qualified Distribution.Version as Cabal
 import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
 import qualified Monadoc.Action.HackageUser.Upsert as HackageUser.Upsert
 import qualified Monadoc.Action.Package.Upsert as Package.Upsert
-import qualified Monadoc.Action.PreferredVersions.Upsert as PreferredVersions.Upsert
-import qualified Monadoc.Action.Release.Upsert as Release.Upsert
+import qualified Monadoc.Action.Preference.Upsert as Preference.Upsert
+import qualified Monadoc.Action.Upload.Upsert as Upload.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
@@ -36,8 +36,8 @@ import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
-import qualified Monadoc.Model.PreferredVersions as PreferredVersions
-import qualified Monadoc.Model.Release as Release
+import qualified Monadoc.Model.Preference as Preference
+import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.Context as Context
@@ -62,17 +62,17 @@ run = do
   case maybeProcessedAt :: Maybe Timestamp.Timestamp of
     Just _ -> MonadLog.debug "index already processed, skipping"
     Nothing -> do
-      preferredVersions <- Base.liftBase $ Stm.newTVarIO Map.empty
+      preference <- Base.liftBase $ Stm.newTVarIO Map.empty
       revisions <- Base.liftBase $ Stm.newTVarIO Map.empty
       context <- Reader.ask
       Pool.withResource (Context.pool context) $ \connection ->
         Sqlite.withBlob (Sql.connectionHandle connection) "hackageIndex" "contents" key False $ \blob -> do
           contents <- Base.liftBase $ Sqlite.unsafeBlobRead blob size 0
-          mapM_ (handleItem preferredVersions revisions)
+          mapM_ (handleItem preference revisions)
             . Tar.foldEntries ((:) . Right) [] (pure . Left)
             . Tar.read
             $ LazyByteString.fromChunks contents
-      upsertPreferredVersions preferredVersions
+      upsertPreference preference
       now <- MonadTime.getCurrentTime
       MonadSql.execute "update hackageIndex set processedAt = ? where key = ?" (Just now, key)
 
@@ -82,8 +82,8 @@ handleItem ::
   Stm.TVar (Map.Map (PackageName.PackageName, VersionNumber.VersionNumber) Revision.Revision) ->
   Either Tar.FormatError Tar.Entry ->
   m ()
-handleItem preferredVersions =
-  either Exception.throwM . handleEntry preferredVersions
+handleItem preference =
+  either Exception.throwM . handleEntry preference
 
 handleEntry ::
   (Base.MonadBase IO m, MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
@@ -91,23 +91,23 @@ handleEntry ::
   Stm.TVar (Map.Map (PackageName.PackageName, VersionNumber.VersionNumber) Revision.Revision) ->
   Tar.Entry ->
   m ()
-handleEntry preferredVersions revisions entry =
+handleEntry preference revisions entry =
   case FilePath.splitDirectories $ Tar.entryPath entry of
     [pkg, "preferred-versions"] ->
-      handlePreferredVersions preferredVersions entry pkg
+      handlePreference preference entry pkg
     [pkg, ver, base] -> case FilePath.splitExtensions base of
       ("package", ".json") -> handlePackageJson entry
       (p, ".cabal") | p == pkg -> handleCabal revisions entry pkg ver
       _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
     _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
 
-handlePreferredVersions ::
+handlePreference ::
   (Base.MonadBase IO m, Exception.MonadThrow m) =>
   Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->
   Tar.Entry ->
   String ->
   m ()
-handlePreferredVersions preferredVersions entry pkg = do
+handlePreference preference entry pkg = do
   packageName <-
     either Exception.throwM pure $
       Witch.tryInto @PackageName.PackageName pkg
@@ -126,7 +126,7 @@ handlePreferredVersions preferredVersions entry pkg = do
           . Exception.throwM
           $ UnexpectedEntry.UnexpectedEntry entry
         pure range
-  Base.liftBase . Stm.atomically . Stm.modifyTVar' preferredVersions
+  Base.liftBase . Stm.atomically . Stm.modifyTVar' preference
     . Map.insert packageName
     $ Witch.into @Constraint.Constraint versionRange
 
@@ -167,39 +167,39 @@ handleCabal revisions entry pkg ver = do
               . Tar.ownerName
               $ Tar.entryOwnership entry
         }
-  release <-
-    Release.Upsert.run
-      Release.Release
-        { Release.blob = Model.key blob,
-          Release.package = Model.key package,
-          Release.revision = revision,
-          Release.uploadedAt =
+  upload <-
+    Upload.Upsert.run
+      Upload.Upload
+        { Upload.blob = Model.key blob,
+          Upload.package = Model.key package,
+          Upload.revision = revision,
+          Upload.uploadedAt =
             Witch.from
               . Time.posixSecondsToUTCTime
               . fromIntegral
               $ Tar.entryTime entry,
-          Release.uploadedBy = Model.key hackageUser,
-          Release.version = Model.key version
+          Upload.uploadedBy = Model.key hackageUser,
+          Upload.version = Model.key version
         }
-  Monad.when (rem (Witch.into @Int.Int64 (Model.key release)) 10000 == 1)
+  Monad.when (rem (Witch.into @Int.Int64 (Model.key upload)) 10000 == 1)
     . MonadLog.debug
     . Text.pack
-    $ show release
+    $ show upload
 
-upsertPreferredVersions ::
+upsertPreference ::
   (Base.MonadBase IO m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
   Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->
   m ()
-upsertPreferredVersions var = do
-  preferredVersions <- Base.liftBase $ Stm.readTVarIO var
-  mapM_ (uncurry upsertPreferredVersion) $ Map.toList preferredVersions
+upsertPreference var = do
+  preference <- Base.liftBase $ Stm.readTVarIO var
+  mapM_ (uncurry upsertPreferredVersion) $ Map.toList preference
 
 upsertPreferredVersion :: (MonadSql.MonadSql m, Exception.MonadThrow m) => PackageName.PackageName -> Constraint.Constraint -> m ()
 upsertPreferredVersion packageName constraint = do
   package <- Package.Upsert.run Package.Package {Package.name = packageName}
   Monad.void $
-    PreferredVersions.Upsert.run
-      PreferredVersions.PreferredVersions
-        { PreferredVersions.package = Model.key package,
-          PreferredVersions.constraint = constraint
+    Preference.Upsert.run
+      Preference.Preference
+        { Preference.package = Model.key package,
+          Preference.constraint = constraint
         }

@@ -1,3 +1,11 @@
+import qualified Monadoc.Model.BlobSpec
+import qualified Monadoc.Model.HackageIndexSpec
+import qualified Monadoc.Model.HackageUserSpec
+import qualified Monadoc.Model.JobSpec
+import qualified Monadoc.Model.MigrationSpec
+import qualified Monadoc.Model.PackageSpec
+import qualified Monadoc.Model.PreferenceSpec
+import qualified Monadoc.Model.UploadSpec
 import qualified Monadoc.Model.VersionSpec
 import qualified Monadoc.Type.ConfigSpec
 import qualified Monadoc.Type.ConstraintSpec
@@ -22,6 +30,14 @@ main = Hspec.hspec spec
 
 spec :: Hspec.Spec
 spec = do
+  Monadoc.Model.BlobSpec.spec
+  Monadoc.Model.HackageIndexSpec.spec
+  Monadoc.Model.HackageUserSpec.spec
+  Monadoc.Model.JobSpec.spec
+  Monadoc.Model.MigrationSpec.spec
+  Monadoc.Model.PackageSpec.spec
+  Monadoc.Model.PreferenceSpec.spec
+  Monadoc.Model.UploadSpec.spec
   Monadoc.Model.VersionSpec.spec
   Monadoc.Type.ConfigSpec.spec
   Monadoc.Type.ConstraintSpec.spec

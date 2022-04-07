@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.4.6
+version: 0.2022.4.7
 
 build-type: Simple
 category: Documentation
@@ -109,8 +109,8 @@ library
     Monadoc.Action.Job.Enqueue
     Monadoc.Action.Key.SelectLastInsert
     Monadoc.Action.Package.Upsert
-    Monadoc.Action.PreferredVersions.Upsert
-    Monadoc.Action.Release.Upsert
+    Monadoc.Action.Preference.Upsert
+    Monadoc.Action.Upload.Upsert
     Monadoc.Action.Version.Upsert
     Monadoc.Class.MonadHttp
     Monadoc.Class.MonadLog
@@ -156,8 +156,8 @@ library
     Monadoc.Model.Job
     Monadoc.Model.Migration
     Monadoc.Model.Package
-    Monadoc.Model.PreferredVersions
-    Monadoc.Model.Release
+    Monadoc.Model.Preference
+    Monadoc.Model.Upload
     Monadoc.Model.Version
     Monadoc.Server.Application
     Monadoc.Server.Main
@@ -198,6 +198,14 @@ test-suite monadoc-test-suite
   hs-source-dirs: source/test-suite
   main-is: Main.hs
   other-modules:
+    Monadoc.Model.BlobSpec
+    Monadoc.Model.HackageIndexSpec
+    Monadoc.Model.HackageUserSpec
+    Monadoc.Model.JobSpec
+    Monadoc.Model.MigrationSpec
+    Monadoc.Model.PackageSpec
+    Monadoc.Model.PreferenceSpec
+    Monadoc.Model.UploadSpec
     Monadoc.Model.VersionSpec
     Monadoc.Test
     Monadoc.Type.ConfigSpec

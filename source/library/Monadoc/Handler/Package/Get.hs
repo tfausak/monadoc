@@ -9,8 +9,8 @@ import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Handler.Home.Get as Home.Get
 import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
-import qualified Monadoc.Model.PreferredVersions as PreferredVersions
-import qualified Monadoc.Model.Release as Release
+import qualified Monadoc.Model.Preference as Preference
+import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.Model as Model
@@ -26,20 +26,20 @@ handler packageName _ = do
       [] -> Exception.throwM NotFound.NotFound
       row : _ -> pure row
   constraint <- do
-    rows <- MonadSql.query "select * from preferredVersions where package = ?" [Model.key package]
+    rows <- MonadSql.query "select * from preference where package = ?" [Model.key package]
     case rows of
       [] -> pure Constraint.any
-      row : _ -> pure . PreferredVersions.constraint $ Model.value row
+      row : _ -> pure . Preference.constraint $ Model.value row
   rows <-
     MonadSql.query
       "select * \
-      \ from release \
+      \ from upload \
       \ inner join version \
-      \ on version.key = release.version \
+      \ on version.key = upload.version \
       \ inner join hackageUser \
-      \ on hackageUser.key = release.uploadedBy \
-      \ where release.package = ? \
-      \ order by release.uploadedAt desc"
+      \ on hackageUser.key = upload.uploadedBy \
+      \ where upload.package = ? \
+      \ order by upload.uploadedAt desc"
       [Model.key package]
   pure . Home.Get.htmlResponse Http.ok200 [] $ do
     Lucid.doctype_
@@ -50,13 +50,13 @@ handler packageName _ = do
           "Preferred versions: "
           Lucid.toHtml constraint
         Lucid.ul_ . Monad.forM_ rows $ \row -> Lucid.li_ $ do
-          let (release Sql.:. version Sql.:. hackageUser) = row
+          let (upload Sql.:. version Sql.:. hackageUser) = row
           "Version "
           Lucid.toHtml . Version.number $ Model.value version
           " revision "
-          Lucid.toHtml . Release.revision $ Model.value release
+          Lucid.toHtml . Upload.revision $ Model.value upload
           " released at "
-          Lucid.toHtml . Release.uploadedAt $ Model.value release
+          Lucid.toHtml . Upload.uploadedAt $ Model.value upload
           " by "
           Lucid.toHtml . HackageUser.name $ Model.value hackageUser
           "."

@@ -1,4 +1,4 @@
-module Monadoc.Model.Release where
+module Monadoc.Model.Upload where
 
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
@@ -12,11 +12,11 @@ import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Revision as Revision
 import qualified Monadoc.Type.Timestamp as Timestamp
 
-type Model = Model.Model Release
+type Model = Model.Model Upload
 
-type Key = Key.Key Release
+type Key = Key.Key Upload
 
-data Release = Release
+data Upload = Upload
   { blob :: Blob.Key,
     package :: Package.Key,
     revision :: Revision.Revision,
@@ -26,9 +26,9 @@ data Release = Release
   }
   deriving (Eq, Show)
 
-instance Sql.FromRow Release where
+instance Sql.FromRow Upload where
   fromRow =
-    Release
+    Upload
       <$> Sql.field
       <*> Sql.field
       <*> Sql.field
@@ -36,21 +36,21 @@ instance Sql.FromRow Release where
       <*> Sql.field
       <*> Sql.field
 
-instance Sql.ToRow Release where
-  toRow release =
-    [ Sql.toField $ blob release,
-      Sql.toField $ package release,
-      Sql.toField $ revision release,
-      Sql.toField $ uploadedAt release,
-      Sql.toField $ uploadedBy release,
-      Sql.toField $ version release
+instance Sql.ToRow Upload where
+  toRow upload =
+    [ Sql.toField $ blob upload,
+      Sql.toField $ package upload,
+      Sql.toField $ revision upload,
+      Sql.toField $ uploadedAt upload,
+      Sql.toField $ uploadedBy upload,
+      Sql.toField $ version upload
     ]
 
 migrations :: [Migration.Migration]
 migrations =
   [ Migration.new
-      (2022, 3, 19, 0, 0, 0)
-      "create table release \
+      (2022, 4, 6, 0, 0, 0)
+      "create table upload \
       \ ( key integer primary key \
       \ , blob integer not null references blob \
       \ , package integer not null references package \

@@ -10,7 +10,7 @@ import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Constant.ContentType as ContentType
 import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
-import qualified Monadoc.Model.Release as Release
+import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
@@ -28,14 +28,14 @@ handler _ = do
   rows <-
     MonadSql.query_
       "select * \
-      \ from release \
+      \ from upload \
       \ inner join package \
-      \ on package.key = release.package \
+      \ on package.key = upload.package \
       \ inner join version \
-      \ on version.key = release.version \
+      \ on version.key = upload.version \
       \ inner join hackageUser \
-      \ on hackageUser.key = release.uploadedBy \
-      \ order by release.uploadedAt desc \
+      \ on hackageUser.key = upload.uploadedBy \
+      \ order by upload.uploadedAt desc \
       \ limit 16"
   pure . htmlResponse Http.ok200 [] $ do
     Lucid.doctype_
@@ -65,7 +65,7 @@ handler _ = do
             Lucid.h2_ "Recent Releases"
             Lucid.ul_ [] $ do
               Monad.forM_ rows $ \row -> Lucid.li_ [] $ do
-                let (release Sql.:. package Sql.:. version Sql.:. hackageUser) = row
+                let (upload Sql.:. package Sql.:. version Sql.:. hackageUser) = row
                 "Package "
                 Lucid.a_
                   [Lucid.href_ . route context . Route.Package . Package.name $ Model.value package]
@@ -75,9 +75,9 @@ handler _ = do
                 " version "
                 Lucid.toHtml . Version.number $ Model.value version
                 " revision "
-                Lucid.toHtml . Release.revision $ Model.value release
+                Lucid.toHtml . Upload.revision $ Model.value upload
                 " released at "
-                Lucid.toHtml . Release.uploadedAt $ Model.value release
+                Lucid.toHtml . Upload.uploadedAt $ Model.value upload
                 " by "
                 Lucid.toHtml . HackageUser.name $ Model.value hackageUser
                 "."
