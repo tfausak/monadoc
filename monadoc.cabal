@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.4.7
+version: 0.2022.4.8
 
 build-type: Simple
 category: Documentation
@@ -198,6 +198,9 @@ test-suite monadoc-test-suite
   hs-source-dirs: source/test-suite
   main-is: Main.hs
   other-modules:
+    Monadoc.Action.Blob.UpsertSpec
+    Monadoc.Extra.DirectSqliteSpec
+    Monadoc.Extra.TimeSpec
     Monadoc.Model.BlobSpec
     Monadoc.Model.HackageIndexSpec
     Monadoc.Model.HackageUserSpec

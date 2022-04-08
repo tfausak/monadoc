@@ -1,3 +1,6 @@
+import qualified Monadoc.Action.Blob.UpsertSpec
+import qualified Monadoc.Extra.DirectSqliteSpec
+import qualified Monadoc.Extra.TimeSpec
 import qualified Monadoc.Model.BlobSpec
 import qualified Monadoc.Model.HackageIndexSpec
 import qualified Monadoc.Model.HackageUserSpec
@@ -30,6 +33,9 @@ main = Hspec.hspec spec
 
 spec :: Hspec.Spec
 spec = do
+  Monadoc.Action.Blob.UpsertSpec.spec
+  Monadoc.Extra.DirectSqliteSpec.spec
+  Monadoc.Extra.TimeSpec.spec
   Monadoc.Model.BlobSpec.spec
   Monadoc.Model.HackageIndexSpec.spec
   Monadoc.Model.HackageUserSpec.spec

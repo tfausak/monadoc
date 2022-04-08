@@ -7,5 +7,7 @@ import qualified Test.Hspec as Hspec
 
 spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Type.Key" $ do
+  Hspec.it "can be converted from an int" $ do
+    Test.expectFrom (0 :: Int) Key.zero
   Hspec.it "can be round-tripped through SQL" $ do
     Test.expectSqlField Key.zero $ Sql.SQLInteger 0

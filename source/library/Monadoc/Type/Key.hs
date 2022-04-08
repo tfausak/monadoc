@@ -19,5 +19,8 @@ instance Sql.FromField (Key a) where
 instance Sql.ToField (Key a) where
   toField = Sql.toField . Witch.into @Int.Int64
 
+instance Witch.From Int (Key a) where
+  from = Witch.via @Int.Int64
+
 zero :: Key a
-zero = Witch.from @Int.Int64 0
+zero = Witch.from @Int 0

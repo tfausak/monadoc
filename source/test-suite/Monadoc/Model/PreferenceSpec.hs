@@ -1,6 +1,5 @@
 module Monadoc.Model.PreferenceSpec where
 
-import qualified Data.Int as Int
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Model.Preference as Preference
 import qualified Monadoc.Test as Test
@@ -14,7 +13,7 @@ spec = Hspec.describe "Monadoc.Model.Preference" $ do
     Test.expectSqlRow
       Preference.Preference
         { Preference.constraint = Constraint.any,
-          Preference.package = Witch.from @Int.Int64 1
+          Preference.package = Witch.from @Int 1
         }
       [ Sql.SQLText ">=0",
         Sql.SQLInteger 1

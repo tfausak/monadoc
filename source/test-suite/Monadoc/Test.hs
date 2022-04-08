@@ -129,3 +129,6 @@ expectHtmlRaw ::
   LazyText.Text ->
   Hspec.Expectation
 expectHtmlRaw x html = Lucid.renderText (Lucid.toHtmlRaw x) `Hspec.shouldBe` html
+
+thisException :: Hspec.Selector e
+thisException = const True
