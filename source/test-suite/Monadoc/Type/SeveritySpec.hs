@@ -10,6 +10,7 @@ spec = Hspec.describe "Monadoc.Type.Severity" $ do
   Hspec.it "has the right order" $ do
     let severities = [Severity.Debug, Severity.Info, Severity.Warn, Severity.Error]
     List.sort severities `Hspec.shouldBe` severities
+
   Hspec.it "can be converted into a string" $ do
     Test.expectFrom Severity.Debug ("debug" :: String)
     Test.expectFrom Severity.Info ("info" :: String)

@@ -3,6 +3,7 @@ module Monadoc.Type.Key where
 import qualified Data.Int as Int
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 newtype Key a
@@ -21,6 +22,10 @@ instance Sql.ToField (Key a) where
 
 instance Witch.From Int (Key a) where
   from = Witch.via @Int.Int64
+
+instance QuickCheck.Arbitrary (Key a) where
+  arbitrary = Witch.from @Int.Int64 <$> QuickCheck.arbitrary
+  shrink = QuickCheck.shrinkMap (Witch.from @Int.Int64) (Witch.into @Int.Int64)
 
 zero :: Key a
 zero = Witch.from @Int 0

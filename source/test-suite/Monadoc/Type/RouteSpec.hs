@@ -17,6 +17,7 @@ spec = Hspec.describe "Monadoc.Type.Route" $ do
     Route.parse ["package", "example"] `Hspec.shouldBe` Just (Route.Package packageName)
     Route.parse ["robots.txt"] `Hspec.shouldBe` Just Route.Robots
     Route.parse ["static", "bootstrap.css"] `Hspec.shouldBe` Just Route.Bootstrap
+
   Hspec.it "can be rendered" $ do
     Route.render Route.Home `Hspec.shouldBe` []
     Route.render Route.AppleTouchIcon `Hspec.shouldBe` ["apple-touch-icon.png"]

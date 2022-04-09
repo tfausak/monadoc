@@ -6,6 +6,7 @@ import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.VersionNumber as VersionNumber
+import qualified Test.QuickCheck as QuickCheck
 
 type Model = Model.Model Version
 
@@ -25,6 +26,14 @@ instance Sql.ToRow Version where
   toRow version =
     [ Sql.toField $ number version
     ]
+
+instance QuickCheck.Arbitrary Version where
+  arbitrary =
+    Version
+      <$> QuickCheck.arbitrary
+  shrink version =
+    Version
+      <$> QuickCheck.shrink (number version)
 
 migrations :: [Migration.Migration]
 migrations =

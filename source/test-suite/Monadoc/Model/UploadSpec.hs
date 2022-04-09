@@ -14,7 +14,7 @@ spec = Hspec.describe "Monadoc.Model.Upload" $ do
       Upload.Upload
         { Upload.blob = Witch.from @Int 1,
           Upload.package = Witch.from @Int 2,
-          Upload.revision = Witch.from @Int 3,
+          Upload.revision = Witch.from @Word 3,
           Upload.uploadedAt = Witch.from $ Time.makeUtcTime 2001 2 3 4 5 6.007,
           Upload.uploadedBy = Witch.from @Int 4,
           Upload.version = Witch.from @Int 5

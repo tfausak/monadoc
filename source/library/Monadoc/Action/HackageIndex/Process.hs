@@ -159,13 +159,15 @@ handleCabal revisions entry pkg ver = do
   blob <- Blob.Upsert.run $ Blob.new byteString
   package <- Package.Upsert.run Package.Package {Package.name = packageName}
   version <- Version.Upsert.run Version.Version {Version.number = versionNumber}
+  hackageUserName <-
+    either Exception.throwM pure
+      . Witch.tryInto @HackageUserName.HackageUserName
+      . Tar.ownerName
+      $ Tar.entryOwnership entry
   hackageUser <-
     HackageUser.Upsert.run
       HackageUser.HackageUser
-        { HackageUser.name =
-            Witch.into @HackageUserName.HackageUserName
-              . Tar.ownerName
-              $ Tar.entryOwnership entry
+        { HackageUser.name = hackageUserName
         }
   upload <-
     Upload.Upsert.run

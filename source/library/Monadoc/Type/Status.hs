@@ -2,6 +2,7 @@ module Monadoc.Type.Status where
 
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 data Status
@@ -34,3 +35,12 @@ instance Sql.FromField Status where
 
 instance Sql.ToField Status where
   toField = Sql.toField . Witch.into @String
+
+instance QuickCheck.Arbitrary Status where
+  arbitrary =
+    QuickCheck.elements
+      [ Failed,
+        Locked,
+        Queued,
+        Passed
+      ]

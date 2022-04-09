@@ -7,6 +7,10 @@ import qualified Test.Hspec as Hspec
 
 spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Extra.Time" $ do
+  Hspec.describe "epoch" $ do
+    Hspec.it "is correct" $ do
+      Extra.epoch `Hspec.shouldBe` Extra.makeUtcTime 1970 1 1 0 0 0
+
   Hspec.describe "makeUtcTime" $ do
     Hspec.it "works" $ do
       let year = 2001 :: Time.Year

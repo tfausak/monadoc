@@ -6,6 +6,7 @@ import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
+import qualified Test.QuickCheck as QuickCheck
 
 type Model = Model.Model Package
 
@@ -25,6 +26,14 @@ instance Sql.ToRow Package where
   toRow package =
     [ Sql.toField $ name package
     ]
+
+instance QuickCheck.Arbitrary Package where
+  arbitrary =
+    Package
+      <$> QuickCheck.arbitrary
+  shrink package =
+    Package
+      <$> QuickCheck.shrink (name package)
 
 migrations :: [Migration.Migration]
 migrations =

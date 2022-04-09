@@ -12,11 +12,13 @@ spec = Hspec.describe "Monadoc.Type.Status" $ do
     Test.expectTryFrom ("Locked" :: String) Status.Locked
     Test.expectTryFrom ("Queued" :: String) Status.Queued
     Test.expectTryFrom ("Passed" :: String) Status.Passed
+
   Hspec.it "can be converted into a string" $ do
     Test.expectFrom Status.Failed ("Failed" :: String)
     Test.expectFrom Status.Locked ("Locked" :: String)
     Test.expectFrom Status.Queued ("Queued" :: String)
     Test.expectFrom Status.Passed ("Passed" :: String)
+
   Hspec.it "can be round-tripped through SQL" $ do
     Test.expectSqlField Status.Failed $ Sql.SQLText "Failed"
     Test.expectSqlField Status.Locked $ Sql.SQLText "Locked"

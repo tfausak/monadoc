@@ -4,6 +4,7 @@ import qualified Data.Aeson as Aeson
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
+import qualified Test.QuickCheck as QuickCheck
 
 data Task
   = ProcessHackageIndex
@@ -36,3 +37,11 @@ instance Sql.FromField Task where
 
 instance Sql.ToField Task where
   toField = Sql.toField . Aeson.encode
+
+instance QuickCheck.Arbitrary Task where
+  arbitrary =
+    QuickCheck.elements
+      [ ProcessHackageIndex,
+        UpsertHackageIndex,
+        Vacuum
+      ]

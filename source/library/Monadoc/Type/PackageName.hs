@@ -1,5 +1,6 @@
 module Monadoc.Type.PackageName where
 
+import qualified Data.Maybe as Maybe
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
@@ -7,6 +8,8 @@ import qualified Distribution.Package as Cabal
 import qualified Distribution.Parsec as Cabal
 import qualified Distribution.Pretty as Cabal
 import qualified Lucid
+import qualified Monadoc.Extra.Either as Either
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 newtype PackageName
@@ -41,3 +44,7 @@ instance Sql.ToField PackageName where
 instance Lucid.ToHtml PackageName where
   toHtml = Lucid.toHtml . Witch.into @String
   toHtmlRaw = Lucid.toHtmlRaw . Witch.into @String
+
+instance QuickCheck.Arbitrary PackageName where
+  arbitrary = QuickCheck.suchThatMap @String QuickCheck.arbitrary $ Either.hush . Witch.tryFrom
+  shrink = Maybe.mapMaybe (Either.hush . Witch.tryFrom) . QuickCheck.shrink @String . Witch.from

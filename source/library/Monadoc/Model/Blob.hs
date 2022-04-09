@@ -7,6 +7,7 @@ import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Type.Hash as Hash
 import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
+import qualified Test.QuickCheck as QuickCheck
 
 type Model = Model.Model Blob
 
@@ -32,6 +33,10 @@ instance Sql.ToRow Blob where
       Sql.toField $ hash blob,
       Sql.toField $ size blob
     ]
+
+instance QuickCheck.Arbitrary Blob where
+  arbitrary = new . ByteString.pack <$> QuickCheck.arbitrary
+  shrink = QuickCheck.shrinkMap (new . ByteString.pack) (ByteString.unpack . contents)
 
 migrations :: [Migration.Migration]
 migrations =

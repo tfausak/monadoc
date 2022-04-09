@@ -10,5 +10,5 @@ spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Model.HackageUser" $ do
   Hspec.it "can be round-tripped through SQL" $ do
     Test.expectSqlRow
-      HackageUser.HackageUser {HackageUser.name = Witch.from @String "example"}
+      HackageUser.HackageUser {HackageUser.name = Witch.unsafeFrom @String "example"}
       [Sql.SQLText "example"]

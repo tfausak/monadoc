@@ -12,8 +12,10 @@ spec = Hspec.describe "Monadoc.Type.Timestamp" $ do
   let timestamp = Witch.into @Timestamp.Timestamp $ Time.makeUtcTime 2001 2 3 4 5 6.007
   Hspec.it "can be converted into a string" $ do
     Test.expectFrom timestamp ("2001-02-03T04:05:06Z" :: String)
+
   Hspec.it "can be round-tripped through SQL" $ do
     Test.expectSqlField timestamp $ Sql.SQLText "2001-02-03 04:05:06.007"
+
   Hspec.it "can be rendered as HTML" $ do
     Test.expectHtml timestamp "2001-02-03T04:05:06Z"
     Test.expectHtmlRaw timestamp "2001-02-03T04:05:06Z"

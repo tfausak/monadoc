@@ -6,6 +6,7 @@ import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
+import qualified Test.QuickCheck as QuickCheck
 
 type Model = Model.Model HackageUser
 
@@ -25,6 +26,14 @@ instance Sql.ToRow HackageUser where
   toRow hackageUser =
     [ Sql.toField $ name hackageUser
     ]
+
+instance QuickCheck.Arbitrary HackageUser where
+  arbitrary =
+    HackageUser
+      <$> QuickCheck.arbitrary
+  shrink hackageUser =
+    HackageUser
+      <$> QuickCheck.shrink (name hackageUser)
 
 migrations :: [Migration.Migration]
 migrations =

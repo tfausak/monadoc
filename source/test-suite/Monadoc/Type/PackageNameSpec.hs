@@ -13,14 +13,19 @@ spec = Hspec.describe "Monadoc.Type.PackageName" $ do
   let packageName = Witch.into @PackageName.PackageName $ Cabal.mkPackageName "example"
   Hspec.it "can be converted from a string" $ do
     Test.expectTryFrom ("example" :: String) packageName
+
   Hspec.it "can be converted into a string" $ do
     Test.expectFrom packageName ("example" :: String)
+
   Hspec.it "can be converted from text" $ do
     Test.expectTryFrom ("example" :: Text.Text) packageName
+
   Hspec.it "can be converted into text" $ do
     Test.expectFrom packageName ("example" :: Text.Text)
+
   Hspec.it "can be round-tripped through SQL" $ do
     Test.expectSqlField packageName $ Sql.SQLText "example"
+
   Hspec.it "can be rendered as HTML" $ do
     Test.expectHtml packageName "example"
     Test.expectHtmlRaw packageName "example"

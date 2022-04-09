@@ -8,6 +8,7 @@ import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Status as Status
 import qualified Monadoc.Type.Task as Task
 import qualified Monadoc.Type.Timestamp as Timestamp
+import qualified Test.QuickCheck as QuickCheck
 
 type Model = Model.Model Job
 
@@ -39,6 +40,22 @@ instance Sql.ToRow Job where
       Sql.toField $ status job,
       Sql.toField $ task job
     ]
+
+instance QuickCheck.Arbitrary Job where
+  arbitrary =
+    Job
+      <$> QuickCheck.arbitrary
+      <*> QuickCheck.arbitrary
+      <*> QuickCheck.arbitrary
+      <*> QuickCheck.arbitrary
+      <*> QuickCheck.arbitrary
+  shrink job =
+    Job
+      <$> QuickCheck.shrink (createdAt job)
+      <*> QuickCheck.shrink (finishedAt job)
+      <*> QuickCheck.shrink (startedAt job)
+      <*> QuickCheck.shrink (status job)
+      <*> QuickCheck.shrink (task job)
 
 migrations :: [Migration.Migration]
 migrations =

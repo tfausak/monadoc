@@ -17,5 +17,6 @@ spec = Hspec.describe "Monadoc.Type.Config" $ do
     Config.fromFlags [Flag.Port "80"] `Hspec.shouldBe` Just Config.initial {Config.port = Witch.from @Int 80}
     Config.fromFlags [Flag.Sql "x"] `Hspec.shouldBe` Just Config.initial {Config.sql = "x"}
     Config.fromFlags [Flag.Version] `Hspec.shouldBe` Just Config.initial {Config.version = True}
+
   Hspec.it "rejects invalid flags" $ do
     Config.fromFlags [Flag.Port "x"] `Hspec.shouldBe` Nothing

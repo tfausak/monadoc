@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.4.8
+version: 0.2022.4.9
 
 build-type: Simple
 category: Documentation
@@ -46,6 +46,7 @@ common library
     , memory ^>= 0.17.0
     , monad-control ^>= 1.0.3
     , mtl ^>= 2.2.2
+    , QuickCheck ^>= 2.14.2
     , resource-pool ^>= 0.2.3
     , say ^>= 0.1.0
     , sqlite-simple ^>= 0.4.18
@@ -136,6 +137,7 @@ library
     Monadoc.Exception.UnknownOption
     Monadoc.Exception.UnknownRoute
     Monadoc.Extra.DirectSqlite
+    Monadoc.Extra.Either
     Monadoc.Extra.Time
     Monadoc.Handler.AppleTouchIcon.Get
     Monadoc.Handler.Bootstrap.Get
@@ -199,7 +201,17 @@ test-suite monadoc-test-suite
   main-is: Main.hs
   other-modules:
     Monadoc.Action.Blob.UpsertSpec
+    Monadoc.Action.Database.InitializeSpec
+    Monadoc.Action.Database.VacuumSpec
+    Monadoc.Action.HackageUser.UpsertSpec
+    Monadoc.Action.Job.EnqueueSpec
+    Monadoc.Action.Key.SelectLastInsertSpec
+    Monadoc.Action.Package.UpsertSpec
+    Monadoc.Action.Preference.UpsertSpec
+    Monadoc.Action.Upload.UpsertSpec
+    Monadoc.Action.Version.UpsertSpec
     Monadoc.Extra.DirectSqliteSpec
+    Monadoc.Extra.EitherSpec
     Monadoc.Extra.TimeSpec
     Monadoc.Model.BlobSpec
     Monadoc.Model.HackageIndexSpec

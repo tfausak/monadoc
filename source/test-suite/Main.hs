@@ -1,5 +1,15 @@
 import qualified Monadoc.Action.Blob.UpsertSpec
+import qualified Monadoc.Action.Database.InitializeSpec
+import qualified Monadoc.Action.Database.VacuumSpec
+import qualified Monadoc.Action.HackageUser.UpsertSpec
+import qualified Monadoc.Action.Job.EnqueueSpec
+import qualified Monadoc.Action.Key.SelectLastInsertSpec
+import qualified Monadoc.Action.Package.UpsertSpec
+import qualified Monadoc.Action.Preference.UpsertSpec
+import qualified Monadoc.Action.Upload.UpsertSpec
+import qualified Monadoc.Action.Version.UpsertSpec
 import qualified Monadoc.Extra.DirectSqliteSpec
+import qualified Monadoc.Extra.EitherSpec
 import qualified Monadoc.Extra.TimeSpec
 import qualified Monadoc.Model.BlobSpec
 import qualified Monadoc.Model.HackageIndexSpec
@@ -34,7 +44,17 @@ main = Hspec.hspec spec
 spec :: Hspec.Spec
 spec = do
   Monadoc.Action.Blob.UpsertSpec.spec
+  Monadoc.Action.Database.InitializeSpec.spec
+  Monadoc.Action.Database.VacuumSpec.spec
+  Monadoc.Action.HackageUser.UpsertSpec.spec
+  Monadoc.Action.Job.EnqueueSpec.spec
+  Monadoc.Action.Key.SelectLastInsertSpec.spec
+  Monadoc.Action.Package.UpsertSpec.spec
+  Monadoc.Action.Preference.UpsertSpec.spec
+  Monadoc.Action.Upload.UpsertSpec.spec
+  Monadoc.Action.Version.UpsertSpec.spec
   Monadoc.Extra.DirectSqliteSpec.spec
+  Monadoc.Extra.EitherSpec.spec
   Monadoc.Extra.TimeSpec.spec
   Monadoc.Model.BlobSpec.spec
   Monadoc.Model.HackageIndexSpec.spec

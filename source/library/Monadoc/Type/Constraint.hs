@@ -4,8 +4,11 @@ import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Distribution.Parsec as Cabal
 import qualified Distribution.Pretty as Cabal
+import qualified Distribution.Types.Version as Cabal
 import qualified Distribution.Types.VersionRange as Cabal
 import qualified Lucid
+import qualified Monadoc.Type.VersionNumber as VersionNumber
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 newtype Constraint
@@ -37,6 +40,40 @@ instance Sql.ToField Constraint where
 instance Lucid.ToHtml Constraint where
   toHtml = Lucid.toHtml . Witch.into @String
   toHtmlRaw = Lucid.toHtmlRaw . Witch.into @String
+
+instance QuickCheck.Arbitrary Constraint where
+  arbitrary = Witch.from <$> genVersionRange
+  shrink = QuickCheck.shrinkMapBy Witch.from Witch.from shrinkVersionRange
+
+genVersionRange :: QuickCheck.Gen Cabal.VersionRange
+genVersionRange =
+  QuickCheck.oneof
+    [ Cabal.thisVersion <$> genVersion,
+      Cabal.laterVersion <$> genVersion,
+      Cabal.earlierVersion <$> genVersion,
+      Cabal.orLaterVersion <$> genVersion,
+      Cabal.orEarlierVersion <$> genVersion,
+      Cabal.majorBoundVersion <$> genVersion,
+      Cabal.unionVersionRanges <$> genVersionRange <*> genVersionRange,
+      Cabal.intersectVersionRanges <$> genVersionRange <*> genVersionRange
+    ]
+
+shrinkVersionRange :: Cabal.VersionRange -> [Cabal.VersionRange]
+shrinkVersionRange =
+  fmap Cabal.normaliseVersionRange
+    . Cabal.foldVersionRange
+      []
+      (fmap Cabal.thisVersion . shrinkVersion)
+      (fmap Cabal.laterVersion . shrinkVersion)
+      (fmap Cabal.earlierVersion . shrinkVersion)
+      (\xs ys -> Cabal.unionVersionRanges <$> xs <*> ys)
+      (\xs ys -> Cabal.intersectVersionRanges <$> xs <*> ys)
+
+genVersion :: QuickCheck.Gen Cabal.Version
+genVersion = Witch.from @VersionNumber.VersionNumber <$> QuickCheck.arbitrary
+
+shrinkVersion :: Cabal.Version -> [Cabal.Version]
+shrinkVersion = QuickCheck.shrinkMap @VersionNumber.VersionNumber Witch.from Witch.from
 
 any :: Constraint
 any = Witch.from @Cabal.VersionRange Cabal.anyVersion

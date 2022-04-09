@@ -3,6 +3,9 @@ module Monadoc.Extra.Time where
 import qualified Data.Fixed as Fixed
 import qualified Data.Time as Time
 
+epoch :: Time.UTCTime
+epoch = makeUtcTime 1970 1 1 0 0 0
+
 makeUtcTime ::
   Time.Year ->
   Time.MonthOfYear ->

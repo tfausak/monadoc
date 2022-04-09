@@ -9,8 +9,10 @@ spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Type.Revision" $ do
   Hspec.it "can be round-tripped through SQL" $ do
     Test.expectSqlField Revision.zero $ Sql.SQLInteger 0
+
   Hspec.it "can be converted into a string" $ do
     Test.expectFrom Revision.zero ("0" :: String)
+
   Hspec.it "can be rendered as HTML" $ do
     Test.expectHtml Revision.zero "0"
     Test.expectHtmlRaw Revision.zero "0"

@@ -11,6 +11,7 @@ import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Revision as Revision
 import qualified Monadoc.Type.Timestamp as Timestamp
+import qualified Test.QuickCheck as QuickCheck
 
 type Model = Model.Model Upload
 
@@ -45,6 +46,24 @@ instance Sql.ToRow Upload where
       Sql.toField $ uploadedBy upload,
       Sql.toField $ version upload
     ]
+
+instance QuickCheck.Arbitrary Upload where
+  arbitrary =
+    Upload
+      <$> QuickCheck.arbitrary
+      <*> QuickCheck.arbitrary
+      <*> QuickCheck.arbitrary
+      <*> QuickCheck.arbitrary
+      <*> QuickCheck.arbitrary
+      <*> QuickCheck.arbitrary
+  shrink upload =
+    Upload
+      <$> QuickCheck.shrink (blob upload)
+      <*> QuickCheck.shrink (package upload)
+      <*> QuickCheck.shrink (revision upload)
+      <*> QuickCheck.shrink (uploadedAt upload)
+      <*> QuickCheck.shrink (uploadedBy upload)
+      <*> QuickCheck.shrink (version upload)
 
 migrations :: [Migration.Migration]
 migrations =

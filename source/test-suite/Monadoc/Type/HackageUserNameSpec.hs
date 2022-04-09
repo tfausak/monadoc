@@ -8,9 +8,10 @@ import qualified Witch
 
 spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Type.HackageUserName" $ do
-  let hackageUserName = Witch.from @String @HackageUserName.HackageUserName "example"
+  let hackageUserName = Witch.unsafeFrom @String @HackageUserName.HackageUserName "example"
   Hspec.it "can be round-tripped through SQL" $ do
     Test.expectSqlField hackageUserName $ Sql.SQLText "example"
+
   Hspec.it "can be rendered to HTML" $ do
     Test.expectHtml hackageUserName "example"
     Test.expectHtmlRaw hackageUserName "example"

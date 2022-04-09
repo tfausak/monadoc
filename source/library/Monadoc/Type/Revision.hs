@@ -3,31 +3,36 @@ module Monadoc.Type.Revision where
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Lucid
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 newtype Revision
-  = Revision Int
+  = Revision Word
   deriving (Eq, Ord, Show)
 
-instance Witch.From Int Revision
+instance Witch.From Word Revision
 
-instance Witch.From Revision Int
+instance Witch.From Revision Word
 
 instance Sql.FromField Revision where
-  fromField = fmap (Witch.from @Int) . Sql.fromField
+  fromField = fmap (Witch.from @Word) . Sql.fromField
 
 instance Sql.ToField Revision where
-  toField = Sql.toField . Witch.into @Int
+  toField = Sql.toField . Witch.into @Word
 
 instance Witch.From Revision String where
-  from = show . Witch.into @Int
+  from = show . Witch.into @Word
 
 instance Lucid.ToHtml Revision where
   toHtml = Lucid.toHtml . Witch.into @String
   toHtmlRaw = Lucid.toHtmlRaw . Witch.into @String
 
+instance QuickCheck.Arbitrary Revision where
+  arbitrary = Witch.from <$> QuickCheck.arbitrary @Word
+  shrink = QuickCheck.shrinkMap @Word Witch.from Witch.from
+
 zero :: Revision
-zero = Witch.from @Int 0
+zero = Witch.from @Word 0
 
 increment :: Revision -> Revision
-increment = Witch.over @Int succ
+increment = Witch.over @Word succ

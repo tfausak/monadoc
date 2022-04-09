@@ -7,6 +7,7 @@ import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
+import qualified Test.QuickCheck as QuickCheck
 
 type Model = Model.Model Preference
 
@@ -29,6 +30,16 @@ instance Sql.ToRow Preference where
     [ Sql.toField $ constraint preference,
       Sql.toField $ package preference
     ]
+
+instance QuickCheck.Arbitrary Preference where
+  arbitrary =
+    Preference
+      <$> QuickCheck.arbitrary
+      <*> QuickCheck.arbitrary
+  shrink preference =
+    Preference
+      <$> QuickCheck.shrink (constraint preference)
+      <*> QuickCheck.shrink (package preference)
 
 migrations :: [Migration.Migration]
 migrations =

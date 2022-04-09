@@ -18,9 +18,12 @@ spec = Hspec.describe "Monadoc.Type.Flag" $ do
     Flag.fromArguments ["--host=x"] `Hspec.shouldBe` Just [Flag.Host "x"]
     Flag.fromArguments ["--port=x"] `Hspec.shouldBe` Just [Flag.Port "x"]
     Flag.fromArguments ["--sql=x"] `Hspec.shouldBe` Just [Flag.Sql "x"]
+
   Hspec.it "rejects invalid options" $ do
     Flag.fromArguments ["--help=invalid"] `Hspec.shouldBe` Nothing
+
   Hspec.it "rejects unknown options" $ do
     Flag.fromArguments ["--unknown"] `Hspec.shouldBe` Nothing
+
   Hspec.it "rejects unexpected arguments" $ do
     Flag.fromArguments ["unexpected"] `Hspec.shouldBe` Nothing
