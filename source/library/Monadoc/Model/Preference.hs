@@ -36,10 +36,6 @@ instance QuickCheck.Arbitrary Preference where
     Preference
       <$> QuickCheck.arbitrary
       <*> QuickCheck.arbitrary
-  shrink preference =
-    Preference
-      <$> QuickCheck.shrink (constraint preference)
-      <*> QuickCheck.shrink (package preference)
 
 migrations :: [Migration.Migration]
 migrations =

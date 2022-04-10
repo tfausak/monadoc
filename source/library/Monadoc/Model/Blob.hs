@@ -36,7 +36,6 @@ instance Sql.ToRow Blob where
 
 instance QuickCheck.Arbitrary Blob where
   arbitrary = new . ByteString.pack <$> QuickCheck.arbitrary
-  shrink = QuickCheck.shrinkMap (new . ByteString.pack) (ByteString.unpack . contents)
 
 migrations :: [Migration.Migration]
 migrations =

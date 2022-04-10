@@ -31,9 +31,6 @@ instance QuickCheck.Arbitrary Package where
   arbitrary =
     Package
       <$> QuickCheck.arbitrary
-  shrink package =
-    Package
-      <$> QuickCheck.shrink (name package)
 
 migrations :: [Migration.Migration]
 migrations =

@@ -31,9 +31,6 @@ instance QuickCheck.Arbitrary Version where
   arbitrary =
     Version
       <$> QuickCheck.arbitrary
-  shrink version =
-    Version
-      <$> QuickCheck.shrink (number version)
 
 migrations :: [Migration.Migration]
 migrations =

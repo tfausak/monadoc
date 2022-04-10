@@ -22,7 +22,3 @@ instance QuickCheck.Arbitrary a => QuickCheck.Arbitrary (Model a) where
     Model
       <$> QuickCheck.arbitrary
       <*> QuickCheck.arbitrary
-  shrink model =
-    Model
-      <$> QuickCheck.shrink (key model)
-      <*> QuickCheck.shrink (value model)

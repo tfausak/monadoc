@@ -49,13 +49,6 @@ instance QuickCheck.Arbitrary Job where
       <*> QuickCheck.arbitrary
       <*> QuickCheck.arbitrary
       <*> QuickCheck.arbitrary
-  shrink job =
-    Job
-      <$> QuickCheck.shrink (createdAt job)
-      <*> QuickCheck.shrink (finishedAt job)
-      <*> QuickCheck.shrink (startedAt job)
-      <*> QuickCheck.shrink (status job)
-      <*> QuickCheck.shrink (task job)
 
 migrations :: [Migration.Migration]
 migrations =

@@ -43,7 +43,6 @@ instance Lucid.ToHtml Constraint where
 
 instance QuickCheck.Arbitrary Constraint where
   arbitrary = Witch.from <$> genVersionRange
-  shrink = QuickCheck.shrinkMapBy Witch.from Witch.from shrinkVersionRange
 
 genVersionRange :: QuickCheck.Gen Cabal.VersionRange
 genVersionRange =
@@ -58,22 +57,8 @@ genVersionRange =
       Cabal.intersectVersionRanges <$> genVersionRange <*> genVersionRange
     ]
 
-shrinkVersionRange :: Cabal.VersionRange -> [Cabal.VersionRange]
-shrinkVersionRange =
-  fmap Cabal.normaliseVersionRange
-    . Cabal.foldVersionRange
-      []
-      (fmap Cabal.thisVersion . shrinkVersion)
-      (fmap Cabal.laterVersion . shrinkVersion)
-      (fmap Cabal.earlierVersion . shrinkVersion)
-      (\xs ys -> Cabal.unionVersionRanges <$> xs <*> ys)
-      (\xs ys -> Cabal.intersectVersionRanges <$> xs <*> ys)
-
 genVersion :: QuickCheck.Gen Cabal.Version
 genVersion = Witch.from @VersionNumber.VersionNumber <$> QuickCheck.arbitrary
-
-shrinkVersion :: Cabal.Version -> [Cabal.Version]
-shrinkVersion = QuickCheck.shrinkMap @VersionNumber.VersionNumber Witch.from Witch.from
 
 any :: Constraint
 any = Witch.from @Cabal.VersionRange Cabal.anyVersion

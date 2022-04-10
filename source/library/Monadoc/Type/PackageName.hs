@@ -1,6 +1,5 @@
 module Monadoc.Type.PackageName where
 
-import qualified Data.Maybe as Maybe
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
@@ -47,4 +46,3 @@ instance Lucid.ToHtml PackageName where
 
 instance QuickCheck.Arbitrary PackageName where
   arbitrary = QuickCheck.suchThatMap @String QuickCheck.arbitrary $ Either.hush . Witch.tryFrom
-  shrink = Maybe.mapMaybe (Either.hush . Witch.tryFrom) . QuickCheck.shrink @String . Witch.from

@@ -2,44 +2,15 @@ module Monadoc.Action.Database.Initialize where
 
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
-import qualified Data.List as List
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
+import qualified Monadoc.Constant.Migration as Migration
+import qualified Monadoc.Constant.Pragma as Pragma
 import qualified Monadoc.Exception.MigrationMismatch as MigrationMismatch
-import qualified Monadoc.Model.Blob as Blob
-import qualified Monadoc.Model.HackageIndex as HackageIndex
-import qualified Monadoc.Model.HackageUser as HackageUser
-import qualified Monadoc.Model.Job as Job
 import qualified Monadoc.Model.Migration as Migration
-import qualified Monadoc.Model.Package as Package
-import qualified Monadoc.Model.Preference as Preference
-import qualified Monadoc.Model.Upload as Upload
-import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.Model as Model
-
-pragmas :: [Sql.Query]
-pragmas =
-  [ "pragma auto_vacuum = 'incremental'",
-    "pragma foreign_keys = true",
-    "pragma journal_mode = 'wal'"
-  ]
-
-migrations :: [Migration.Migration]
-migrations =
-  List.sortOn Migration.createdAt $
-    mconcat
-      [ Blob.migrations,
-        HackageIndex.migrations,
-        HackageUser.migrations,
-        Job.migrations,
-        Migration.migrations,
-        Package.migrations,
-        Preference.migrations,
-        Upload.migrations,
-        Version.migrations
-      ]
 
 run :: (MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) => m ()
 run = do
@@ -51,7 +22,7 @@ run = do
 runPragmas :: (MonadLog.MonadLog m, MonadSql.MonadSql m) => m ()
 runPragmas = do
   MonadLog.info "executing pragmas"
-  mapM_ runPragma pragmas
+  mapM_ runPragma Pragma.all
 
 runPragma :: (MonadLog.MonadLog m, MonadSql.MonadSql m) => Sql.Query -> m ()
 runPragma pragma = do
@@ -62,7 +33,7 @@ runMigrations :: (MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow
 runMigrations = do
   MonadLog.info "running migrations"
   MonadSql.execute_ Migration.createTable
-  mapM_ runMigration migrations
+  mapM_ runMigration Migration.all
 
 runMigration :: (MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) => Migration.Migration -> m ()
 runMigration migration = do

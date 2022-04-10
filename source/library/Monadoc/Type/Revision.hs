@@ -29,7 +29,6 @@ instance Lucid.ToHtml Revision where
 
 instance QuickCheck.Arbitrary Revision where
   arbitrary = Witch.from <$> QuickCheck.arbitrary @Word
-  shrink = QuickCheck.shrinkMap @Word Witch.from Witch.from
 
 zero :: Revision
 zero = Witch.from @Word 0

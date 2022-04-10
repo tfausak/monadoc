@@ -19,8 +19,8 @@ spec = Hspec.describe "Monadoc.Action.Upload.Upsert" . Hspec.around Test.withCon
     hackageUser <- HackageUser.Upsert.run =<< Test.arbitrary
     package <- Package.Upsert.run =<< Test.arbitrary
     version <- Version.Upsert.run =<< Test.arbitrary
-    upload <- Test.arbitraryWith $ \upload ->
-      upload
+    upload <- Test.arbitraryWith $ \x ->
+      x
         { Upload.blob = Model.key blob,
           Upload.package = Model.key package,
           Upload.uploadedBy = Model.key hackageUser,
@@ -34,8 +34,8 @@ spec = Hspec.describe "Monadoc.Action.Upload.Upsert" . Hspec.around Test.withCon
     hackageUser <- HackageUser.Upsert.run =<< Test.arbitrary
     package <- Package.Upsert.run =<< Test.arbitrary
     version <- Version.Upsert.run =<< Test.arbitrary
-    upload <- Test.arbitraryWith $ \upload ->
-      upload
+    upload <- Test.arbitraryWith $ \x ->
+      x
         { Upload.blob = Model.key blob,
           Upload.package = Model.key package,
           Upload.uploadedBy = Model.key hackageUser,
@@ -50,20 +50,28 @@ spec = Hspec.describe "Monadoc.Action.Upload.Upsert" . Hspec.around Test.withCon
     hackageUser <- HackageUser.Upsert.run =<< Test.arbitrary
     package <- Package.Upsert.run =<< Test.arbitrary
     version <- Version.Upsert.run =<< Test.arbitrary
-    upload1 <- Test.arbitraryWith $ \upload ->
-      upload
-        { Upload.blob = Model.key blob,
-          Upload.package = Model.key package,
-          Upload.uploadedBy = Model.key hackageUser,
-          Upload.version = Model.key version
-        }
-    upload2 <- Test.arbitraryWith $ \upload ->
-      upload
-        { Upload.blob = Model.key blob,
-          Upload.package = Model.key package,
-          Upload.uploadedBy = Model.key hackageUser,
-          Upload.version = Model.key version
-        }
-    model1 <- Upload.Upsert.run upload1
-    model2 <- Upload.Upsert.run upload2
-    Base.liftBase $ Model.key model1 `Hspec.shouldNotBe` Model.key model2
+    a <-
+      Upload.Upsert.run
+        =<< Test.arbitraryWith
+          ( \x ->
+              x
+                { Upload.blob = Model.key blob,
+                  Upload.package = Model.key package,
+                  Upload.revision = Witch.from @Word 1,
+                  Upload.uploadedBy = Model.key hackageUser,
+                  Upload.version = Model.key version
+                }
+          )
+    b <-
+      Upload.Upsert.run
+        =<< Test.arbitraryWith
+          ( \x ->
+              x
+                { Upload.blob = Model.key blob,
+                  Upload.package = Model.key package,
+                  Upload.revision = Witch.from @Word 2,
+                  Upload.uploadedBy = Model.key hackageUser,
+                  Upload.version = Model.key version
+                }
+          )
+    Base.liftBase $ Model.key a `Hspec.shouldNotBe` Model.key b

@@ -2,7 +2,6 @@ module Monadoc.Type.Timestamp where
 
 import qualified Control.Monad as Monad
 import qualified Data.Fixed as Fixed
-import qualified Data.Maybe as Maybe
 import qualified Data.Time as Time
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
@@ -35,22 +34,12 @@ instance Lucid.ToHtml Timestamp where
 
 instance QuickCheck.Arbitrary Timestamp where
   arbitrary = Witch.from <$> genUtcTime
-  shrink = QuickCheck.shrinkMapBy Witch.from Witch.from shrinkUtcTime
 
 genUtcTime :: QuickCheck.Gen Time.UTCTime
 genUtcTime = Time.UTCTime <$> genDay <*> fmap Time.timeOfDayToTime genTimeOfDay
 
-shrinkUtcTime :: Time.UTCTime -> [Time.UTCTime]
-shrinkUtcTime x =
-  Time.UTCTime
-    <$> shrinkDay (Time.utctDay x)
-    <*> QuickCheck.shrinkMapBy Time.timeOfDayToTime Time.timeToTimeOfDay shrinkTimeOfDay (Time.utctDayTime x)
-
 genDay :: QuickCheck.Gen Time.Day
 genDay = QuickCheck.suchThatMap QuickCheck.arbitrary toDay
-
-shrinkDay :: Time.Day -> [Time.Day]
-shrinkDay = Maybe.mapMaybe toDay . QuickCheck.shrink . Time.toGregorian
 
 toDay :: (Time.Year, Time.MonthOfYear, Time.DayOfMonth) -> Maybe Time.Day
 toDay (y, m, d) = do
@@ -61,9 +50,6 @@ toDay (y, m, d) = do
 
 genTimeOfDay :: QuickCheck.Gen Time.TimeOfDay
 genTimeOfDay = QuickCheck.suchThatMap QuickCheck.arbitrary toTimeOfDay
-
-shrinkTimeOfDay :: Time.TimeOfDay -> [Time.TimeOfDay]
-shrinkTimeOfDay = Maybe.mapMaybe toTimeOfDay . QuickCheck.shrink . fromTimeOfDay
 
 toTimeOfDay :: (Int, Int, Fixed.Pico) -> Maybe Time.TimeOfDay
 toTimeOfDay (h, m, s) = Time.makeTimeOfDayValid h m s

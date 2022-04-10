@@ -31,9 +31,6 @@ instance QuickCheck.Arbitrary HackageUser where
   arbitrary =
     HackageUser
       <$> QuickCheck.arbitrary
-  shrink hackageUser =
-    HackageUser
-      <$> QuickCheck.shrink (name hackageUser)
 
 migrations :: [Migration.Migration]
 migrations =

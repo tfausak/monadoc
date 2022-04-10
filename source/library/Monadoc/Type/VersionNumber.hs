@@ -1,7 +1,6 @@
 module Monadoc.Type.VersionNumber where
 
 import qualified Control.Monad as Monad
-import qualified Data.Maybe as Maybe
 import qualified Data.Version as Version
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
@@ -47,13 +46,9 @@ instance Witch.From VersionNumber Version.Version where
 
 instance QuickCheck.Arbitrary VersionNumber where
   arbitrary = Witch.from <$> genVersion
-  shrink = QuickCheck.shrinkMapBy Witch.from Witch.from shrinkVersion
 
 genVersion :: QuickCheck.Gen Cabal.Version
 genVersion = QuickCheck.suchThatMap QuickCheck.arbitrary toVersion
-
-shrinkVersion :: Cabal.Version -> [Cabal.Version]
-shrinkVersion = Maybe.mapMaybe toVersion . QuickCheck.shrink . Cabal.versionNumbers
 
 toVersion :: [Int] -> Maybe Cabal.Version
 toVersion ns = do

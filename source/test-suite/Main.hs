@@ -12,6 +12,7 @@ import qualified Monadoc.Extra.DirectSqliteSpec
 import qualified Monadoc.Extra.EitherSpec
 import qualified Monadoc.Extra.TimeSpec
 import qualified Monadoc.Model.BlobSpec
+import qualified Monadoc.Model.CronEntrySpec
 import qualified Monadoc.Model.HackageIndexSpec
 import qualified Monadoc.Model.HackageUserSpec
 import qualified Monadoc.Model.JobSpec
@@ -23,6 +24,7 @@ import qualified Monadoc.Model.VersionSpec
 import qualified Monadoc.Type.ConfigSpec
 import qualified Monadoc.Type.ConstraintSpec
 import qualified Monadoc.Type.FlagSpec
+import qualified Monadoc.Type.GuidSpec
 import qualified Monadoc.Type.HackageUserNameSpec
 import qualified Monadoc.Type.HashSpec
 import qualified Monadoc.Type.KeySpec
@@ -31,6 +33,7 @@ import qualified Monadoc.Type.PackageNameSpec
 import qualified Monadoc.Type.PortSpec
 import qualified Monadoc.Type.RevisionSpec
 import qualified Monadoc.Type.RouteSpec
+import qualified Monadoc.Type.ScheduleSpec
 import qualified Monadoc.Type.SeveritySpec
 import qualified Monadoc.Type.StatusSpec
 import qualified Monadoc.Type.TaskSpec
@@ -57,6 +60,7 @@ spec = do
   Monadoc.Extra.EitherSpec.spec
   Monadoc.Extra.TimeSpec.spec
   Monadoc.Model.BlobSpec.spec
+  Monadoc.Model.CronEntrySpec.spec
   Monadoc.Model.HackageIndexSpec.spec
   Monadoc.Model.HackageUserSpec.spec
   Monadoc.Model.JobSpec.spec
@@ -68,6 +72,7 @@ spec = do
   Monadoc.Type.ConfigSpec.spec
   Monadoc.Type.ConstraintSpec.spec
   Monadoc.Type.FlagSpec.spec
+  Monadoc.Type.GuidSpec.spec
   Monadoc.Type.HackageUserNameSpec.spec
   Monadoc.Type.HashSpec.spec
   Monadoc.Type.KeySpec.spec
@@ -76,6 +81,7 @@ spec = do
   Monadoc.Type.PortSpec.spec
   Monadoc.Type.RevisionSpec.spec
   Monadoc.Type.RouteSpec.spec
+  Monadoc.Type.ScheduleSpec.spec
   Monadoc.Type.SeveritySpec.spec
   Monadoc.Type.StatusSpec.spec
   Monadoc.Type.TaskSpec.spec

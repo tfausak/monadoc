@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.4.9
+version: 0.2022.4.10
 
 build-type: Simple
 category: Documentation
@@ -34,6 +34,7 @@ common library
     , bytestring ^>= 0.11.1
     , Cabal ^>= 3.6.3
     , containers ^>= 0.6.5
+    , cron ^>= 0.7.0
     , cryptonite ^>= 0.30
     , direct-sqlite ^>= 2.3.26
     , directory ^>= 1.3.6
@@ -55,6 +56,7 @@ common library
     , text ^>= 2.0
     , time ^>= 1.11.1
     , transformers-base ^>= 0.4.6
+    , uuid ^>= 1.3.15
     , wai ^>= 3.2.3
     , wai-extra ^>= 3.1.8
     , warp ^>= 3.3.19
@@ -100,6 +102,9 @@ library
   autogen-modules: Paths_monadoc
   exposed-modules:
     Monadoc.Action.Blob.Upsert
+    Monadoc.Action.CronEntry.Enqueue
+    Monadoc.Action.CronEntry.Prune
+    Monadoc.Action.CronEntry.Upsert
     Monadoc.Action.Database.Initialize
     Monadoc.Action.Database.Vacuum
     Monadoc.Action.HackageIndex.Insert
@@ -107,10 +112,14 @@ library
     Monadoc.Action.HackageIndex.Update
     Monadoc.Action.HackageIndex.Upsert
     Monadoc.Action.HackageUser.Upsert
+    Monadoc.Action.Job.Acquire
     Monadoc.Action.Job.Enqueue
+    Monadoc.Action.Job.Perform
+    Monadoc.Action.Job.Release
     Monadoc.Action.Key.SelectLastInsert
     Monadoc.Action.Package.Upsert
     Monadoc.Action.Preference.Upsert
+    Monadoc.Action.Task.Perform
     Monadoc.Action.Upload.Upsert
     Monadoc.Action.Version.Upsert
     Monadoc.Class.MonadHttp
@@ -120,7 +129,10 @@ library
     Monadoc.Class.MonadSql
     Monadoc.Class.MonadTime
     Monadoc.Constant.ContentType
+    Monadoc.Constant.CronEntry
     Monadoc.Constant.Header
+    Monadoc.Constant.Migration
+    Monadoc.Constant.Pragma
     Monadoc.Exception.ConversionFailure
     Monadoc.Exception.InvalidOption
     Monadoc.Exception.InvalidSize
@@ -129,6 +141,7 @@ library
     Monadoc.Exception.MissingHackageIndex
     Monadoc.Exception.MissingRowid
     Monadoc.Exception.MissingSize
+    Monadoc.Exception.NoNextMatch
     Monadoc.Exception.NotFound
     Monadoc.Exception.Sick
     Monadoc.Exception.TrailingBytes
@@ -153,6 +166,7 @@ library
     Monadoc.Middleware.HandleExceptions
     Monadoc.Middleware.LogResponses
     Monadoc.Model.Blob
+    Monadoc.Model.CronEntry
     Monadoc.Model.HackageIndex
     Monadoc.Model.HackageUser
     Monadoc.Model.Job
@@ -166,9 +180,10 @@ library
     Monadoc.Server.Middleware
     Monadoc.Type.App
     Monadoc.Type.Config
-    Monadoc.Type.Context
     Monadoc.Type.Constraint
+    Monadoc.Type.Context
     Monadoc.Type.Flag
+    Monadoc.Type.Guid
     Monadoc.Type.HackageUserName
     Monadoc.Type.Hash
     Monadoc.Type.Key
@@ -177,6 +192,7 @@ library
     Monadoc.Type.Port
     Monadoc.Type.Revision
     Monadoc.Type.Route
+    Monadoc.Type.Schedule
     Monadoc.Type.Severity
     Monadoc.Type.Status
     Monadoc.Type.Task
@@ -214,6 +230,7 @@ test-suite monadoc-test-suite
     Monadoc.Extra.EitherSpec
     Monadoc.Extra.TimeSpec
     Monadoc.Model.BlobSpec
+    Monadoc.Model.CronEntrySpec
     Monadoc.Model.HackageIndexSpec
     Monadoc.Model.HackageUserSpec
     Monadoc.Model.JobSpec
@@ -226,6 +243,7 @@ test-suite monadoc-test-suite
     Monadoc.Type.ConfigSpec
     Monadoc.Type.ConstraintSpec
     Monadoc.Type.FlagSpec
+    Monadoc.Type.GuidSpec
     Monadoc.Type.HackageUserNameSpec
     Monadoc.Type.HashSpec
     Monadoc.Type.KeySpec
@@ -234,6 +252,7 @@ test-suite monadoc-test-suite
     Monadoc.Type.PortSpec
     Monadoc.Type.RevisionSpec
     Monadoc.Type.RouteSpec
+    Monadoc.Type.ScheduleSpec
     Monadoc.Type.SeveritySpec
     Monadoc.Type.StatusSpec
     Monadoc.Type.TaskSpec

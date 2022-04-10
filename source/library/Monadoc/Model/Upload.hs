@@ -56,14 +56,6 @@ instance QuickCheck.Arbitrary Upload where
       <*> QuickCheck.arbitrary
       <*> QuickCheck.arbitrary
       <*> QuickCheck.arbitrary
-  shrink upload =
-    Upload
-      <$> QuickCheck.shrink (blob upload)
-      <*> QuickCheck.shrink (package upload)
-      <*> QuickCheck.shrink (revision upload)
-      <*> QuickCheck.shrink (uploadedAt upload)
-      <*> QuickCheck.shrink (uploadedBy upload)
-      <*> QuickCheck.shrink (version upload)
 
 migrations :: [Migration.Migration]
 migrations =
