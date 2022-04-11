@@ -2,3 +2,53 @@
 - group: { name: dollar, enabled: true }
 - group: { name: generalise, enabled: true }
 - ignore: { name: Use lambda-case }
+- ignore: { name: Use section }
+- ignore: { name: Use unless }
+
+- group:
+    name: Monadoc
+    rules:
+      - warn: { lhs: Control.Monad.IO.Class.liftIO, rhs: Control.Monad.Base.liftBase }
+      - warn: { lhs: Data.IORef.newIORef, rhs: Control.Concurrent.STM.newTVarIO }
+
+- group:
+    name: Witch
+    rules:
+      - warn: { lhs: Prelude.fromEnum, rhs: Witch.from }
+      - warn: { lhs: Prelude.fromInteger, rhs: Witch.from }
+      - warn: { lhs: Prelude.fromIntegral, rhs: Witch.from }
+      - warn: { lhs: Prelude.fromRational, rhs: Witch.from }
+      - warn: { lhs: Prelude.realToFrac, rhs: Witch.from }
+      - warn: { lhs: Prelude.toEnum, rhs: Witch.from }
+
+# https://github.com/NorfairKing/haskell-dangerous-functions
+- group:
+    name: Danger
+    rules:
+      - warn: { lhs: Prelude.enumFrom, rhs: _, name: Avoid enumFrom }
+      - warn: { lhs: Prelude.enumFromThen, rhs: _, name: Avoid enumFromThen }
+      - warn: { lhs: Prelude.enumFromThenTo, rhs: _, name: Avoid enumFromThenTo }
+      - warn: { lhs: Prelude.enumFromTo, rhs: _, name: Avoid enumFromTo }
+      - warn: { lhs: Prelude.error, rhs: _, name: Avoid error }
+      - warn: { lhs: Prelude.errorWithoutStackTrace, rhs: _, name: Avoid errorWithoutStackTrace }
+      - warn: { lhs: Control.Concurrent.forkIO, rhs: Control.Concurrent.Async.async }
+      - warn: { lhs: Prelude.foldl1, rhs: Prelude.foldl }
+      - warn: { lhs: Prelude.foldr1, rhs: Prelude.foldr }
+      - warn: { lhs: Data.Maybe.fromJust, rhs: _, name: Avoid fromJust }
+      - warn: { lhs: Prelude.head, rhs: Data.Maybe.listToMaybe }
+      - warn: { lhs: Prelude.init, rhs: _, name: Avoid init }
+      - warn: { lhs: Prelude.last, rhs: _, name: Avoid last }
+      - warn: { lhs: Prelude.maximum, rhs: _, name: Avoid maximum }
+      - warn: { lhs: Prelude.minimum, rhs: _, name: Avoid minimum }
+      - warn: { lhs: Data.List.NonEmpty.fromList, rhs: Data.List.NonEmpty.nonEmpty }
+      - warn: { lhs: Data.List.nub, rhs: Data.Containers.ListUtils.nubOrd }
+      - warn: { lhs: Prelude.pred, rhs: (Prelude.subtract 1) }
+      - warn: { lhs: Prelude.read, rhs: Text.Read.readMaybe }
+      - warn: { lhs: Prelude.return, rhs: Prelude.pure }
+      - warn: { lhs: Prelude.succ, rhs: (Prelude.+ 1) }
+      - warn: { lhs: Prelude.tail, rhs: Prelude.drop 1 }
+      - warn: { lhs: Control.Exception.throw, rhs: Control.Monad.Catch.throwM }
+      - warn: { lhs: Prelude.undefined, rhs: Prelude.error "..." }
+      - warn: { lhs: Control.Monad.unless p, rhs: Control.Monad.when (not p) }
+      - warn: { lhs: (Prelude.!!), rhs: _, name: Avoid !! }
+      - warn: { lhs: (Prelude.^), rhs: _, name: Avoid ^ }

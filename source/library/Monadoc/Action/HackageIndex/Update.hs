@@ -60,7 +60,7 @@ run oldKey oldSize = do
             let loop offset = do
                   chunk <- Client.brRead $ Client.responseBody response
                   let size = ByteString.length chunk
-                  Monad.unless (ByteString.null chunk) $ do
+                  Monad.when (not $ ByteString.null chunk) $ do
                     Sqlite.blobWrite newBlob chunk offset
                     loop $ offset + size
             Base.liftBase $ loop start

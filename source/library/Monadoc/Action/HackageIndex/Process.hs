@@ -178,7 +178,7 @@ handleCabal revisions entry pkg ver = do
           Upload.uploadedAt =
             Witch.from
               . Time.posixSecondsToUTCTime
-              . fromIntegral
+              . epochTimeToPosixTime
               $ Tar.entryTime entry,
           Upload.uploadedBy = Model.key hackageUser,
           Upload.version = Model.key version
@@ -187,6 +187,10 @@ handleCabal revisions entry pkg ver = do
     . MonadLog.debug
     . Text.pack
     $ show upload
+
+{- hlint ignore epochTimeToPosixTime "Use from" -}
+epochTimeToPosixTime :: Tar.EpochTime -> Time.POSIXTime
+epochTimeToPosixTime = fromIntegral
 
 upsertPreference ::
   (Base.MonadBase IO m, MonadSql.MonadSql m, Exception.MonadThrow m) =>

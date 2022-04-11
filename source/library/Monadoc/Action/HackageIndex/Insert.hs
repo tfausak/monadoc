@@ -1,13 +1,13 @@
 module Monadoc.Action.HackageIndex.Insert where
 
 import qualified Codec.Compression.Zlib.Internal as Zlib
+import qualified Control.Concurrent.STM as Stm
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Base as Base
 import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Reader as Reader
 import qualified Control.Monad.Trans.Control as Control
 import qualified Data.ByteString as ByteString
-import qualified Data.IORef as IORef
 import qualified Data.Int as Int
 import qualified Data.Pool as Pool
 import qualified Database.SQLite.Simple as Sql
@@ -37,7 +37,7 @@ run = do
     MonadSql.execute "insert into hackageIndex (contents, processedAt, size) values (zeroblob(?), null, ?)" (size, size)
     key <- Key.SelectLastInsert.run
     Pool.withResource (Context.pool context) $ \connection -> Sqlite.withBlob (Sql.connectionHandle connection) "hackageIndex" "contents" (Witch.into @Int.Int64 key) True $ \blob -> do
-      offsetRef <- Base.liftBase $ IORef.newIORef 0
+      offsetRef <- Base.liftBase $ Stm.newTVarIO 0
       Base.liftBase $
         Zlib.foldDecompressStream
           ( \f -> do
@@ -45,12 +45,12 @@ run = do
               f chunk
           )
           ( \chunk io -> do
-              offset <- IORef.atomicModifyIORef' offsetRef $ \n -> (n + ByteString.length chunk, n)
+              offset <- Stm.atomically . Stm.stateTVar offsetRef $ \n -> (n, n + ByteString.length chunk)
               Sqlite.blobWrite blob chunk offset
               io
           )
           ( \leftovers ->
-              Monad.unless (ByteString.null leftovers)
+              Monad.when (not $ ByteString.null leftovers)
                 . Exception.throwM
                 $ TrailingBytes.TrailingBytes leftovers
           )
