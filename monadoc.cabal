@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.4.10
+version: 0.2022.4.11
 
 build-type: Simple
 category: Documentation
@@ -69,6 +69,7 @@ common library
     OverloadedStrings
     ScopedTypeVariables
     TypeApplications
+    TypeOperators
   default-language: Haskell2010
   ghc-options:
     -Weverything
@@ -149,11 +150,13 @@ library
     Monadoc.Exception.UnexpectedEntry
     Monadoc.Exception.UnknownOption
     Monadoc.Exception.UnknownRoute
+    Monadoc.Extra.Aeson
     Monadoc.Extra.DirectSqlite
     Monadoc.Extra.Either
     Monadoc.Extra.Time
     Monadoc.Handler.AppleTouchIcon.Get
     Monadoc.Handler.Bootstrap.Get
+    Monadoc.Handler.Common
     Monadoc.Handler.Favicon.Get
     Monadoc.Handler.HealthCheck.Get
     Monadoc.Handler.Home.Get
@@ -178,6 +181,9 @@ library
     Monadoc.Server.Application
     Monadoc.Server.Main
     Monadoc.Server.Middleware
+    Monadoc.Template.Common
+    Monadoc.Template.Home.Get
+    Monadoc.Template.Package.Get
     Monadoc.Type.App
     Monadoc.Type.Config
     Monadoc.Type.Constraint

@@ -1,12 +1,11 @@
 module Monadoc.Middleware.CompressResponses where
 
-import qualified Monadoc.Type.Context as Context
 import qualified Network.Wai as Wai
 import qualified Network.Wai.Middleware.Gzip as Gzip
 
-middleware :: Context.Context -> Wai.Middleware
-middleware context =
+middleware :: FilePath -> Wai.Middleware
+middleware temporaryDirectory =
   Gzip.gzip
     Gzip.def
-      { Gzip.gzipFiles = Gzip.GzipCacheFolder $ Context.temporaryDirectory context
+      { Gzip.gzipFiles = Gzip.GzipCacheFolder temporaryDirectory
       }

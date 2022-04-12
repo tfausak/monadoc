@@ -17,5 +17,8 @@ link = "Link"
 referrerPolicy :: Http.HeaderName
 referrerPolicy = "Referrer-Policy"
 
+strictTransportSecurity :: Http.HeaderName
+strictTransportSecurity = "Strict-Transport-Security"
+
 xssProtection :: Http.HeaderName
 xssProtection = "X-XSS-Protection"

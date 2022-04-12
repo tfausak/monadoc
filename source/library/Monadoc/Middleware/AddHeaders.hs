@@ -1,20 +1,35 @@
 module Monadoc.Middleware.AddHeaders where
 
 import qualified Data.Function as Function
+import qualified Data.List as List
+import qualified Data.Maybe as Maybe
 import qualified Monadoc.Constant.Header as Header
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 
-middleware :: Wai.Middleware
-middleware =
-  Wai.modifyResponse . Wai.mapResponseHeaders $
-    addHeaders
-      [ (Header.contentSecurityPolicy, "default-src 'self'"),
-        (Header.referrerPolicy, "no-referrer"),
-        (Header.contentTypeOptions, "nosniff"),
-        (Header.frameOptions, "DENY"),
-        (Header.xssProtection, "1; mode=block")
+middleware :: String -> Wai.Middleware
+middleware base =
+  Wai.modifyResponse . Wai.mapResponseHeaders . addHeaders $
+    Maybe.catMaybes
+      [ Just contentSecurityPolicy,
+        Just (Header.referrerPolicy, "no-referrer"),
+        Just (Header.contentTypeOptions, "nosniff"),
+        Just (Header.frameOptions, "DENY"),
+        Just (Header.xssProtection, "1; mode=block"),
+        if List.isPrefixOf "https:" base then Just strictTransportSecurity else Nothing
       ]
+
+contentSecurityPolicy :: Http.Header
+contentSecurityPolicy =
+  ( Header.contentSecurityPolicy,
+    "default-src 'none'; img-src 'self'; manifest-src 'self'; style-src 'self'"
+  )
+
+strictTransportSecurity :: Http.Header
+strictTransportSecurity =
+  ( Header.strictTransportSecurity,
+    "max-age=31536000"
+  )
 
 addHeaders :: [Http.Header] -> Http.ResponseHeaders -> Http.ResponseHeaders
 addHeaders = foldr addIfMissing

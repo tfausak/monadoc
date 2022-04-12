@@ -1,0 +1,58 @@
+module Monadoc.Template.Common where
+
+import qualified Data.Text as Text
+import qualified Lucid
+import qualified Lucid.Base as Lucid
+import qualified Monadoc.Type.Config as Config
+import qualified Monadoc.Type.Context as Context
+import qualified Monadoc.Type.Route as Route
+import qualified Monadoc.Type.VersionNumber as VersionNumber
+import qualified Paths_monadoc as Monadoc
+import qualified Witch
+
+base :: Context.Context -> Route.Route -> Lucid.Html () -> Lucid.Html ()
+base ctx rt html = do
+  Lucid.doctype_
+  Lucid.html_ [Lucid.lang_ "en-US"] $ do
+    Lucid.head_ $ do
+      let title = "Monadoc" :: Text.Text
+          description = "Worse Haskell documentation." :: Text.Text
+          url = route ctx rt
+      Lucid.meta_ [Lucid.charset_ "utf-8"]
+      Lucid.meta_ [Lucid.name_ "viewport", Lucid.content_ "initial-scale = 1, width = device-width"]
+      Lucid.meta_ [Lucid.name_ "description", Lucid.content_ description]
+      Lucid.title_ $ Lucid.toHtml title
+      Lucid.link_ [Lucid.rel_ "stylesheet", Lucid.href_ $ route ctx Route.Bootstrap]
+      Lucid.link_ [Lucid.rel_ "manifest", Lucid.href_ $ route ctx Route.Manifest]
+      Lucid.link_ [Lucid.rel_ "canonical", Lucid.href_ url]
+      og "title" title
+      og "type" "website"
+      og "url" url
+      og "image" $ route ctx Route.AppleTouchIcon
+      og "description" description
+    Lucid.body_ $ do
+      Lucid.header_ [Lucid.class_ "bg-dark navbar navbar-dark"]
+        . Lucid.div_ [Lucid.class_ "container"]
+        $ Lucid.a_ [Lucid.class_ "navbar-brand", Lucid.href_ $ route ctx Route.Home] "Monadoc"
+      Lucid.main_ [Lucid.class_ "my-3"] $ Lucid.div_ [Lucid.class_ "container"] html
+      Lucid.footer_ [Lucid.class_ "my-3 text-muted"]
+        . Lucid.div_ [Lucid.class_ "border-top container pt-3"]
+        $ do
+          "Powered by "
+          Lucid.a_ [Lucid.href_ "https://github.com/tfausak/monadoc"] "Monadoc"
+          " version "
+          Lucid.toHtml $ Witch.into @VersionNumber.VersionNumber Monadoc.version
+          ". \x1f516"
+
+og :: Text.Text -> Text.Text -> Lucid.Html ()
+og property content =
+  Lucid.meta_
+    [ Lucid.makeAttribute "property" $ "og:" <> property,
+      Lucid.content_ content
+    ]
+
+route :: Context.Context -> Route.Route -> Text.Text
+route context =
+  mappend (Text.pack . Config.base $ Context.config context)
+    . Text.intercalate "/"
+    . Route.render
