@@ -5,13 +5,15 @@ import qualified Control.Monad.Reader as Reader
 import qualified Monadoc.Exception.ConversionFailure as ConversionFailure
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Handler.AppleTouchIcon.Get as AppleTouchIcon.Get
-import qualified Monadoc.Handler.Bootstrap.Get as Bootstrap.Get
 import qualified Monadoc.Handler.Favicon.Get as Favicon.Get
 import qualified Monadoc.Handler.HealthCheck.Get as HealthCheck.Get
 import qualified Monadoc.Handler.Home.Get as Home.Get
 import qualified Monadoc.Handler.Manifest.Get as Manifest.Get
 import qualified Monadoc.Handler.Package.Get as Package.Get
 import qualified Monadoc.Handler.Robots.Get as Robots.Get
+import qualified Monadoc.Handler.Script.Get as Script.Get
+import qualified Monadoc.Handler.Stylesheet.Get as Stylesheet.Get
+import qualified Monadoc.Handler.User.Get as User.Get
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Route as Route
@@ -38,9 +40,6 @@ getHandler method route = case route of
   Route.AppleTouchIcon -> case method of
     Http.GET -> pure AppleTouchIcon.Get.handler
     _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
-  Route.Bootstrap -> case method of
-    Http.GET -> pure Bootstrap.Get.handler
-    _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
   Route.Favicon -> case method of
     Http.GET -> pure Favicon.Get.handler
     _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
@@ -58,4 +57,13 @@ getHandler method route = case route of
     _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
   Route.Robots -> case method of
     Http.GET -> pure Robots.Get.handler
+    _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
+  Route.Script -> case method of
+    Http.GET -> pure Script.Get.handler
+    _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
+  Route.Stylesheet -> case method of
+    Http.GET -> pure Stylesheet.Get.handler
+    _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
+  Route.User u -> case method of
+    Http.GET -> pure $ User.Get.handler u
     _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route

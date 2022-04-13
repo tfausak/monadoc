@@ -1,15 +1,16 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.4.11
+version: 0.2022.4.12
 
 build-type: Simple
 category: Documentation
 data-dir: data
 data-files:
   apple-touch-icon.png
-  bootstrap.css
   favicon.ico
+  monadoc.css
+  monadoc.js
 description: Monadoc provides worse Haskell documentation.
 extra-source-files: README.markdown
 license-file: LICENSE.txt
@@ -155,7 +156,6 @@ library
     Monadoc.Extra.Either
     Monadoc.Extra.Time
     Monadoc.Handler.AppleTouchIcon.Get
-    Monadoc.Handler.Bootstrap.Get
     Monadoc.Handler.Common
     Monadoc.Handler.Favicon.Get
     Monadoc.Handler.HealthCheck.Get
@@ -163,6 +163,9 @@ library
     Monadoc.Handler.Manifest.Get
     Monadoc.Handler.Package.Get
     Monadoc.Handler.Robots.Get
+    Monadoc.Handler.Script.Get
+    Monadoc.Handler.Stylesheet.Get
+    Monadoc.Handler.User.Get
     Monadoc.Main
     Monadoc.Middleware.AddHeaders
     Monadoc.Middleware.CompressResponses
@@ -184,6 +187,7 @@ library
     Monadoc.Template.Common
     Monadoc.Template.Home.Get
     Monadoc.Template.Package.Get
+    Monadoc.Template.User.Get
     Monadoc.Type.App
     Monadoc.Type.Config
     Monadoc.Type.Constraint

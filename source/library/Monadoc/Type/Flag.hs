@@ -34,7 +34,7 @@ options =
       (Console.NoArg Help)
       "Shows this help message, then exits.",
     Console.Option
-      ['v']
+      []
       ["version"]
       (Console.NoArg Version)
       "Shows the version number, then exits.",

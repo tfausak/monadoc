@@ -2,6 +2,7 @@ module Monadoc.Type.Timestamp where
 
 import qualified Control.Monad as Monad
 import qualified Data.Fixed as Fixed
+import qualified Data.Text as Text
 import qualified Data.Time as Time
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
@@ -34,6 +35,9 @@ instance Lucid.ToHtml Timestamp where
 
 instance QuickCheck.Arbitrary Timestamp where
   arbitrary = Witch.from <$> genUtcTime
+
+instance Witch.From Timestamp Text.Text where
+  from = Witch.via @String
 
 genUtcTime :: QuickCheck.Gen Time.UTCTime
 genUtcTime = Time.UTCTime <$> genDay <*> fmap Time.timeOfDayToTime genTimeOfDay

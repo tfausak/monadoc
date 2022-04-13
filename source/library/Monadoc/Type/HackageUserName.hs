@@ -2,6 +2,7 @@ module Monadoc.Type.HackageUserName where
 
 import qualified Control.Monad as Monad
 import qualified Data.Char as Char
+import qualified Data.Text as Text
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Lucid
@@ -39,3 +40,9 @@ instance Lucid.ToHtml HackageUserName where
 
 instance QuickCheck.Arbitrary HackageUserName where
   arbitrary = QuickCheck.suchThatMap @String QuickCheck.arbitrary $ Either.hush . Witch.tryFrom
+
+instance Witch.TryFrom Text.Text HackageUserName where
+  tryFrom = Witch.eitherTryFrom $ Witch.tryFrom . Witch.into @String
+
+instance Witch.From HackageUserName Text.Text where
+  from = Witch.via @String

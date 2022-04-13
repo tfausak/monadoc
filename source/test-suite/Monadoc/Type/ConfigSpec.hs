@@ -1,7 +1,9 @@
 module Monadoc.Type.ConfigSpec where
 
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Flag as Flag
+import qualified Monadoc.Type.Port as Port
 import qualified Test.Hspec as Hspec
 import qualified Witch
 
@@ -19,4 +21,4 @@ spec = Hspec.describe "Monadoc.Type.Config" $ do
     Config.fromFlags [Flag.Version] `Hspec.shouldBe` Just Config.initial {Config.version = True}
 
   Hspec.it "rejects invalid flags" $ do
-    Config.fromFlags [Flag.Port "x"] `Hspec.shouldBe` Nothing
+    Config.fromFlags [Flag.Port "x"] `Hspec.shouldThrow` Test.exceptionSelector @(Witch.TryFromException String Port.Port)

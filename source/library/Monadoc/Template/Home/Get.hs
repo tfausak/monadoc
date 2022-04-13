@@ -31,8 +31,11 @@ render context rows = Common.base context Route.Home $ do
       Lucid.toHtml . Version.number $ Model.value version
       " revision "
       Lucid.toHtml . Upload.revision $ Model.value upload
-      " uploaded at "
-      Lucid.toHtml . Upload.uploadedAt $ Model.value upload
+      " uploaded "
+      Common.timestamp . Upload.uploadedAt $ Model.value upload
       " by "
-      Lucid.toHtml . HackageUser.name $ Model.value hackageUser
+      Lucid.a_ [Lucid.href_ . Common.route context . Route.User . HackageUser.name $ Model.value hackageUser]
+        . Lucid.toHtml
+        . HackageUser.name
+        $ Model.value hackageUser
       "."

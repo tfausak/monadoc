@@ -11,6 +11,9 @@ html = "text/html;charset=utf-8"
 ico :: ByteString.ByteString
 ico = "image/x-icon"
 
+js :: ByteString.ByteString
+js = "application/javascript;charset=utf-8"
+
 json :: ByteString.ByteString
 json = "application/json;charset=utf-8"
 

@@ -22,7 +22,7 @@ middleware base =
 contentSecurityPolicy :: Http.Header
 contentSecurityPolicy =
   ( Header.contentSecurityPolicy,
-    "default-src 'none'; img-src 'self'; manifest-src 'self'; style-src 'self'"
+    "default-src 'none'; img-src 'self'; manifest-src 'self'; script-src 'self'; style-src 'self'"
   )
 
 strictTransportSecurity :: Http.Header

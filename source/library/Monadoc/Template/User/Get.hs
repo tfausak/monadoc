@@ -1,4 +1,4 @@
-module Monadoc.Template.Package.Get where
+module Monadoc.Template.User.Get where
 
 import qualified Control.Monad as Monad
 import qualified Data.Text as Text
@@ -9,7 +9,6 @@ import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Template.Common as Common
-import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Route as Route
@@ -17,29 +16,25 @@ import qualified Witch
 
 render ::
   Context.Context ->
-  Package.Model ->
-  Constraint.Constraint ->
-  [Upload.Model Sql.:. Version.Model Sql.:. HackageUser.Model] ->
+  HackageUser.Model ->
+  [Upload.Model Sql.:. Version.Model Sql.:. Package.Model] ->
   Lucid.Html ()
-render context package constraint rows = Common.base context (Route.Package . Package.name $ Model.value package) $ do
-  Lucid.h2_ . Lucid.toHtml . Package.name $ Model.value package
+render context hackageUser rows = Common.base context (Route.User . HackageUser.name $ Model.value hackageUser) $ do
+  Lucid.h2_ . Lucid.toHtml . HackageUser.name $ Model.value hackageUser
   Lucid.p_ . Common.url $
-    "https://hackage.haskell.org/package/" <> (Witch.into @Text.Text . Package.name $ Model.value package)
-  Lucid.p_ $ do
-    "Preferred versions: "
-    Lucid.toHtml constraint
+    "https://hackage.haskell.org/user/" <> (Witch.into @Text.Text . HackageUser.name $ Model.value hackageUser)
   Lucid.h3_ "Uploads"
   Lucid.ul_ . Monad.forM_ rows $ \row -> Lucid.li_ $ do
-    let (upload Sql.:. version Sql.:. hackageUser) = row
-    "Version "
+    let (upload Sql.:. version Sql.:. package) = row
+    "Package "
+    Lucid.a_ [Lucid.href_ . Common.route context . Route.Package . Package.name $ Model.value package]
+      . Lucid.toHtml
+      . Package.name
+      $ Model.value package
+    " version "
     Lucid.toHtml . Version.number $ Model.value version
     " revision "
     Lucid.toHtml . Upload.revision $ Model.value upload
     " uploaded "
     Common.timestamp . Upload.uploadedAt $ Model.value upload
-    " by "
-    Lucid.a_ [Lucid.href_ . Common.route context . Route.User . HackageUser.name $ Model.value hackageUser]
-      . Lucid.toHtml
-      . HackageUser.name
-      $ Model.value hackageUser
     "."

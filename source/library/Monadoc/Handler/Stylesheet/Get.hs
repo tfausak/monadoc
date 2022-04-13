@@ -1,4 +1,4 @@
-module Monadoc.Handler.Bootstrap.Get where
+module Monadoc.Handler.Stylesheet.Get where
 
 import qualified Control.Monad.Reader as Reader
 import qualified Monadoc.Constant.ContentType as ContentType
@@ -14,5 +14,5 @@ handler _ = do
     Wai.responseFile
       Http.ok200
       [(Http.hContentType, ContentType.css)]
-      (FilePath.combine (Context.data_ context) "bootstrap.css")
+      (FilePath.combine (Context.data_ context) "monadoc.css")
       Nothing
