@@ -11,7 +11,7 @@
                     "column": 3
                 },
                 {
-                    "regexp": "  \\d+) (.+)",
+                    "regexp": "  \\d+\\) (.+)",
                     "message": 1
                 }
             ]
