@@ -45,16 +45,6 @@ import qualified Test.Hspec as Hspec
 
 spec :: Hspec.Spec
 spec = do
-  Hspec.describe "TODO" $ do
-    Hspec.it "success" $ True `Hspec.shouldBe` True
-    Hspec.it "pending" Hspec.pending
-    Hspec.it "pendingWith" $ Hspec.pendingWith "whatever"
-    Hspec.it "failure" $ False `Hspec.shouldBe` True
-    Hspec.describe "A" $ do
-      Hspec.it "failure" $ False `Hspec.shouldBe` True
-      Hspec.describe "B" $
-        Hspec.it "failure" $ do
-          False `Hspec.shouldBe` True
   Monadoc.Action.Blob.UpsertSpec.spec
   Monadoc.Action.Database.InitializeSpec.spec
   Monadoc.Action.Database.VacuumSpec.spec
