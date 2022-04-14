@@ -8,6 +8,7 @@
   "initializeCommand": [
     ".devcontainer/initialize.sh"
   ],
+  "overrideCommand": true,
   "postCreateCommand": [
     ".devcontainer/postCreate.sh"
   ],

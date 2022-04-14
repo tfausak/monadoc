@@ -1,8 +1,8 @@
-version: '3.8'
+version: '3.7'
 services:
   devcontainer:
     build: .
-    command: sh -x -c 'while :; do sleep 60; done'
+    command: .devcontainer/watch.sh
     image: monadoc/devcontainer
     init: true
     ports:

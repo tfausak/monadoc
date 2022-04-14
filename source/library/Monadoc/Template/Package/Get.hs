@@ -23,8 +23,11 @@ render ::
   Lucid.Html ()
 render context package constraint rows = Common.base context (Route.Package . Package.name $ Model.value package) $ do
   Lucid.h2_ . Lucid.toHtml . Package.name $ Model.value package
-  Lucid.p_ . Common.url $
-    "https://hackage.haskell.org/package/" <> (Witch.into @Text.Text . Package.name $ Model.value package)
+  Lucid.ul_ $ do
+    Lucid.li_ . Common.url $
+      "https://hackage.haskell.org/package/" <> (Witch.into @Text.Text . Package.name $ Model.value package)
+    Lucid.li_ . Common.url $
+      "https://www.stackage.org/package/" <> (Witch.into @Text.Text . Package.name $ Model.value package)
   Lucid.p_ $ do
     "Preferred versions: "
     Lucid.toHtml constraint
