@@ -81,7 +81,7 @@ jobs:
 
       - run: echo '::add-matcher::data/hspec-problem-matcher.json'
 
-      - run: cabal run -- monadoc-test-suite --fail-on-focused --randomize
+      - run: cabal run -- monadoc-test-suite --fail-on-focused --no-color --randomize
 
       - run: cp "$( cabal list-bin monadoc )" ${{ steps.artifact.outputs.directory }}
 
