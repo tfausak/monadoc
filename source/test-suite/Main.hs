@@ -46,6 +46,7 @@ main = Hspec.hspec spec
 
 spec :: Hspec.Spec
 spec = do
+  Hspec.it "TODO\nblah" $ False `Hspec.shouldBe` True
   Monadoc.Action.Blob.UpsertSpec.spec
   Monadoc.Action.Database.InitializeSpec.spec
   Monadoc.Action.Database.VacuumSpec.spec
