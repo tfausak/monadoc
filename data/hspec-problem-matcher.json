@@ -5,14 +5,11 @@
             "owner": "hspec",
             "pattern": [
                 {
-                    "regexp": "^  (.+):(\\d+):(\\d+):$",
+                    "regexp": "^  *(.+):(\\d+):(\\d+):$",
                     "file": 1,
                     "line": 2,
-                    "column": 3
-                },
-                {
-                    "regexp": "  \\d+\\) (.+)",
-                    "message": 1
+                    "column": 3,
+                    "message": 0
                 }
             ]
         }
