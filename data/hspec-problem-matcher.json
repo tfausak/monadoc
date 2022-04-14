@@ -5,7 +5,7 @@
             "owner": "hspec",
             "pattern": [
                 {
-                    "regexp": "^FAILURE file (.+) line (.+) column (.+) path (.+)$",
+                    "regexp": "^FAILURE (.+):(.+):(.+): (.+)$",
                     "file": 1,
                     "line": 2,
                     "column": 3,

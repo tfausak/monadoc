@@ -34,8 +34,8 @@ done = do
   Monad.forM_ failures $ \failure ->
     Formatter.writeLine $
       Printf.printf
-        "FAILURE file %s line %d column %d path %s"
-        (maybe "unknown" Spec.locationFile $ Formatter.failureRecordLocation failure)
-        (maybe (-1) Spec.locationLine $ Formatter.failureRecordLocation failure)
-        (maybe (-1) Spec.locationColumn $ Formatter.failureRecordLocation failure)
+        "FAILURE %s:%d:%d: %s"
+        (maybe "?" Spec.locationFile $ Formatter.failureRecordLocation failure)
+        (maybe 0 Spec.locationLine $ Formatter.failureRecordLocation failure)
+        (maybe 0 Spec.locationColumn $ Formatter.failureRecordLocation failure)
         (Util.formatRequirement $ Formatter.failureRecordPath failure)
