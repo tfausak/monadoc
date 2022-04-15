@@ -45,7 +45,6 @@ import qualified Test.Hspec as Hspec
 
 spec :: Hspec.Spec
 spec = do
-  Hspec.it "TODO" $ False `Hspec.shouldBe` True
   Monadoc.Action.Blob.UpsertSpec.spec
   Monadoc.Action.Database.InitializeSpec.spec
   Monadoc.Action.Database.VacuumSpec.spec
