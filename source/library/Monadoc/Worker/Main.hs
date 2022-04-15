@@ -8,7 +8,6 @@ import qualified Monadoc.Action.CronEntry.Enqueue as CronEntry.Enqueue
 import qualified Monadoc.Action.CronEntry.Prune as CronEntry.Prune
 import qualified Monadoc.Action.CronEntry.Upsert as CronEntry.Upsert
 import qualified Monadoc.Action.Job.Acquire as Job.Acquire
-import qualified Monadoc.Action.Job.Enqueue as Job.Enqueue
 import qualified Monadoc.Action.Job.Perform as Job.Perform
 import qualified Monadoc.Action.Job.Release as Job.Release
 import qualified Monadoc.Class.MonadHttp as MonadHttp
@@ -17,7 +16,6 @@ import qualified Monadoc.Class.MonadSleep as MonadSleep
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Constant.CronEntry as CronEntry
 import qualified Monadoc.Type.Context as Context
-import qualified Monadoc.Type.Task as Task
 
 worker ::
   ( Control.MonadBaseControl IO m,
@@ -30,9 +28,6 @@ worker ::
   ) =>
   m ()
 worker = do
-  Monad.void $ Job.Enqueue.run Task.UpsertHackageIndex
-  Monad.void $ Job.Enqueue.run Task.ProcessHackageIndex
-
   mapM_ CronEntry.Upsert.run CronEntry.all
   CronEntry.Prune.run
 

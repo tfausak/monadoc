@@ -12,6 +12,7 @@ import qualified Monadoc.Template.Common as Common
 import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
+import qualified Monadoc.Type.Revision as Revision
 import qualified Monadoc.Type.Route as Route
 import qualified Witch
 
@@ -34,10 +35,11 @@ render context package constraint rows = Common.base context (Route.Package . Pa
   Lucid.h3_ "Uploads"
   Lucid.ul_ . Monad.forM_ rows $ \row -> Lucid.li_ $ do
     let (upload Sql.:. version Sql.:. hackageUser) = row
-    "Version "
     Lucid.toHtml . Version.number $ Model.value version
-    " revision "
-    Lucid.toHtml . Upload.revision $ Model.value upload
+    let revision = Upload.revision $ Model.value upload
+    Monad.when (Revision.isNonZero revision) $ do
+      "-"
+      Lucid.toHtml revision
     " uploaded "
     Common.timestamp . Upload.uploadedAt $ Model.value upload
     " by "

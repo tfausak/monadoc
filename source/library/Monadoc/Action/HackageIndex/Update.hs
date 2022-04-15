@@ -64,4 +64,4 @@ run oldKey oldSize = do
                     Sqlite.blobWrite newBlob chunk offset
                     loop $ offset + size
             Base.liftBase $ loop start
-        MonadSql.execute "delete from hackageIndex where key != ?" [newKey]
+        MonadSql.execute "delete from hackageIndex where processedAt is not null and key != ?" [newKey]

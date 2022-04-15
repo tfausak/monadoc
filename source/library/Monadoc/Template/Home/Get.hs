@@ -10,6 +10,7 @@ import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Template.Common as Common
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
+import qualified Monadoc.Type.Revision as Revision
 import qualified Monadoc.Type.Route as Route
 
 render ::
@@ -21,16 +22,17 @@ render context rows = Common.base context Route.Home $ do
   Lucid.ul_ [] $ do
     Monad.forM_ rows $ \row -> Lucid.li_ [] $ do
       let (upload Sql.:. package Sql.:. version Sql.:. hackageUser) = row
-      "Package "
       Lucid.a_
         [Lucid.href_ . Common.route context . Route.Package . Package.name $ Model.value package]
         . Lucid.toHtml
         . Package.name
         $ Model.value package
-      " version "
+      "@"
       Lucid.toHtml . Version.number $ Model.value version
-      " revision "
-      Lucid.toHtml . Upload.revision $ Model.value upload
+      let revision = Upload.revision $ Model.value upload
+      Monad.when (Revision.isNonZero revision) $ do
+        "-"
+        Lucid.toHtml revision
       " uploaded "
       Common.timestamp . Upload.uploadedAt $ Model.value upload
       " by "
