@@ -1,89 +1,106 @@
-import qualified Monadoc.Action.Blob.UpsertSpec
-import qualified Monadoc.Action.Database.InitializeSpec
-import qualified Monadoc.Action.Database.VacuumSpec
-import qualified Monadoc.Action.HackageUser.UpsertSpec
-import qualified Monadoc.Action.Job.EnqueueSpec
-import qualified Monadoc.Action.Key.SelectLastInsertSpec
-import qualified Monadoc.Action.Package.UpsertSpec
-import qualified Monadoc.Action.Preference.UpsertSpec
-import qualified Monadoc.Action.Upload.UpsertSpec
-import qualified Monadoc.Action.Version.UpsertSpec
-import qualified Monadoc.Extra.DirectSqliteSpec
-import qualified Monadoc.Extra.EitherSpec
-import qualified Monadoc.Extra.TimeSpec
-import qualified Monadoc.Model.BlobSpec
-import qualified Monadoc.Model.CronEntrySpec
-import qualified Monadoc.Model.HackageIndexSpec
-import qualified Monadoc.Model.HackageUserSpec
-import qualified Monadoc.Model.JobSpec
-import qualified Monadoc.Model.MigrationSpec
-import qualified Monadoc.Model.PackageSpec
-import qualified Monadoc.Model.PreferenceSpec
-import qualified Monadoc.Model.UploadSpec
-import qualified Monadoc.Model.VersionSpec
-import qualified Monadoc.Type.ConfigSpec
-import qualified Monadoc.Type.ConstraintSpec
-import qualified Monadoc.Type.FlagSpec
-import qualified Monadoc.Type.GuidSpec
-import qualified Monadoc.Type.HackageUserNameSpec
-import qualified Monadoc.Type.HashSpec
-import qualified Monadoc.Type.KeySpec
-import qualified Monadoc.Type.ModelSpec
-import qualified Monadoc.Type.PackageNameSpec
-import qualified Monadoc.Type.PortSpec
-import qualified Monadoc.Type.RevisionSpec
-import qualified Monadoc.Type.RouteSpec
-import qualified Monadoc.Type.ScheduleSpec
-import qualified Monadoc.Type.SeveritySpec
-import qualified Monadoc.Type.StatusSpec
-import qualified Monadoc.Type.TaskSpec
-import qualified Monadoc.Type.TimestampSpec
-import qualified Monadoc.Type.VersionNumberSpec
-import qualified Test.Hspec as Hspec
+import qualified Control.Monad as Monad
+import qualified Control.Monad.Catch as Exception
+import qualified Data.Maybe as Maybe
+import qualified Data.Typeable as Typeable
+import qualified Monadoc.Spec as Monadoc
+import qualified System.Environment as Environment
+import qualified Test.Hspec.Core.Format as Format
+import qualified Test.Hspec.Core.Formatters as Formatters
+import qualified Test.Hspec.Runner as Runner
 
 main :: IO ()
-main = Hspec.hspec spec
+main = do
+  arguments <- Environment.getArgs
+  config <- Runner.readConfig Runner.defaultConfig arguments
+  summary <- Environment.withArgs [] . Runner.runSpec Monadoc.spec $ appendCiFormat config
+  Runner.evaluateSummary summary
 
-spec :: Hspec.Spec
-spec = do
-  Monadoc.Action.Blob.UpsertSpec.spec
-  Monadoc.Action.Database.InitializeSpec.spec
-  Monadoc.Action.Database.VacuumSpec.spec
-  Monadoc.Action.HackageUser.UpsertSpec.spec
-  Monadoc.Action.Job.EnqueueSpec.spec
-  Monadoc.Action.Key.SelectLastInsertSpec.spec
-  Monadoc.Action.Package.UpsertSpec.spec
-  Monadoc.Action.Preference.UpsertSpec.spec
-  Monadoc.Action.Upload.UpsertSpec.spec
-  Monadoc.Action.Version.UpsertSpec.spec
-  Monadoc.Extra.DirectSqliteSpec.spec
-  Monadoc.Extra.EitherSpec.spec
-  Monadoc.Extra.TimeSpec.spec
-  Monadoc.Model.BlobSpec.spec
-  Monadoc.Model.CronEntrySpec.spec
-  Monadoc.Model.HackageIndexSpec.spec
-  Monadoc.Model.HackageUserSpec.spec
-  Monadoc.Model.JobSpec.spec
-  Monadoc.Model.MigrationSpec.spec
-  Monadoc.Model.PackageSpec.spec
-  Monadoc.Model.PreferenceSpec.spec
-  Monadoc.Model.UploadSpec.spec
-  Monadoc.Model.VersionSpec.spec
-  Monadoc.Type.ConfigSpec.spec
-  Monadoc.Type.ConstraintSpec.spec
-  Monadoc.Type.FlagSpec.spec
-  Monadoc.Type.GuidSpec.spec
-  Monadoc.Type.HackageUserNameSpec.spec
-  Monadoc.Type.HashSpec.spec
-  Monadoc.Type.KeySpec.spec
-  Monadoc.Type.ModelSpec.spec
-  Monadoc.Type.PackageNameSpec.spec
-  Monadoc.Type.PortSpec.spec
-  Monadoc.Type.RevisionSpec.spec
-  Monadoc.Type.RouteSpec.spec
-  Monadoc.Type.ScheduleSpec.spec
-  Monadoc.Type.SeveritySpec.spec
-  Monadoc.Type.StatusSpec.spec
-  Monadoc.Type.TaskSpec.spec
-  Monadoc.Type.TimestampSpec.spec
-  Monadoc.Type.VersionNumberSpec.spec
+appendCiFormat :: Runner.Config -> Runner.Config
+appendCiFormat config = withFormat (getFormat config <> ciFormatter) config
+
+withFormat :: (Format.FormatConfig -> IO Format.Format) -> Runner.Config -> Runner.Config
+withFormat format config =
+  config
+    { Runner.configFormat = Just format,
+      Runner.configFormatter = Nothing
+    }
+
+getFormat :: Runner.Config -> Format.FormatConfig -> IO Format.Format
+getFormat = Maybe.fromMaybe defaultFormat . lookupFormat
+
+lookupFormat :: Runner.Config -> Maybe (Format.FormatConfig -> IO Format.Format)
+lookupFormat config = case Runner.configFormat config of
+  Just f -> Just f
+  Nothing -> case Runner.configFormatter config of
+    Just x -> Just $ Formatters.formatterToFormat x
+    Nothing -> Nothing
+
+defaultFormat :: Format.FormatConfig -> IO Format.Format
+defaultFormat = Formatters.formatterToFormat Formatters.checks
+
+ciFormatter :: Applicative io => formatConfig -> io Format.Format
+ciFormatter = const $ pure ciFormat
+
+ciFormat :: Format.Format
+ciFormat = whenDone $ \xs -> whenCi $ do
+  putStrLn ""
+  mapM_ (putStrLn . uncurry formatFailure) $
+    Maybe.mapMaybe (toFailure . Format.itemResult . snd) xs
+
+whenDone ::
+  Applicative io =>
+  ([(Runner.Path, Format.Item)] -> io ()) ->
+  Format.Event ->
+  io ()
+whenDone callback event = case event of
+  Format.Done xs -> callback xs
+  _ -> pure ()
+
+whenCi :: IO () -> IO ()
+whenCi action = do
+  ci <- Environment.lookupEnv "CI"
+  Monad.when (ci == Just "true") action
+
+toFailure :: Format.Result -> Maybe (Maybe Format.Location, Format.FailureReason)
+toFailure result = case result of
+  Format.Failure maybeLocation failureReason -> Just (maybeLocation, failureReason)
+  _ -> Nothing
+
+formatFailure :: Maybe Format.Location -> Format.FailureReason -> String
+formatFailure maybeLocation failureReason =
+  mconcat
+    [ "FAILURE ",
+      formatLocation maybeLocation,
+      ": ",
+      formatFailureReason failureReason
+    ]
+
+formatLocation :: Maybe Format.Location -> String
+formatLocation maybeLocation =
+  mconcat
+    [ maybe "?" Format.locationFile maybeLocation,
+      ":",
+      maybe "0" (show . Format.locationLine) maybeLocation,
+      ":",
+      maybe "0" (show . Format.locationColumn) maybeLocation
+    ]
+
+formatFailureReason :: Format.FailureReason -> String
+formatFailureReason failureReason = case failureReason of
+  Format.NoReason -> "no reason"
+  Format.Reason reason -> reason
+  Format.ExpectedButGot prefix expected actual ->
+    mconcat
+      [ maybe "" (<> ": ") prefix,
+        "expected ",
+        expected,
+        " but got ",
+        actual
+      ]
+  Format.Error prefix (Exception.SomeException exception) ->
+    mconcat
+      [ maybe "" (<> ": ") prefix,
+        show (Typeable.typeOf exception),
+        ": ",
+        Exception.displayException exception
+      ]

@@ -225,6 +225,7 @@ test-suite monadoc-test-suite
 
   build-depends:
     , hspec ^>= 2.9.4
+    , hspec-core ^>= 2.9.4
   hs-source-dirs: source/test-suite
   main-is: Main.hs
   other-modules:
@@ -251,6 +252,7 @@ test-suite monadoc-test-suite
     Monadoc.Model.PreferenceSpec
     Monadoc.Model.UploadSpec
     Monadoc.Model.VersionSpec
+    Monadoc.Spec
     Monadoc.Test
     Monadoc.Type.ConfigSpec
     Monadoc.Type.ConstraintSpec

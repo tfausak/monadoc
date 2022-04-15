@@ -1,0 +1,17 @@
+{
+    "//": "https://github.com/actions/toolkit/blob/7654d97/docs/problem-matchers.md",
+    "problemMatcher": [
+        {
+            "owner": "hspec",
+            "pattern": [
+                {
+                    "regexp": "^FAILURE (.+):(.+):(.+): (.+)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "message": 4
+                }
+            ]
+        }
+    ]
+}
