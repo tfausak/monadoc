@@ -79,7 +79,7 @@ jobs:
 
       - run: cabal build
 
-      - run: echo '::add-matcher::data/hspec-problem-matcher.json'
+      - run: echo '::add-matcher::.github/hspec-problem-matcher.json'
 
       - run: cabal run -- monadoc-test-suite --fail-on-focused --randomize
 
