@@ -225,7 +225,6 @@ test-suite monadoc-test-suite
 
   build-depends:
     , hspec ^>= 2.9.4
-    , hspec-core ^>= 2.9.4
   hs-source-dirs: source/test-suite
   main-is: Main.hs
   other-modules:
