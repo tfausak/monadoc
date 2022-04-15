@@ -44,9 +44,8 @@ ciFormatter = const $ pure ciFormat
 ciFormat :: Format.Format
 ciFormat = whenDone $ \xs -> whenCi $ do
   putStrLn ""
-  mapM_ (putStrLn . uncurry formatFailure)
-    . Maybe.mapMaybe toFailure
-    $ fmap (Format.itemResult . snd) xs
+  mapM_ (putStrLn . uncurry formatFailure) $
+    Maybe.mapMaybe (toFailure . Format.itemResult . snd) xs
 
 whenDone ::
   Applicative io =>
