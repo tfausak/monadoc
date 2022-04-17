@@ -5,6 +5,7 @@ import qualified Monadoc.Class.MonadTime as MonadTime
 import qualified Monadoc.Model.Job as Job
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Status as Status
+import qualified Monadoc.Type.Timestamp as Timestamp
 
 run :: (MonadSql.MonadSql m, MonadTime.MonadTime m) => m (Maybe Job.Model)
 run = do
@@ -15,7 +16,7 @@ run = do
   case rows of
     [] -> pure Nothing
     job : _ -> do
-      now <- MonadTime.getCurrentTime
+      now <- Timestamp.getCurrentTime
       MonadSql.execute
         "update job set startedAt = ?, status = ? where key = ?"
         (now, Status.Locked, Model.key job)

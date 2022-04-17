@@ -6,6 +6,7 @@ import qualified Monadoc.Class.MonadTime as MonadTime
 import qualified Monadoc.Model.Job as Job
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Status as Status
+import qualified Monadoc.Type.Timestamp as Timestamp
 
 run ::
   (MonadSql.MonadSql m, MonadTime.MonadTime m) =>
@@ -15,7 +16,7 @@ run ::
 run maybeJob exitCase = case maybeJob of
   Nothing -> pure ()
   Just job -> do
-    now <- MonadTime.getCurrentTime
+    now <- Timestamp.getCurrentTime
     let status = case exitCase of
           Exception.ExitCaseSuccess _ -> Status.Passed
           Exception.ExitCaseException _ -> Status.Failed

@@ -21,12 +21,19 @@ import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
+import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Types as Http
 import qualified Witch
 
 run ::
-  (Control.MonadBaseControl IO m, MonadHttp.MonadHttp m, MonadLog.MonadLog m, Exception.MonadMask m, Reader.MonadReader Context.Context m, MonadSql.MonadSql m) =>
+  ( Control.MonadBaseControl IO m,
+    MonadHttp.MonadHttp m,
+    MonadLog.MonadLog m,
+    Exception.MonadMask m,
+    Reader.MonadReader Context.Context m,
+    MonadSql.MonadSql m
+  ) =>
   HackageIndex.Key ->
   Int ->
   m ()
@@ -49,7 +56,8 @@ run oldKey oldSize = do
       MonadLog.debug $ "new index to get: " <> Text.pack (show $ newSize - oldSize)
       request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar"
       let headers = (Http.hRange, range) : Client.requestHeaders request
-      MonadSql.execute "insert into hackageIndex (contents, processedAt, size) values (zeroblob(?), null, ?)" (newSize, newSize)
+      createdAt <- Timestamp.getCurrentTime
+      MonadSql.execute "insert into hackageIndex (contents, createdAt, processedAt, size, updatedAt) values (zeroblob(?), ?, null, ?, null)" (newSize, createdAt, newSize)
       newKey <- Key.SelectLastInsert.run
       Pool.withResource (Context.pool context) $ \connection -> do
         Sqlite.withBlob (Sql.connectionHandle connection) "hackageIndex" "contents" (Witch.into @Int.Int64 newKey) True $ \newBlob -> do
@@ -64,4 +72,5 @@ run oldKey oldSize = do
                     Sqlite.blobWrite newBlob chunk offset
                     loop $ offset + size
             Base.liftBase $ loop start
-        MonadSql.execute "delete from hackageIndex where processedAt is not null and key != ?" [newKey]
+      updatedAt <- Timestamp.getCurrentTime
+      MonadSql.execute "update hackageIndex set updatedAt = ? where key = ?" (updatedAt, newKey)

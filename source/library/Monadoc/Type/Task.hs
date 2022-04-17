@@ -8,6 +8,7 @@ import qualified Test.QuickCheck as QuickCheck
 
 data Task
   = ProcessHackageIndex
+  | PruneHackageIndex
   | UpsertHackageIndex
   | Vacuum
   deriving (Eq, Show)
@@ -17,6 +18,7 @@ instance Aeson.FromJSON Task where
     tag :: Text.Text <- object Aeson..: "tag"
     case tag of
       "ProcessHackageIndex" -> pure ProcessHackageIndex
+      "PruneHackageIndex" -> pure PruneHackageIndex
       "UpsertHackageIndex" -> pure UpsertHackageIndex
       "Vacuum" -> pure Vacuum
       _ -> fail $ "unknown tag: " <> show tag
@@ -25,6 +27,7 @@ instance Aeson.ToJSON Task where
   toJSON task =
     let tag :: Text.Text = case task of
           ProcessHackageIndex -> "ProcessHackageIndex"
+          PruneHackageIndex -> "PruneHackageIndex"
           UpsertHackageIndex -> "UpsertHackageIndex"
           Vacuum -> "Vacuum"
      in Aeson.object ["tag" Aeson..= tag]
@@ -42,6 +45,7 @@ instance QuickCheck.Arbitrary Task where
   arbitrary =
     QuickCheck.elements
       [ ProcessHackageIndex,
+        PruneHackageIndex,
         UpsertHackageIndex,
         Vacuum
       ]

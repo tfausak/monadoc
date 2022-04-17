@@ -7,6 +7,7 @@ import qualified Data.Time as Time
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Lucid
+import qualified Monadoc.Class.MonadTime as MonadTime
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
@@ -38,6 +39,9 @@ instance QuickCheck.Arbitrary Timestamp where
 
 instance Witch.From Timestamp Text.Text where
   from = Witch.via @String
+
+getCurrentTime :: MonadTime.MonadTime m => m Timestamp
+getCurrentTime = Witch.into @Timestamp <$> MonadTime.getCurrentTime
 
 genUtcTime :: QuickCheck.Gen Time.UTCTime
 genUtcTime = Time.UTCTime <$> genDay <*> fmap Time.timeOfDayToTime genTimeOfDay

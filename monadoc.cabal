@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.4.15
+version: 0.2022.4.17
 
 build-type: Simple
 category: Documentation
@@ -111,6 +111,7 @@ library
     Monadoc.Action.Database.Vacuum
     Monadoc.Action.HackageIndex.Insert
     Monadoc.Action.HackageIndex.Process
+    Monadoc.Action.HackageIndex.Prune
     Monadoc.Action.HackageIndex.Update
     Monadoc.Action.HackageIndex.Upsert
     Monadoc.Action.HackageUser.Upsert
@@ -140,7 +141,6 @@ library
     Monadoc.Exception.InvalidSize
     Monadoc.Exception.MethodNotAllowed
     Monadoc.Exception.MigrationMismatch
-    Monadoc.Exception.MissingHackageIndex
     Monadoc.Exception.MissingRowid
     Monadoc.Exception.MissingSize
     Monadoc.Exception.NoNextMatch

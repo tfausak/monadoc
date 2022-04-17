@@ -8,11 +8,12 @@ import qualified Monadoc.Model.Job as Job
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Status as Status
 import qualified Monadoc.Type.Task as Task
+import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Witch
 
 run :: (MonadSql.MonadSql m, Exception.MonadThrow m, MonadTime.MonadTime m) => Task.Task -> m Job.Model
 run task = do
-  now <- MonadTime.getCurrentTime
+  now <- Timestamp.getCurrentTime
   let job =
         Job.Job
           { Job.createdAt = Witch.from now,

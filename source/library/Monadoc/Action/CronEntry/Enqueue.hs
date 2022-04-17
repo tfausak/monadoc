@@ -5,7 +5,6 @@ import qualified Control.Monad.Catch as Exception
 import qualified Monadoc.Action.Job.Enqueue as Job.Enqueue
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
-import qualified Monadoc.Class.MonadTime as MonadTime
 import qualified Monadoc.Exception.NoNextMatch as NoNextMatch
 import qualified Monadoc.Model.CronEntry as CronEntry
 import qualified Monadoc.Type.Model as Model
@@ -20,7 +19,7 @@ run ::
   ) =>
   m ()
 run = do
-  now <- Witch.into @Timestamp.Timestamp <$> MonadTime.getCurrentTime
+  now <- Timestamp.getCurrentTime
   cronEntries <- MonadSql.query "select * from cronEntry where runAt <= ? order by runAt asc" [now]
   Monad.forM_ cronEntries $ \cronEntry -> do
     job <- Job.Enqueue.run . CronEntry.task $ Model.value cronEntry

@@ -14,8 +14,10 @@ type Key = Key.Key HackageIndex
 
 data HackageIndex = HackageIndex
   { contents :: ByteString.ByteString,
+    createdAt :: Timestamp.Timestamp,
     processedAt :: Maybe Timestamp.Timestamp,
-    size :: Int
+    size :: Int,
+    updatedAt :: Maybe Timestamp.Timestamp
   }
   deriving (Eq, Show)
 
@@ -25,21 +27,27 @@ instance Sql.FromRow HackageIndex where
       <$> Sql.field
       <*> Sql.field
       <*> Sql.field
+      <*> Sql.field
+      <*> Sql.field
 
 instance Sql.ToRow HackageIndex where
   toRow hackageIndex =
     [ Sql.toField $ contents hackageIndex,
+      Sql.toField $ createdAt hackageIndex,
       Sql.toField $ processedAt hackageIndex,
-      Sql.toField $ size hackageIndex
+      Sql.toField $ size hackageIndex,
+      Sql.toField $ updatedAt hackageIndex
     ]
 
 migrations :: [Migration.Migration]
 migrations =
   [ Migration.new
-      (2022, 3, 12, 0, 0, 0)
+      (2022, 4, 17, 0, 0, 0)
       "create table hackageIndex \
       \ ( key integer primary key \
       \ , contents blob not null \
+      \ , createdAt text not null \
       \ , processedAt text \
-      \ , size integer not null )"
+      \ , size integer not null \
+      \ , updatedAt text )"
   ]

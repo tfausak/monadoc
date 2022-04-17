@@ -13,10 +13,14 @@ spec = Hspec.describe "Monadoc.Model.HackageIndex" $ do
     Test.expectSqlRow
       HackageIndex.HackageIndex
         { HackageIndex.contents = "example",
-          HackageIndex.processedAt = Just . Witch.from $ Time.makeUtcTime 2001 2 3 4 5 6.007,
-          HackageIndex.size = 7
+          HackageIndex.createdAt = Witch.from $ Time.makeUtcTime 2001 2 3 4 5 6.007,
+          HackageIndex.processedAt = Just . Witch.from $ Time.makeUtcTime 2002 2 3 4 5 6.007,
+          HackageIndex.size = 7,
+          HackageIndex.updatedAt = Just . Witch.from $ Time.makeUtcTime 2003 2 3 4 5 6.007
         }
       [ Sql.SQLBlob "example",
         Sql.SQLText "2001-02-03 04:05:06.007",
-        Sql.SQLInteger 7
+        Sql.SQLText "2002-02-03 04:05:06.007",
+        Sql.SQLInteger 7,
+        Sql.SQLText "2003-02-03 04:05:06.007"
       ]

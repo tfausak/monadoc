@@ -1,20 +1,20 @@
 {
-    "//": "https://github.com/actions/toolkit/blob/7654d97/docs/problem-matchers.md",
-    "problemMatcher": [
+  "//": "https://github.com/actions/toolkit/blob/7654d97/docs/problem-matchers.md",
+  "problemMatcher": [
+    {
+      "owner": "hspec",
+      "pattern": [
         {
-            "owner": "hspec",
-            "pattern": [
-                {
-                    "regexp": "^[^ ]* *(.+?):(\\d+):(\\d+): ",
-                    "file": 1,
-                    "line": 2,
-                    "column": 3
-                },
-                {
-                    "regexp": "^  \\d+\\) (.+)",
-                    "message": 1
-                }
-            ]
+          "regexp": "^[^ ]* *(.+?):(\\d+):(\\d+): ",
+          "file": 1,
+          "line": 2,
+          "column": 3
+        },
+        {
+          "regexp": "^  \\d+\\) (.+)",
+          "message": 1
         }
-    ]
+      ]
+    }
+  ]
 }

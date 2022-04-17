@@ -1,7 +1,6 @@
 module Monadoc.Template.User.Get where
 
 import qualified Control.Monad as Monad
-import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
 import qualified Lucid
 import qualified Monadoc.Model.HackageUser as HackageUser
@@ -13,7 +12,6 @@ import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Revision as Revision
 import qualified Monadoc.Type.Route as Route
-import qualified Witch
 
 render ::
   Context.Context ->
@@ -22,8 +20,6 @@ render ::
   Lucid.Html ()
 render context hackageUser rows = Common.base context (Route.User . HackageUser.name $ Model.value hackageUser) $ do
   Lucid.h2_ . Lucid.toHtml . HackageUser.name $ Model.value hackageUser
-  Lucid.p_ . Common.url $
-    "https://hackage.haskell.org/user/" <> (Witch.into @Text.Text . HackageUser.name $ Model.value hackageUser)
   Lucid.h3_ "Uploads"
   Lucid.ul_ . Monad.forM_ rows $ \row -> Lucid.li_ $ do
     let (upload Sql.:. version Sql.:. package) = row

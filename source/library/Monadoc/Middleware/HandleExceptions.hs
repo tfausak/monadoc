@@ -11,6 +11,7 @@ import qualified Data.Text as Text
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Constant.ContentType as ContentType
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
+import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
@@ -41,8 +42,9 @@ onException someException =
 
 onExceptionResponse :: Exception.SomeException -> Wai.Response
 onExceptionResponse e
-  | isType @UnknownRoute.UnknownRoute e = statusResponse Http.notFound404 []
   | isType @MethodNotAllowed.MethodNotAllowed e = statusResponse Http.methodNotAllowed405 []
+  | isType @NotFound.NotFound e = statusResponse Http.notFound404 []
+  | isType @UnknownRoute.UnknownRoute e = statusResponse Http.notFound404 []
   | otherwise = statusResponse Http.internalServerError500 []
 
 isType :: forall e. Exception.Exception e => Exception.SomeException -> Bool

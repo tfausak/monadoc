@@ -28,9 +28,7 @@ import qualified Monadoc.Action.Upload.Upsert as Upload.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
-import qualified Monadoc.Class.MonadTime as MonadTime
 import qualified Monadoc.Exception.ConversionFailure as ConversionFailure
-import qualified Monadoc.Exception.MissingHackageIndex as MissingHackageIndex
 import qualified Monadoc.Exception.UnexpectedEntry as UnexpectedEntry
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Model.Blob as Blob
@@ -51,17 +49,18 @@ import qualified System.FilePath as FilePath
 import qualified Witch
 
 run ::
-  (Control.MonadBaseControl IO m, MonadLog.MonadLog m, Exception.MonadMask m, Reader.MonadReader Context.Context m, MonadSql.MonadSql m) =>
+  ( Control.MonadBaseControl IO m,
+    MonadLog.MonadLog m,
+    Exception.MonadMask m,
+    Reader.MonadReader Context.Context m,
+    MonadSql.MonadSql m
+  ) =>
   m ()
 run = do
-  (key, maybeProcessedAt, size) <- do
-    rows <- MonadSql.query_ "select key, processedAt, size from hackageIndex order by key asc limit 1"
-    case rows of
-      [] -> Exception.throwM MissingHackageIndex.MissingHackageIndex
-      (key, maybeProcessedAt, size) : _ -> pure (key, maybeProcessedAt, size)
-  case maybeProcessedAt :: Maybe Timestamp.Timestamp of
-    Just _ -> MonadLog.debug "index already processed, skipping"
-    Nothing -> do
+  rows <- MonadSql.query_ "select key, size from hackageIndex where updatedAt is not null and processedAt is null order by createdAt asc limit 1"
+  case rows of
+    [] -> MonadLog.debug "no new hackage index to process"
+    (key, size) : _ -> do
       preference <- Base.liftBase $ Stm.newTVarIO Map.empty
       revisions <- Base.liftBase $ Stm.newTVarIO Map.empty
       context <- Reader.ask
@@ -73,7 +72,7 @@ run = do
             . Tar.read
             $ LazyByteString.fromChunks contents
       upsertPreference preference
-      now <- MonadTime.getCurrentTime
+      now <- Timestamp.getCurrentTime
       MonadSql.execute "update hackageIndex set processedAt = ? where key = ?" (Just now, key)
 
 handleItem ::

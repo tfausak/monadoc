@@ -22,19 +22,29 @@ import qualified Monadoc.Exception.TrailingBytes as TrailingBytes
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
+import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Types as Http
 import qualified Text.Read as Read
 import qualified Witch
 
-run :: (Control.MonadBaseControl IO m, MonadHttp.MonadHttp m, MonadLog.MonadLog m, Exception.MonadMask m, Reader.MonadReader Context.Context m, MonadSql.MonadSql m) => m ()
+run ::
+  ( Control.MonadBaseControl IO m,
+    MonadHttp.MonadHttp m,
+    MonadLog.MonadLog m,
+    Exception.MonadMask m,
+    Reader.MonadReader Context.Context m,
+    MonadSql.MonadSql m
+  ) =>
+  m ()
 run = do
   MonadLog.debug "inserting hackage index"
   size <- getSize
   context <- Reader.ask
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"
   MonadHttp.withResponse request $ \response -> do
-    MonadSql.execute "insert into hackageIndex (contents, processedAt, size) values (zeroblob(?), null, ?)" (size, size)
+    createdAt <- Timestamp.getCurrentTime
+    MonadSql.execute "insert into hackageIndex (contents, createdAt, processedAt, size, updatedAt) values (zeroblob(?), ?, null, ?, null)" (size, createdAt, size)
     key <- Key.SelectLastInsert.run
     Pool.withResource (Context.pool context) $ \connection -> Sqlite.withBlob (Sql.connectionHandle connection) "hackageIndex" "contents" (Witch.into @Int.Int64 key) True $ \blob -> do
       offsetRef <- Base.liftBase $ Stm.newTVarIO 0
@@ -56,6 +66,8 @@ run = do
           )
           Exception.throwM
           (Zlib.decompressIO Zlib.gzipFormat Zlib.defaultDecompressParams)
+    updatedAt <- Timestamp.getCurrentTime
+    MonadSql.execute "update hackageIndex set updatedAt = ? where key = ?" (updatedAt, key)
 
 getSize :: (MonadHttp.MonadHttp m, Reader.MonadReader Context.Context m, Exception.MonadThrow m) => m Int
 getSize = do
