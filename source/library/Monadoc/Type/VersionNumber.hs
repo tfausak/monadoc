@@ -4,10 +4,10 @@ import qualified Control.Monad as Monad
 import qualified Data.Version as Version
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
-import qualified Distribution.Parsec as Cabal
 import qualified Distribution.Pretty as Cabal
 import qualified Distribution.Types.Version as Cabal
 import qualified Lucid
+import qualified Monadoc.Extra.Cabal as Cabal
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
@@ -20,7 +20,10 @@ instance Witch.From Cabal.Version VersionNumber
 instance Witch.From VersionNumber Cabal.Version
 
 instance Witch.TryFrom String VersionNumber where
-  tryFrom = Witch.maybeTryFrom $ fmap (Witch.from @Cabal.Version) . Cabal.simpleParsec
+  tryFrom =
+    Witch.eitherTryFrom $
+      fmap (Witch.from @Cabal.Version)
+        . Cabal.tryParsec
 
 instance Witch.From VersionNumber String where
   from = Cabal.prettyShow . Witch.into @Cabal.Version

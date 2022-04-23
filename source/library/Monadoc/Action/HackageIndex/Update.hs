@@ -16,8 +16,12 @@ import qualified Monadoc.Action.Key.SelectLastInsert as Key.SelectLastInsert
 import qualified Monadoc.Class.MonadHttp as MonadHttp
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
+import qualified Monadoc.Constant.Header as Header
 import qualified Monadoc.Exception.InvalidSize as InvalidSize
+import qualified Monadoc.Exception.MissingHeader as MissingHeader
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
+import qualified Monadoc.Extra.Either as Either
+import qualified Monadoc.Extra.Read as Read
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
@@ -56,21 +60,35 @@ run oldKey oldSize = do
       MonadLog.debug $ "new index to get: " <> Text.pack (show $ newSize - oldSize)
       request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar"
       let headers = (Http.hRange, range) : Client.requestHeaders request
-      createdAt <- Timestamp.getCurrentTime
-      MonadSql.execute "insert into hackageIndex (contents, createdAt, processedAt, size, updatedAt) values (zeroblob(?), ?, null, ?, null)" (newSize, createdAt, newSize)
-      newKey <- Key.SelectLastInsert.run
-      Pool.withResource (Context.pool context) $ \connection -> do
-        Sqlite.withBlob (Sql.connectionHandle connection) "hackageIndex" "contents" (Witch.into @Int.Int64 newKey) True $ \newBlob -> do
-          Sqlite.withBlob (Sql.connectionHandle connection) "hackageIndex" "contents" (Witch.into @Int.Int64 oldKey) False $ \oldBlob -> do
-            contents <- Base.liftBase $ Sqlite.blobRead oldBlob oldSize 0
-            Base.liftBase $ Sqlite.blobWrite newBlob contents 0
-          MonadHttp.withResponse request {Client.requestHeaders = headers} $ \response -> do
-            let loop offset = do
-                  chunk <- Client.brRead $ Client.responseBody response
-                  let size = ByteString.length chunk
-                  Monad.when (not $ ByteString.null chunk) $ do
-                    Sqlite.blobWrite newBlob chunk offset
-                    loop $ offset + size
-            Base.liftBase $ loop start
-      updatedAt <- Timestamp.getCurrentTime
-      MonadSql.execute "update hackageIndex set updatedAt = ? where key = ?" (updatedAt, newKey)
+      MonadHttp.withResponse request {Client.requestHeaders = headers} $ \response -> do
+        actualSize <- getActualSize response
+        Monad.when (actualSize /= newSize) . Exception.throwM $
+          InvalidSize.InvalidSize
+            { InvalidSize.old = newSize,
+              InvalidSize.new = actualSize
+            }
+        createdAt <- Timestamp.getCurrentTime
+        MonadSql.execute "insert into hackageIndex (contents, createdAt, processedAt, size, updatedAt) values (zeroblob(?), ?, null, ?, null)" (newSize, createdAt, newSize)
+        newKey <- Key.SelectLastInsert.run
+        Pool.withResource (Context.pool context) $ \connection -> do
+          Sqlite.withBlob (Sql.connectionHandle connection) "hackageIndex" "contents" (Witch.into @Int.Int64 newKey) True $ \newBlob -> do
+            Sqlite.withBlob (Sql.connectionHandle connection) "hackageIndex" "contents" (Witch.into @Int.Int64 oldKey) False $ \oldBlob -> do
+              contents <- Base.liftBase $ Sqlite.blobRead oldBlob oldSize 0
+              Base.liftBase $ Sqlite.blobWrite newBlob contents 0
+              let loop offset = do
+                    chunk <- Client.brRead $ Client.responseBody response
+                    let size = ByteString.length chunk
+                    Monad.when (not $ ByteString.null chunk) $ do
+                      Sqlite.blobWrite newBlob chunk offset
+                      loop $ offset + size
+              Base.liftBase $ loop start
+        updatedAt <- Timestamp.getCurrentTime
+        MonadSql.execute "update hackageIndex set updatedAt = ? where key = ?" (updatedAt, newKey)
+
+getActualSize :: Exception.MonadThrow m => Client.Response a -> m Int
+getActualSize response = do
+  a <- case lookup Header.contentRange $ Client.responseHeaders response of
+    Nothing -> Exception.throwM $ MissingHeader.MissingHeader Header.contentRange
+    Just c -> pure c
+  b <- Either.throw . Witch.tryInto @String . ByteString.drop 1 . snd $ ByteString.break (== 0x2f) a
+  Either.throw $ Read.tryRead b

@@ -17,7 +17,6 @@ import qualified Data.Text as Text
 import qualified Data.Time.Clock.POSIX as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Distribution.Package as Cabal
-import qualified Distribution.Parsec as Cabal
 import qualified Distribution.Types.PackageVersionConstraint as Cabal
 import qualified Distribution.Version as Cabal
 import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
@@ -28,9 +27,10 @@ import qualified Monadoc.Action.Upload.Upsert as Upload.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
-import qualified Monadoc.Exception.ConversionFailure as ConversionFailure
 import qualified Monadoc.Exception.UnexpectedEntry as UnexpectedEntry
+import qualified Monadoc.Extra.Cabal as Cabal
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
+import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
@@ -108,19 +108,17 @@ handlePreference ::
   m ()
 handlePreference preference entry pkg = do
   packageName <-
-    either Exception.throwM pure $
+    Either.throw $
       Witch.tryInto @PackageName.PackageName pkg
   lazyByteString <- case Tar.entryContent entry of
     Tar.NormalFile lazyByteString _ -> pure lazyByteString
     _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
-  string <- either Exception.throwM pure $ Witch.tryInto @String lazyByteString
+  string <- Either.throw $ Witch.tryInto @String lazyByteString
   versionRange <-
     if null string
       then pure Cabal.anyVersion
       else do
-        Cabal.PackageVersionConstraint name range <- case Cabal.simpleParsec string of
-          Nothing -> Exception.throwM $ ConversionFailure.new @Cabal.PackageVersionConstraint string
-          Just x -> pure x
+        Cabal.PackageVersionConstraint name range <- Either.throw $ Cabal.tryParsec string
         Monad.when (name /= Witch.into @Cabal.PackageName packageName)
           . Exception.throwM
           $ UnexpectedEntry.UnexpectedEntry entry
@@ -141,10 +139,10 @@ handleCabal ::
   m ()
 handleCabal revisions entry pkg ver = do
   packageName <-
-    either Exception.throwM pure $
+    Either.throw $
       Witch.tryInto @PackageName.PackageName pkg
   versionNumber <-
-    either Exception.throwM pure $
+    Either.throw $
       Witch.tryInto @VersionNumber.VersionNumber ver
   let key = (packageName, versionNumber)
   revision <- Base.liftBase . Stm.atomically . Stm.stateTVar revisions $ \m ->
@@ -159,7 +157,7 @@ handleCabal revisions entry pkg ver = do
   package <- Package.Upsert.run Package.Package {Package.name = packageName}
   version <- Version.Upsert.run Version.Version {Version.number = versionNumber}
   hackageUserName <-
-    either Exception.throwM pure
+    Either.throw
       . Witch.tryInto @HackageUserName.HackageUserName
       . Tar.ownerName
       $ Tar.entryOwnership entry

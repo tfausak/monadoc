@@ -1,6 +1,6 @@
 module Monadoc.Exception.MissingRowid where
 
-import qualified Control.Exception.Base as Exception
+import qualified Control.Monad.Catch as Exception
 
 data MissingRowid
   = MissingRowid

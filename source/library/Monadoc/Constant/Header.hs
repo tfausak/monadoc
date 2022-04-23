@@ -2,6 +2,9 @@ module Monadoc.Constant.Header where
 
 import qualified Network.HTTP.Types as Http
 
+contentRange :: Http.HeaderName
+contentRange = "Content-Range"
+
 contentSecurityPolicy :: Http.HeaderName
 contentSecurityPolicy = "Content-Security-Policy"
 

@@ -1,6 +1,6 @@
 module Monadoc.Exception.InvalidSize where
 
-import qualified Control.Exception.Base as Exception
+import qualified Control.Monad.Catch as Exception
 
 data InvalidSize = InvalidSize
   { old :: Int,

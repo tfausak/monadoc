@@ -4,9 +4,9 @@ import qualified Data.Text as Text
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Distribution.Package as Cabal
-import qualified Distribution.Parsec as Cabal
 import qualified Distribution.Pretty as Cabal
 import qualified Lucid
+import qualified Monadoc.Extra.Cabal as Cabal
 import qualified Monadoc.Extra.Either as Either
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
@@ -20,7 +20,10 @@ instance Witch.From Cabal.PackageName PackageName
 instance Witch.From PackageName Cabal.PackageName
 
 instance Witch.TryFrom String PackageName where
-  tryFrom = Witch.maybeTryFrom $ fmap (Witch.from @Cabal.PackageName) . Cabal.simpleParsec
+  tryFrom =
+    Witch.eitherTryFrom $
+      fmap (Witch.from @Cabal.PackageName)
+        . Cabal.tryParsec
 
 instance Witch.From PackageName String where
   from = Cabal.prettyShow . Witch.into @Cabal.PackageName

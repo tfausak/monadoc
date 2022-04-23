@@ -2,11 +2,11 @@ module Monadoc.Type.Constraint where
 
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
-import qualified Distribution.Parsec as Cabal
 import qualified Distribution.Pretty as Cabal
 import qualified Distribution.Types.Version as Cabal
 import qualified Distribution.Types.VersionRange as Cabal
 import qualified Lucid
+import qualified Monadoc.Extra.Cabal as Cabal
 import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
@@ -21,9 +21,9 @@ instance Witch.From Constraint Cabal.VersionRange
 
 instance Witch.TryFrom String Constraint where
   tryFrom =
-    Witch.maybeTryFrom $
+    Witch.eitherTryFrom $
       fmap (Witch.from @Cabal.VersionRange)
-        . Cabal.simpleParsec
+        . Cabal.tryParsec
 
 instance Witch.From Constraint String where
   from = Cabal.prettyShow . Witch.into @Cabal.VersionRange

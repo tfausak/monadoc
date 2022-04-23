@@ -16,16 +16,16 @@ import qualified Monadoc.Action.Key.SelectLastInsert as Key.SelectLastInsert
 import qualified Monadoc.Class.MonadHttp as MonadHttp
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
-import qualified Monadoc.Exception.ConversionFailure as ConversionFailure
 import qualified Monadoc.Exception.MissingSize as MissingSize
 import qualified Monadoc.Exception.TrailingBytes as TrailingBytes
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
+import qualified Monadoc.Extra.Either as Either
+import qualified Monadoc.Extra.Read as Read
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Types as Http
-import qualified Text.Read as Read
 import qualified Witch
 
 run ::
@@ -80,7 +80,5 @@ getSize = do
     maybe (Exception.throwM $ MissingSize.MissingSize response) pure
       . lookup Http.hContentLength
       $ Client.responseHeaders response
-  string <- either Exception.throwM pure $ Witch.tryInto @String byteString
-  case Read.readMaybe string of
-    Nothing -> Exception.throwM $ ConversionFailure.new @Int string
-    Just int -> pure int
+  string <- Either.throw $ Witch.tryInto @String byteString
+  Either.throw $ Read.tryRead string

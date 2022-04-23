@@ -1,6 +1,6 @@
 module Monadoc.Extra.DirectSqliteSpec where
 
-import qualified Control.Exception.Base as Exception
+import qualified Control.Monad.Catch as Exception
 import qualified Database.SQLite3 as Sqlite
 import qualified Monadoc.Extra.DirectSqlite as Extra
 import qualified Monadoc.Test as Test

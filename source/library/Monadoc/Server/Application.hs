@@ -2,8 +2,9 @@ module Monadoc.Server.Application where
 
 import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Reader as Reader
-import qualified Monadoc.Exception.ConversionFailure as ConversionFailure
+import qualified Data.Bifunctor as Bifunctor
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
+import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Handler.AppleTouchIcon.Get as AppleTouchIcon.Get
 import qualified Monadoc.Handler.Favicon.Get as Favicon.Get
 import qualified Monadoc.Handler.HealthCheck.Get as HealthCheck.Get
@@ -19,17 +20,21 @@ import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Route as Route
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
+import qualified Witch
 
 application :: Context.Context -> Wai.Application
 application context request respond = do
   method <-
-    either (Exception.throwM . ConversionFailure.new @Http.StdMethod) pure
-      . Http.parseMethod
+    Either.throw
+      . parseMethod
       $ Wai.requestMethod request
   route <- Route.parse $ Wai.pathInfo request
   handler <- getHandler method route
   response <- Reader.runReaderT (App.runAppT $ handler request) context
   respond response
+
+parseMethod :: Http.Method -> Either (Witch.TryFromException Http.Method Http.StdMethod) Http.StdMethod
+parseMethod m = Bifunctor.first (const $ Witch.TryFromException m Nothing) $ Http.parseMethod m
 
 getHandler ::
   Exception.MonadThrow m =>

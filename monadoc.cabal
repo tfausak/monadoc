@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.4.17
+version: 0.2022.4.23
 
 build-type: Simple
 category: Documentation
@@ -136,11 +136,11 @@ library
     Monadoc.Constant.Header
     Monadoc.Constant.Migration
     Monadoc.Constant.Pragma
-    Monadoc.Exception.ConversionFailure
     Monadoc.Exception.InvalidOption
     Monadoc.Exception.InvalidSize
     Monadoc.Exception.MethodNotAllowed
     Monadoc.Exception.MigrationMismatch
+    Monadoc.Exception.MissingHeader
     Monadoc.Exception.MissingRowid
     Monadoc.Exception.MissingSize
     Monadoc.Exception.NoNextMatch
@@ -152,8 +152,10 @@ library
     Monadoc.Exception.UnknownOption
     Monadoc.Exception.UnknownRoute
     Monadoc.Extra.Aeson
+    Monadoc.Extra.Cabal
     Monadoc.Extra.DirectSqlite
     Monadoc.Extra.Either
+    Monadoc.Extra.Read
     Monadoc.Extra.Time
     Monadoc.Handler.AppleTouchIcon.Get
     Monadoc.Handler.Common
