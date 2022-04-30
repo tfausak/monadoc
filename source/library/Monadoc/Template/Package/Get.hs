@@ -28,7 +28,8 @@ render context package constraint rows = Common.base context (Route.Package . Pa
   Lucid.h3_ "Uploads"
   Lucid.ul_ . Monad.forM_ rows $ \row -> Lucid.li_ $ do
     let (upload Sql.:. version Sql.:. hackageUser) = row
-    Lucid.toHtml . Version.number $ Model.value version
+    Lucid.a_ [Lucid.href_ $ Common.route context $ Route.Version (Package.name $ Model.value package) (Version.number $ Model.value version)] $ do
+      Lucid.toHtml . Version.number $ Model.value version
     let revision = Upload.revision $ Model.value upload
     Monad.when (Revision.isNonZero revision) $ do
       "-"

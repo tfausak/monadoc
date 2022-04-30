@@ -15,6 +15,7 @@ import qualified Monadoc.Handler.Robots.Get as Robots.Get
 import qualified Monadoc.Handler.Script.Get as Script.Get
 import qualified Monadoc.Handler.Stylesheet.Get as Stylesheet.Get
 import qualified Monadoc.Handler.User.Get as User.Get
+import qualified Monadoc.Handler.Version.Get as Version.Get
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Route as Route
@@ -71,4 +72,7 @@ getHandler method route = case route of
     _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
   Route.User u -> case method of
     Http.GET -> pure $ User.Get.handler u
+    _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
+  Route.Version p v -> case method of
+    Http.GET -> pure $ Version.Get.handler p v
     _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route

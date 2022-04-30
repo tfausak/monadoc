@@ -36,6 +36,7 @@ handler packageName _ = do
       \ inner join hackageUser \
       \ on hackageUser.key = upload.uploadedBy \
       \ where upload.package = ? \
-      \ order by upload.uploadedAt desc"
+      \ order by upload.uploadedAt desc \
+      \ limit 16"
       [Model.key package]
   pure . Common.htmlResponse Http.ok200 [] $ Template.render context package constraint rows

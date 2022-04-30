@@ -1,8 +1,14 @@
 cradle:
-  cabal:
-    - path: source/executable
-      component: exe:monadoc
-    - path: source/library
-      component: lib:monadoc
-    - path: source/test-suite
-      component: test:monadoc-test-suite
+  multi:
+    - path: .
+      config: { cradle: { none: null } }
+    - path: source
+      config:
+        cradle:
+          cabal:
+            - path: source/executable
+              component: exe:monadoc
+            - path: source/library
+              component: lib:monadoc
+            - path: source/test-suite
+              component: test:monadoc-test-suite

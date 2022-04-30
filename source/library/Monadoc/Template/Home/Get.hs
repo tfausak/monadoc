@@ -22,13 +22,10 @@ render context rows = Common.base context Route.Home $ do
   Lucid.ul_ [] $ do
     Monad.forM_ rows $ \row -> Lucid.li_ [] $ do
       let (upload Sql.:. package Sql.:. version Sql.:. hackageUser) = row
-      Lucid.a_
-        [Lucid.href_ . Common.route context . Route.Package . Package.name $ Model.value package]
-        . Lucid.toHtml
-        . Package.name
-        $ Model.value package
-      "@"
-      Lucid.toHtml . Version.number $ Model.value version
+      Lucid.a_ [Lucid.href_ . Common.route context $ Route.Version (Package.name $ Model.value package) (Version.number $ Model.value version)] $ do
+        Lucid.toHtml . Package.name $ Model.value package
+        "-"
+        Lucid.toHtml . Version.number $ Model.value version
       let revision = Upload.revision $ Model.value upload
       Monad.when (Revision.isNonZero revision) $ do
         "-"

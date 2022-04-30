@@ -6,6 +6,7 @@ import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Monadoc.Type.PackageName as PackageName
+import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Witch
 
 data Route
@@ -19,6 +20,7 @@ data Route
   | Script
   | Stylesheet
   | User HackageUserName.HackageUserName
+  | Version PackageName.PackageName VersionNumber.VersionNumber
   deriving (Eq, Show)
 
 parse :: Exception.MonadThrow m => [Text.Text] -> m Route
@@ -27,11 +29,12 @@ parse texts = case texts of
   ["apple-touch-icon.png"] -> pure AppleTouchIcon
   ["favicon.ico"] -> pure Favicon
   ["health-check"] -> pure HealthCheck
-  ["static", "monadoc.webmanifest"] -> pure Manifest
   ["package", p] -> Package <$> Either.throw (Witch.tryFrom p)
+  ["package", p, "version", v] -> Version <$> Either.throw (Witch.tryFrom p) <*> Either.throw (Witch.tryFrom v)
   ["robots.txt"] -> pure Robots
-  ["static", "monadoc.js"] -> pure Script
   ["static", "monadoc.css"] -> pure Stylesheet
+  ["static", "monadoc.js"] -> pure Script
+  ["static", "monadoc.webmanifest"] -> pure Manifest
   ["user", u] -> User <$> Either.throw (Witch.tryFrom u)
   _ -> Exception.throwM $ UnknownRoute.UnknownRoute texts
 
@@ -47,3 +50,4 @@ render route = case route of
   Script -> ["static", "monadoc.js"]
   Stylesheet -> ["static", "monadoc.css"]
   User u -> ["user", Witch.from u]
+  Version p v -> ["package", Witch.from p, "version", Witch.from v]

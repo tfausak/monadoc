@@ -29,6 +29,7 @@ handler hackageUserName _ = do
       \ inner join package \
       \ on package.key = upload.package \
       \ where upload.uploadedBy = ? \
-      \ order by upload.uploadedAt desc"
+      \ order by upload.uploadedAt desc \
+      \ limit 16"
       [Model.key hackageUser]
   pure . Common.htmlResponse Http.ok200 [] $ Template.render context hackageUser rows

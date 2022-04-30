@@ -1,6 +1,7 @@
 module Monadoc.Type.VersionNumber where
 
 import qualified Control.Monad as Monad
+import qualified Data.Text as Text
 import qualified Data.Version as Version
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
@@ -49,6 +50,15 @@ instance Witch.From VersionNumber Version.Version where
 
 instance QuickCheck.Arbitrary VersionNumber where
   arbitrary = Witch.from <$> genVersion
+
+instance Witch.TryFrom Text.Text VersionNumber where
+  tryFrom =
+    Witch.eitherTryFrom $
+      Witch.tryInto @VersionNumber
+        . Witch.into @String
+
+instance Witch.From VersionNumber Text.Text where
+  from = Witch.via @String
 
 genVersion :: QuickCheck.Gen Cabal.Version
 genVersion = QuickCheck.suchThatMap QuickCheck.arbitrary toVersion
