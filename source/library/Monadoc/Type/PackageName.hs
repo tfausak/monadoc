@@ -29,7 +29,7 @@ instance Witch.From PackageName String where
   from = Cabal.prettyShow . Witch.into @Cabal.PackageName
 
 instance Witch.TryFrom Text.Text PackageName where
-  tryFrom = Witch.eitherTryFrom $ Witch.tryInto @PackageName . Witch.into @String
+  tryFrom = Witch.eitherTryFrom $ Witch.tryFrom . Witch.into @String
 
 instance Witch.From PackageName Text.Text where
   from = Witch.via @String

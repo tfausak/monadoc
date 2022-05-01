@@ -11,7 +11,7 @@ import qualified Monadoc.Template.Common as Common
 import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
-import qualified Monadoc.Type.Revision as Revision
+import qualified Monadoc.Type.Reversion as Reversion
 import qualified Monadoc.Type.Route as Route
 
 render ::
@@ -28,12 +28,9 @@ render context package constraint rows = Common.base context (Route.Package . Pa
   Lucid.h3_ "Uploads"
   Lucid.ul_ . Monad.forM_ rows $ \row -> Lucid.li_ $ do
     let (upload Sql.:. version Sql.:. hackageUser) = row
-    Lucid.a_ [Lucid.href_ $ Common.route context $ Route.Version (Package.name $ Model.value package) (Version.number $ Model.value version)] $ do
-      Lucid.toHtml . Version.number $ Model.value version
-    let revision = Upload.revision $ Model.value upload
-    Monad.when (Revision.isNonZero revision) $ do
-      "-"
-      Lucid.toHtml revision
+        reversion = Reversion.Reversion {Reversion.revision = Just . Upload.revision $ Model.value upload, Reversion.version = Version.number $ Model.value version}
+    Lucid.a_ [Lucid.href_ . Common.route context $ Route.Version (Package.name $ Model.value package) reversion] $ do
+      Lucid.toHtml reversion
     " uploaded "
     Common.timestamp . Upload.uploadedAt $ Model.value upload
     " by "

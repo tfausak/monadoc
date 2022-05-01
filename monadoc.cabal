@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.4.30
+version: 0.2022.5.1
 
 build-type: Simple
 category: Documentation
@@ -206,6 +206,7 @@ library
     Monadoc.Type.Model
     Monadoc.Type.PackageName
     Monadoc.Type.Port
+    Monadoc.Type.Reversion
     Monadoc.Type.Revision
     Monadoc.Type.Route
     Monadoc.Type.Schedule
@@ -267,6 +268,7 @@ test-suite monadoc-test-suite
     Monadoc.Type.ModelSpec
     Monadoc.Type.PackageNameSpec
     Monadoc.Type.PortSpec
+    Monadoc.Type.ReversionSpec
     Monadoc.Type.RevisionSpec
     Monadoc.Type.RouteSpec
     Monadoc.Type.ScheduleSpec

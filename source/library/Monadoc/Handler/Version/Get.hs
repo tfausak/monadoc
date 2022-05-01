@@ -9,17 +9,17 @@ import qualified Monadoc.Template.Version.Get as Template
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
-import qualified Monadoc.Type.VersionNumber as VersionNumber
+import qualified Monadoc.Type.Reversion as Reversion
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 
 handler ::
   (Reader.MonadReader Context.Context m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
   PackageName.PackageName ->
-  VersionNumber.VersionNumber ->
+  Reversion.Reversion ->
   Wai.Request ->
   m Wai.Response
-handler packageName versionNumber _ = do
+handler packageName reversion _ = do
   context <- Reader.ask
   package <- do
     rows <- MonadSql.query "select * from package where name = ?" [packageName]
@@ -27,12 +27,20 @@ handler packageName versionNumber _ = do
       [] -> Exception.throwM NotFound.NotFound
       row : _ -> pure row
   version <- do
-    rows <- MonadSql.query "select * from version where number = ?" [versionNumber]
+    rows <- MonadSql.query "select * from version where number = ?" [Reversion.version reversion]
     case rows of
       [] -> Exception.throwM NotFound.NotFound
       row : _ -> pure row
   upload <- do
-    rows <- MonadSql.query "select * from upload where package = ? and version = ? order by revision desc limit 1" (Model.key package, Model.key version)
+    rows <- case Reversion.revision reversion of
+      Nothing ->
+        MonadSql.query
+          "select * from upload where package = ? and version = ? order by revision desc limit 1"
+          (Model.key package, Model.key version)
+      Just revision ->
+        MonadSql.query
+          "select * from upload where package = ? and version = ? and revision = ? limit 1"
+          (Model.key package, Model.key version, revision)
     case rows of
       [] -> Exception.throwM NotFound.NotFound
       row : _ -> pure row

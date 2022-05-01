@@ -33,6 +33,7 @@ import qualified Monadoc.Type.KeySpec
 import qualified Monadoc.Type.ModelSpec
 import qualified Monadoc.Type.PackageNameSpec
 import qualified Monadoc.Type.PortSpec
+import qualified Monadoc.Type.ReversionSpec
 import qualified Monadoc.Type.RevisionSpec
 import qualified Monadoc.Type.RouteSpec
 import qualified Monadoc.Type.ScheduleSpec
@@ -78,6 +79,7 @@ spec = do
   Monadoc.Type.ModelSpec.spec
   Monadoc.Type.PackageNameSpec.spec
   Monadoc.Type.PortSpec.spec
+  Monadoc.Type.ReversionSpec.spec
   Monadoc.Type.RevisionSpec.spec
   Monadoc.Type.RouteSpec.spec
   Monadoc.Type.ScheduleSpec.spec

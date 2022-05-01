@@ -6,7 +6,7 @@ import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Monadoc.Type.PackageName as PackageName
-import qualified Monadoc.Type.VersionNumber as VersionNumber
+import qualified Monadoc.Type.Reversion as Reversion
 import qualified Witch
 
 data Route
@@ -20,7 +20,7 @@ data Route
   | Script
   | Stylesheet
   | User HackageUserName.HackageUserName
-  | Version PackageName.PackageName VersionNumber.VersionNumber
+  | Version PackageName.PackageName Reversion.Reversion
   deriving (Eq, Show)
 
 parse :: Exception.MonadThrow m => [Text.Text] -> m Route
