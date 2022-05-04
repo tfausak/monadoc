@@ -2,10 +2,8 @@ module Monadoc.Handler.Manifest.Get where
 
 import qualified Control.Monad.Reader as Reader
 import qualified Data.Aeson as Aeson
-import qualified Data.ByteString as ByteString
-import qualified Data.Hashable as Hashable
 import qualified Monadoc.Constant.ContentType as ContentType
-import qualified Monadoc.Constant.Header as Header
+import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Template.Common as Common
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
@@ -13,17 +11,17 @@ import qualified Monadoc.Type.Icon as Icon
 import qualified Monadoc.Type.Manifest as Manifest
 import qualified Monadoc.Type.Route as Route
 import qualified Network.HTTP.Types as Http
+import qualified Network.HTTP.Types.Header as Http
 import qualified Network.Wai as Wai
-import qualified Witch
 
 handler :: Reader.MonadReader Context.Context m => Wai.Request -> m Wai.Response
 handler _ = do
   context <- Reader.ask
   let manifest = makeManifest context
       body = Aeson.encode manifest
-      eTag = Witch.into @ByteString.ByteString . show . show $ Hashable.hash body
+      eTag = Common.makeETag body
   pure $
-    Wai.responseLBS Http.ok200 [(Http.hContentType, ContentType.manifest), (Header.eTag, eTag)] body
+    Wai.responseLBS Http.ok200 [(Http.hContentType, ContentType.manifest), (Http.hETag, eTag)] body
 
 makeManifest :: Context.Context -> Manifest.Manifest
 makeManifest context =

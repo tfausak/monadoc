@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.5.3
+version: 0.2022.5.4
 
 build-type: Simple
 category: Documentation
@@ -172,6 +172,7 @@ library
     Monadoc.Handler.Version.Get
     Monadoc.Main
     Monadoc.Middleware.AddHeaders
+    Monadoc.Middleware.CacheResponses
     Monadoc.Middleware.CompressResponses
     Monadoc.Middleware.HandleExceptions
     Monadoc.Middleware.LogResponses

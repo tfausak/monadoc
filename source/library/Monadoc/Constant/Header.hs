@@ -11,9 +11,6 @@ contentSecurityPolicy = "Content-Security-Policy"
 contentTypeOptions :: Http.HeaderName
 contentTypeOptions = "X-Content-Type-Options"
 
-eTag :: Http.HeaderName
-eTag = "ETag"
-
 frameOptions :: Http.HeaderName
 frameOptions = "X-Frame-Options"
 
