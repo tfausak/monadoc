@@ -3,6 +3,7 @@
   "extensions": [
     "dramforever.vscode-ghc-simple",
     "Edka.haskutil",
+    "hoovercj.haskell-linter",
     "sjurmillidahl.ormolu-vscode"
   ],
   "initializeCommand": [

@@ -5,8 +5,6 @@ services:
     command: .devcontainer/watch.sh
     image: monadoc/devcontainer
     init: true
-    ports:
-      - 3000:3000
     volumes:
       - ..:/workspaces/monadoc:cached
       - cabal:/home/haskell/.cabal:cached

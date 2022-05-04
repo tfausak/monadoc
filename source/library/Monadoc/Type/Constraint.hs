@@ -62,3 +62,9 @@ genVersion = Witch.from @VersionNumber.VersionNumber <$> QuickCheck.arbitrary
 
 any :: Constraint
 any = Witch.from @Cabal.VersionRange Cabal.anyVersion
+
+includes :: VersionNumber.VersionNumber -> Constraint -> Bool
+includes v = Cabal.withinRange (Witch.into @Cabal.Version v) . Witch.into @Cabal.VersionRange
+
+excludes :: VersionNumber.VersionNumber -> Constraint -> Bool
+excludes v = not . includes v

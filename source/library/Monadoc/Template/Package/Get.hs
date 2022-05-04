@@ -28,7 +28,8 @@ render context package constraint rows = Common.base context (Route.Package . Pa
   Lucid.h3_ "Uploads"
   Lucid.ul_ . Monad.forM_ rows $ \row -> Lucid.li_ $ do
     let (upload Sql.:. version Sql.:. hackageUser) = row
-        reversion = Reversion.Reversion {Reversion.revision = Just . Upload.revision $ Model.value upload, Reversion.version = Version.number $ Model.value version}
+        versionNumber = Version.number $ Model.value version
+        reversion = Reversion.Reversion {Reversion.revision = Just . Upload.revision $ Model.value upload, Reversion.version = versionNumber}
     Lucid.a_ [Lucid.href_ . Common.route context $ Route.Version (Package.name $ Model.value package) reversion] $ do
       Lucid.toHtml reversion
     " uploaded "
@@ -39,3 +40,4 @@ render context package constraint rows = Common.base context (Route.Package . Pa
       . HackageUser.name
       $ Model.value hackageUser
     "."
+    Monad.when (Constraint.excludes versionNumber constraint) " (deprecated)"
