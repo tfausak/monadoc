@@ -1,3 +1,6 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeApplications #-}
+
 module Monadoc.Type.Guid where
 
 import qualified Data.ByteString.Lazy as LazyByteString

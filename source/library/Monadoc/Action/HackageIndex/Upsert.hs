@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Action.HackageIndex.Upsert where
 
 import qualified Control.Monad.Catch as Exception

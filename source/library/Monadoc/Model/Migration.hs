@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Model.Migration where
 
 import qualified Data.Fixed as Fixed
@@ -51,5 +53,5 @@ new (dy, dm, dd, th, tm, ts) q =
 
 migrations :: [Migration]
 migrations =
-  [ new (2022, 3, 11, 0, 0, 0) "select 1"
+  [ new (2022, 1, 1, 0, 0, 0) "select 1"
   ]

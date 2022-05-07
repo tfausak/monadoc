@@ -21,9 +21,9 @@ jobs:
 
       - uses: mrkkrp/ormolu-action@v5
 
-  check:
+  cabal:
     runs-on: ubuntu-latest
-    name: Check
+    name: Cabal
     steps:
       - uses: actions/checkout@v2
 

@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeApplications #-}
+
 module Monadoc.Class.MonadLog where
 
 import qualified Data.Text as Text

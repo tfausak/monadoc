@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Model.HackageIndex where
 
 import qualified Data.ByteString as ByteString
@@ -13,11 +15,11 @@ type Model = Model.Model HackageIndex
 type Key = Key.Key HackageIndex
 
 data HackageIndex = HackageIndex
-  { contents :: ByteString.ByteString,
-    createdAt :: Timestamp.Timestamp,
+  { createdAt :: Timestamp.Timestamp,
     processedAt :: Maybe Timestamp.Timestamp,
     size :: Int,
-    updatedAt :: Maybe Timestamp.Timestamp
+    updatedAt :: Maybe Timestamp.Timestamp,
+    contents :: ByteString.ByteString
   }
   deriving (Eq, Show)
 
@@ -32,22 +34,22 @@ instance Sql.FromRow HackageIndex where
 
 instance Sql.ToRow HackageIndex where
   toRow hackageIndex =
-    [ Sql.toField $ contents hackageIndex,
-      Sql.toField $ createdAt hackageIndex,
+    [ Sql.toField $ createdAt hackageIndex,
       Sql.toField $ processedAt hackageIndex,
       Sql.toField $ size hackageIndex,
-      Sql.toField $ updatedAt hackageIndex
+      Sql.toField $ updatedAt hackageIndex,
+      Sql.toField $ contents hackageIndex
     ]
 
 migrations :: [Migration.Migration]
 migrations =
   [ Migration.new
-      (2022, 4, 17, 0, 0, 0)
+      (2022, 1, 4, 0, 0, 0)
       "create table hackageIndex \
       \ ( key integer primary key \
-      \ , contents blob not null \
       \ , createdAt text not null \
       \ , processedAt text \
       \ , size integer not null \
-      \ , updatedAt text )"
+      \ , updatedAt text \
+      \ , contents blob not null )"
   ]

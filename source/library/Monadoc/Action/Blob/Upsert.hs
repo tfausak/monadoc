@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Action.Blob.Upsert where
 
 import qualified Control.Monad.Catch as Exception
@@ -11,7 +13,7 @@ run blob = do
   models <- MonadSql.query "select * from blob where hash = ?" [Blob.hash blob]
   case models of
     [] -> do
-      MonadSql.execute "insert into blob (contents, hash, size) values (?, ?, ?)" blob
+      MonadSql.execute "insert into blob (size, hash, contents) values (?, ?, ?)" blob
       key <- Key.SelectLastInsert.run
       pure Model.Model {Model.key = key, Model.value = blob}
     model : _ -> pure model

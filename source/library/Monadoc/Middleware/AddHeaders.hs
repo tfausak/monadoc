@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Middleware.AddHeaders where
 
 import qualified Data.Function as Function

@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Model.Blob where
 
 import qualified Data.ByteString as ByteString
@@ -14,9 +16,9 @@ type Model = Model.Model Blob
 type Key = Key.Key Blob
 
 data Blob = Blob
-  { contents :: ByteString.ByteString,
+  { size :: Int,
     hash :: Hash.Hash,
-    size :: Int
+    contents :: ByteString.ByteString
   }
   deriving (Eq, Show)
 
@@ -29,9 +31,9 @@ instance Sql.FromRow Blob where
 
 instance Sql.ToRow Blob where
   toRow blob =
-    [ Sql.toField $ contents blob,
+    [ Sql.toField $ size blob,
       Sql.toField $ hash blob,
-      Sql.toField $ size blob
+      Sql.toField $ contents blob
     ]
 
 instance QuickCheck.Arbitrary Blob where
@@ -40,12 +42,12 @@ instance QuickCheck.Arbitrary Blob where
 migrations :: [Migration.Migration]
 migrations =
   [ Migration.new
-      (2022, 3, 16, 0, 0, 0)
+      (2022, 1, 2, 0, 0, 0)
       "create table blob \
       \ ( key integer primary key \
-      \ , contents blob not null \
+      \ , size integer not null \
       \ , hash blob not null unique \
-      \ , size integer not null )"
+      \ , contents blob not null )"
   ]
 
 new :: ByteString.ByteString -> Blob

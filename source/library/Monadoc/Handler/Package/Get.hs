@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Handler.Package.Get where
 
 import qualified Control.Monad.Catch as Exception

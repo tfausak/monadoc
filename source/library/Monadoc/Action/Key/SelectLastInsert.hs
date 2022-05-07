@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Action.Key.SelectLastInsert where
 
 import qualified Control.Monad.Catch as Exception

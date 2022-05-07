@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Model.Preference where
 
 import qualified Database.SQLite.Simple as Sql
@@ -40,7 +42,7 @@ instance QuickCheck.Arbitrary Preference where
 migrations :: [Migration.Migration]
 migrations =
   [ Migration.new
-      (2022, 4, 7, 0, 0, 0)
+      (2022, 1, 8, 0, 0, 0)
       "create table preference \
       \ ( key integer primary key \
       \ , \"constraint\" text not null \

@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Action.Job.Acquire where
 
 import qualified Monadoc.Class.MonadSql as MonadSql

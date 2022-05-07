@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TypeApplications #-}
+
 module Monadoc.Extra.Read where
 
 import qualified Monadoc.Extra.Either as Either
@@ -5,8 +8,7 @@ import qualified Text.Read as Read
 import qualified Witch
 
 tryRead ::
-  forall t s.
-  (Witch.From s String, Read t) =>
+  (Read t, Witch.From s String) =>
   s ->
   Either (Witch.TryFromException s t) t
 tryRead s =

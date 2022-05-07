@@ -1,3 +1,7 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeApplications #-}
+
 module Monadoc.Type.Port where
 
 import qualified Monadoc.Extra.Read as Read

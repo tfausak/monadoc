@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Action.CronEntry.Upsert where
 
 import qualified Control.Monad as Monad

@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Model.Job where
 
 import qualified Database.SQLite.Simple as Sql
@@ -53,7 +55,7 @@ instance QuickCheck.Arbitrary Job where
 migrations :: [Migration.Migration]
 migrations =
   [ Migration.new
-      (2022, 3, 20, 0, 0, 0)
+      (2022, 1, 6, 0, 0, 0)
       "create table job \
       \ ( key integer primary key \
       \ , createdAt text not null \

@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Model.CronEntry where
 
 import qualified Database.SQLite.Simple as Sql
@@ -50,7 +52,7 @@ instance QuickCheck.Arbitrary CronEntry where
 migrations :: [Migration.Migration]
 migrations =
   [ Migration.new
-      (2022, 4, 9, 0, 0, 0)
+      (2022, 1, 3, 0, 0, 0)
       "create table cronEntry \
       \ ( key integer primary key \
       \ , guid blob unique \

@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Model.HackageUser where
 
 import qualified Database.SQLite.Simple as Sql
@@ -35,7 +37,7 @@ instance QuickCheck.Arbitrary HackageUser where
 migrations :: [Migration.Migration]
 migrations =
   [ Migration.new
-      (2022, 3, 28, 0, 0, 0)
+      (2022, 1, 5, 0, 0, 0)
       "create table hackageUser \
       \ ( key integer primary key \
       \ , name text not null unique )"

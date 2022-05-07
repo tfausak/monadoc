@@ -31,25 +31,25 @@
       - warn: { lhs: Prelude.enumFromThenTo, rhs: _, name: Avoid enumFromThenTo }
       - warn: { lhs: Prelude.enumFromTo, rhs: _, name: Avoid enumFromTo }
       - warn: { lhs: Prelude.error, rhs: _, name: Avoid error }
-      - warn: { lhs: Prelude.errorWithoutStackTrace, rhs: _, name: Avoid errorWithoutStackTrace }
+      - warn: { lhs: Prelude.errorWithoutStackTrace, rhs: Prelude.error }
       - warn: { lhs: Control.Concurrent.forkIO, rhs: Control.Concurrent.Async.async }
-      - warn: { lhs: Prelude.foldl1, rhs: Prelude.foldl }
-      - warn: { lhs: Prelude.foldr1, rhs: Prelude.foldr }
-      - warn: { lhs: Data.Maybe.fromJust, rhs: _, name: Avoid fromJust }
+      - warn: { lhs: Prelude.foldl1, rhs: Safe.foldl1May }
+      - warn: { lhs: Prelude.foldr1, rhs: Safe.foldr1May }
+      - warn: { lhs: Data.Maybe.fromJust, rhs: Data.Maybe.fromMaybe Prelude.undefined }
       - warn: { lhs: Prelude.head, rhs: Data.Maybe.listToMaybe }
-      - warn: { lhs: Prelude.init, rhs: _, name: Avoid init }
-      - warn: { lhs: Prelude.last, rhs: _, name: Avoid last }
-      - warn: { lhs: Prelude.maximum, rhs: _, name: Avoid maximum }
-      - warn: { lhs: Prelude.minimum, rhs: _, name: Avoid minimum }
+      - warn: { lhs: Prelude.init, rhs: Safe.initMay }
+      - warn: { lhs: Prelude.last, rhs: Safe.lastMay }
+      - warn: { lhs: Prelude.maximum, rhs: Safe.maximumMay }
+      - warn: { lhs: Prelude.minimum, rhs: Safe.minimumMay }
       - warn: { lhs: Data.List.NonEmpty.fromList, rhs: Data.List.NonEmpty.nonEmpty }
       - warn: { lhs: Data.List.nub, rhs: Data.Containers.ListUtils.nubOrd }
-      - warn: { lhs: Prelude.pred, rhs: (Prelude.subtract 1) }
+      - warn: { lhs: Prelude.pred, rhs: Safe.predMay }
       - warn: { lhs: Prelude.read, rhs: Text.Read.readMaybe }
       - warn: { lhs: Prelude.return, rhs: Prelude.pure }
-      - warn: { lhs: Prelude.succ, rhs: (Prelude.+ 1) }
-      - warn: { lhs: Prelude.tail, rhs: Prelude.drop 1 }
+      - warn: { lhs: Prelude.succ, rhs: Safe.succMay }
+      - warn: { lhs: Prelude.tail, rhs: Safe.tailMay }
       - warn: { lhs: Control.Exception.throw, rhs: Control.Monad.Catch.throwM }
-      - warn: { lhs: Prelude.undefined, rhs: Prelude.error "..." }
+      - warn: { lhs: Prelude.undefined, rhs: Prelude.error "undefined" }
       - warn: { lhs: Control.Monad.unless p, rhs: Control.Monad.when (not p) }
-      - warn: { lhs: (Prelude.!!), rhs: _, name: Avoid !! }
+      - warn: { lhs: (Prelude.!!), rhs: Safe.atMay }
       - warn: { lhs: (Prelude.^), rhs: _, name: Avoid ^ }

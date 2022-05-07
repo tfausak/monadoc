@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module Monadoc.Handler.Script.Get where
 
 import qualified Control.Monad.Reader as Reader

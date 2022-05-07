@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Constant.ContentType where
 
 import qualified Data.ByteString as ByteString

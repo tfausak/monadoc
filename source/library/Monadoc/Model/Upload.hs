@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Model.Upload where
 
 import qualified Database.SQLite.Simple as Sql
@@ -60,7 +62,7 @@ instance QuickCheck.Arbitrary Upload where
 migrations :: [Migration.Migration]
 migrations =
   [ Migration.new
-      (2022, 4, 6, 0, 0, 0)
+      (2022, 1, 10, 0, 0, 0)
       "create table upload \
       \ ( key integer primary key \
       \ , blob integer not null references blob \

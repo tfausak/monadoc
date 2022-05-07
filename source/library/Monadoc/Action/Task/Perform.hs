@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module Monadoc.Action.Task.Perform where
 
 import qualified Control.Monad.Catch as Exception

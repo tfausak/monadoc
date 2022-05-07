@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Extra.DirectSqlite where
 
 import qualified Control.Monad.Base as Base

@@ -1,3 +1,7 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeApplications #-}
+
 module Monadoc.Type.HackageUserName where
 
 import qualified Control.Monad as Monad

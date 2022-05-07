@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Type.Task where
 
 import qualified Data.Aeson as Aeson
@@ -15,8 +17,8 @@ data Task
 
 instance Aeson.FromJSON Task where
   parseJSON = Aeson.withObject "Task" $ \object -> do
-    tag :: Text.Text <- object Aeson..: "tag"
-    case tag of
+    tag <- object Aeson..: "tag"
+    case tag :: Text.Text of
       "ProcessHackageIndex" -> pure ProcessHackageIndex
       "PruneHackageIndex" -> pure PruneHackageIndex
       "UpsertHackageIndex" -> pure UpsertHackageIndex
@@ -25,11 +27,11 @@ instance Aeson.FromJSON Task where
 
 instance Aeson.ToJSON Task where
   toJSON task =
-    let tag :: Text.Text = case task of
+    let tag = case task of
           ProcessHackageIndex -> "ProcessHackageIndex"
           PruneHackageIndex -> "PruneHackageIndex"
           UpsertHackageIndex -> "UpsertHackageIndex"
-          Vacuum -> "Vacuum"
+          Vacuum -> "Vacuum" :: Text.Text
      in Aeson.object ["tag" Aeson..= tag]
 
 instance Sql.FromField Task where

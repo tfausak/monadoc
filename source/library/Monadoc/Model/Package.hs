@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Model.Package where
 
 import qualified Database.SQLite.Simple as Sql
@@ -35,7 +37,7 @@ instance QuickCheck.Arbitrary Package where
 migrations :: [Migration.Migration]
 migrations =
   [ Migration.new
-      (2022, 3, 17, 0, 0, 0)
+      (2022, 1, 7, 0, 0, 0)
       "create table package \
       \ ( key integer primary key \
       \ , name text not null unique )"

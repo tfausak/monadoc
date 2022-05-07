@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Action.Database.Initialize where
 
 import qualified Control.Monad as Monad

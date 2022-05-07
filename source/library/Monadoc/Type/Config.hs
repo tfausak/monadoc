@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeApplications #-}
+
 module Monadoc.Type.Config where
 
 import qualified Control.Monad as Monad

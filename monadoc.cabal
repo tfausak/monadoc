@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.5.4
+version: 0.2022.5.7
 
 build-type: Simple
 category: Documentation
@@ -28,50 +28,7 @@ flag pedantic
   manual: True
 
 common library
-  build-depends:
-    , aeson ^>= 2.0.3
-    , async ^>= 2.2.4
-    , base ^>= 4.16.0
-    , bytestring ^>= 0.11.1
-    , Cabal ^>= 3.6.3
-    , containers ^>= 0.6.5
-    , cron ^>= 0.7.0
-    , cryptonite ^>= 0.30
-    , direct-sqlite ^>= 2.3.26
-    , directory ^>= 1.3.6
-    , exceptions ^>= 0.10.4
-    , filepath ^>= 1.4.2
-    , hashable ^>= 1.4.0
-    , http-client ^>= 0.7.11
-    , http-client-tls ^>= 0.3.6
-    , http-types ^>= 0.12.3
-    , lucid ^>= 2.11.0
-    , memory ^>= 0.17.0
-    , monad-control ^>= 1.0.3
-    , mtl ^>= 2.2.2
-    , QuickCheck ^>= 2.14.2
-    , resource-pool ^>= 0.2.3
-    , say ^>= 0.1.0
-    , sqlite-simple ^>= 0.4.18
-    , stm ^>= 2.5.0
-    , tar ^>= 0.5.1
-    , text ^>= 2.0
-    , time ^>= 1.11.1
-    , transformers-base ^>= 0.4.6
-    , uuid ^>= 1.3.15
-    , wai ^>= 3.2.3
-    , wai-extra ^>= 3.1.8
-    , warp ^>= 3.3.19
-    , witch ^>= 1.0.0
-    , zlib ^>= 0.6.2
-  default-extensions:
-    FlexibleContexts
-    FlexibleInstances
-    MultiParamTypeClasses
-    OverloadedStrings
-    ScopedTypeVariables
-    TypeApplications
-    TypeOperators
+  build-depends: base ^>= 4.16.0
   default-language: Haskell2010
   ghc-options:
     -Weverything
@@ -97,35 +54,80 @@ common executable
   ghc-options:
     -rtsopts
     -threaded
-    -Wno-unused-packages
 
 library
   import: library
 
   autogen-modules: Paths_monadoc
+  build-depends:
+    , aeson ^>= 2.0.3
+    , async ^>= 2.2.4
+    , bytestring ^>= 0.11.1
+    , Cabal ^>= 3.6.3
+    , containers ^>= 0.6.5
+    , cron ^>= 0.7.0
+    , cryptonite ^>= 0.30
+    , direct-sqlite ^>= 2.3.26
+    , directory ^>= 1.3.6
+    , exceptions ^>= 0.10.4
+    , filepath ^>= 1.4.2
+    , hashable ^>= 1.4.0
+    , hspec ^>= 2.9.4
+    , http-client ^>= 0.7.11
+    , http-client-tls ^>= 0.3.6
+    , http-types ^>= 0.12.3
+    , lucid ^>= 2.11.0
+    , memory ^>= 0.17.0
+    , monad-control ^>= 1.0.3
+    , mtl ^>= 2.2.2
+    , QuickCheck ^>= 2.14.2
+    , resource-pool ^>= 0.2.3
+    , say ^>= 0.1.0
+    , sqlite-simple ^>= 0.4.18
+    , stm ^>= 2.5.0
+    , tar ^>= 0.5.1
+    , text ^>= 2.0
+    , time ^>= 1.11.1
+    , transformers-base ^>= 0.4.6
+    , uuid ^>= 1.3.15
+    , wai ^>= 3.2.3
+    , wai-extra ^>= 3.1.8
+    , warp ^>= 3.3.19
+    , witch ^>= 1.0.0
+    , zlib ^>= 0.6.2
   exposed-modules:
     Monadoc.Action.Blob.Upsert
+    Monadoc.Action.Blob.UpsertSpec
     Monadoc.Action.CronEntry.Enqueue
     Monadoc.Action.CronEntry.Prune
     Monadoc.Action.CronEntry.Upsert
     Monadoc.Action.Database.Initialize
+    Monadoc.Action.Database.InitializeSpec
     Monadoc.Action.Database.Vacuum
+    Monadoc.Action.Database.VacuumSpec
     Monadoc.Action.HackageIndex.Insert
     Monadoc.Action.HackageIndex.Process
     Monadoc.Action.HackageIndex.Prune
     Monadoc.Action.HackageIndex.Update
     Monadoc.Action.HackageIndex.Upsert
     Monadoc.Action.HackageUser.Upsert
+    Monadoc.Action.HackageUser.UpsertSpec
     Monadoc.Action.Job.Acquire
     Monadoc.Action.Job.Enqueue
+    Monadoc.Action.Job.EnqueueSpec
     Monadoc.Action.Job.Perform
     Monadoc.Action.Job.Release
     Monadoc.Action.Key.SelectLastInsert
+    Monadoc.Action.Key.SelectLastInsertSpec
     Monadoc.Action.Package.Upsert
+    Monadoc.Action.Package.UpsertSpec
     Monadoc.Action.Preference.Upsert
+    Monadoc.Action.Preference.UpsertSpec
     Monadoc.Action.Task.Perform
     Monadoc.Action.Upload.Upsert
+    Monadoc.Action.Upload.UpsertSpec
     Monadoc.Action.Version.Upsert
+    Monadoc.Action.Version.UpsertSpec
     Monadoc.Class.MonadHttp
     Monadoc.Class.MonadLog
     Monadoc.Class.MonadSay
@@ -155,9 +157,12 @@ library
     Monadoc.Extra.Aeson
     Monadoc.Extra.Cabal
     Monadoc.Extra.DirectSqlite
+    Monadoc.Extra.DirectSqliteSpec
     Monadoc.Extra.Either
+    Monadoc.Extra.EitherSpec
     Monadoc.Extra.Read
     Monadoc.Extra.Time
+    Monadoc.Extra.TimeSpec
     Monadoc.Handler.AppleTouchIcon.Get
     Monadoc.Handler.Common
     Monadoc.Handler.Favicon.Get
@@ -170,22 +175,33 @@ library
     Monadoc.Handler.Stylesheet.Get
     Monadoc.Handler.User.Get
     Monadoc.Handler.Version.Get
-    Monadoc.Main
+    Monadoc.Main.Executable
+    Monadoc.Main.TestSuite
     Monadoc.Middleware.AddHeaders
     Monadoc.Middleware.CacheResponses
     Monadoc.Middleware.CompressResponses
     Monadoc.Middleware.HandleExceptions
     Monadoc.Middleware.LogResponses
     Monadoc.Model.Blob
+    Monadoc.Model.BlobSpec
     Monadoc.Model.CronEntry
+    Monadoc.Model.CronEntrySpec
     Monadoc.Model.HackageIndex
+    Monadoc.Model.HackageIndexSpec
     Monadoc.Model.HackageUser
+    Monadoc.Model.HackageUserSpec
     Monadoc.Model.Job
+    Monadoc.Model.JobSpec
     Monadoc.Model.Migration
+    Monadoc.Model.MigrationSpec
     Monadoc.Model.Package
+    Monadoc.Model.PackageSpec
     Monadoc.Model.Preference
+    Monadoc.Model.PreferenceSpec
     Monadoc.Model.Upload
+    Monadoc.Model.UploadSpec
     Monadoc.Model.Version
+    Monadoc.Model.VersionSpec
     Monadoc.Server.Application
     Monadoc.Server.Main
     Monadoc.Server.Middleware
@@ -194,32 +210,53 @@ library
     Monadoc.Template.Package.Get
     Monadoc.Template.User.Get
     Monadoc.Template.Version.Get
+    Monadoc.Test.Common
+    Monadoc.Test.Spec
     Monadoc.Type.App
     Monadoc.Type.Config
+    Monadoc.Type.ConfigSpec
     Monadoc.Type.Constraint
+    Monadoc.Type.ConstraintSpec
     Monadoc.Type.Context
     Monadoc.Type.Flag
+    Monadoc.Type.FlagSpec
     Monadoc.Type.Guid
+    Monadoc.Type.GuidSpec
     Monadoc.Type.HackageUserName
+    Monadoc.Type.HackageUserNameSpec
     Monadoc.Type.Hash
+    Monadoc.Type.HashSpec
     Monadoc.Type.Icon
     Monadoc.Type.Key
+    Monadoc.Type.KeySpec
     Monadoc.Type.Manifest
     Monadoc.Type.Model
+    Monadoc.Type.ModelSpec
     Monadoc.Type.PackageName
+    Monadoc.Type.PackageNameSpec
     Monadoc.Type.Port
+    Monadoc.Type.PortSpec
     Monadoc.Type.Reversion
+    Monadoc.Type.ReversionSpec
     Monadoc.Type.Revision
+    Monadoc.Type.RevisionSpec
     Monadoc.Type.Route
+    Monadoc.Type.RouteSpec
     Monadoc.Type.Schedule
+    Monadoc.Type.ScheduleSpec
     Monadoc.Type.Severity
+    Monadoc.Type.SeveritySpec
     Monadoc.Type.Status
+    Monadoc.Type.StatusSpec
     Monadoc.Type.Task
+    Monadoc.Type.TaskSpec
     Monadoc.Type.Timestamp
+    Monadoc.Type.TimestampSpec
     Monadoc.Type.VersionNumber
+    Monadoc.Type.VersionNumberSpec
     Monadoc.Worker.Main
+    Paths_monadoc
   hs-source-dirs: source/library
-  other-modules: Paths_monadoc
 
 executable monadoc
   import: executable
@@ -230,53 +267,6 @@ executable monadoc
 test-suite monadoc-test-suite
   import: executable
 
-  build-depends:
-    , hspec ^>= 2.9.4
   hs-source-dirs: source/test-suite
   main-is: Main.hs
-  other-modules:
-    Monadoc.Action.Blob.UpsertSpec
-    Monadoc.Action.Database.InitializeSpec
-    Monadoc.Action.Database.VacuumSpec
-    Monadoc.Action.HackageUser.UpsertSpec
-    Monadoc.Action.Job.EnqueueSpec
-    Monadoc.Action.Key.SelectLastInsertSpec
-    Monadoc.Action.Package.UpsertSpec
-    Monadoc.Action.Preference.UpsertSpec
-    Monadoc.Action.Upload.UpsertSpec
-    Monadoc.Action.Version.UpsertSpec
-    Monadoc.Extra.DirectSqliteSpec
-    Monadoc.Extra.EitherSpec
-    Monadoc.Extra.TimeSpec
-    Monadoc.Model.BlobSpec
-    Monadoc.Model.CronEntrySpec
-    Monadoc.Model.HackageIndexSpec
-    Monadoc.Model.HackageUserSpec
-    Monadoc.Model.JobSpec
-    Monadoc.Model.MigrationSpec
-    Monadoc.Model.PackageSpec
-    Monadoc.Model.PreferenceSpec
-    Monadoc.Model.UploadSpec
-    Monadoc.Model.VersionSpec
-    Monadoc.Spec
-    Monadoc.Test
-    Monadoc.Type.ConfigSpec
-    Monadoc.Type.ConstraintSpec
-    Monadoc.Type.FlagSpec
-    Monadoc.Type.GuidSpec
-    Monadoc.Type.HackageUserNameSpec
-    Monadoc.Type.HashSpec
-    Monadoc.Type.KeySpec
-    Monadoc.Type.ModelSpec
-    Monadoc.Type.PackageNameSpec
-    Monadoc.Type.PortSpec
-    Monadoc.Type.ReversionSpec
-    Monadoc.Type.RevisionSpec
-    Monadoc.Type.RouteSpec
-    Monadoc.Type.ScheduleSpec
-    Monadoc.Type.SeveritySpec
-    Monadoc.Type.StatusSpec
-    Monadoc.Type.TaskSpec
-    Monadoc.Type.TimestampSpec
-    Monadoc.Type.VersionNumberSpec
   type: exitcode-stdio-1.0

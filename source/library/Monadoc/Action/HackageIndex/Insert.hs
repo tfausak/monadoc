@@ -1,3 +1,7 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
+
 module Monadoc.Action.HackageIndex.Insert where
 
 import qualified Codec.Compression.Zlib.Internal as Zlib

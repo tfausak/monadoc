@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Action.Preference.Upsert where
 
 import qualified Control.Monad.Catch as Exception

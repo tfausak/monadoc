@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Model.Version where
 
 import qualified Database.SQLite.Simple as Sql
@@ -35,7 +37,7 @@ instance QuickCheck.Arbitrary Version where
 migrations :: [Migration.Migration]
 migrations =
   [ Migration.new
-      (2022, 3, 18, 0, 0, 0)
+      (2022, 1, 9, 0, 0, 0)
       "create table version \
       \ ( key integer primary key \
       \ , number text not null unique )"

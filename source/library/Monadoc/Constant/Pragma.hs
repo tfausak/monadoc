@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Constant.Pragma where
 
 import qualified Database.SQLite.Simple as Sql

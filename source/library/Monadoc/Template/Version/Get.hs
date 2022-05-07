@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Template.Version.Get where
 
 import qualified Control.Monad as Monad

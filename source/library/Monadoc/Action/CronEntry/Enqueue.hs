@@ -1,3 +1,6 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
+
 module Monadoc.Action.CronEntry.Enqueue where
 
 import qualified Control.Monad as Monad

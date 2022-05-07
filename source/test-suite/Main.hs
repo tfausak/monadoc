@@ -1,5 +1,4 @@
-import qualified Monadoc.Spec as Monadoc
-import qualified Test.Hspec as Hspec
+import qualified Monadoc.Main.TestSuite as Monadoc
 
 main :: IO ()
-main = Hspec.hspec Monadoc.spec
+main = Monadoc.testSuite

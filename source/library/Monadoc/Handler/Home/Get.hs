@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Monadoc.Handler.Home.Get where
 
 import qualified Control.Monad.Reader as Reader
