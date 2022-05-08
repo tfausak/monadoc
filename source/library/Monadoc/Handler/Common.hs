@@ -1,18 +1,38 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Handler.Common where
 
+import qualified Control.Monad.Reader as Reader
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Hashable as Hashable
 import qualified Lucid
+import qualified Monadoc.Class.MonadFile as MonadFile
 import qualified Monadoc.Constant.ContentType as ContentType
+import qualified Monadoc.Type.Context as Context
+import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Network.HTTP.Types as Http
+import qualified Network.HTTP.Types.Header as Http
 import qualified Network.Wai as Wai
+import qualified System.FilePath as FilePath
 import qualified Text.Printf as Printf
 import qualified Witch
 
-htmlResponse :: Http.Status -> [Http.Header] -> Lucid.Html () -> Wai.Response
+fileResponse ::
+  (MonadFile.MonadFile m, Reader.MonadReader Context.Context m) =>
+  Http.Status ->
+  Http.ResponseHeaders ->
+  FilePath ->
+  m Wai.Response
+fileResponse status headers file = do
+  context <- Reader.ask
+  let path = FilePath.combine (Context.data_ context) file
+  modificationTime <- MonadFile.getModificationTime path
+  let eTag = makeETag $ Witch.into @Timestamp.Timestamp modificationTime
+  pure $ Wai.responseFile status ((Http.hETag, eTag) : headers) path Nothing
+
+htmlResponse :: Http.Status -> Http.ResponseHeaders -> Lucid.Html () -> Wai.Response
 htmlResponse status headers =
   Wai.responseLBS status ((Http.hContentType, ContentType.html) : headers)
     . Lucid.renderBS

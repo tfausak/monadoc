@@ -6,6 +6,7 @@ module Monadoc.Type.Timestamp where
 
 import qualified Control.Monad as Monad
 import qualified Data.Fixed as Fixed
+import qualified Data.Hashable as Hashable
 import qualified Data.Text as Text
 import qualified Data.Time as Time
 import qualified Database.SQLite.Simple.FromField as Sql
@@ -43,6 +44,13 @@ instance QuickCheck.Arbitrary Timestamp where
 
 instance Witch.From Timestamp Text.Text where
   from = Witch.via @String
+
+instance Hashable.Hashable Timestamp where
+  hashWithSalt salt =
+    Hashable.hashWithSalt salt
+      . Witch.into @Fixed.Pico
+      . Witch.into @Time.NominalDiffTime
+      . Witch.into @Time.UTCTime
 
 getCurrentTime :: MonadTime.MonadTime m => m Timestamp
 getCurrentTime = Witch.into @Timestamp <$> MonadTime.getCurrentTime

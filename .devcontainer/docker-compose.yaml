@@ -6,9 +6,9 @@ services:
     image: monadoc/devcontainer
     init: true
     volumes:
-      - ..:/workspaces/monadoc:cached
-      - cabal:/home/haskell/.cabal:cached
-      - cabal-store:/cabal-store:cached
+      - ..:/workspaces/monadoc
+      - cabal:/home/haskell/.cabal
+      - cabal-store:/cabal-store
     working_dir: /workspaces/monadoc
 volumes:
   cabal: null

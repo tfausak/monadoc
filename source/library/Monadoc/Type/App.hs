@@ -11,6 +11,7 @@ import qualified Control.Monad.Trans as Trans
 import qualified Control.Monad.Trans.Control as Control
 import qualified Data.Pool as Pool
 import qualified Database.SQLite.Simple as Sql
+import qualified Monadoc.Class.MonadFile as MonadFile
 import qualified Monadoc.Class.MonadHttp as MonadHttp
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSay as MonadSay
@@ -20,6 +21,7 @@ import qualified Monadoc.Class.MonadTime as MonadTime
 import qualified Monadoc.Type.Context as Context
 import qualified Network.HTTP.Client as Client
 import qualified Say
+import qualified System.Directory as Directory
 
 type App = AppT IO
 
@@ -38,6 +40,9 @@ newtype AppT m a = AppT
       Exception.MonadThrow,
       Trans.MonadTrans
     )
+
+instance Base.MonadBase IO m => MonadFile.MonadFile (AppT m) where
+  getModificationTime = Base.liftBase . Directory.getModificationTime
 
 instance Control.MonadBaseControl IO m => MonadHttp.MonadHttp (AppT m) where
   withResponse request f = do
