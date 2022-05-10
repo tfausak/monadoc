@@ -23,8 +23,8 @@ ENV MONADOC_PORT=8080
 ENV MONADOC_SQL="/home/$USER_NAME/volume/monadoc.sqlite"
 
 CMD \
-  [ "sh"
-  , "-c"
+  [ "sh" \
+  , "-c" \
   , "/usr/local/bin/monadoc" \
   , "--base=$MONADOC_BASE" \
   , "--data=$MONADOC_DATA" \
