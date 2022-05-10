@@ -1,20 +1,18 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Handler.Version.Get where
 
 import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Reader as Reader
-import qualified Data.ByteString as ByteString
 import qualified Monadoc.Class.MonadSql as MonadSql
+import qualified Monadoc.Exception.Found as Found
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.Preference as Preference
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
-import qualified Monadoc.Template.Common as Common
 import qualified Monadoc.Template.Version.Get as Template
 import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.Context as Context
@@ -24,7 +22,6 @@ import qualified Monadoc.Type.Reversion as Reversion
 import qualified Monadoc.Type.Route as Route
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
-import qualified Witch
 
 handler ::
   (Reader.MonadReader Context.Context m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
@@ -58,10 +55,7 @@ handler packageName reversion _ = do
                 { Reversion.revision = Just . Upload.revision $ Model.value upload,
                   Reversion.version = Version.number $ Model.value version
                 }
-      pure $
-        Common.statusResponse
-          Http.found302
-          [(Http.hLocation, Witch.into @ByteString.ByteString $ Common.route context route)]
+      Exception.throwM $ Found.Found route
     Just revision -> do
       upload <-
         selectFirst $

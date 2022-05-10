@@ -17,8 +17,8 @@ import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Witch
 
 data Reversion = Reversion
-  { revision :: Maybe Revision.Revision,
-    version :: VersionNumber.VersionNumber
+  { version :: VersionNumber.VersionNumber,
+    revision :: Maybe Revision.Revision
   }
   deriving (Eq, Show)
 

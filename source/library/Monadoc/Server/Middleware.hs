@@ -15,4 +15,4 @@ middleware context =
     . CacheResponses.middleware
     . CompressResponses.middleware (Context.temporaryDirectory context)
     . AddHeaders.middleware (Config.base $ Context.config context)
-    . HandleExceptions.middleware
+    . HandleExceptions.middleware context

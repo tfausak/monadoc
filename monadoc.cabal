@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.5.8
+version: 0.2022.5.9
 
 build-type: Simple
 category: Documentation
@@ -140,6 +140,7 @@ library
     Monadoc.Constant.Header
     Monadoc.Constant.Migration
     Monadoc.Constant.Pragma
+    Monadoc.Exception.Found
     Monadoc.Exception.InvalidOption
     Monadoc.Exception.InvalidSize
     Monadoc.Exception.MethodNotAllowed

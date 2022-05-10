@@ -21,18 +21,19 @@ server :: (Base.MonadBase IO m, Reader.MonadReader Context.Context m) => m ()
 server = do
   context <- Reader.ask
   Base.liftBase
-    . Warp.runSettings (getSettings $ Context.config context)
+    . Warp.runSettings (getSettings context)
     . Middleware.middleware context
     $ Application.application context
 
-getSettings :: Config.Config -> Warp.Settings
-getSettings config =
-  Warp.setBeforeMainLoop (beforeMainLoop config)
-    . Warp.setHost (Config.host config)
-    . Warp.setOnException (const HandleExceptions.onException)
-    . Warp.setOnExceptionResponse HandleExceptions.onExceptionResponse
-    . Warp.setPort (Witch.into @Int $ Config.port config)
-    $ Warp.setServerName ByteString.empty Warp.defaultSettings
+getSettings :: Context.Context -> Warp.Settings
+getSettings context =
+  let config = Context.config context
+   in Warp.setBeforeMainLoop (beforeMainLoop config)
+        . Warp.setHost (Config.host config)
+        . Warp.setOnException (const HandleExceptions.onException)
+        . Warp.setOnExceptionResponse (HandleExceptions.onExceptionResponse context)
+        . Warp.setPort (Witch.into @Int $ Config.port config)
+        $ Warp.setServerName ByteString.empty Warp.defaultSettings
 
 beforeMainLoop :: MonadLog.MonadLog m => Config.Config -> m ()
 beforeMainLoop config = do

@@ -41,7 +41,7 @@ makeETag :: Hashable.Hashable a => a -> ByteString.ByteString
 makeETag =
   Witch.from @String @ByteString.ByteString
     . Printf.printf "\"%x\""
-    . Hashable.hash
+    . Hashable.hashWithSalt 0
 
 statusResponse :: Http.Status -> Http.ResponseHeaders -> Wai.Response
 statusResponse status headers =
