@@ -22,14 +22,11 @@ ENV MONADOC_HOST=*
 ENV MONADOC_PORT=8080
 ENV MONADOC_SQL="/home/$USER_NAME/volume/monadoc.sqlite"
 
-CMD \
-  [ "sh" \
-  , "-c" \
-  , "/usr/local/bin/monadoc" \
-  , "--base=$MONADOC_BASE" \
-  , "--data=$MONADOC_DATA" \
-  , "--hackage=$MONADOC_HACKAGE" \
-  , "--host=$MONADOC_HOST" \
-  , "--port=$MONADOC_PORT" \
-  , "--sql=$MONADOC_SQL" \
+CMD [ "sh", "-c", "exec /usr/local/bin/monadoc \
+  --base=$MONADOC_BASE \
+  --data=$MONADOC_DATA \
+  --hackage=$MONADOC_HACKAGE \
+  --host=$MONADOC_HOST \
+  --port=$MONADOC_PORT \
+  --sql=$MONADOC_SQL" \
   ]
