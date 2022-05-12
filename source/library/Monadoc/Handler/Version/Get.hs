@@ -21,6 +21,7 @@ import qualified Monadoc.Type.PackageName as PackageName
 import qualified Monadoc.Type.Reversion as Reversion
 import qualified Monadoc.Type.Route as Route
 import qualified Network.HTTP.Types as Http
+import qualified Network.HTTP.Types.Header as Http
 import qualified Network.Wai as Wai
 
 handler ::
@@ -67,7 +68,8 @@ handler packageName reversion _ = do
         case rows of
           [] -> pure Constraint.any
           row : _ -> pure . Preference.constraint $ Model.value row
-      pure . Common.htmlResponse Http.ok200 [] $ Template.render context package version upload constraint
+      let eTag = Common.makeETag . Upload.uploadedAt $ Model.value upload
+      pure . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)] $ Template.render context package version upload constraint
 
 selectFirst :: Exception.MonadThrow m => m [a] -> m a
 selectFirst query = do

@@ -3,6 +3,7 @@
 module Monadoc.Type.Manifest where
 
 import qualified Data.Aeson as Aeson
+import qualified Data.Hashable as Hashable
 import qualified Data.Text as Text
 import qualified Monadoc.Extra.Aeson as Aeson
 import qualified Monadoc.Type.Icon as Icon
@@ -29,3 +30,14 @@ instance Aeson.ToJSON Manifest where
         Aeson.pair "start_url" $ startUrl manifest,
         Aeson.pair "theme_color" $ themeColor manifest
       ]
+
+instance Hashable.Hashable Manifest where
+  hashWithSalt s x =
+    s
+      `Hashable.hashWithSalt` backgroundColor x
+      `Hashable.hashWithSalt` display x
+      `Hashable.hashWithSalt` icons x
+      `Hashable.hashWithSalt` name x
+      `Hashable.hashWithSalt` schema x
+      `Hashable.hashWithSalt` startUrl x
+      `Hashable.hashWithSalt` themeColor x

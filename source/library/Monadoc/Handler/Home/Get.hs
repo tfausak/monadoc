@@ -4,11 +4,15 @@
 module Monadoc.Handler.Home.Get where
 
 import qualified Control.Monad.Reader as Reader
+import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Handler.Common as Common
+import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Template.Home.Get as Template
 import qualified Monadoc.Type.Context as Context
+import qualified Monadoc.Type.Model as Model
 import qualified Network.HTTP.Types as Http
+import qualified Network.HTTP.Types.Header as Http
 import qualified Network.Wai as Wai
 
 handler :: (Reader.MonadReader Context.Context m, MonadSql.MonadSql m) => Wai.Request -> m Wai.Response
@@ -26,4 +30,7 @@ handler _ = do
       \ on hackageUser.key = upload.uploadedBy \
       \ order by upload.uploadedAt desc \
       \ limit 16"
-  pure . Common.htmlResponse Http.ok200 [] $ Template.render context rows
+  let eTag = Common.makeETag $ case rows of
+        (upload Sql.:. _) : _ -> Just . Upload.uploadedAt $ Model.value upload
+        _ -> Nothing
+  pure . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)] $ Template.render context rows

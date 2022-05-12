@@ -22,7 +22,7 @@ handler _ = do
   context <- Reader.ask
   let manifest = makeManifest context
       body = Aeson.encode manifest
-      eTag = Common.makeETag body
+      eTag = Common.makeETag manifest
   pure $
     Wai.responseLBS Http.ok200 [(Http.hContentType, ContentType.manifest), (Http.hETag, eTag)] body
 
