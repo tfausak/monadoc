@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.5.12
+version: 0.2022.5.13
 
 build-type: Simple
 category: Documentation
@@ -72,7 +72,7 @@ library
     , exceptions ^>= 0.10.4
     , filepath ^>= 1.4.2
     , hashable ^>= 1.4.0
-    , hspec ^>= 2.9.4
+    , hspec ^>= 2.10.0
     , http-client ^>= 0.7.11
     , http-client-tls ^>= 0.3.6
     , http-types ^>= 0.12.3
