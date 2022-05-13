@@ -22,8 +22,9 @@ render ::
   Package.Model ->
   Constraint.Constraint ->
   [Upload.Model Sql.:. Version.Model Sql.:. HackageUser.Model] ->
+  [HackageUser.Model] ->
   Lucid.Html ()
-render context package constraint rows = Common.base context (Route.Package . Package.name $ Model.value package) $ do
+render context package constraint rows hackageUsers = Common.base context (Route.Package . Package.name $ Model.value package) $ do
   Lucid.h2_ . Lucid.toHtml . Package.name $ Model.value package
   Lucid.p_ $ do
     "Preferred versions: "
@@ -44,3 +45,10 @@ render context package constraint rows = Common.base context (Route.Package . Pa
       $ Model.value hackageUser
     "."
     Monad.when (Constraint.excludes versionNumber constraint) " (deprecated)"
+  Lucid.h3_ "Uploaders"
+  Lucid.ul_ . Monad.forM_ hackageUsers $ \hackageUser ->
+    Lucid.li_
+      . Lucid.a_ [Lucid.href_ . Common.route context . Route.User . HackageUser.name $ Model.value hackageUser]
+      . Lucid.toHtml
+      . HackageUser.name
+      $ Model.value hackageUser

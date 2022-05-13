@@ -41,4 +41,5 @@ handler hackageUserName _ = do
   let eTag = Common.makeETag $ case rows of
         (upload Sql.:. _) : _ -> Just . Upload.uploadedAt $ Model.value upload
         _ -> Nothing
-  pure . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)] $ Template.render context hackageUser rows
+  packages <- MonadSql.query "select * from package where key in ( select distinct package from upload where uploadedBy = ? ) order by name collate nocase asc" [Model.key hackageUser]
+  pure . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)] $ Template.render context hackageUser rows packages

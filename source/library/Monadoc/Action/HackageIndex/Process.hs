@@ -127,7 +127,9 @@ handlePreference preference entry pkg = do
           . Exception.throwM
           $ UnexpectedEntry.UnexpectedEntry entry
         pure range
-  Base.liftBase . Stm.atomically . Stm.modifyTVar' preference
+  Base.liftBase
+    . Stm.atomically
+    . Stm.modifyTVar' preference
     . Map.insert packageName
     $ Witch.into @Constraint.Constraint versionRange
 

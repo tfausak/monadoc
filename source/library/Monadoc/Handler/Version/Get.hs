@@ -68,8 +68,9 @@ handler packageName reversion _ = do
         case rows of
           [] -> pure Constraint.any
           row : _ -> pure . Preference.constraint $ Model.value row
+      hackageUser <- selectFirst $ MonadSql.query "select * from hackageUser where key = ?" [Upload.uploadedBy $ Model.value upload]
       let eTag = Common.makeETag . Upload.uploadedAt $ Model.value upload
-      pure . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)] $ Template.render context package version upload constraint
+      pure . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)] $ Template.render context package version upload constraint hackageUser
 
 selectFirst :: Exception.MonadThrow m => m [a] -> m a
 selectFirst query = do

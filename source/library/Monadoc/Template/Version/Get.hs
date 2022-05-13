@@ -4,6 +4,7 @@ module Monadoc.Template.Version.Get where
 
 import qualified Control.Monad as Monad
 import qualified Lucid
+import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
@@ -20,8 +21,9 @@ render ::
   Version.Model ->
   Upload.Model ->
   Constraint.Constraint ->
+  HackageUser.Model ->
   Lucid.Html ()
-render context package version upload constraint = do
+render context package version upload constraint hackageUser = do
   let packageName = Package.name $ Model.value package
       versionNumber = Version.number $ Model.value version
       revision = Upload.revision $ Model.value upload
@@ -35,5 +37,10 @@ render context package version upload constraint = do
       Lucid.toHtml revision
       " uploaded "
       Common.timestamp . Upload.uploadedAt $ Model.value upload
+      " by "
+      Lucid.a_ [Lucid.href_ . Common.route context . Route.User . HackageUser.name $ Model.value hackageUser]
+        . Lucid.toHtml
+        . HackageUser.name
+        $ Model.value hackageUser
       "."
       Monad.when (Constraint.excludes versionNumber constraint) " (deprecated)"

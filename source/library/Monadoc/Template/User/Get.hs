@@ -20,8 +20,9 @@ render ::
   Context.Context ->
   HackageUser.Model ->
   [Upload.Model Sql.:. Version.Model Sql.:. Package.Model] ->
+  [Package.Model] ->
   Lucid.Html ()
-render context hackageUser rows = Common.base context (Route.User . HackageUser.name $ Model.value hackageUser) $ do
+render context hackageUser rows packages = Common.base context (Route.User . HackageUser.name $ Model.value hackageUser) $ do
   Lucid.h2_ . Lucid.toHtml . HackageUser.name $ Model.value hackageUser
   Lucid.h3_ "Uploads"
   Lucid.ul_ . Monad.forM_ rows $ \row -> Lucid.li_ $ do
@@ -34,3 +35,10 @@ render context hackageUser rows = Common.base context (Route.User . HackageUser.
     " uploaded "
     Common.timestamp . Upload.uploadedAt $ Model.value upload
     "."
+  Lucid.h3_ "Packages"
+  Lucid.ul_ . Monad.forM_ packages $ \package ->
+    Lucid.li_
+      . Lucid.a_ [Lucid.href_ . Common.route context . Route.Package . Package.name $ Model.value package]
+      . Lucid.toHtml
+      . Package.name
+      $ Model.value package
