@@ -16,7 +16,7 @@ jobs:
       - run: cabal check
 
   hlint:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     name: HLint
     steps:
       - uses: actions/checkout@v3
