@@ -1,12 +1,22 @@
 name: Workflow
+
 on:
   push: null
   schedule:
     - cron: '0 12 * * *'
+
 jobs:
 
+  cabal:
+    runs-on: ubuntu-22.04
+    name: Cabal
+    steps:
+      - uses: actions/checkout@v2
+
+      - run: cabal check
+
   hlint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: HLint
     steps:
       - uses: actions/checkout@v2
@@ -14,30 +24,25 @@ jobs:
       - uses: tfausak/hlint-action@v1
 
   ormolu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Ormolu
     steps:
       - uses: actions/checkout@v2
 
-      - uses: mrkkrp/ormolu-action@v5
-
-  cabal:
-    runs-on: ubuntu-latest
-    name: Cabal
-    steps:
-      - uses: actions/checkout@v2
-
-      - run: cabal check
+      - uses: mrkkrp/ormolu-action@v6
 
   build:
     strategy:
       matrix:
         include:
           - platform: macos
+            version: 12
           - platform: ubuntu
+            version: 22.04
           - platform: windows
+            version: 2022
             extension: .exe
-    runs-on: ${{ matrix.platform }}-latest
+    runs-on: ${{ matrix.platform }}-${{ matrix.version }}
     name: Build on ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v2
@@ -55,7 +60,7 @@ jobs:
       - run: mkdir ${{ steps.artifact.outputs.directory }}
 
       - id: setup-haskell
-        uses: haskell/actions/setup@v1
+        uses: haskell/actions/setup@v2
         with:
           ghc-version: 9.2.2
 
@@ -96,8 +101,7 @@ jobs:
 
   docker:
     needs: build
-    if: github.event_name != 'schedule'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Docker
     steps:
       - uses: actions/checkout@v2
@@ -132,5 +136,5 @@ jobs:
         with:
           context: docker
           labels: ${{ steps.meta.outputs.labels }}
-          push: true
+          push: ${{ github.event_name != 'schedule' }}
           tags: ${{ steps.meta.outputs.tags }}
