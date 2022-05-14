@@ -118,7 +118,7 @@ jobs:
       - run: mv artifact/ubuntu/monadoc docker
 
       - id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ghcr.io/${{ github.repository }}
           flavor: latest=false
