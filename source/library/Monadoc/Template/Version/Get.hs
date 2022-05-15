@@ -1,8 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Template.Version.Get where
 
 import qualified Control.Monad as Monad
+import qualified Data.Text as Text
 import qualified Lucid
 import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
@@ -14,6 +16,7 @@ import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Reversion as Reversion
 import qualified Monadoc.Type.Route as Route
+import qualified Witch
 
 render ::
   Context.Context ->
@@ -28,7 +31,9 @@ render context package version upload constraint hackageUser = do
       versionNumber = Version.number $ Model.value version
       revision = Upload.revision $ Model.value upload
       reversion = Reversion.Reversion {Reversion.revision = Just revision, Reversion.version = versionNumber}
-  Common.base context (Route.Version packageName reversion) $ do
+      route = Route.Version packageName reversion
+      title = "Package " <> Witch.into @Text.Text packageName <> " version " <> Witch.into @Text.Text reversion <> " :: Monadoc"
+  Common.base context route title $ do
     Lucid.h2_ . Lucid.a_ [Lucid.href_ . Common.route context . Route.Package . Package.name $ Model.value package] $ Lucid.toHtml packageName
     Lucid.p_ $ do
       "Version "

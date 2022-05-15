@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ENV LANG=C.UTF-8
 
@@ -21,6 +21,9 @@ ENV MONADOC_HACKAGE=https://hackage.haskell.org/
 ENV MONADOC_HOST=*
 ENV MONADOC_PORT=8080
 ENV MONADOC_SQL="/home/$USER_NAME/volume/monadoc.sqlite"
+
+ARG MONADOC_SHA
+ENV MONADOC_SHA="$MONADOC_SHA"
 
 CMD [ "sh", "-c", "exec /usr/local/bin/monadoc \
   --base=$MONADOC_BASE \

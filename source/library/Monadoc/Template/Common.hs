@@ -14,13 +14,12 @@ import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Paths_monadoc as Monadoc
 import qualified Witch
 
-base :: Context.Context -> Route.Route -> Lucid.Html () -> Lucid.Html ()
-base ctx rt html = do
+base :: Context.Context -> Route.Route -> Text.Text -> Lucid.Html () -> Lucid.Html ()
+base ctx rt title html = do
   Lucid.doctype_
   Lucid.html_ [Lucid.lang_ "en-US"] $ do
     Lucid.head_ $ do
-      let title = "Monadoc" :: Text.Text
-          description = "Worse Haskell documentation." :: Text.Text
+      let description = "Worse Haskell documentation." :: Text.Text
           canonical = route ctx rt
       Lucid.meta_ [Lucid.charset_ "utf-8"]
       Lucid.meta_ [Lucid.name_ "viewport", Lucid.content_ "initial-scale = 1, width = device-width"]
@@ -46,6 +45,13 @@ base ctx rt html = do
           Lucid.a_ [Lucid.href_ "https://github.com/tfausak/monadoc"] "Monadoc"
           " version "
           Lucid.toHtml $ Witch.into @VersionNumber.VersionNumber Monadoc.version
+          case Context.sha ctx of
+            Nothing -> ""
+            Just sha -> do
+              " commit "
+              Lucid.a_ [Lucid.href_ $ "https://github.com/tfausak/monadoc/commit/" <> Witch.into @Text.Text sha]
+                . Lucid.toHtml
+                $ take 7 sha
           ". \x1f516"
       Lucid.script_ [Lucid.src_ $ route ctx Route.Script] Text.empty
 

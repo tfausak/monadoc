@@ -15,6 +15,7 @@ import qualified Paths_monadoc as Monadoc
 import qualified Say
 import qualified System.Console.GetOpt as Console
 import qualified System.Directory as Directory
+import qualified System.Environment as Environment
 import qualified System.Exit as Exit
 
 data Context = Context
@@ -22,6 +23,7 @@ data Context = Context
     data_ :: FilePath,
     manager :: Client.Manager,
     pool :: Pool.Pool Sql.Connection,
+    sha :: Maybe String,
     temporaryDirectory :: FilePath
   }
 
@@ -41,4 +43,5 @@ fromConfig name cfg = do
     <$> maybe Monadoc.getDataDir pure (Config.data_ cfg)
     <*> Tls.newTlsManager
     <*> Pool.createPool (Sql.open $ Config.sql cfg) Sql.close 1 60 8
+    <*> Environment.lookupEnv "MONADOC_SHA"
     <*> Directory.getTemporaryDirectory

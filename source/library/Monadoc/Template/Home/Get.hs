@@ -20,7 +20,7 @@ render ::
   Context.Context ->
   [Upload.Model Sql.:. Package.Model Sql.:. Version.Model Sql.:. HackageUser.Model] ->
   Lucid.Html ()
-render context rows = Common.base context Route.Home $ do
+render context rows = Common.base context Route.Home "Monadoc" $ do
   Lucid.h2_ "Recent Uploads"
   Lucid.ul_ [] $ do
     Monad.forM_ rows $ \row -> Lucid.li_ [] $ do
