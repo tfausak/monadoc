@@ -94,7 +94,7 @@ jobs:
         with:
           file: ${{ steps.artifact.outputs.directory }}/monadoc${{ matrix.extension }}
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: monadoc-${{ github.sha }}
           path: artifact
