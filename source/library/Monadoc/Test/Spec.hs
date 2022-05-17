@@ -12,6 +12,7 @@ import qualified Monadoc.Action.Upload.UpsertSpec
 import qualified Monadoc.Action.Version.UpsertSpec
 import qualified Monadoc.Extra.DirectSqliteSpec
 import qualified Monadoc.Extra.EitherSpec
+import qualified Monadoc.Extra.ListSpec
 import qualified Monadoc.Extra.TimeSpec
 import qualified Monadoc.Model.BlobSpec
 import qualified Monadoc.Model.CronEntrySpec
@@ -58,6 +59,7 @@ spec = do
   Monadoc.Action.Version.UpsertSpec.spec
   Monadoc.Extra.DirectSqliteSpec.spec
   Monadoc.Extra.EitherSpec.spec
+  Monadoc.Extra.ListSpec.spec
   Monadoc.Extra.TimeSpec.spec
   Monadoc.Model.BlobSpec.spec
   Monadoc.Model.CronEntrySpec.spec

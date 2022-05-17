@@ -11,6 +11,7 @@ import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Route as Route
 import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Monadoc.Type.VersionNumber as VersionNumber
+import qualified Network.HTTP.Types as Http
 import qualified Paths_monadoc as Monadoc
 import qualified Witch
 
@@ -36,7 +37,11 @@ base ctx rt title html = do
     Lucid.body_ $ do
       Lucid.header_ [Lucid.class_ "bg-dark navbar navbar-dark"]
         . Lucid.div_ [Lucid.class_ "container"]
-        $ Lucid.a_ [Lucid.class_ "navbar-brand", Lucid.href_ $ route ctx Route.Home] "Monadoc"
+        $ do
+          Lucid.a_ [Lucid.class_ "navbar-brand", Lucid.href_ $ route ctx Route.Home] "Monadoc"
+          Lucid.form_ [Lucid.action_ . route ctx . Route.Search $ Witch.from @Text.Text "", Lucid.class_ "d-flex"] . Lucid.div_ [Lucid.class_ "input-group"] $ do
+            Lucid.input_ [Lucid.class_ "form-control", Lucid.name_ "query", Lucid.placeholder_ "traverse", Lucid.type_ "search"]
+            Lucid.button_ [Lucid.class_ "btn btn-secondary", Lucid.type_ "submit"] "Search"
       Lucid.main_ [Lucid.class_ "my-3"] $ Lucid.div_ [Lucid.class_ "container"] html
       Lucid.footer_ [Lucid.class_ "my-3 text-muted"]
         . Lucid.div_ [Lucid.class_ "border-top container pt-3"]
@@ -63,10 +68,13 @@ og property content =
     ]
 
 route :: Context.Context -> Route.Route -> Text.Text
-route context =
-  mappend (Text.pack . Config.base $ Context.config context)
-    . Text.intercalate "/"
-    . Route.render
+route c r =
+  let (p, q) = Route.render r
+   in mconcat
+        [ Text.pack . Config.base $ Context.config c,
+          Text.intercalate "/" p,
+          if null q then Text.empty else Witch.unsafeInto @Text.Text $ Http.renderQuery True q
+        ]
 
 timestamp :: Timestamp.Timestamp -> Lucid.Html ()
 timestamp ts =

@@ -13,6 +13,7 @@ import qualified Monadoc.Handler.Manifest.Get as Manifest.Get
 import qualified Monadoc.Handler.Package.Get as Package.Get
 import qualified Monadoc.Handler.Robots.Get as Robots.Get
 import qualified Monadoc.Handler.Script.Get as Script.Get
+import qualified Monadoc.Handler.Search.Get as Search.Get
 import qualified Monadoc.Handler.Stylesheet.Get as Stylesheet.Get
 import qualified Monadoc.Handler.User.Get as User.Get
 import qualified Monadoc.Handler.Version.Get as Version.Get
@@ -29,7 +30,7 @@ application context request respond = do
     Either.throw
       . parseMethod
       $ Wai.requestMethod request
-  route <- Route.parse $ Wai.pathInfo request
+  route <- Route.parse (Wai.pathInfo request) (Wai.queryString request)
   handler <- getHandler method route
   response <- Reader.runReaderT (App.runAppT $ handler request) context
   respond response
@@ -66,6 +67,9 @@ getHandler method route = case route of
     _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
   Route.Script -> case method of
     Http.GET -> pure Script.Get.handler
+    _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
+  Route.Search q -> case method of
+    Http.GET -> pure $ Search.Get.handler q
     _ -> Exception.throwM $ MethodNotAllowed.MethodNotAllowed method route
   Route.Stylesheet -> case method of
     Http.GET -> pure Stylesheet.Get.handler

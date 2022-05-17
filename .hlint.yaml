@@ -3,6 +3,7 @@
 - group: { name: generalise, enabled: true }
 - ignore: { name: Use infix }
 - ignore: { name: Use lambda-case }
+- ignore: { name: Use list comprehension }
 - ignore: { name: Use section }
 - ignore: { name: Use unless }
 

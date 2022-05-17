@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.5.15
+version: 0.2022.5.16
 
 build-type: Simple
 category: Documentation
@@ -162,6 +162,8 @@ library
     Monadoc.Extra.DirectSqliteSpec
     Monadoc.Extra.Either
     Monadoc.Extra.EitherSpec
+    Monadoc.Extra.List
+    Monadoc.Extra.ListSpec
     Monadoc.Extra.Read
     Monadoc.Extra.Time
     Monadoc.Extra.TimeSpec
@@ -174,6 +176,7 @@ library
     Monadoc.Handler.Package.Get
     Monadoc.Handler.Robots.Get
     Monadoc.Handler.Script.Get
+    Monadoc.Handler.Search.Get
     Monadoc.Handler.Stylesheet.Get
     Monadoc.Handler.User.Get
     Monadoc.Handler.Version.Get
@@ -210,6 +213,7 @@ library
     Monadoc.Template.Common
     Monadoc.Template.Home.Get
     Monadoc.Template.Package.Get
+    Monadoc.Template.Search.Get
     Monadoc.Template.User.Get
     Monadoc.Template.Version.Get
     Monadoc.Test.Common
@@ -238,6 +242,7 @@ library
     Monadoc.Type.PackageNameSpec
     Monadoc.Type.Port
     Monadoc.Type.PortSpec
+    Monadoc.Type.Query
     Monadoc.Type.Reversion
     Monadoc.Type.ReversionSpec
     Monadoc.Type.Revision

@@ -3,7 +3,7 @@
 
 module Monadoc.Extra.DirectSqliteSpec where
 
-import qualified Control.Monad.Catch as Exception
+import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite3 as Sqlite
 import qualified Monadoc.Extra.DirectSqlite as Extra
 import qualified Monadoc.Test.Common as Test
@@ -56,4 +56,4 @@ spec = Hspec.describe "Monadoc.Extra.DirectSqlite" . Hspec.around withDatabase $
         bs `Hspec.shouldBe` "hs"
 
 withDatabase :: (Sqlite.Database -> IO a) -> IO a
-withDatabase = Exception.bracket (Sqlite.open ":memory:") Sqlite.close
+withDatabase f = Test.withConnection $ f . Sql.connectionHandle

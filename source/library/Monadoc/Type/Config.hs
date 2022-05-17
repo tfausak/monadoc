@@ -6,6 +6,7 @@ import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
 import qualified Data.String as String
 import qualified Monadoc.Extra.Either as Either
+import qualified Monadoc.Extra.List as List
 import qualified Monadoc.Type.Flag as Flag
 import qualified Monadoc.Type.Port as Port
 import qualified Network.Wai.Handler.Warp as Warp
@@ -38,9 +39,9 @@ initial =
 
 applyFlag :: Exception.MonadThrow m => Config -> Flag.Flag -> m Config
 applyFlag config flag = case flag of
-  Flag.Base str -> pure config {base = ensureTrailing '/' str}
+  Flag.Base str -> pure config {base = List.ensureSuffix '/' str}
   Flag.Data str -> pure config {data_ = Just str}
-  Flag.Hackage str -> pure config {hackage = ensureTrailing '/' str}
+  Flag.Hackage str -> pure config {hackage = List.ensureSuffix '/' str}
   Flag.Help -> pure config {help = True}
   Flag.Host str -> pure config {host = String.fromString str}
   Flag.Port str -> do
@@ -51,9 +52,3 @@ applyFlag config flag = case flag of
 
 fromFlags :: Exception.MonadThrow m => [Flag.Flag] -> m Config
 fromFlags = Monad.foldM applyFlag initial
-
-ensureTrailing :: Eq a => a -> [a] -> [a]
-ensureTrailing z xs = case xs of
-  [] -> []
-  [x] -> if x == z then xs else [x, z]
-  x : ys -> x : ensureTrailing z ys
