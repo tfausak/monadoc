@@ -28,5 +28,5 @@ instance Lucid.ToHtml Query where
   toHtml = Lucid.toHtml . Witch.into @Text.Text
   toHtmlRaw = Lucid.toHtmlRaw . Witch.into @Text.Text
 
-isEmpty :: Query -> Bool
-isEmpty = Text.all Char.isSpace . Witch.into @Text.Text
+isBlank :: Query -> Bool
+isBlank = Text.all Char.isSpace . Witch.into @Text.Text

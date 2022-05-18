@@ -39,9 +39,8 @@ base ctx rt title html = do
         . Lucid.div_ [Lucid.class_ "container"]
         $ do
           Lucid.a_ [Lucid.class_ "navbar-brand", Lucid.href_ $ route ctx Route.Home] "Monadoc"
-          Lucid.form_ [Lucid.action_ . route ctx . Route.Search $ Witch.from @Text.Text "", Lucid.class_ "d-flex"] . Lucid.div_ [Lucid.class_ "input-group"] $ do
-            Lucid.input_ [Lucid.class_ "form-control", Lucid.name_ "query", Lucid.placeholder_ "traverse", Lucid.type_ "search"]
-            Lucid.button_ [Lucid.class_ "btn btn-secondary", Lucid.type_ "submit"] "Search"
+          Lucid.form_ [Lucid.action_ . route ctx . Route.Search $ Witch.from @Text.Text ""] $
+            Lucid.input_ [Lucid.class_ "form-control", Lucid.name_ "query", Lucid.placeholder_ "Search", Lucid.type_ "search"]
       Lucid.main_ [Lucid.class_ "my-3"] $ Lucid.div_ [Lucid.class_ "container"] html
       Lucid.footer_ [Lucid.class_ "my-3 text-muted"]
         . Lucid.div_ [Lucid.class_ "border-top container pt-3"]
