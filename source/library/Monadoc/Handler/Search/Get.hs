@@ -21,11 +21,17 @@ handler query _ = do
   packages <-
     if Query.isBlank query
       then pure []
-      else MonadSql.query "select * from package where name like ? escape '\\' order by name collate nocase asc limit 16" [like query]
+      else
+        MonadSql.query
+          "select * from package where name like ? escape '\\' order by name collate nocase asc limit 16"
+          [like query]
   hackageUsers <-
     if Query.isBlank query
       then pure []
-      else MonadSql.query "select * from hackageUser where name like ? escape '\\' order by name collate nocase asc limit 16" [like query]
+      else
+        MonadSql.query
+          "select * from hackageUser where name like ? escape '\\' order by name collate nocase asc limit 16"
+          [like query]
   pure . Common.htmlResponse Http.ok200 [] $ Template.render context query packages hackageUsers
 
 like :: Query.Query -> Text.Text

@@ -13,7 +13,6 @@ import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Template.Common as Common
-import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Reversion as Reversion
@@ -23,18 +22,14 @@ import qualified Witch
 render ::
   Context.Context ->
   Package.Model ->
-  Constraint.Constraint ->
   [Upload.Model Sql.:. Version.Model Sql.:. HackageUser.Model] ->
   [HackageUser.Model] ->
   Lucid.Html ()
-render context package constraint rows hackageUsers = do
+render context package rows hackageUsers = do
   let route = Route.Package . Package.name $ Model.value package
       title = "Package " <> (Witch.into @Text.Text . Package.name $ Model.value package) <> " :: Monadoc"
   Common.base context route title $ do
     Lucid.h2_ . Lucid.toHtml . Package.name $ Model.value package
-    Lucid.p_ $ do
-      "Preferred versions: "
-      Lucid.toHtml constraint
     Lucid.h3_ "Uploads"
     Lucid.ul_ . Monad.forM_ rows $ \row -> Lucid.li_ $ do
       let (upload Sql.:. version Sql.:. hackageUser) = row
@@ -50,7 +45,7 @@ render context package constraint rows hackageUsers = do
         . HackageUser.name
         $ Model.value hackageUser
       "."
-      Monad.when (Constraint.excludes versionNumber constraint) " (deprecated)"
+      Monad.when (not . Upload.isPreferred $ Model.value upload) " (deprecated)"
     Lucid.h3_ "Uploaders"
     Lucid.ul_ . Monad.forM_ hackageUsers $ \hackageUser ->
       Lucid.li_

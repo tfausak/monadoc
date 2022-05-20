@@ -10,11 +10,9 @@ import qualified Monadoc.Exception.Found as Found
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Model.Package as Package
-import qualified Monadoc.Model.Preference as Preference
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Template.Version.Get as Template
-import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
@@ -63,14 +61,9 @@ handler packageName reversion _ = do
           MonadSql.query
             "select * from upload where package = ? and version = ? and revision = ? limit 1"
             (Model.key package, Model.key version, revision)
-      constraint <- do
-        rows <- MonadSql.query "select * from preference where package = ?" [Model.key package]
-        case rows of
-          [] -> pure Constraint.any
-          row : _ -> pure . Preference.constraint $ Model.value row
       hackageUser <- selectFirst $ MonadSql.query "select * from hackageUser where key = ?" [Upload.uploadedBy $ Model.value upload]
       let eTag = Common.makeETag . Upload.uploadedAt $ Model.value upload
-      pure . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)] $ Template.render context package version upload constraint hackageUser
+      pure . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)] $ Template.render context package version upload hackageUser
 
 selectFirst :: Exception.MonadThrow m => m [a] -> m a
 selectFirst query = do

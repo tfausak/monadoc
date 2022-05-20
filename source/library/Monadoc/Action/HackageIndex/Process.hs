@@ -184,7 +184,8 @@ handleCabal revisions entry pkg ver = do
               . epochTimeToPosixTime
               $ Tar.entryTime entry,
           Upload.uploadedBy = Model.key hackageUser,
-          Upload.version = Model.key version
+          Upload.version = Model.key version,
+          Upload.isPreferred = True
         }
   Monad.when (rem (Witch.into @Int.Int64 (Model.key upload)) 10000 == 1)
     . MonadLog.debug
@@ -212,3 +213,8 @@ upsertPreferredVersion packageName constraint = do
         { Preference.package = Model.key package,
           Preference.constraint = constraint
         }
+  rows <- MonadSql.query "select * from upload inner join version on version.key = upload.version where upload.package = ?" [Model.key package]
+  Monad.forM_ rows $ \(upload Sql.:. version) -> do
+    let isPreferred = Constraint.includes (Version.number $ Model.value version) constraint
+    Monad.when (Upload.isPreferred (Model.value upload) /= isPreferred) $
+      MonadSql.execute "update upload set isPreferred = ? where key = ?" (isPreferred, Model.key upload)

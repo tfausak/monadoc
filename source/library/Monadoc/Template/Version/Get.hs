@@ -11,7 +11,6 @@ import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Template.Common as Common
-import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Reversion as Reversion
@@ -23,10 +22,9 @@ render ::
   Package.Model ->
   Version.Model ->
   Upload.Model ->
-  Constraint.Constraint ->
   HackageUser.Model ->
   Lucid.Html ()
-render context package version upload constraint hackageUser = do
+render context package version upload hackageUser = do
   let packageName = Package.name $ Model.value package
       versionNumber = Version.number $ Model.value version
       revision = Upload.revision $ Model.value upload
@@ -48,4 +46,4 @@ render context package version upload constraint hackageUser = do
         . HackageUser.name
         $ Model.value hackageUser
       "."
-      Monad.when (Constraint.excludes versionNumber constraint) " (deprecated)"
+      Monad.when (not . Upload.isPreferred $ Model.value upload) " (deprecated)"
