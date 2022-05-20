@@ -14,6 +14,6 @@ run upload = do
   case rows of
     model : _ -> pure model
     [] -> do
-      MonadSql.execute "insert into upload (blob, package, revision, uploadedAt, uploadedBy, version, isPreferred) values (?, ?, ?, ?, ?, ?, ?)" upload
+      MonadSql.execute "insert into upload (blob, package, revision, uploadedAt, uploadedBy, version, isPreferred, isLatest) values (?, ?, ?, ?, ?, ?, ?, ?)" upload
       key <- Key.SelectLastInsert.run
       pure Model.Model {Model.key = key, Model.value = upload}

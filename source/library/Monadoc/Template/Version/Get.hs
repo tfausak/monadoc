@@ -46,4 +46,5 @@ render context package version upload hackageUser = do
         . HackageUser.name
         $ Model.value hackageUser
       "."
+      Monad.when (Upload.isLatest $ Model.value upload) " (latest)"
       Monad.when (not . Upload.isPreferred $ Model.value upload) " (deprecated)"

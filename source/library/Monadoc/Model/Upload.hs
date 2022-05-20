@@ -26,7 +26,8 @@ data Upload = Upload
     uploadedAt :: Timestamp.Timestamp,
     uploadedBy :: HackageUser.Key,
     version :: Version.Key,
-    isPreferred :: Bool
+    isPreferred :: Bool,
+    isLatest :: Bool
   }
   deriving (Eq, Show)
 
@@ -34,6 +35,7 @@ instance Sql.FromRow Upload where
   fromRow =
     Upload
       <$> Sql.field
+      <*> Sql.field
       <*> Sql.field
       <*> Sql.field
       <*> Sql.field
@@ -49,13 +51,15 @@ instance Sql.ToRow Upload where
       Sql.toField $ uploadedAt upload,
       Sql.toField $ uploadedBy upload,
       Sql.toField $ version upload,
-      Sql.toField $ isPreferred upload
+      Sql.toField $ isPreferred upload,
+      Sql.toField $ isLatest upload
     ]
 
 instance QuickCheck.Arbitrary Upload where
   arbitrary =
     Upload
       <$> QuickCheck.arbitrary
+      <*> QuickCheck.arbitrary
       <*> QuickCheck.arbitrary
       <*> QuickCheck.arbitrary
       <*> QuickCheck.arbitrary
@@ -78,5 +82,8 @@ migrations =
       \ , unique ( package, version, revision ) )",
     Migration.new
       (2022, 1, 11, 0, 0, 0)
-      "alter table upload add column isPreferred integer default true"
+      "alter table upload add column isPreferred integer default true",
+    Migration.new
+      (2022, 1, 12, 0, 0, 0)
+      "alter table upload add column isLatest integer default false"
   ]

@@ -45,6 +45,7 @@ render context package rows hackageUsers = do
         . HackageUser.name
         $ Model.value hackageUser
       "."
+      Monad.when (Upload.isLatest $ Model.value upload) " (latest)"
       Monad.when (not . Upload.isPreferred $ Model.value upload) " (deprecated)"
     Lucid.h3_ "Uploaders"
     Lucid.ul_ . Monad.forM_ hackageUsers $ \hackageUser ->

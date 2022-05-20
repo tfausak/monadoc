@@ -21,7 +21,8 @@ spec = Hspec.describe "Monadoc.Model.Upload" $ do
           Upload.uploadedAt = Witch.from $ Time.makeUtcTime 2001 2 3 4 5 6.007,
           Upload.uploadedBy = Witch.from @Int 4,
           Upload.version = Witch.from @Int 5,
-          Upload.isPreferred = True
+          Upload.isPreferred = True,
+          Upload.isLatest = False
         }
       [ Sql.SQLInteger 1,
         Sql.SQLInteger 2,
@@ -29,5 +30,6 @@ spec = Hspec.describe "Monadoc.Model.Upload" $ do
         Sql.SQLText "2001-02-03 04:05:06.007",
         Sql.SQLInteger 4,
         Sql.SQLInteger 5,
-        Sql.SQLInteger 1
+        Sql.SQLInteger 1,
+        Sql.SQLInteger 0
       ]

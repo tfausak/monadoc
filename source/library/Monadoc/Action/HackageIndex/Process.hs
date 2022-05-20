@@ -15,7 +15,10 @@ import qualified Control.Monad.Trans.Control as Control
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Int as Int
+import qualified Data.List as List
 import qualified Data.Map.Strict as Map
+import qualified Data.Maybe as Maybe
+import qualified Data.Ord as Ord
 import qualified Data.Pool as Pool
 import qualified Data.Text as Text
 import qualified Data.Time.Clock.POSIX as Time
@@ -185,7 +188,8 @@ handleCabal revisions entry pkg ver = do
               $ Tar.entryTime entry,
           Upload.uploadedBy = Model.key hackageUser,
           Upload.version = Model.key version,
-          Upload.isPreferred = True
+          Upload.isPreferred = True,
+          Upload.isLatest = False
         }
   Monad.when (rem (Witch.into @Int.Int64 (Model.key upload)) 10000 == 1)
     . MonadLog.debug
@@ -218,3 +222,7 @@ upsertPreferredVersion packageName constraint = do
     let isPreferred = Constraint.includes (Version.number $ Model.value version) constraint
     Monad.when (Upload.isPreferred (Model.value upload) /= isPreferred) $
       MonadSql.execute "update upload set isPreferred = ? where key = ?" (isPreferred, Model.key upload)
+  let latest = Maybe.listToMaybe $ List.sortOn (\(upload Sql.:. version) -> Ord.Down (Upload.isPreferred $ Model.value upload, Version.number $ Model.value version)) rows
+  case latest of
+    Nothing -> pure ()
+    Just (upload Sql.:. _) -> MonadSql.execute "update upload set isLatest = (key = ?) where package = ?" (Model.key upload, Model.key package)
