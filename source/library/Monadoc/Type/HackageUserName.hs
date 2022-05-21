@@ -9,7 +9,7 @@ import qualified Data.Char as Char
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
-import qualified Lucid
+import qualified Lucid as Html
 import qualified Monadoc.Extra.Either as Either
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
@@ -38,9 +38,9 @@ instance Sql.FromField HackageUserName where
 instance Sql.ToField HackageUserName where
   toField = Sql.toField . Witch.into @String
 
-instance Lucid.ToHtml HackageUserName where
-  toHtml = Lucid.toHtml . Witch.into @String
-  toHtmlRaw = Lucid.toHtmlRaw . Witch.into @String
+instance Html.ToHtml HackageUserName where
+  toHtml = Html.toHtml . Witch.into @String
+  toHtmlRaw = Html.toHtmlRaw . Witch.into @String
 
 instance QuickCheck.Arbitrary HackageUserName where
   arbitrary = QuickCheck.suchThatMap @String QuickCheck.arbitrary $ Either.hush . Witch.tryFrom

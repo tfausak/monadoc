@@ -9,8 +9,10 @@ import qualified Data.Text as Text
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Template.Search.Get as Template
+import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Query as Query
+import qualified Monadoc.Type.Route as Route
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 import qualified Witch
@@ -32,7 +34,15 @@ handler query _ = do
         MonadSql.query
           "select * from hackageUser where name like ? escape '\\' order by name collate nocase asc limit 16"
           [like query]
-  pure . Common.htmlResponse Http.ok200 [] $ Template.render context query packages hackageUsers
+  let breadcrumbs =
+        Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home} :
+        if Query.isBlank query
+          then [Breadcrumb.Breadcrumb {Breadcrumb.label = "Search", Breadcrumb.route = Nothing}]
+          else
+            [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Search", Breadcrumb.route = Just $ Route.Search Query.empty},
+              Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text query, Breadcrumb.route = Nothing}
+            ]
+  pure . Common.htmlResponse Http.ok200 [] $ Template.render context breadcrumbs query packages hackageUsers
 
 like :: Query.Query -> Text.Text
 like = Text.cons '%' . flip Text.snoc '%' . escape . Witch.into @Text.Text

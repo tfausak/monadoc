@@ -22,7 +22,7 @@ import qualified Database.SQLite.Simple.Ok as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified GHC.Clock as Clock
 import qualified GHC.Stack as Stack
-import qualified Lucid
+import qualified Lucid as Html
 import qualified Monadoc.Action.Database.Initialize as Database.Initialize
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSay as MonadSay
@@ -87,11 +87,11 @@ expectFromSqlRow sql x = do
       fromRow xs = State.evalStateT (Reader.runReaderT (Sql.unRP Sql.fromRow) . Sql.RowParseRO $ length xs) (0, xs)
   fromRow sql `Hspec.shouldBe` Sql.Ok x
 
-expectHtml :: (Stack.HasCallStack, Lucid.ToHtml a) => a -> LazyText.Text -> IO ()
-expectHtml x html = Lucid.renderText (Lucid.toHtml x) `Hspec.shouldBe` html
+expectHtml :: (Stack.HasCallStack, Html.ToHtml a) => a -> LazyText.Text -> IO ()
+expectHtml x html = Html.renderText (Html.toHtml x) `Hspec.shouldBe` html
 
-expectHtmlRaw :: (Stack.HasCallStack, Lucid.ToHtml a) => a -> LazyText.Text -> IO ()
-expectHtmlRaw x html = Lucid.renderText (Lucid.toHtmlRaw x) `Hspec.shouldBe` html
+expectHtmlRaw :: (Stack.HasCallStack, Html.ToHtml a) => a -> LazyText.Text -> IO ()
+expectHtmlRaw x html = Html.renderText (Html.toHtmlRaw x) `Hspec.shouldBe` html
 
 expectJson :: (Stack.HasCallStack, Eq a, Aeson.FromJSON a, Show a, Aeson.ToJSON a) => a -> LazyByteString.ByteString -> IO ()
 expectJson x json = do

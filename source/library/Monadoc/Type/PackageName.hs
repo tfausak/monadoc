@@ -9,7 +9,7 @@ import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Distribution.Package as Cabal
 import qualified Distribution.Pretty as Cabal
-import qualified Lucid
+import qualified Lucid as Html
 import qualified Monadoc.Extra.Cabal as Cabal
 import qualified Monadoc.Extra.Either as Either
 import qualified Test.QuickCheck as QuickCheck
@@ -47,9 +47,9 @@ instance Sql.FromField PackageName where
 instance Sql.ToField PackageName where
   toField = Sql.toField . Witch.into @String
 
-instance Lucid.ToHtml PackageName where
-  toHtml = Lucid.toHtml . Witch.into @String
-  toHtmlRaw = Lucid.toHtmlRaw . Witch.into @String
+instance Html.ToHtml PackageName where
+  toHtml = Html.toHtml . Witch.into @String
+  toHtmlRaw = Html.toHtmlRaw . Witch.into @String
 
 instance QuickCheck.Arbitrary PackageName where
   arbitrary = QuickCheck.suchThatMap @String QuickCheck.arbitrary $ Either.hush . Witch.tryFrom

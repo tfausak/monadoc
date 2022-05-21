@@ -6,7 +6,7 @@ module Monadoc.Type.Revision where
 
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
-import qualified Lucid
+import qualified Lucid as Html
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
@@ -27,9 +27,9 @@ instance Sql.ToField Revision where
 instance Witch.From Revision String where
   from = show . Witch.into @Word
 
-instance Lucid.ToHtml Revision where
-  toHtml = Lucid.toHtml . Witch.into @String
-  toHtmlRaw = Lucid.toHtmlRaw . Witch.into @String
+instance Html.ToHtml Revision where
+  toHtml = Html.toHtml . Witch.into @String
+  toHtmlRaw = Html.toHtmlRaw . Witch.into @String
 
 instance QuickCheck.Arbitrary Revision where
   arbitrary = Witch.from <$> QuickCheck.arbitrary @Word

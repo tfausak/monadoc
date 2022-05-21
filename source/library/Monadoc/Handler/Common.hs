@@ -7,7 +7,7 @@ import qualified Control.Monad.Reader as Reader
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Hashable as Hashable
-import qualified Lucid
+import qualified Lucid as Html
 import qualified Monadoc.Class.MonadFile as MonadFile
 import qualified Monadoc.Constant.ContentType as ContentType
 import qualified Monadoc.Type.Context as Context
@@ -32,10 +32,14 @@ fileResponse status headers file = do
   let eTag = makeETag $ Witch.into @Timestamp.Timestamp modificationTime
   pure $ Wai.responseFile status ((Http.hETag, eTag) : headers) path Nothing
 
-htmlResponse :: Http.Status -> Http.ResponseHeaders -> Lucid.Html () -> Wai.Response
+htmlResponse ::
+  Http.Status ->
+  Http.ResponseHeaders ->
+  Html.Html () ->
+  Wai.Response
 htmlResponse status headers =
   Wai.responseLBS status ((Http.hContentType, ContentType.html) : headers)
-    . Lucid.renderBS
+    . Html.renderBS
 
 makeETag :: Hashable.Hashable a => a -> ByteString.ByteString
 makeETag =

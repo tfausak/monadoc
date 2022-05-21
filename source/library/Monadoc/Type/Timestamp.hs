@@ -11,7 +11,7 @@ import qualified Data.Text as Text
 import qualified Data.Time as Time
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
-import qualified Lucid
+import qualified Lucid as Html
 import qualified Monadoc.Class.MonadTime as MonadTime
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
@@ -35,9 +35,9 @@ instance Sql.FromField Timestamp where
 instance Sql.ToField Timestamp where
   toField = Sql.toField . Witch.into @Time.UTCTime
 
-instance Lucid.ToHtml Timestamp where
-  toHtml = Lucid.toHtml . Witch.into @String
-  toHtmlRaw = Lucid.toHtmlRaw . Witch.into @String
+instance Html.ToHtml Timestamp where
+  toHtml = Html.toHtml . Witch.into @String
+  toHtmlRaw = Html.toHtmlRaw . Witch.into @String
 
 instance QuickCheck.Arbitrary Timestamp where
   arbitrary = Witch.from <$> genUtcTime

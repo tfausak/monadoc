@@ -9,7 +9,7 @@ import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Distribution.Pretty as Cabal
 import qualified Distribution.Types.Version as Cabal
 import qualified Distribution.Types.VersionRange as Cabal
-import qualified Lucid
+import qualified Lucid as Html
 import qualified Monadoc.Extra.Cabal as Cabal
 import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Test.QuickCheck as QuickCheck
@@ -41,9 +41,9 @@ instance Sql.FromField Constraint where
 instance Sql.ToField Constraint where
   toField = Sql.toField . Witch.into @String
 
-instance Lucid.ToHtml Constraint where
-  toHtml = Lucid.toHtml . Witch.into @String
-  toHtmlRaw = Lucid.toHtmlRaw . Witch.into @String
+instance Html.ToHtml Constraint where
+  toHtml = Html.toHtml . Witch.into @String
+  toHtmlRaw = Html.toHtmlRaw . Witch.into @String
 
 instance QuickCheck.Arbitrary Constraint where
   arbitrary = Witch.from <$> genVersionRange

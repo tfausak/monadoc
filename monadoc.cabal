@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.5.20
+version: 0.2022.5.21
 
 build-type: Simple
 category: Documentation
@@ -219,6 +219,7 @@ library
     Monadoc.Test.Common
     Monadoc.Test.Spec
     Monadoc.Type.App
+    Monadoc.Type.Breadcrumb
     Monadoc.Type.Config
     Monadoc.Type.ConfigSpec
     Monadoc.Type.Constraint

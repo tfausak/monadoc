@@ -11,7 +11,7 @@ import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Distribution.Pretty as Cabal
 import qualified Distribution.Types.Version as Cabal
-import qualified Lucid
+import qualified Lucid as Html
 import qualified Monadoc.Extra.Cabal as Cabal
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
@@ -42,9 +42,9 @@ instance Sql.FromField VersionNumber where
 instance Sql.ToField VersionNumber where
   toField = Sql.toField . Witch.into @String
 
-instance Lucid.ToHtml VersionNumber where
-  toHtml = Lucid.toHtml . Witch.into @String
-  toHtmlRaw = Lucid.toHtmlRaw . Witch.into @String
+instance Html.ToHtml VersionNumber where
+  toHtml = Html.toHtml . Witch.into @String
+  toHtmlRaw = Html.toHtmlRaw . Witch.into @String
 
 instance Witch.From Version.Version VersionNumber where
   from = Witch.from @Cabal.Version . Cabal.mkVersion'

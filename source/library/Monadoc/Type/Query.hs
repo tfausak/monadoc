@@ -7,7 +7,7 @@ import qualified Data.ByteString as ByteString
 import qualified Data.Char as Char
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
-import qualified Lucid
+import qualified Lucid as Html
 import qualified Witch
 
 newtype Query
@@ -24,9 +24,12 @@ instance Witch.From Query ByteString.ByteString where
 instance Witch.TryFrom ByteString.ByteString Query where
   tryFrom = Witch.eitherTryFrom $ fmap (Witch.from @Text.Text) . Text.decodeUtf8'
 
-instance Lucid.ToHtml Query where
-  toHtml = Lucid.toHtml . Witch.into @Text.Text
-  toHtmlRaw = Lucid.toHtmlRaw . Witch.into @Text.Text
+instance Html.ToHtml Query where
+  toHtml = Html.toHtml . Witch.into @Text.Text
+  toHtmlRaw = Html.toHtmlRaw . Witch.into @Text.Text
 
 isBlank :: Query -> Bool
 isBlank = Text.all Char.isSpace . Witch.into @Text.Text
+
+empty :: Query
+empty = Witch.from Text.empty

@@ -9,6 +9,7 @@ import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Template.Home.Get as Template
+import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
 import qualified Network.HTTP.Types as Http
@@ -33,4 +34,14 @@ handler _ = do
   let eTag = Common.makeETag $ case rows of
         (upload Sql.:. _) : _ -> Just . Upload.uploadedAt $ Model.value upload
         _ -> Nothing
-  pure . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)] $ Template.render context rows
+      breadcrumbs =
+        [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Nothing}
+        ]
+      input =
+        Template.Input
+          { Template.breadcrumbs = breadcrumbs,
+            Template.rows = rows
+          }
+  pure
+    . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)]
+    $ Template.render context input

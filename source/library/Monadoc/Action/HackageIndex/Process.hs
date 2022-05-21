@@ -79,6 +79,7 @@ run = do
             . Tar.read
             $ LazyByteString.fromChunks contents
       upsertPreference preference
+      updateLatest
       now <- Timestamp.getCurrentTime
       MonadSql.execute "update hackageIndex set processedAt = ? where key = ?" (Just now, key)
 
@@ -222,7 +223,28 @@ upsertPreferredVersion packageName constraint = do
     let isPreferred = Constraint.includes (Version.number $ Model.value version) constraint
     Monad.when (Upload.isPreferred (Model.value upload) /= isPreferred) $
       MonadSql.execute "update upload set isPreferred = ? where key = ?" (isPreferred, Model.key upload)
-  let latest = Maybe.listToMaybe $ List.sortOn (\(upload Sql.:. version) -> Ord.Down (Upload.isPreferred $ Model.value upload, Version.number $ Model.value version)) rows
-  case latest of
-    Nothing -> pure ()
-    Just (upload Sql.:. _) -> MonadSql.execute "update upload set isLatest = (key = ?) where package = ?" (Model.key upload, Model.key package)
+
+updateLatest :: MonadSql.MonadSql m => m ()
+updateLatest = do
+  keys <- MonadSql.query_ "select key from package"
+  Monad.forM_ keys $ \(Sql.Only key) -> do
+    rows <-
+      MonadSql.query
+        "select * \
+        \ from upload \
+        \ inner join version \
+        \ on version.key = upload.version \
+        \ where upload.package = ?"
+        [key :: Package.Key]
+    let f (upload Sql.:. version) =
+          Ord.Down
+            ( Upload.isPreferred $ Model.value upload,
+              Version.number $ Model.value version,
+              Upload.revision $ Model.value upload
+            )
+    case Maybe.listToMaybe $ List.sortOn f rows of
+      Nothing -> pure ()
+      Just (upload Sql.:. _) ->
+        MonadSql.execute
+          "update upload set isLatest = (key = ?) where package = ?"
+          (Model.key upload, key)

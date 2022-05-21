@@ -10,7 +10,7 @@ import qualified Data.Text as Text
 import qualified Distribution.Compat.CharParsing as Cabal
 import qualified Distribution.Parsec as Cabal
 import qualified Distribution.Types.Version as Cabal
-import qualified Lucid
+import qualified Lucid as Html
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Type.Revision as Revision
 import qualified Monadoc.Type.VersionNumber as VersionNumber
@@ -30,9 +30,9 @@ instance Witch.From Reversion String where
 instance Witch.From Reversion Text.Text where
   from = Witch.via @String
 
-instance Lucid.ToHtml Reversion where
-  toHtml = Lucid.toHtml . Witch.into @String
-  toHtmlRaw = Lucid.toHtmlRaw . Witch.into @String
+instance Html.ToHtml Reversion where
+  toHtml = Html.toHtml . Witch.into @String
+  toHtmlRaw = Html.toHtmlRaw . Witch.into @String
 
 instance Witch.TryFrom String Reversion where
   tryFrom = Witch.maybeTryFrom $ Either.hush . Cabal.explicitEitherParsec parseReversion
