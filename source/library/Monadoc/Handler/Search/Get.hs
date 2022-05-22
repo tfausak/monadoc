@@ -35,13 +35,13 @@ handler query _ = do
           "select * from hackageUser where name like ? escape '\\' order by name collate nocase asc limit 16"
           [like query]
   let breadcrumbs =
-        Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home} :
-        if Query.isBlank query
-          then [Breadcrumb.Breadcrumb {Breadcrumb.label = "Search", Breadcrumb.route = Nothing}]
-          else
-            [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Search", Breadcrumb.route = Just $ Route.Search Query.empty},
-              Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text query, Breadcrumb.route = Nothing}
-            ]
+        Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home}
+          : if Query.isBlank query
+            then [Breadcrumb.Breadcrumb {Breadcrumb.label = "Search", Breadcrumb.route = Nothing}]
+            else
+              [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Search", Breadcrumb.route = Just $ Route.Search Query.empty},
+                Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text query, Breadcrumb.route = Nothing}
+              ]
   pure . Common.htmlResponse Http.ok200 [] $ Template.render context breadcrumbs query packages hackageUsers
 
 like :: Query.Query -> Text.Text

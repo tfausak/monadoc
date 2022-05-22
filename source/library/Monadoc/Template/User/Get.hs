@@ -49,7 +49,7 @@ render context breadcrumbs hackageUser rows packages = do
       "."
       Monad.when (Upload.isLatest $ Model.value upload) $ do
         " "
-        Html.span_ [Html.class_ "badge bg-success"] "latest"
+        Html.span_ [Html.class_ "badge bg-info text-dark"] "latest"
       Monad.when (not . Upload.isPreferred $ Model.value upload) $ do
         " "
         Html.span_ [Html.class_ "badge bg-warning text-dark"] "deprecated"

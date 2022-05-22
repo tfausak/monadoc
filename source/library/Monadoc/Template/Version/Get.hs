@@ -49,7 +49,9 @@ render context breadcrumbs package version upload hackageUser maybeLatest = do
                   Reversion.revision = Just . Upload.revision $ Model.value upl
                 }
         Html.a_
-          [Html.href_ . Common.route context $ Route.Version packageName rev]
+          [ Html.class_ "alert-link",
+            Html.href_ . Common.route context $ Route.Version packageName rev
+          ]
           $ Html.toHtml rev
         "."
     Monad.when (not . Upload.isPreferred $ Model.value upload)
