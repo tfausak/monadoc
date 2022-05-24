@@ -62,5 +62,11 @@ migrations =
       \ , finishedAt text \
       \ , startedAt text \
       \ , status text not null \
-      \ , task blob not null )"
+      \ , task blob not null )",
+    Migration.new
+      (2022, 5, 23, 6, 54, 0)
+      "create index job_status on job ( status )",
+    Migration.new
+      (2022, 5, 23, 6, 55, 0)
+      "create index job_createdAt on job ( createdAt )"
   ]

@@ -12,7 +12,6 @@ import qualified Monadoc.Class.MonadHttp as MonadHttp
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Type.Context as Context
-import qualified Monadoc.Type.Timestamp as Timestamp
 
 run ::
   ( Control.MonadBaseControl IO m,
@@ -25,9 +24,7 @@ run ::
   m ()
 run = do
   MonadLog.debug "upserting hackage index"
-  rows <- MonadSql.query_ "select key, size, updatedAt from hackageIndex order by createdAt desc limit 1"
+  rows <- MonadSql.query_ "select * from hackageIndex order by createdAt desc limit 1"
   case rows of
     [] -> Insert.run
-    (key, size, maybeUpdatedAt) : _ -> case maybeUpdatedAt :: Maybe Timestamp.Timestamp of
-      Nothing -> MonadLog.warn "previous insert or update is not yet finished"
-      Just _ -> Update.run key size
+    hackageIndex : _ -> Update.run hackageIndex

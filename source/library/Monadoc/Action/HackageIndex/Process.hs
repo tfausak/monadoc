@@ -39,6 +39,7 @@ import qualified Monadoc.Extra.Cabal as Cabal
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Model.Blob as Blob
+import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.Preference as Preference
@@ -64,15 +65,21 @@ run ::
   ) =>
   m ()
 run = do
-  rows <- MonadSql.query_ "select key, size from hackageIndex where updatedAt is not null and processedAt is null order by createdAt asc limit 1"
+  rows <- MonadSql.query_ "select * from hackageIndex where processedAt is null order by createdAt asc limit 1"
   case rows of
     [] -> MonadLog.debug "no new hackage index to process"
-    (key, size) : _ -> do
+    hackageIndex : _ -> do
       preference <- Base.liftBase $ Stm.newTVarIO Map.empty
       revisions <- Base.liftBase $ Stm.newTVarIO Map.empty
       context <- Reader.ask
+      let blobKey = HackageIndex.blob $ Model.value hackageIndex
+      size <- do
+        xs <- MonadSql.query "select size from blob where key = ?" [blobKey]
+        case xs of
+          [] -> Exception.throwM $ userError "TODO"
+          Sql.Only x : _ -> pure x
       Pool.withResource (Context.pool context) $ \connection ->
-        Sqlite.withBlob (Sql.connectionHandle connection) "hackageIndex" "contents" key False $ \blob -> do
+        Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 blobKey) False $ \blob -> do
           contents <- Base.liftBase $ Sqlite.unsafeBlobRead blob size 0
           mapM_ (handleItem preference revisions)
             . Tar.foldEntries ((:) . Right) [] (pure . Left)
@@ -81,7 +88,7 @@ run = do
       upsertPreference preference
       updateLatest
       now <- Timestamp.getCurrentTime
-      MonadSql.execute "update hackageIndex set processedAt = ? where key = ?" (Just now, key)
+      MonadSql.execute "update hackageIndex set processedAt = ? where key = ?" (Just now, Model.key hackageIndex)
 
 handleItem ::
   (Base.MonadBase IO m, MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) =>

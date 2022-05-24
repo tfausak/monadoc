@@ -85,5 +85,23 @@ migrations =
       "alter table upload add column isPreferred integer default true",
     Migration.new
       (2022, 1, 12, 0, 0, 0)
-      "alter table upload add column isLatest integer default false"
+      "alter table upload add column isLatest integer default false",
+    Migration.new
+      (2022, 5, 23, 6, 53, 0)
+      "create index upload_package on upload ( package )",
+    Migration.new
+      (2022, 5, 23, 6, 56, 0)
+      "create index upload_version on upload ( version )",
+    Migration.new
+      (2022, 5, 23, 6, 57, 0)
+      "create index upload_revision on upload ( revision )",
+    Migration.new
+      (2022, 5, 23, 6, 58, 0)
+      "create index upload_uploadedAt on upload ( uploadedAt )",
+    Migration.new
+      (2022, 5, 23, 6, 59, 0)
+      "create index upload_isLatest on upload ( isLatest )",
+    Migration.new
+      (2022, 5, 23, 7, 0, 0)
+      "create index upload_uploadedBy on upload ( uploadedBy )"
   ]

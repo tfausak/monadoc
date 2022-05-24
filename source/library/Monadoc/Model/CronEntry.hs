@@ -58,5 +58,8 @@ migrations =
       \ , guid blob unique \
       \ , runAt text not null \
       \ , schedule text not null \
-      \ , task blob not null )"
+      \ , task blob not null )",
+    Migration.new
+      (2022, 5, 23, 6, 48, 0)
+      "create index cronEntry_runAt on cronEntry ( runAt )"
   ]
