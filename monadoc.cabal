@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.5.25
+version: 0.2022.5.26
 
 build-type: Simple
 category: Documentation
@@ -102,6 +102,7 @@ library
     Monadoc.Action.Blob.UpsertSpec
     Monadoc.Action.CronEntry.Enqueue
     Monadoc.Action.CronEntry.Insert
+    Monadoc.Action.CronEntry.InsertSpec
     Monadoc.Action.CronEntry.Prune
     Monadoc.Action.CronEntry.Upsert
     Monadoc.Action.Database.Initialize
@@ -210,9 +211,10 @@ library
     Monadoc.Model.UploadSpec
     Monadoc.Model.Version
     Monadoc.Model.VersionSpec
-    Monadoc.Query.Blob.SelectByHash
-    Monadoc.Query.Blob.SelectByHashSpec
-    Monadoc.Query.CronEntry.SelectByGuid
+    Monadoc.Query.Blob
+    Monadoc.Query.BlobSpec
+    Monadoc.Query.CronEntry
+    Monadoc.Query.CronEntrySpec
     Monadoc.Server.Application
     Monadoc.Server.Main
     Monadoc.Server.Middleware

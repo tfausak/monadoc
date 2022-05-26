@@ -9,7 +9,7 @@ import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Model.CronEntry as CronEntry
-import qualified Monadoc.Query.CronEntry.SelectByGuid as CronEntry.SelectByGuid
+import qualified Monadoc.Query.CronEntry as CronEntry
 import qualified Monadoc.Type.Model as Model
 import qualified Witch
 
@@ -21,7 +21,7 @@ run cronEntry =
   case CronEntry.guid cronEntry of
     Nothing -> MonadLog.warn $ "missing GUID on static cron entry: " <> Witch.from (show cronEntry)
     Just guid -> do
-      maybeCronEntry <- CronEntry.SelectByGuid.run guid
+      maybeCronEntry <- CronEntry.selectByGuid guid
       case maybeCronEntry of
         Nothing -> do
           Monad.void $ CronEntry.Insert.run cronEntry

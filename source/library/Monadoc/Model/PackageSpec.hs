@@ -13,5 +13,8 @@ spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Model.Package" $ do
   Hspec.it "can be round-tripped through SQL" $ do
     Test.expectSqlRow
-      Package.Package {Package.name = Witch.unsafeFrom @String "example"}
-      [Sql.SQLText "example"]
+      Package.Package
+        { Package.name = Witch.unsafeFrom @String "example"
+        }
+      [ Sql.SQLText "example"
+      ]

@@ -16,9 +16,6 @@ contentTypeOptions = "X-Content-Type-Options"
 frameOptions :: Http.HeaderName
 frameOptions = "X-Frame-Options"
 
-link :: Http.HeaderName
-link = "Link"
-
 referrerPolicy :: Http.HeaderName
 referrerPolicy = "Referrer-Policy"
 

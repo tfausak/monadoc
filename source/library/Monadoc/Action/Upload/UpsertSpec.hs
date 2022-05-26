@@ -17,10 +17,18 @@ import qualified Witch
 spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Action.Upload.Upsert" . Hspec.around Test.withConnection $ do
   Hspec.it "inserts a new upload" . Test.runFake $ do
-    blob <- Blob.Upsert.run =<< Test.arbitrary
-    hackageUser <- HackageUser.Upsert.run =<< Test.arbitrary
-    package <- Package.Upsert.run =<< Test.arbitrary
-    version <- Version.Upsert.run =<< Test.arbitrary
+    blob <- do
+      x <- Test.arbitrary
+      Blob.Upsert.run x
+    hackageUser <- do
+      x <- Test.arbitrary
+      HackageUser.Upsert.run x
+    package <- do
+      x <- Test.arbitrary
+      Package.Upsert.run x
+    version <- do
+      x <- Test.arbitrary
+      Version.Upsert.run x
     upload <- Test.arbitraryWith $ \x ->
       x
         { Upload.blob = Model.key blob,
@@ -29,13 +37,26 @@ spec = Hspec.describe "Monadoc.Action.Upload.Upsert" . Hspec.around Test.withCon
           Upload.version = Model.key version
         }
     model <- Upload.Upsert.run upload
-    Base.liftBase $ model `Hspec.shouldBe` Model.Model {Model.key = Witch.from @Int 1, Model.value = upload}
+    Base.liftBase $
+      model
+        `Hspec.shouldBe` Model.Model
+          { Model.key = Witch.from @Int 1,
+            Model.value = upload
+          }
 
   Hspec.it "updates an existing upload" . Test.runFake $ do
-    blob <- Blob.Upsert.run =<< Test.arbitrary
-    hackageUser <- HackageUser.Upsert.run =<< Test.arbitrary
-    package <- Package.Upsert.run =<< Test.arbitrary
-    version <- Version.Upsert.run =<< Test.arbitrary
+    blob <- do
+      x <- Test.arbitrary
+      Blob.Upsert.run x
+    hackageUser <- do
+      x <- Test.arbitrary
+      HackageUser.Upsert.run x
+    package <- do
+      x <- Test.arbitrary
+      Package.Upsert.run x
+    version <- do
+      x <- Test.arbitrary
+      Version.Upsert.run x
     upload <- Test.arbitraryWith $ \x ->
       x
         { Upload.blob = Model.key blob,
@@ -48,32 +69,25 @@ spec = Hspec.describe "Monadoc.Action.Upload.Upsert" . Hspec.around Test.withCon
     Base.liftBase $ new `Hspec.shouldBe` old
 
   Hspec.it "inserts two uploads" . Test.runFake $ do
-    blob <- Blob.Upsert.run =<< Test.arbitrary
-    hackageUser <- HackageUser.Upsert.run =<< Test.arbitrary
-    package <- Package.Upsert.run =<< Test.arbitrary
-    version <- Version.Upsert.run =<< Test.arbitrary
-    a <-
-      Upload.Upsert.run
-        =<< Test.arbitraryWith
-          ( \x ->
-              x
-                { Upload.blob = Model.key blob,
-                  Upload.package = Model.key package,
-                  Upload.revision = Witch.from @Word 1,
-                  Upload.uploadedBy = Model.key hackageUser,
-                  Upload.version = Model.key version
-                }
-          )
-    b <-
-      Upload.Upsert.run
-        =<< Test.arbitraryWith
-          ( \x ->
-              x
-                { Upload.blob = Model.key blob,
-                  Upload.package = Model.key package,
-                  Upload.revision = Witch.from @Word 2,
-                  Upload.uploadedBy = Model.key hackageUser,
-                  Upload.version = Model.key version
-                }
-          )
-    Base.liftBase $ Model.key a `Hspec.shouldNotBe` Model.key b
+    blob <- do
+      x <- Test.arbitrary
+      Blob.Upsert.run x
+    hackageUser <- do
+      x <- Test.arbitrary
+      HackageUser.Upsert.run x
+    package <- do
+      x <- Test.arbitrary
+      Package.Upsert.run x
+    version <- do
+      x <- Test.arbitrary
+      Version.Upsert.run x
+    upload <- Test.arbitraryWith $ \x ->
+      x
+        { Upload.blob = Model.key blob,
+          Upload.package = Model.key package,
+          Upload.uploadedBy = Model.key hackageUser,
+          Upload.version = Model.key version
+        }
+    model1 <- Upload.Upsert.run upload {Upload.revision = Witch.from @Word 1}
+    model2 <- Upload.Upsert.run upload {Upload.revision = Witch.from @Word 2}
+    Base.liftBase $ Model.key model1 `Hspec.shouldNotBe` Model.key model2

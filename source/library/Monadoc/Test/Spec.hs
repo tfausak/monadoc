@@ -2,6 +2,7 @@ module Monadoc.Test.Spec where
 
 import qualified Monadoc.Action.Blob.InsertSpec
 import qualified Monadoc.Action.Blob.UpsertSpec
+import qualified Monadoc.Action.CronEntry.InsertSpec
 import qualified Monadoc.Action.Database.InitializeSpec
 import qualified Monadoc.Action.Database.VacuumSpec
 import qualified Monadoc.Action.HackageUser.UpsertSpec
@@ -25,7 +26,8 @@ import qualified Monadoc.Model.PackageSpec
 import qualified Monadoc.Model.PreferenceSpec
 import qualified Monadoc.Model.UploadSpec
 import qualified Monadoc.Model.VersionSpec
-import qualified Monadoc.Query.Blob.SelectByHashSpec
+import qualified Monadoc.Query.BlobSpec
+import qualified Monadoc.Query.CronEntrySpec
 import qualified Monadoc.Type.ConfigSpec
 import qualified Monadoc.Type.ConstraintSpec
 import qualified Monadoc.Type.FlagSpec
@@ -51,6 +53,7 @@ spec :: Hspec.Spec
 spec = do
   Monadoc.Action.Blob.InsertSpec.spec
   Monadoc.Action.Blob.UpsertSpec.spec
+  Monadoc.Action.CronEntry.InsertSpec.spec
   Monadoc.Action.Database.InitializeSpec.spec
   Monadoc.Action.Database.VacuumSpec.spec
   Monadoc.Action.HackageUser.UpsertSpec.spec
@@ -74,7 +77,8 @@ spec = do
   Monadoc.Model.PreferenceSpec.spec
   Monadoc.Model.UploadSpec.spec
   Monadoc.Model.VersionSpec.spec
-  Monadoc.Query.Blob.SelectByHashSpec.spec
+  Monadoc.Query.BlobSpec.spec
+  Monadoc.Query.CronEntrySpec.spec
   Monadoc.Type.ConfigSpec.spec
   Monadoc.Type.ConstraintSpec.spec
   Monadoc.Type.FlagSpec.spec

@@ -39,9 +39,3 @@ zero = Witch.from @Word 0
 
 increment :: Revision -> Revision
 increment = Witch.over @Word (+ 1)
-
-isZero :: Revision -> Bool
-isZero = (==) zero
-
-isNonZero :: Revision -> Bool
-isNonZero = not . isZero

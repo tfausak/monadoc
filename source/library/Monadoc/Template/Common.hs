@@ -134,6 +134,3 @@ timestamp ts =
         Html.class_ "timeago"
       ]
     $ Html.toHtml ts
-
-url :: Text.Text -> Html.Html ()
-url x = Html.a_ [Html.href_ x] $ Html.toHtml x

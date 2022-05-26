@@ -12,5 +12,8 @@ spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Model.Version" $ do
   Hspec.it "can be round-tripped through SQL" $ do
     Test.expectSqlRow
-      Version.Version {Version.number = VersionNumber.zero}
-      [Sql.SQLText "0"]
+      Version.Version
+        { Version.number = VersionNumber.zero
+        }
+      [ Sql.SQLText "0"
+      ]
