@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.5.23
+version: 0.2022.5.25
 
 build-type: Simple
 category: Documentation
@@ -97,9 +97,11 @@ library
     , zlib ^>= 0.6.2
   exposed-modules:
     Monadoc.Action.Blob.Insert
+    Monadoc.Action.Blob.InsertSpec
     Monadoc.Action.Blob.Upsert
     Monadoc.Action.Blob.UpsertSpec
     Monadoc.Action.CronEntry.Enqueue
+    Monadoc.Action.CronEntry.Insert
     Monadoc.Action.CronEntry.Prune
     Monadoc.Action.CronEntry.Upsert
     Monadoc.Action.Database.Initialize
@@ -209,6 +211,8 @@ library
     Monadoc.Model.Version
     Monadoc.Model.VersionSpec
     Monadoc.Query.Blob.SelectByHash
+    Monadoc.Query.Blob.SelectByHashSpec
+    Monadoc.Query.CronEntry.SelectByGuid
     Monadoc.Server.Application
     Monadoc.Server.Main
     Monadoc.Server.Middleware

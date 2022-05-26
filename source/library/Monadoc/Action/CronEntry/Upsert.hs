@@ -3,27 +3,30 @@
 module Monadoc.Action.CronEntry.Upsert where
 
 import qualified Control.Monad as Monad
+import qualified Control.Monad.Catch as Exception
 import qualified Data.Function as Function
+import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Model.CronEntry as CronEntry
+import qualified Monadoc.Query.CronEntry.SelectByGuid as CronEntry.SelectByGuid
 import qualified Monadoc.Type.Model as Model
 import qualified Witch
 
 run ::
-  (MonadLog.MonadLog m, MonadSql.MonadSql m) =>
+  (MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
   CronEntry.CronEntry ->
   m ()
 run cronEntry =
   case CronEntry.guid cronEntry of
     Nothing -> MonadLog.warn $ "missing GUID on static cron entry: " <> Witch.from (show cronEntry)
     Just guid -> do
-      models <- MonadSql.query "select * from cronEntry where guid = ?" [guid]
-      case models of
-        [] -> do
-          MonadSql.execute "insert into cronEntry (guid, runAt, schedule, task) values (?, ?, ?, ?)" cronEntry
+      maybeCronEntry <- CronEntry.SelectByGuid.run guid
+      case maybeCronEntry of
+        Nothing -> do
+          Monad.void $ CronEntry.Insert.run cronEntry
           MonadLog.info $ "inserted static cron entry: " <> Witch.from guid
-        model : _ -> do
+        Just model -> do
           let existing = Model.value model
               differentSchedule = Function.on (/=) CronEntry.schedule existing cronEntry
               differentTask = Function.on (/=) CronEntry.task existing cronEntry
