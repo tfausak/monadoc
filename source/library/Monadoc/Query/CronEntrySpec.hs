@@ -1,16 +1,36 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Query.CronEntrySpec where
 
+import qualified Control.Monad as Monad
 import qualified Control.Monad.Base as Base
+import qualified Data.Function as Function
+import qualified Data.List as List
+import qualified Data.Time as Time
 import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
 import qualified Monadoc.Model.CronEntry as CronEntry
 import qualified Monadoc.Query.CronEntry as CronEntry
 import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Type.Model as Model
+import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Test.Hspec as Hspec
+import qualified Witch
 
 spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Query.CronEntry" . Hspec.around Test.withConnection $ do
+  Hspec.describe "selectAll" $ do
+    Hspec.it "works when there are no cron entries" . Test.runFake $ do
+      cronEntries <- CronEntry.selectAll
+      Base.liftBase $ cronEntries `Hspec.shouldBe` []
+
+    Hspec.it "works when there are cron entries" . Test.runFake $ do
+      cronEntry <- do
+        x <- Test.arbitrary
+        CronEntry.Insert.run x
+      cronEntries <- CronEntry.selectAll
+      Base.liftBase $ cronEntries `Hspec.shouldBe` [cronEntry]
+
   Hspec.describe "selectByGuid" $ do
     Hspec.it "returns nothing when the cron entry doesn't exist" . Test.runFake $ do
       guid <- Test.arbitrary
@@ -23,3 +43,65 @@ spec = Hspec.describe "Monadoc.Query.CronEntry" . Hspec.around Test.withConnecti
       model <- CronEntry.Insert.run cronEntry
       result <- CronEntry.selectByGuid guid
       Base.liftBase $ result `Hspec.shouldBe` Just model
+
+  Hspec.describe "selectByKey" $ do
+    Hspec.it "returns nothing when the cron entry doesn't exist" . Test.runFake $ do
+      key <- Test.arbitrary
+      result <- CronEntry.selectByKey key
+      Base.liftBase $ result `Hspec.shouldBe` Nothing
+
+    Hspec.it "returns just when the cron entry exists" . Test.runFake $ do
+      cronEntry <- Test.arbitrary
+      model <- CronEntry.Insert.run cronEntry
+      result <- CronEntry.selectByKey $ Model.key model
+      Base.liftBase $ result `Hspec.shouldBe` Just model
+
+  Hspec.describe "selectByRunAt" $ do
+    Hspec.it "returns an empty list when there are no cron entries" . Test.runFake $ do
+      now <- Timestamp.getCurrentTime
+      result <- CronEntry.selectByRunAt now
+      Base.liftBase $ result `Hspec.shouldBe` []
+
+    Hspec.it "returns a cron entry before the time" . Test.runFake $ do
+      cronEntry <- Test.arbitrary
+      model <- CronEntry.Insert.run cronEntry
+      result <- CronEntry.selectByRunAt . Witch.over @Time.UTCTime (Time.addUTCTime 1) $ CronEntry.runAt cronEntry
+      Base.liftBase $ result `Hspec.shouldBe` [model]
+
+    Hspec.it "returns a cron entry at the time" . Test.runFake $ do
+      cronEntry <- Test.arbitrary
+      model <- CronEntry.Insert.run cronEntry
+      result <- CronEntry.selectByRunAt $ CronEntry.runAt cronEntry
+      Base.liftBase $ result `Hspec.shouldBe` [model]
+
+    Hspec.it "does not return a cron entry after the time" . Test.runFake $ do
+      cronEntry <- Test.arbitrary
+      Monad.void $ CronEntry.Insert.run cronEntry
+      result <- CronEntry.selectByRunAt . Witch.over @Time.UTCTime (Time.addUTCTime (-1)) $ CronEntry.runAt cronEntry
+      Base.liftBase $ result `Hspec.shouldBe` []
+
+    Hspec.it "sorts cron entries by time" . Test.runFake $ do
+      cronEntry1 <- Test.arbitrary
+      cronEntry2 <- Test.arbitrary
+      model1 <- CronEntry.Insert.run cronEntry1
+      model2 <- CronEntry.Insert.run cronEntry2
+      result <- CronEntry.selectByRunAt $ Function.on max CronEntry.runAt cronEntry1 cronEntry2
+      Base.liftBase $ result `Hspec.shouldBe` List.sortOn (CronEntry.runAt . Model.value) [model1, model2]
+
+  Hspec.describe "selectWithGuid" $ do
+    Hspec.it "returns an empty list when there are no cron entries" . Test.runFake $ do
+      result <- CronEntry.selectWithGuid
+      Base.liftBase $ result `Hspec.shouldBe` []
+
+    Hspec.it "returns a cron entry with a guid" . Test.runFake $ do
+      guid <- Test.arbitrary
+      cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Just guid}
+      model <- CronEntry.Insert.run cronEntry
+      result <- CronEntry.selectWithGuid
+      Base.liftBase $ result `Hspec.shouldBe` [model]
+
+    Hspec.it "does not return a cron entry without a guid" . Test.runFake $ do
+      cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Nothing}
+      Monad.void $ CronEntry.Insert.run cronEntry
+      result <- CronEntry.selectWithGuid
+      Base.liftBase $ result `Hspec.shouldBe` []

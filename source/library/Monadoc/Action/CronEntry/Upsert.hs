@@ -6,6 +6,7 @@ import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
 import qualified Data.Function as Function
 import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
+import qualified Monadoc.Action.CronEntry.Update as CronEntry.Update
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Model.CronEntry as CronEntry
@@ -19,19 +20,23 @@ run ::
   m ()
 run cronEntry =
   case CronEntry.guid cronEntry of
-    Nothing -> MonadLog.warn $ "missing GUID on static cron entry: " <> Witch.from (show cronEntry)
+    Nothing -> do
+      model <- CronEntry.Insert.run cronEntry
+      MonadLog.info $ "inserted dynamic cron entry: " <> Witch.from (Model.key model)
     Just guid -> do
       maybeCronEntry <- CronEntry.selectByGuid guid
       case maybeCronEntry of
         Nothing -> do
-          Monad.void $ CronEntry.Insert.run cronEntry
-          MonadLog.info $ "inserted static cron entry: " <> Witch.from guid
+          model <- CronEntry.Insert.run cronEntry
+          MonadLog.info $ "inserted static cron entry: " <> Witch.from (Model.key model)
         Just model -> do
           let existing = Model.value model
               differentSchedule = Function.on (/=) CronEntry.schedule existing cronEntry
               differentTask = Function.on (/=) CronEntry.task existing cronEntry
           Monad.when (differentSchedule || differentTask) $ do
-            MonadSql.execute
-              "update cronEntry set schedule = ?, task = ? where key = ?"
-              (CronEntry.schedule cronEntry, CronEntry.task cronEntry, Model.key model)
-            MonadLog.debug $ "updated static cron entry: " <> Witch.from guid
+            CronEntry.Update.run
+              Model.Model
+                { Model.key = Model.key model,
+                  Model.value = cronEntry
+                }
+            MonadLog.debug $ "updated static cron entry: " <> Witch.from (Model.key model)

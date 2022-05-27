@@ -2,7 +2,12 @@ module Monadoc.Test.Spec where
 
 import qualified Monadoc.Action.Blob.InsertSpec
 import qualified Monadoc.Action.Blob.UpsertSpec
+import qualified Monadoc.Action.CronEntry.DeleteSpec
+import qualified Monadoc.Action.CronEntry.EnqueueSpec
 import qualified Monadoc.Action.CronEntry.InsertSpec
+import qualified Monadoc.Action.CronEntry.PruneSpec
+import qualified Monadoc.Action.CronEntry.UpdateSpec
+import qualified Monadoc.Action.CronEntry.UpsertSpec
 import qualified Monadoc.Action.Database.InitializeSpec
 import qualified Monadoc.Action.Database.VacuumSpec
 import qualified Monadoc.Action.HackageUser.UpsertSpec
@@ -53,7 +58,12 @@ spec :: Hspec.Spec
 spec = do
   Monadoc.Action.Blob.InsertSpec.spec
   Monadoc.Action.Blob.UpsertSpec.spec
+  Monadoc.Action.CronEntry.DeleteSpec.spec
+  Monadoc.Action.CronEntry.EnqueueSpec.spec
   Monadoc.Action.CronEntry.InsertSpec.spec
+  Monadoc.Action.CronEntry.PruneSpec.spec
+  Monadoc.Action.CronEntry.UpdateSpec.spec
+  Monadoc.Action.CronEntry.UpsertSpec.spec
   Monadoc.Action.Database.InitializeSpec.spec
   Monadoc.Action.Database.VacuumSpec.spec
   Monadoc.Action.HackageUser.UpsertSpec.spec
