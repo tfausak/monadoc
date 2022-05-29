@@ -16,3 +16,9 @@ spec = Hspec.describe "Monadoc.Type.Severity" $ do
     Test.expectFrom Severity.Info ("info" :: String)
     Test.expectFrom Severity.Warn ("warn" :: String)
     Test.expectFrom Severity.Error ("error" :: String)
+
+  Hspec.it "can be converted from a string" $ do
+    Test.expectTryFrom "debug" Severity.Debug
+    Test.expectTryFrom "info" Severity.Info
+    Test.expectTryFrom "warn" Severity.Warn
+    Test.expectTryFrom "error" Severity.Error

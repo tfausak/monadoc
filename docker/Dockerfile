@@ -15,21 +15,23 @@ VOLUME "/home/$USER_NAME/volume"
 COPY data data
 COPY monadoc /usr/local/bin
 
-ENV MONADOC_BASE=/
-ENV MONADOC_DATA="/home/$USER_NAME/data"
-ENV MONADOC_HACKAGE=https://hackage.haskell.org/
-ENV MONADOC_HOST=*
-ENV MONADOC_PORT=8080
-ENV MONADOC_SQL="/home/$USER_NAME/volume/monadoc.sqlite"
+ENV MONADOC_BASE_URL=/
+ENV MONADOC_DATA_DIRECTORY="/home/$USER_NAME/data"
+ENV MONADOC_DATABASE_FILE="/home/$USER_NAME/volume/monadoc.sqlite"
+ENV MONADOC_HACKAGE_URL=https://hackage.haskell.org/
+ENV MONADOC_HOST_PREFERENCE=*
+ENV MONADOC_LOG_SEVERITY=debug
+ENV MONADOC_PORT_NUMBER=8080
 
 ARG MONADOC_SHA
 ENV MONADOC_SHA="$MONADOC_SHA"
 
 CMD [ "sh", "-c", "exec /usr/local/bin/monadoc \
-  --base=$MONADOC_BASE \
-  --data=$MONADOC_DATA \
-  --hackage=$MONADOC_HACKAGE \
-  --host=$MONADOC_HOST \
-  --port=$MONADOC_PORT \
-  --sql=$MONADOC_SQL" \
+  --base-url=$MONADOC_BASE_URL \
+  --data-directory=$MONADOC_DATA_DIRECTORY \
+  --database-file=$MONADOC_DATABASE_FILE \
+  --hackage-url=$MONADOC_HACKAGE_URL \
+  --host-preference=$MONADOC_HOST_PREFERENCE \
+  --log-severity=$MONADOC_LOG_SEVERITY \
+  --port-number=$MONADOC_PORT_NUMBER" \
   ]

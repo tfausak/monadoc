@@ -16,13 +16,15 @@ spec = Hspec.describe "Monadoc.Type.Flag" $ do
     Flag.fromArguments ["-h"] `Hspec.shouldBe` Just [Flag.Help]
     Flag.fromArguments ["-?"] `Hspec.shouldBe` Just [Flag.Help]
     Flag.fromArguments ["--help"] `Hspec.shouldBe` Just [Flag.Help]
+    Flag.fromArguments ["-v"] `Hspec.shouldBe` Just [Flag.Version]
     Flag.fromArguments ["--version"] `Hspec.shouldBe` Just [Flag.Version]
-    Flag.fromArguments ["--base=x"] `Hspec.shouldBe` Just [Flag.Base "x"]
-    Flag.fromArguments ["--data=x"] `Hspec.shouldBe` Just [Flag.Data "x"]
-    Flag.fromArguments ["--hackage=x"] `Hspec.shouldBe` Just [Flag.Hackage "x"]
-    Flag.fromArguments ["--host=x"] `Hspec.shouldBe` Just [Flag.Host "x"]
-    Flag.fromArguments ["--port=x"] `Hspec.shouldBe` Just [Flag.Port "x"]
-    Flag.fromArguments ["--sql=x"] `Hspec.shouldBe` Just [Flag.Sql "x"]
+    Flag.fromArguments ["--base-url=x"] `Hspec.shouldBe` Just [Flag.Base "x"]
+    Flag.fromArguments ["--data-directory=x"] `Hspec.shouldBe` Just [Flag.Data "x"]
+    Flag.fromArguments ["--database-file=x"] `Hspec.shouldBe` Just [Flag.Sql "x"]
+    Flag.fromArguments ["--hackage-url=x"] `Hspec.shouldBe` Just [Flag.Hackage "x"]
+    Flag.fromArguments ["--host-preference=x"] `Hspec.shouldBe` Just [Flag.Host "x"]
+    Flag.fromArguments ["--log-severity=x"] `Hspec.shouldBe` Just [Flag.Severity "x"]
+    Flag.fromArguments ["--port-number=x"] `Hspec.shouldBe` Just [Flag.Port "x"]
 
   Hspec.it "rejects invalid options" $ do
     Flag.fromArguments ["--help=invalid"] `Hspec.shouldThrow` Test.exceptionSelector @InvalidOption.InvalidOption

@@ -9,7 +9,9 @@ import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Monadoc.Extra.Time as Time
 import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
+import qualified Monadoc.Type.Query as Query
 import qualified Monadoc.Type.Timestamp as Timestamp
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 type Model = Model.Model Migration
@@ -18,7 +20,7 @@ type Key = Key.Key Migration
 
 data Migration = Migration
   { createdAt :: Timestamp.Timestamp,
-    query :: Sql.Query
+    query :: Query.Query
   }
   deriving (Eq, Show)
 
@@ -26,15 +28,21 @@ instance Sql.FromRow Migration where
   fromRow =
     Migration
       <$> Sql.field
-      <*> fmap Sql.Query Sql.field
+      <*> Sql.field
 
 instance Sql.ToRow Migration where
   toRow migration =
     [ Sql.toField $ createdAt migration,
-      Sql.toField . Sql.fromQuery $ query migration
+      Sql.toField $ query migration
     ]
 
-createTable :: Sql.Query
+instance QuickCheck.Arbitrary Migration where
+  arbitrary =
+    Migration
+      <$> QuickCheck.arbitrary
+      <*> QuickCheck.arbitrary
+
+createTable :: Query.Query
 createTable =
   "create table if not exists migration \
   \ ( key integer primary key \
@@ -43,7 +51,7 @@ createTable =
 
 new ::
   (Time.Year, Time.MonthOfYear, Time.DayOfMonth, Int, Int, Fixed.Pico) ->
-  Sql.Query ->
+  Query.Query ->
   Migration
 new (dy, dm, dd, th, tm, ts) q =
   Migration

@@ -21,8 +21,10 @@ selectByKey key = do
   cronEntries <- MonadSql.query "select * from cronEntry where key = ? limit 1" [key]
   pure $ Maybe.listToMaybe cronEntries
 
-selectByRunAt :: MonadSql.MonadSql m => Timestamp.Timestamp -> m [CronEntry.Model]
-selectByRunAt now = MonadSql.query "select * from cronEntry where runAt <= ? order by runAt asc" [now]
+selectNext :: MonadSql.MonadSql m => Timestamp.Timestamp -> m (Maybe CronEntry.Model)
+selectNext now = do
+  rows <- MonadSql.query "select * from cronEntry where runAt <= ? order by runAt asc limit 1" [now]
+  pure $ Maybe.listToMaybe rows
 
 selectWithGuid :: MonadSql.MonadSql m => m [CronEntry.Model]
 selectWithGuid = MonadSql.query_ "select * from cronEntry where guid is not null"

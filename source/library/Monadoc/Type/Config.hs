@@ -9,6 +9,7 @@ import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Extra.List as List
 import qualified Monadoc.Type.Flag as Flag
 import qualified Monadoc.Type.Port as Port
+import qualified Monadoc.Type.Severity as Severity
 import qualified Network.Wai.Handler.Warp as Warp
 import qualified Witch
 
@@ -19,6 +20,7 @@ data Config = Config
     help :: Bool,
     host :: Warp.HostPreference,
     port :: Port.Port,
+    severity :: Severity.Severity,
     sql :: FilePath,
     version :: Bool
   }
@@ -34,6 +36,7 @@ initial =
       help = False,
       host = String.fromString "127.0.0.1",
       port = Witch.from @Int 3000,
+      severity = Severity.Debug,
       version = False
     }
 
@@ -47,6 +50,9 @@ applyFlag config flag = case flag of
   Flag.Port str -> do
     x <- Either.throw $ Witch.tryInto @Port.Port str
     pure config {port = x}
+  Flag.Severity svr -> do
+    x <- Either.throw $ Witch.tryInto @Severity.Severity svr
+    pure config {severity = x}
   Flag.Sql str -> pure config {sql = str}
   Flag.Version -> pure config {version = True}
 

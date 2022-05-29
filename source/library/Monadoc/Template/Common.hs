@@ -10,8 +10,8 @@ import qualified Lucid.Base as Html
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
-import qualified Monadoc.Type.Query as Query
 import qualified Monadoc.Type.Route as Route
+import qualified Monadoc.Type.Search as Search
 import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Network.HTTP.Types as Http
@@ -65,7 +65,7 @@ base ctx rt breadcrumbs title html = do
                 Html.href_ $ route ctx Route.Home
               ]
               "Monadoc"
-          Html.form_ [Html.action_ . route ctx $ Route.Search Query.empty] $
+          Html.form_ [Html.action_ . route ctx $ Route.Search Search.empty] $
             Html.input_
               [ Html.class_ "form-control",
                 Html.name_ "query",

@@ -22,6 +22,7 @@ import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Constant.Header as Header
 import qualified Monadoc.Exception.InvalidSize as InvalidSize
 import qualified Monadoc.Exception.MissingHeader as MissingHeader
+import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Extra.Read as Read
@@ -57,7 +58,7 @@ run hackageIndex = do
         \ where hackageIndex.key = ?"
         [Model.key hackageIndex]
     case rows of
-      [] -> Exception.throwM $ userError "TODO"
+      [] -> Exception.throwM NotFound.NotFound
       (key, size) : _ -> pure (key :: Blob.Key, size)
   newSize <- HackageIndex.Insert.getSize
   let start = oldSize - 1024

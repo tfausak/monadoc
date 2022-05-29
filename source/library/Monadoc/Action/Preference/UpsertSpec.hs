@@ -5,6 +5,7 @@ module Monadoc.Action.Preference.UpsertSpec where
 import qualified Control.Monad.Base as Base
 import qualified Monadoc.Action.Package.Upsert as Package.Upsert
 import qualified Monadoc.Action.Preference.Upsert as Preference.Upsert
+import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.Preference as Preference
 import qualified Monadoc.Test.Common as Test
 import qualified Monadoc.Type.Model as Model
@@ -40,12 +41,12 @@ spec = Hspec.describe "Monadoc.Action.Preference.Upsert" . Hspec.around Test.wit
 
   Hspec.it "inserts two preferences" . Test.runFake $ do
     preference1 <- do
-      x <- Test.arbitrary
+      x <- Test.arbitraryWith $ \y -> y {Package.name = Witch.unsafeFrom @String "a"}
       package <- Package.Upsert.run x
       y <- Test.arbitraryWith $ \z -> z {Preference.package = Model.key package}
       Preference.Upsert.run y
     preference2 <- do
-      x <- Test.arbitrary
+      x <- Test.arbitraryWith $ \y -> y {Package.name = Witch.unsafeFrom @String "b"}
       package <- Package.Upsert.run x
       y <- Test.arbitraryWith $ \z -> z {Preference.package = Model.key package}
       Preference.Upsert.run y

@@ -12,14 +12,14 @@ import qualified Monadoc.Template.Common as Common
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
-import qualified Monadoc.Type.Query as Query
 import qualified Monadoc.Type.Route as Route
+import qualified Monadoc.Type.Search as Search
 import qualified Witch
 
 render ::
   Context.Context ->
   [Breadcrumb.Breadcrumb] ->
-  Query.Query ->
+  Search.Search ->
   [Package.Model] ->
   [HackageUser.Model] ->
   Html.Html ()
@@ -44,7 +44,7 @@ render context breadcrumbs query packages hackageUsers = do
             Html.type_ "submit"
           ]
           "Search"
-    Monad.when (not $ Query.isBlank query) $ do
+    Monad.when (not $ Search.isBlank query) $ do
       Html.h3_ "Packages"
       if null packages
         then Html.p_ "None found."

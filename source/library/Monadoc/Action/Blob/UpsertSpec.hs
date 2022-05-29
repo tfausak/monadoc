@@ -5,6 +5,7 @@ module Monadoc.Action.Blob.UpsertSpec where
 
 import qualified Control.Monad.Base as Base
 import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
+import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Test.Common as Test
 import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec
@@ -29,10 +30,6 @@ spec = Hspec.describe "Monadoc.Action.Blob.Upsert" . Hspec.around Test.withConne
     Base.liftBase $ new `Hspec.shouldBe` old
 
   Hspec.it "inserts two blobs" . Test.runFake $ do
-    blob1 <- do
-      x <- Test.arbitrary
-      Blob.Upsert.run x
-    blob2 <- do
-      x <- Test.arbitrary
-      Blob.Upsert.run x
+    blob1 <- Blob.Upsert.run $ Blob.new "a"
+    blob2 <- Blob.Upsert.run $ Blob.new "b"
     Base.liftBase $ Model.key blob1 `Hspec.shouldNotBe` Model.key blob2

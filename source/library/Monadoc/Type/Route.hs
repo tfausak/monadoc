@@ -12,8 +12,8 @@ import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Monadoc.Type.PackageName as PackageName
-import qualified Monadoc.Type.Query as Query
 import qualified Monadoc.Type.Reversion as Reversion
+import qualified Monadoc.Type.Search as Search
 import qualified Network.HTTP.Types as Http
 import qualified Witch
 
@@ -26,7 +26,7 @@ data Route
   | Package PackageName.PackageName
   | Robots
   | Script
-  | Search Query.Query
+  | Search Search.Search
   | Stylesheet
   | User HackageUserName.HackageUserName
   | Version PackageName.PackageName Reversion.Reversion
@@ -58,7 +58,7 @@ render route = case route of
   Package p -> (["package", Witch.from p], [])
   Robots -> (["robots.txt"], [])
   Script -> (["static", "monadoc.js"], [])
-  Search q -> (["search"], if Query.isBlank q then [] else [("query", Just $ Witch.into @ByteString.ByteString q)])
+  Search q -> (["search"], if Search.isBlank q then [] else [("query", Just $ Witch.into @ByteString.ByteString q)])
   Stylesheet -> (["static", "monadoc.css"], [])
   User u -> (["user", Witch.from u], [])
   Version p v -> (["package", Witch.from p, "version", Witch.from v], [])

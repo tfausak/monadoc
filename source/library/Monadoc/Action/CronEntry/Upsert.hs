@@ -2,7 +2,6 @@
 
 module Monadoc.Action.CronEntry.Upsert where
 
-import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
 import qualified Data.Function as Function
 import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
@@ -17,26 +16,28 @@ import qualified Witch
 run ::
   (MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
   CronEntry.CronEntry ->
-  m ()
+  m CronEntry.Model
 run cronEntry =
   case CronEntry.guid cronEntry of
     Nothing -> do
       model <- CronEntry.Insert.run cronEntry
       MonadLog.info $ "inserted dynamic cron entry: " <> Witch.from (Model.key model)
+      pure model
     Just guid -> do
       maybeCronEntry <- CronEntry.selectByGuid guid
       case maybeCronEntry of
         Nothing -> do
           model <- CronEntry.Insert.run cronEntry
           MonadLog.info $ "inserted static cron entry: " <> Witch.from (Model.key model)
+          pure model
         Just model -> do
           let existing = Model.value model
               differentSchedule = Function.on (/=) CronEntry.schedule existing cronEntry
               differentTask = Function.on (/=) CronEntry.task existing cronEntry
-          Monad.when (differentSchedule || differentTask) $ do
-            CronEntry.Update.run
-              Model.Model
-                { Model.key = Model.key model,
-                  Model.value = cronEntry
-                }
-            MonadLog.debug $ "updated static cron entry: " <> Witch.from (Model.key model)
+          if differentSchedule || differentTask
+            then do
+              let newModel = model {Model.value = cronEntry}
+              CronEntry.Update.run newModel
+              MonadLog.debug $ "updated static cron entry: " <> Witch.from (Model.key newModel)
+              pure newModel
+            else pure model

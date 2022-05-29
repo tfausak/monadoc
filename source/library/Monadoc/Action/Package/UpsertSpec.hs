@@ -4,6 +4,7 @@ module Monadoc.Action.Package.UpsertSpec where
 
 import qualified Control.Monad.Base as Base
 import qualified Monadoc.Action.Package.Upsert as Package.Upsert
+import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Test.Common as Test
 import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec
@@ -29,9 +30,9 @@ spec = Hspec.describe "Monadoc.Action.Package.Upsert" . Hspec.around Test.withCo
 
   Hspec.it "inserts two packages" . Test.runFake $ do
     package1 <- do
-      x <- Test.arbitrary
+      x <- Test.arbitraryWith $ \y -> y {Package.name = Witch.unsafeFrom @String "a"}
       Package.Upsert.run x
     package2 <- do
-      x <- Test.arbitrary
+      x <- Test.arbitraryWith $ \y -> y {Package.name = Witch.unsafeFrom @String "b"}
       Package.Upsert.run x
     Base.liftBase $ Model.key package1 `Hspec.shouldNotBe` Model.key package2

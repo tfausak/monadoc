@@ -34,6 +34,7 @@ import qualified Monadoc.Action.Upload.Upsert as Upload.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
+import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Exception.UnexpectedEntry as UnexpectedEntry
 import qualified Monadoc.Extra.Cabal as Cabal
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
@@ -76,7 +77,7 @@ run = do
       size <- do
         xs <- MonadSql.query "select size from blob where key = ?" [blobKey]
         case xs of
-          [] -> Exception.throwM $ userError "TODO"
+          [] -> Exception.throwM NotFound.NotFound
           Sql.Only x : _ -> pure x
       Pool.withResource (Context.pool context) $ \connection ->
         Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 blobKey) False $ \blob -> do

@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.5.27
+version: 0.2022.5.28
 
 build-type: Simple
 category: Documentation
@@ -130,6 +130,8 @@ library
     Monadoc.Action.Job.Release
     Monadoc.Action.Key.SelectLastInsert
     Monadoc.Action.Key.SelectLastInsertSpec
+    Monadoc.Action.Migration.Insert
+    Monadoc.Action.Migration.Migrate
     Monadoc.Action.Package.Upsert
     Monadoc.Action.Package.UpsertSpec
     Monadoc.Action.Preference.Upsert
@@ -150,7 +152,6 @@ library
     Monadoc.Constant.CronEntry
     Monadoc.Constant.Header
     Monadoc.Constant.Migration
-    Monadoc.Constant.Pragma
     Monadoc.Exception.Found
     Monadoc.Exception.InvalidOption
     Monadoc.Exception.InvalidSize
@@ -223,6 +224,7 @@ library
     Monadoc.Query.CronEntry
     Monadoc.Query.CronEntrySpec
     Monadoc.Query.Job
+    Monadoc.Query.Migration
     Monadoc.Server.Application
     Monadoc.Server.Main
     Monadoc.Server.Middleware
@@ -268,6 +270,7 @@ library
     Monadoc.Type.RouteSpec
     Monadoc.Type.Schedule
     Monadoc.Type.ScheduleSpec
+    Monadoc.Type.Search
     Monadoc.Type.Severity
     Monadoc.Type.SeveritySpec
     Monadoc.Type.Status

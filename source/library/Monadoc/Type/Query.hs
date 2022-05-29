@@ -1,35 +1,44 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Type.Query where
 
-import qualified Data.ByteString as ByteString
-import qualified Data.Char as Char
+import qualified Data.String as String
 import qualified Data.Text as Text
-import qualified Data.Text.Encoding as Text
-import qualified Lucid as Html
+import qualified Database.SQLite.Simple as Sql
+import qualified Database.SQLite.Simple.FromField as Sql
+import qualified Database.SQLite.Simple.ToField as Sql
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 newtype Query
-  = Query Text.Text
+  = Query Sql.Query
   deriving (Eq, Show)
 
-instance Witch.From Text.Text Query
+instance Sql.FromField Query where
+  fromField = fmap Witch.from . Sql.fromField @Text.Text
 
-instance Witch.From Query Text.Text
+instance Witch.From Text.Text Query where
+  from = Witch.from . Sql.Query
 
-instance Witch.From Query ByteString.ByteString where
+instance Witch.From Sql.Query Query
+
+instance Sql.ToField Query where
+  toField = Sql.toField @Text.Text . Witch.from
+
+instance Witch.From Query Text.Text where
+  from = Sql.fromQuery . Witch.from
+
+instance Witch.From Query Sql.Query
+
+instance String.IsString Query where
+  fromString = Witch.from
+
+instance Witch.From String Query where
   from = Witch.via @Text.Text
 
-instance Witch.TryFrom ByteString.ByteString Query where
-  tryFrom = Witch.eitherTryFrom $ fmap (Witch.from @Text.Text) . Text.decodeUtf8'
-
-instance Html.ToHtml Query where
-  toHtml = Html.toHtml . Witch.into @Text.Text
-  toHtmlRaw = Html.toHtmlRaw . Witch.into @Text.Text
-
-isBlank :: Query -> Bool
-isBlank = Text.all Char.isSpace . Witch.into @Text.Text
-
-empty :: Query
-empty = Witch.from Text.empty
+instance QuickCheck.Arbitrary Query where
+  arbitrary = do
+    n <- QuickCheck.arbitrary @Int
+    pure . Witch.from $ "select " <> show n

@@ -4,6 +4,7 @@
 
 module Monadoc.Type.App where
 
+import qualified Control.Monad as Monad
 import qualified Control.Monad.Base as Base
 import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Reader as Reader
@@ -18,10 +19,12 @@ import qualified Monadoc.Class.MonadSay as MonadSay
 import qualified Monadoc.Class.MonadSleep as MonadSleep
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Class.MonadTime as MonadTime
+import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Network.HTTP.Client as Client
 import qualified Say
 import qualified System.Directory as Directory
+import qualified Witch
 
 type App = AppT IO
 
@@ -50,7 +53,12 @@ instance Control.MonadBaseControl IO m => MonadHttp.MonadHttp (AppT m) where
     Control.control $ \runInBase ->
       Client.withResponse request (Context.manager context) $ runInBase . f
 
-instance Base.MonadBase IO m => MonadLog.MonadLog (AppT m)
+instance Base.MonadBase IO m => MonadLog.MonadLog (AppT m) where
+  log severity message = do
+    context <- Reader.ask
+    Monad.when (severity >= Config.severity (Context.config context))
+      . Base.liftBase
+      $ MonadLog.log severity message
 
 instance Base.MonadBase IO m => MonadSay.MonadSay (AppT m) where
   hSay h = Base.liftBase . Say.hSay h
@@ -62,7 +70,7 @@ instance (Monad m, Control.MonadBaseControl IO m) => MonadSql.MonadSql (AppT m) 
   query template parameters = do
     context <- Reader.ask
     Pool.withResource (Context.pool context) $ \connection ->
-      Base.liftBase $ Sql.query connection template parameters
+      Base.liftBase $ Sql.query connection (Witch.from template) parameters
 
 instance Base.MonadBase IO m => MonadTime.MonadTime (AppT m) where
   getCurrentTime = Base.liftBase MonadTime.getCurrentTime

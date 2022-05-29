@@ -54,7 +54,7 @@ instance Monad m => MonadSay.MonadSay (FakeT m) where
 instance Base.MonadBase IO m => MonadSql.MonadSql (FakeT m) where
   query query row = do
     connection <- Reader.ask
-    Base.liftBase $ Sql.query connection query row
+    Base.liftBase $ Sql.query connection (Witch.from query) row
 
 instance Base.MonadBase IO m => MonadTime.MonadTime (FakeT m) where
   getCurrentTime = Base.liftBase Time.getCurrentTime

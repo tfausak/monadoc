@@ -7,10 +7,10 @@ import qualified Data.ByteString as ByteString
 import qualified Data.Text as Text
 import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Monadoc.Type.PackageName as PackageName
-import qualified Monadoc.Type.Query as Query
 import qualified Monadoc.Type.Reversion as Reversion
 import qualified Monadoc.Type.Revision as Revision
 import qualified Monadoc.Type.Route as Route
+import qualified Monadoc.Type.Search as Search
 import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Test.Hspec as Hspec
 import qualified Witch
@@ -22,7 +22,7 @@ spec = Hspec.describe "Monadoc.Type.Route" $ do
       versionNumber = Witch.unsafeFrom @String @VersionNumber.VersionNumber "1.2.3"
       revision = Witch.from @Word @Revision.Revision 4
       reversion = Reversion.Reversion {Reversion.revision = Just revision, Reversion.version = versionNumber}
-      query = Witch.from @Text.Text @Query.Query "qry"
+      query = Witch.from @Text.Text @Search.Search "qry"
   Hspec.it "can be parsed" $ do
     Route.parse [] [] `Hspec.shouldBe` Just Route.Home
     Route.parse ["apple-touch-icon.png"] [] `Hspec.shouldBe` Just Route.AppleTouchIcon

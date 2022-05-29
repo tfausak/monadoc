@@ -1,9 +1,12 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Action.HackageUser.UpsertSpec where
 
 import qualified Control.Monad.Base as Base
+import qualified Data.Text as Text
 import qualified Monadoc.Action.HackageUser.Upsert as HackageUser.Upsert
+import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Test.Common as Test
 import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec
@@ -29,9 +32,9 @@ spec = Hspec.describe "Monadoc.Action.HackageUser.Upsert" . Hspec.around Test.wi
 
   Hspec.it "inserts two hackage users" . Test.runFake $ do
     hackageUser1 <- do
-      x <- Test.arbitrary
+      x <- Test.arbitraryWith $ \y -> y {HackageUser.name = Witch.unsafeFrom @Text.Text "a"}
       HackageUser.Upsert.run x
     hackageUser2 <- do
-      x <- Test.arbitrary
+      x <- Test.arbitraryWith $ \y -> y {HackageUser.name = Witch.unsafeFrom @Text.Text "b"}
       HackageUser.Upsert.run x
     Base.liftBase $ Model.key hackageUser1 `Hspec.shouldNotBe` Model.key hackageUser2
