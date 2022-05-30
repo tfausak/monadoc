@@ -109,7 +109,7 @@ insertBlob :: (MonadSql.MonadSql m, Exception.MonadThrow m) => Int -> m Blob.Key
 insertBlob size = do
   MonadSql.execute
     "insert into blob (size, hash, contents) values (?, ?, zeroblob(?))"
-    (size, Hash.new ByteString.empty, size)
+    (size, Hash.new . Witch.into @ByteString.ByteString $ show size, size)
   Key.SelectLastInsert.run
 
 getSize :: (MonadHttp.MonadHttp m, Reader.MonadReader Context.Context m, Exception.MonadThrow m) => m Int

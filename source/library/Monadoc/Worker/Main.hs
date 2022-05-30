@@ -17,6 +17,7 @@ import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSleep as MonadSleep
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Constant.CronEntry as CronEntry
+import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
 import qualified Monadoc.Type.Context as Context
 
 worker ::
@@ -35,4 +36,6 @@ worker = do
 
   Monad.forever $ do
     CronEntry.Enqueue.run
-    Exception.generalBracket Job.Acquire.run Job.Release.run Job.Perform.run
+    Exception.handleAll HandleExceptions.onException $ do
+      ((), ()) <- Exception.generalBracket Job.Acquire.run Job.Release.run Job.Perform.run
+      pure ()
