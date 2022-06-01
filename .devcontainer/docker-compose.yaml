@@ -1,16 +1,9 @@
 version: '3.7'
 services:
   devcontainer:
-    build: .
-    command: .devcontainer/watch.sh
-    image: monadoc/devcontainer
+    command: sh -c 'while :; do sleep 60; done'
+    image: ghcr.io/tfausak/docker-haskell:9.2.3-f3d72755b3f864863835f59c622f8311b0578f1f
     init: true
     volumes:
-      - ..:/workspaces/monadoc
-      - cabal:/home/haskell/.cabal
-      - cabal-store:/cabal-store
-    working_dir: /workspaces/monadoc
-volumes:
-  cabal: null
-  cabal-store:
-    external: true
+      - ..:/workspace
+    working_dir: /workspace

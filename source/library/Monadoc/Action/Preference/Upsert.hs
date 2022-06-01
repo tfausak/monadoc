@@ -14,9 +14,9 @@ run preference = do
   rows <- MonadSql.query "select key from preference where package = ?" [Preference.package preference]
   key <- case rows of
     [] -> do
-      MonadSql.execute "insert into preference (\"constraint\", package) values (?, ?)" preference
+      MonadSql.execute "insert into preference (package, range) values (?, ?)" preference
       Key.SelectLastInsert.run
     Sql.Only key : _ -> do
-      MonadSql.execute "update preference set \"constraint\" = ? where key = ?" (Preference.constraint preference, key)
+      MonadSql.execute "update preference set range = ? where key = ?" (Preference.range preference, key)
       pure key
   pure Model.Model {Model.key = key, Model.value = preference}

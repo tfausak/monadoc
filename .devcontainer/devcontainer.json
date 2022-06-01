@@ -1,24 +1,14 @@
 {
   "dockerComposeFile": "docker-compose.yaml",
   "extensions": [
-    "dramforever.vscode-ghc-simple",
-    "Edka.haskutil",
-    "hoovercj.haskell-linter",
-    "sjurmillidahl.ormolu-vscode"
-  ],
-  "initializeCommand": [
-    ".devcontainer/initialize.sh"
+    "haskell.haskell"
   ],
   "overrideCommand": true,
-  "postCreateCommand": [
-    ".devcontainer/postCreate.sh"
-  ],
+  "postCreateCommand": ".devcontainer/postCreate.sh",
   "service": "devcontainer",
   "settings": {
     "editor.formatOnSave": true,
-    "editor.tabSize": 2,
-    "haskutil.alignExtensions": false,
-    "haskutil.alignImports": false
+    "editor.tabSize": 2
   },
-  "workspaceFolder": "/workspaces/monadoc"
+  "workspaceFolder": "/workspace"
 }

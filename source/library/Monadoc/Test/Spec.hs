@@ -15,6 +15,8 @@ import qualified Monadoc.Action.Job.EnqueueSpec
 import qualified Monadoc.Action.Key.SelectLastInsertSpec
 import qualified Monadoc.Action.Package.UpsertSpec
 import qualified Monadoc.Action.Preference.UpsertSpec
+import qualified Monadoc.Action.Range.InsertSpec
+import qualified Monadoc.Action.Range.UpsertSpec
 import qualified Monadoc.Action.Upload.UpsertSpec
 import qualified Monadoc.Action.Version.UpsertSpec
 import qualified Monadoc.Extra.DirectSqliteSpec
@@ -29,10 +31,12 @@ import qualified Monadoc.Model.JobSpec
 import qualified Monadoc.Model.MigrationSpec
 import qualified Monadoc.Model.PackageSpec
 import qualified Monadoc.Model.PreferenceSpec
+import qualified Monadoc.Model.RangeSpec
 import qualified Monadoc.Model.UploadSpec
 import qualified Monadoc.Model.VersionSpec
 import qualified Monadoc.Query.BlobSpec
 import qualified Monadoc.Query.CronEntrySpec
+import qualified Monadoc.Query.RangeSpec
 import qualified Monadoc.Type.ConfigSpec
 import qualified Monadoc.Type.ConstraintSpec
 import qualified Monadoc.Type.FlagSpec
@@ -71,6 +75,8 @@ spec = do
   Monadoc.Action.Key.SelectLastInsertSpec.spec
   Monadoc.Action.Package.UpsertSpec.spec
   Monadoc.Action.Preference.UpsertSpec.spec
+  Monadoc.Action.Range.InsertSpec.spec
+  Monadoc.Action.Range.UpsertSpec.spec
   Monadoc.Action.Upload.UpsertSpec.spec
   Monadoc.Action.Version.UpsertSpec.spec
   Monadoc.Extra.DirectSqliteSpec.spec
@@ -85,10 +91,12 @@ spec = do
   Monadoc.Model.MigrationSpec.spec
   Monadoc.Model.PackageSpec.spec
   Monadoc.Model.PreferenceSpec.spec
+  Monadoc.Model.RangeSpec.spec
   Monadoc.Model.UploadSpec.spec
   Monadoc.Model.VersionSpec.spec
   Monadoc.Query.BlobSpec.spec
   Monadoc.Query.CronEntrySpec.spec
+  Monadoc.Query.RangeSpec.spec
   Monadoc.Type.ConfigSpec.spec
   Monadoc.Type.ConstraintSpec.spec
   Monadoc.Type.FlagSpec.spec

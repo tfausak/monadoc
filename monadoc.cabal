@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.5.30
+version: 0.2022.6.1
 
 build-type: Simple
 category: Documentation
@@ -136,6 +136,10 @@ library
     Monadoc.Action.Package.UpsertSpec
     Monadoc.Action.Preference.Upsert
     Monadoc.Action.Preference.UpsertSpec
+    Monadoc.Action.Range.Insert
+    Monadoc.Action.Range.InsertSpec
+    Monadoc.Action.Range.Upsert
+    Monadoc.Action.Range.UpsertSpec
     Monadoc.Action.Task.Perform
     Monadoc.Action.Upload.Upsert
     Monadoc.Action.Upload.UpsertSpec
@@ -215,6 +219,8 @@ library
     Monadoc.Model.PackageSpec
     Monadoc.Model.Preference
     Monadoc.Model.PreferenceSpec
+    Monadoc.Model.Range
+    Monadoc.Model.RangeSpec
     Monadoc.Model.Upload
     Monadoc.Model.UploadSpec
     Monadoc.Model.Version
@@ -225,6 +231,8 @@ library
     Monadoc.Query.CronEntrySpec
     Monadoc.Query.Job
     Monadoc.Query.Migration
+    Monadoc.Query.Range
+    Monadoc.Query.RangeSpec
     Monadoc.Server.Application
     Monadoc.Server.Main
     Monadoc.Server.Middleware

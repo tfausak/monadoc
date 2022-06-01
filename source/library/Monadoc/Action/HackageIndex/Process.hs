@@ -30,6 +30,7 @@ import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
 import qualified Monadoc.Action.HackageUser.Upsert as HackageUser.Upsert
 import qualified Monadoc.Action.Package.Upsert as Package.Upsert
 import qualified Monadoc.Action.Preference.Upsert as Preference.Upsert
+import qualified Monadoc.Action.Range.Upsert as Range.Upsert
 import qualified Monadoc.Action.Upload.Upsert as Upload.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
 import qualified Monadoc.Class.MonadLog as MonadLog
@@ -44,6 +45,7 @@ import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.Preference as Preference
+import qualified Monadoc.Model.Range as Range
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.Constraint as Constraint
@@ -70,7 +72,7 @@ run = do
   case rows of
     [] -> MonadLog.debug "no new hackage index to process"
     hackageIndex : _ -> do
-      preference <- Base.liftBase $ Stm.newTVarIO Map.empty
+      constraints <- Base.liftBase $ Stm.newTVarIO Map.empty
       revisions <- Base.liftBase $ Stm.newTVarIO Map.empty
       context <- Reader.ask
       let blobKey = HackageIndex.blob $ Model.value hackageIndex
@@ -82,11 +84,11 @@ run = do
       Pool.withResource (Context.pool context) $ \connection ->
         Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 blobKey) False $ \blob -> do
           contents <- Base.liftBase $ Sqlite.unsafeBlobRead blob size 0
-          mapM_ (handleItem preference revisions)
+          mapM_ (handleItem constraints revisions)
             . Tar.foldEntries ((:) . Right) [] (pure . Left)
             . Tar.read
             $ LazyByteString.fromChunks contents
-      upsertPreference preference
+      upsertPreferences constraints
       updateLatest
       now <- Timestamp.getCurrentTime
       MonadSql.execute "update hackageIndex set processedAt = ? where key = ?" (Just now, Model.key hackageIndex)
@@ -97,8 +99,8 @@ handleItem ::
   Stm.TVar (Map.Map (PackageName.PackageName, VersionNumber.VersionNumber) Revision.Revision) ->
   Either Tar.FormatError Tar.Entry ->
   m ()
-handleItem preference =
-  either Exception.throwM . handleEntry preference
+handleItem constraints =
+  either Exception.throwM . handleEntry constraints
 
 handleEntry ::
   (Base.MonadBase IO m, MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
@@ -106,10 +108,10 @@ handleEntry ::
   Stm.TVar (Map.Map (PackageName.PackageName, VersionNumber.VersionNumber) Revision.Revision) ->
   Tar.Entry ->
   m ()
-handleEntry preference revisions entry =
+handleEntry constraints revisions entry =
   case FilePath.splitDirectories $ Tar.entryPath entry of
     [pkg, "preferred-versions"] ->
-      handlePreference preference entry pkg
+      handlePreference constraints entry pkg
     [pkg, ver, base] -> case FilePath.splitExtensions base of
       ("package", ".json") -> handlePackageJson entry
       (p, ".cabal") | p == pkg -> handleCabal revisions entry pkg ver
@@ -122,7 +124,7 @@ handlePreference ::
   Tar.Entry ->
   String ->
   m ()
-handlePreference preference entry pkg = do
+handlePreference constraints entry pkg = do
   packageName <-
     Either.throw $
       Witch.tryInto @PackageName.PackageName pkg
@@ -141,7 +143,7 @@ handlePreference preference entry pkg = do
         pure range
   Base.liftBase
     . Stm.atomically
-    . Stm.modifyTVar' preference
+    . Stm.modifyTVar' constraints
     . Map.insert packageName
     $ Witch.into @Constraint.Constraint versionRange
 
@@ -209,22 +211,27 @@ handleCabal revisions entry pkg ver = do
 epochTimeToPosixTime :: Tar.EpochTime -> Time.POSIXTime
 epochTimeToPosixTime = fromIntegral
 
-upsertPreference ::
+upsertPreferences ::
   (Base.MonadBase IO m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
   Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->
   m ()
-upsertPreference var = do
-  preference <- Base.liftBase $ Stm.readTVarIO var
-  mapM_ (uncurry upsertPreferredVersion) $ Map.toList preference
+upsertPreferences var = do
+  constraints <- Base.liftBase $ Stm.readTVarIO var
+  mapM_ (uncurry upsertPreference) $ Map.toList constraints
 
-upsertPreferredVersion :: (MonadSql.MonadSql m, Exception.MonadThrow m) => PackageName.PackageName -> Constraint.Constraint -> m ()
-upsertPreferredVersion packageName constraint = do
+upsertPreference ::
+  (MonadSql.MonadSql m, Exception.MonadThrow m) =>
+  PackageName.PackageName ->
+  Constraint.Constraint ->
+  m ()
+upsertPreference packageName constraint = do
   package <- Package.Upsert.run Package.Package {Package.name = packageName}
+  range <- Range.Upsert.run Range.Range {Range.constraint = constraint}
   Monad.void $
     Preference.Upsert.run
       Preference.Preference
         { Preference.package = Model.key package,
-          Preference.constraint = constraint
+          Preference.range = Model.key range
         }
   rows <- MonadSql.query "select * from upload inner join version on version.key = upload.version where upload.package = ?" [Model.key package]
   Monad.forM_ rows $ \(upload Sql.:. version) -> do
