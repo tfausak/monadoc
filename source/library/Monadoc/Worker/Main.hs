@@ -1,7 +1,10 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Worker.Main where
 
+import qualified Control.Concurrent.Async as Async
+import qualified Control.Exception as Exception (AsyncException, SomeAsyncException)
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Reader as Reader
@@ -36,6 +39,13 @@ worker = do
 
   Monad.forever $ do
     CronEntry.Enqueue.run
-    Exception.handleAll HandleExceptions.onException $ do
-      ((), ()) <- Exception.generalBracket Job.Acquire.run Job.Release.run Job.Perform.run
-      pure ()
+    Exception.handleJust rejectAsync HandleExceptions.onException
+      . Monad.void
+      $ Exception.generalBracket Job.Acquire.run Job.Release.run Job.Perform.run
+
+rejectAsync :: Exception.SomeException -> Maybe Exception.SomeException
+rejectAsync e = do
+  Monad.guard . not $ HandleExceptions.isType @Async.AsyncCancelled e
+  Monad.guard . not $ HandleExceptions.isType @Exception.AsyncException e
+  Monad.guard . not $ HandleExceptions.isType @Exception.SomeAsyncException e
+  pure e

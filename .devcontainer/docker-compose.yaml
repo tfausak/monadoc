@@ -2,7 +2,7 @@ version: '3.7'
 services:
   devcontainer:
     command: sh -c 'while :; do sleep 60; done'
-    image: ghcr.io/tfausak/docker-haskell:9.2.3-f3d72755b3f864863835f59c622f8311b0578f1f
+    image: ghcr.io/tfausak/docker-haskell:9.2.3
     init: true
     volumes:
       - ..:/workspace
