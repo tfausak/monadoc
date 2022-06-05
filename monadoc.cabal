@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.6.2
+version: 0.2022.6.5
 
 build-type: Simple
 category: Documentation
@@ -81,7 +81,7 @@ library
     , monad-control ^>= 1.0.3
     , mtl ^>= 2.2.2
     , QuickCheck ^>= 2.14.2
-    , resource-pool ^>= 0.2.3
+    , resource-pool ^>= 0.3.0
     , say ^>= 0.1.0
     , sqlite-simple ^>= 0.4.18
     , stm ^>= 2.5.0
@@ -181,6 +181,7 @@ library
     Monadoc.Extra.List
     Monadoc.Extra.ListSpec
     Monadoc.Extra.Read
+    Monadoc.Extra.ResourcePool
     Monadoc.Extra.Time
     Monadoc.Extra.TimeSpec
     Monadoc.Handler.AppleTouchIcon.Get

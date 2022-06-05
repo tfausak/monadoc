@@ -11,7 +11,6 @@ import qualified Control.Monad.Reader as Reader
 import qualified Control.Monad.Trans.Control as Control
 import qualified Data.ByteString as ByteString
 import qualified Data.Int as Int
-import qualified Data.Pool as Pool
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite3 as Sqlite
@@ -26,6 +25,7 @@ import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Extra.Read as Read
+import qualified Monadoc.Extra.ResourcePool as Pool
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Type.Config as Config
@@ -85,7 +85,7 @@ run hackageIndex = do
               InvalidSize.new = actualSize
             }
         newKey <- HackageIndex.Insert.insertBlob newSize
-        Pool.withResource (Context.pool context) $ \connection -> do
+        Pool.liftResource (Context.pool context) $ \connection -> do
           Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 newKey) True $ \newBlob -> do
             Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 oldKey) False $ \oldBlob -> do
               MonadLog.debug "copying old blob"

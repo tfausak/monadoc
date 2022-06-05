@@ -10,7 +10,6 @@ import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Reader as Reader
 import qualified Control.Monad.Trans as Trans
 import qualified Control.Monad.Trans.Control as Control
-import qualified Data.Pool as Pool
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Class.MonadFile as MonadFile
 import qualified Monadoc.Class.MonadHttp as MonadHttp
@@ -19,6 +18,7 @@ import qualified Monadoc.Class.MonadSay as MonadSay
 import qualified Monadoc.Class.MonadSleep as MonadSleep
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Class.MonadTime as MonadTime
+import qualified Monadoc.Extra.ResourcePool as Pool
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Network.HTTP.Client as Client
@@ -69,7 +69,7 @@ instance Base.MonadBase IO m => MonadSleep.MonadSleep (AppT m) where
 instance (Monad m, Control.MonadBaseControl IO m) => MonadSql.MonadSql (AppT m) where
   query template parameters = do
     context <- Reader.ask
-    Pool.withResource (Context.pool context) $ \connection ->
+    Pool.liftResource (Context.pool context) $ \connection ->
       Base.liftBase $ Sql.query connection (Witch.from template) parameters
 
 instance Base.MonadBase IO m => MonadTime.MonadTime (AppT m) where

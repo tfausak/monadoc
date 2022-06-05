@@ -19,7 +19,6 @@ import qualified Data.List as List
 import qualified Data.Map.Strict as Map
 import qualified Data.Maybe as Maybe
 import qualified Data.Ord as Ord
-import qualified Data.Pool as Pool
 import qualified Data.Text as Text
 import qualified Data.Time.Clock.POSIX as Time
 import qualified Database.SQLite.Simple as Sql
@@ -40,6 +39,7 @@ import qualified Monadoc.Exception.UnexpectedEntry as UnexpectedEntry
 import qualified Monadoc.Extra.Cabal as Cabal
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Extra.Either as Either
+import qualified Monadoc.Extra.ResourcePool as Pool
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Model.HackageUser as HackageUser
@@ -81,7 +81,7 @@ run = do
         case xs of
           [] -> Exception.throwM NotFound.NotFound
           Sql.Only x : _ -> pure x
-      Pool.withResource (Context.pool context) $ \connection ->
+      Pool.liftResource (Context.pool context) $ \connection ->
         Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 blobKey) False $ \blob -> do
           contents <- Base.liftBase $ Sqlite.unsafeBlobRead blob size 0
           mapM_ (handleItem constraints revisions)

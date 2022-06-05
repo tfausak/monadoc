@@ -14,7 +14,6 @@ import qualified Control.Monad.Trans.Control as Control
 import qualified Crypto.Hash as Crypto
 import qualified Data.ByteString as ByteString
 import qualified Data.Int as Int
-import qualified Data.Pool as Pool
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite3 as Sqlite
 import qualified Monadoc.Action.Key.SelectLastInsert as Key.SelectLastInsert
@@ -27,6 +26,7 @@ import qualified Monadoc.Exception.TrailingBytes as TrailingBytes
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Extra.Read as Read
+import qualified Monadoc.Extra.ResourcePool as Pool
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Type.Config as Config
@@ -54,7 +54,7 @@ run = do
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"
   MonadHttp.withResponse request $ \response -> do
     key <- insertBlob size
-    Pool.withResource (Context.pool context) $ \connection -> do
+    Pool.liftResource (Context.pool context) $ \connection -> do
       hashVar <- Base.liftBase . Stm.newTVarIO $ Crypto.hashInitWith Crypto.SHA256
       Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 key) True $ \blob -> do
         offsetRef <- Base.liftBase $ Stm.newTVarIO 0

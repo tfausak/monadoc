@@ -18,4 +18,4 @@ handler _ =
   Common.fileResponse
     Http.ok200
     [(Http.hContentType, ContentType.css)]
-    "monadoc.css"
+    "bootstrap.min.css"

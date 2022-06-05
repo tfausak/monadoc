@@ -42,6 +42,12 @@ fromConfig name cfg = do
   Context cfg
     <$> maybe Monadoc.getDataDir pure (Config.data_ cfg)
     <*> Tls.newTlsManager
-    <*> Pool.createPool (Sql.open $ Config.sql cfg) Sql.close 1 60 8
+    <*> Pool.newPool
+      Pool.PoolConfig
+        { Pool.createResource = Sql.open $ Config.sql cfg,
+          Pool.freeResource = Sql.close,
+          Pool.poolCacheTTL = 60,
+          Pool.poolMaxResources = 8
+        }
     <*> Environment.lookupEnv "MONADOC_SHA"
     <*> Directory.getTemporaryDirectory
