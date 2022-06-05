@@ -9,7 +9,7 @@ data-dir: data
 data-files:
   apple-touch-icon.png
   favicon.ico
-  monadoc.css
+  bootstrap.min.css
   monadoc.js
 description: Monadoc provides worse Haskell documentation.
 extra-source-files: README.markdown
