@@ -9,6 +9,7 @@ import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Timestamp as Timestamp
+import qualified Test.QuickCheck as QuickCheck
 
 type Model = Model.Model HackageIndex
 
@@ -34,6 +35,13 @@ instance Sql.ToRow HackageIndex where
       Sql.toField $ createdAt hackageIndex,
       Sql.toField $ processedAt hackageIndex
     ]
+
+instance QuickCheck.Arbitrary HackageIndex where
+  arbitrary =
+    HackageIndex
+      <$> QuickCheck.arbitrary
+      <*> QuickCheck.arbitrary
+      <*> QuickCheck.arbitrary
 
 migrations :: [Migration.Migration]
 migrations =

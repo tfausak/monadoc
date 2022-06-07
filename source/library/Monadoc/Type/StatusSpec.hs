@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Type.StatusSpec where
 
@@ -6,6 +7,7 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Test.Common as Test
 import qualified Monadoc.Type.Status as Status
 import qualified Test.Hspec as Hspec
+import qualified Test.QuickCheck as QuickCheck
 
 spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Type.Status" $ do
@@ -26,3 +28,6 @@ spec = Hspec.describe "Monadoc.Type.Status" $ do
     Test.expectSqlField Status.Locked $ Sql.SQLText "Locked"
     Test.expectSqlField Status.Queued $ Sql.SQLText "Queued"
     Test.expectSqlField Status.Passed $ Sql.SQLText "Passed"
+
+  Hspec.it "can be round-tripped through SQL" $
+    QuickCheck.property (Test.propertySqlField @Status.Status)

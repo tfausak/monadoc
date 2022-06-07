@@ -7,6 +7,7 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Test.Common as Test
 import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Test.Hspec as Hspec
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 spec :: Hspec.Spec
@@ -14,6 +15,9 @@ spec = Hspec.describe "Monadoc.Type.HackageUserName" $ do
   let hackageUserName = Witch.unsafeFrom @String @HackageUserName.HackageUserName "example"
   Hspec.it "can be round-tripped through SQL" $ do
     Test.expectSqlField hackageUserName $ Sql.SQLText "example"
+
+  Hspec.it "can be round-tripped through SQL" $
+    QuickCheck.property (Test.propertySqlField @HackageUserName.HackageUserName)
 
   Hspec.it "can be rendered to HTML" $ do
     Test.expectHtml hackageUserName "example"

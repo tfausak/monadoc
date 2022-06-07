@@ -7,6 +7,7 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Model.Preference as Preference
 import qualified Monadoc.Test.Common as Test
 import qualified Test.Hspec as Hspec
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 spec :: Hspec.Spec
@@ -20,3 +21,6 @@ spec = Hspec.describe "Monadoc.Model.Preference" $ do
       [ Sql.SQLInteger 1,
         Sql.SQLInteger 2
       ]
+
+  Hspec.it "can be round-tripped through SQL" $
+    QuickCheck.property (Test.propertySqlRow @Preference.Preference)

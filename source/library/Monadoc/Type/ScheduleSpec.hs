@@ -9,6 +9,7 @@ import qualified Monadoc.Test.Common as Test
 import qualified Monadoc.Type.Schedule as Schedule
 import qualified System.Cron as Cron
 import qualified Test.Hspec as Hspec
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 spec :: Hspec.Spec
@@ -21,3 +22,6 @@ spec = Hspec.describe "Monadoc.Type.Schedule" $ do
 
   Hspec.it "can be round-tripped through SQL" $ do
     Test.expectSqlField (Witch.into @Schedule.Schedule Cron.everyMinute) (Sql.SQLText "* * * * *")
+
+  Hspec.it "can be round-tripped through SQL" $
+    QuickCheck.property (Test.propertySqlField @Schedule.Schedule)

@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Model.JobSpec where
 
@@ -9,6 +10,7 @@ import qualified Monadoc.Test.Common as Test
 import qualified Monadoc.Type.Status as Status
 import qualified Monadoc.Type.Task as Task
 import qualified Test.Hspec as Hspec
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 spec :: Hspec.Spec
@@ -28,3 +30,6 @@ spec = Hspec.describe "Monadoc.Model.Job" $ do
         Sql.SQLText "Passed",
         Sql.SQLBlob "{\"tag\":\"Vacuum\"}"
       ]
+
+  Hspec.it "can be round-tripped through SQL" $
+    QuickCheck.property (Test.propertySqlRow @Job.Job)

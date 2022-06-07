@@ -76,16 +76,10 @@ expectFromJson :: (Stack.HasCallStack, Eq a, Aeson.FromJSON a, Show a) => LazyBy
 expectFromJson json x = Aeson.eitherDecode json `Hspec.shouldBe` Right x
 
 expectFromSqlField :: (Stack.HasCallStack, Eq a, Sql.FromField a, Show a) => Sql.SQLData -> a -> IO ()
-expectFromSqlField sql x = do
-  let fromField :: Sql.FromField b => Sql.SQLData -> Sql.Ok b
-      fromField = Sql.fromField . flip Sql.Field 0
-  fromField sql `Hspec.shouldBe` Sql.Ok x
+expectFromSqlField sql x = fromField sql `Hspec.shouldBe` Sql.Ok x
 
 expectFromSqlRow :: (Stack.HasCallStack, Eq a, Sql.FromRow a, Show a) => [Sql.SQLData] -> a -> IO ()
-expectFromSqlRow sql x = do
-  let fromRow :: Sql.FromRow b => [Sql.SQLData] -> Sql.Ok b
-      fromRow xs = State.evalStateT (Reader.runReaderT (Sql.unRP Sql.fromRow) . Sql.RowParseRO $ length xs) (0, xs)
-  fromRow sql `Hspec.shouldBe` Sql.Ok x
+expectFromSqlRow sql x = fromRow sql `Hspec.shouldBe` Sql.Ok x
 
 expectHtml :: (Stack.HasCallStack, Html.ToHtml a) => a -> LazyText.Text -> IO ()
 expectHtml x html = Html.renderText (Html.toHtml x) `Hspec.shouldBe` html
@@ -121,6 +115,18 @@ expectTryFrom :: (Stack.HasCallStack, Eq t, Show s, Show t, Witch.TryFrom s t, T
 expectTryFrom s expected = case Witch.tryFrom s of
   Left e -> Hspec.expectationFailure $ Exception.displayException e
   Right actual -> expected `Hspec.shouldBe` actual
+
+fromField :: Sql.FromField b => Sql.SQLData -> Sql.Ok b
+fromField = Sql.fromField . flip Sql.Field 0
+
+fromRow :: Sql.FromRow b => [Sql.SQLData] -> Sql.Ok b
+fromRow xs = State.evalStateT (Reader.runReaderT (Sql.unRP Sql.fromRow) . Sql.RowParseRO $ length xs) (0, xs)
+
+propertySqlField :: (Eq a, Sql.FromField a, Show a, Sql.ToField a) => a -> QuickCheck.Property
+propertySqlField x = fromField (Sql.toField x) QuickCheck.=== Sql.Ok x
+
+propertySqlRow :: (Eq a, Sql.FromRow a, Show a, Sql.ToRow a) => a -> QuickCheck.Property
+propertySqlRow x = fromRow (Sql.toRow x) QuickCheck.=== Sql.Ok x
 
 runFake :: FakeT IO a -> Sql.Connection -> IO a
 runFake = Reader.runReaderT . runFakeT . (*>) Database.Initialize.run

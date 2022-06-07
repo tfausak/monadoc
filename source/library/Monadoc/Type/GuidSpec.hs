@@ -9,6 +9,7 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Test.Common as Test
 import qualified Monadoc.Type.Guid as Guid
 import qualified Test.Hspec as Hspec
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 spec :: Hspec.Spec
@@ -21,3 +22,6 @@ spec = Hspec.describe "Monadoc.Type.Guid" $ do
 
   Hspec.it "can be round-tripped through SQL" $ do
     Test.expectSqlField (Witch.into @Guid.Guid Uuid.nil) (Sql.SQLBlob "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
+
+  Hspec.it "can be round-tripped through SQL" $
+    QuickCheck.property (Test.propertySqlField @Guid.Guid)

@@ -10,6 +10,8 @@ import qualified Data.ByteString as ByteString
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
+import qualified Monadoc.Extra.Either as Either
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 newtype Hash
@@ -36,6 +38,9 @@ instance Sql.FromField Hash where
 
 instance Sql.ToField Hash where
   toField = Sql.toField . Witch.into @ByteString.ByteString
+
+instance QuickCheck.Arbitrary Hash where
+  arbitrary = QuickCheck.suchThatMap (QuickCheck.vector 32) $ Either.hush . Witch.tryFrom . ByteString.pack
 
 new :: ByteString.ByteString -> Hash
 new = Witch.from @(Crypto.Digest Crypto.SHA256) . Crypto.hash

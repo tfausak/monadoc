@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Model.RangeSpec where
 
@@ -7,6 +8,7 @@ import qualified Monadoc.Model.Range as Range
 import qualified Monadoc.Test.Common as Test
 import qualified Monadoc.Type.Constraint as Constraint
 import qualified Test.Hspec as Hspec
+import qualified Test.QuickCheck as QuickCheck
 
 spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Model.Range" $ do
@@ -17,3 +19,6 @@ spec = Hspec.describe "Monadoc.Model.Range" $ do
         }
       [ Sql.SQLText ">=0"
       ]
+
+  Hspec.it "can be round-tripped through SQL" $
+    QuickCheck.property (Test.propertySqlRow @Range.Range)

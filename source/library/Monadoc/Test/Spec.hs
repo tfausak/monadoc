@@ -44,6 +44,7 @@ import qualified Monadoc.Type.GuidSpec
 import qualified Monadoc.Type.HackageUserNameSpec
 import qualified Monadoc.Type.HashSpec
 import qualified Monadoc.Type.KeySpec
+import qualified Monadoc.Type.LicenseSpec
 import qualified Monadoc.Type.ModelSpec
 import qualified Monadoc.Type.PackageNameSpec
 import qualified Monadoc.Type.PortSpec
@@ -104,6 +105,7 @@ spec = do
   Monadoc.Type.HackageUserNameSpec.spec
   Monadoc.Type.HashSpec.spec
   Monadoc.Type.KeySpec.spec
+  Monadoc.Type.LicenseSpec.spec
   Monadoc.Type.ModelSpec.spec
   Monadoc.Type.PackageNameSpec.spec
   Monadoc.Type.PortSpec.spec

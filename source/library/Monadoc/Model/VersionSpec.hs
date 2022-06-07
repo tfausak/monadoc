@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Model.VersionSpec where
 
@@ -7,6 +8,7 @@ import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Test.Common as Test
 import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Test.Hspec as Hspec
+import qualified Test.QuickCheck as QuickCheck
 
 spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Model.Version" $ do
@@ -17,3 +19,6 @@ spec = Hspec.describe "Monadoc.Model.Version" $ do
         }
       [ Sql.SQLText "0"
       ]
+
+  Hspec.it "can be round-tripped through SQL" $
+    QuickCheck.property (Test.propertySqlRow @Version.Version)

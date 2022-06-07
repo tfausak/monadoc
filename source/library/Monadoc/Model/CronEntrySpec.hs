@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Model.CronEntrySpec where
 
@@ -10,6 +11,7 @@ import qualified Monadoc.Test.Common as Test
 import qualified Monadoc.Type.Task as Task
 import qualified System.Cron as Cron
 import qualified Test.Hspec as Hspec
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 spec :: Hspec.Spec
@@ -27,3 +29,6 @@ spec = Hspec.describe "Monadoc.Model.CronEntry" $ do
         Sql.SQLText "* * * * *",
         Sql.SQLBlob "{\"tag\":\"Vacuum\"}"
       ]
+
+  Hspec.it "can be round-tripped through SQL" $
+    QuickCheck.property (Test.propertySqlRow @CronEntry.CronEntry)

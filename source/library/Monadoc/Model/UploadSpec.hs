@@ -8,6 +8,7 @@ import qualified Monadoc.Extra.Time as Time
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Test.Common as Test
 import qualified Test.Hspec as Hspec
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 spec :: Hspec.Spec
@@ -33,3 +34,6 @@ spec = Hspec.describe "Monadoc.Model.Upload" $ do
         Sql.SQLInteger 1,
         Sql.SQLInteger 0
       ]
+
+  Hspec.it "can be round-tripped through SQL" $
+    QuickCheck.property (Test.propertySqlRow @Upload.Upload)

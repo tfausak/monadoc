@@ -4,7 +4,6 @@
 
 module Monadoc.Type.Timestamp where
 
-import qualified Control.Monad as Monad
 import qualified Data.Fixed as Fixed
 import qualified Data.Hashable as Hashable
 import qualified Data.Text as Text
@@ -56,23 +55,14 @@ getCurrentTime :: MonadTime.MonadTime m => m Timestamp
 getCurrentTime = Witch.into @Timestamp <$> MonadTime.getCurrentTime
 
 genUtcTime :: QuickCheck.Gen Time.UTCTime
-genUtcTime = Time.UTCTime <$> genDay <*> fmap Time.timeOfDayToTime genTimeOfDay
+genUtcTime = Time.UTCTime <$> genDay <*> genDiffTime
 
+-- The sqlite-simple package requires years to have at least 4 digits. The
+-- Julian Day Number (JDN) @-313698@ is @1000-01-01@. The JDN @2973483@ is
+-- @9999-12-31@. This function generates a day between those two, inclusive.
+-- https://github.com/nurpax/sqlite-simple/blob/9190080/Database/SQLite/Simple/Time/Implementation.hs#L50
 genDay :: QuickCheck.Gen Time.Day
-genDay = QuickCheck.suchThatMap QuickCheck.arbitrary toDay
+genDay = Time.ModifiedJulianDay <$> QuickCheck.chooseInteger (-313698, 2973483)
 
-toDay :: (Time.Year, Time.MonthOfYear, Time.DayOfMonth) -> Maybe Time.Day
-toDay (y, m, d) = do
-  -- The sqlite-simple package requires years to have at least 4 digits.
-  -- https://github.com/nurpax/sqlite-simple/blob/9190080/Database/SQLite/Simple/Time/Implementation.hs#L50
-  Monad.guard $ y >= 1000
-  Time.fromGregorianValid y m d
-
-genTimeOfDay :: QuickCheck.Gen Time.TimeOfDay
-genTimeOfDay = QuickCheck.suchThatMap QuickCheck.arbitrary toTimeOfDay
-
-toTimeOfDay :: (Int, Int, Fixed.Pico) -> Maybe Time.TimeOfDay
-toTimeOfDay (h, m, s) = Time.makeTimeOfDayValid h m s
-
-fromTimeOfDay :: Time.TimeOfDay -> (Int, Int, Fixed.Pico)
-fromTimeOfDay t = (Time.todHour t, Time.todMin t, Time.todSec t)
+genDiffTime :: QuickCheck.Gen Time.DiffTime
+genDiffTime = Time.picosecondsToDiffTime <$> QuickCheck.chooseInteger (0, 24 * 60 * 60 * 1000000000000)

@@ -9,6 +9,7 @@ import qualified Distribution.Types.Version as Cabal
 import qualified Monadoc.Test.Common as Test
 import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Test.Hspec as Hspec
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 spec :: Hspec.Spec
@@ -22,6 +23,9 @@ spec = Hspec.describe "Monadoc.Type.VersionNumber" $ do
 
   Hspec.it "can be round-tripped through SQL" $ do
     Test.expectSqlField versionNumber (Sql.SQLText "1.2.3.4")
+
+  Hspec.it "can be round-tripped through SQL" $
+    QuickCheck.property (Test.propertySqlField @VersionNumber.VersionNumber)
 
   Hspec.it "can be rendered as HTML" $ do
     Test.expectHtml versionNumber "1.2.3.4"

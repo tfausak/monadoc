@@ -9,6 +9,7 @@ import qualified Distribution.Types.PackageName as Cabal
 import qualified Monadoc.Test.Common as Test
 import qualified Monadoc.Type.PackageName as PackageName
 import qualified Test.Hspec as Hspec
+import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
 spec :: Hspec.Spec
@@ -28,6 +29,9 @@ spec = Hspec.describe "Monadoc.Type.PackageName" $ do
 
   Hspec.it "can be round-tripped through SQL" $ do
     Test.expectSqlField packageName $ Sql.SQLText "example"
+
+  Hspec.it "can be round-tripped through SQL" $
+    QuickCheck.property (Test.propertySqlField @PackageName.PackageName)
 
   Hspec.it "can be rendered as HTML" $ do
     Test.expectHtml packageName "example"

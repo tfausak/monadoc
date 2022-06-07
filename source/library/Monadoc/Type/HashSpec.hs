@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Type.HashSpec where
 
@@ -7,6 +8,7 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Test.Common as Test
 import qualified Monadoc.Type.Hash as Hash
 import qualified Test.Hspec as Hspec
+import qualified Test.QuickCheck as QuickCheck
 
 spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Type.Hash" $ do
@@ -22,3 +24,6 @@ spec = Hspec.describe "Monadoc.Type.Hash" $ do
 
   Hspec.it "can be round-tripped through SQL" $ do
     Test.expectSqlField hash $ Sql.SQLBlob byteString
+
+  Hspec.it "can be round-tripped through SQL" $
+    QuickCheck.property (Test.propertySqlField @Hash.Hash)
