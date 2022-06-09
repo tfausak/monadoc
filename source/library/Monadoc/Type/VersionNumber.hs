@@ -4,7 +4,6 @@
 
 module Monadoc.Type.VersionNumber where
 
-import qualified Control.Monad as Monad
 import qualified Data.Text as Text
 import qualified Data.Version as Version
 import qualified Database.SQLite.Simple.FromField as Sql
@@ -65,16 +64,7 @@ instance Witch.From VersionNumber Text.Text where
   from = Witch.via @String
 
 genVersion :: QuickCheck.Gen Cabal.Version
-genVersion = QuickCheck.suchThatMap QuickCheck.arbitrary toVersion
-
-toVersion :: [Int] -> Maybe Cabal.Version
-toVersion ns = do
-  -- Versions must be non-empty. Numbers must be positive and less than 10 digits.
-  -- https://github.com/haskell/cabal/blob/9ca9891/Cabal-syntax/src/Distribution/Types/Version.hs#L118
-  Monad.guard . not $ null ns
-  let p n = 0 <= n && n < (1000000000 :: Int)
-  Monad.guard $ all p ns
-  pure $ Cabal.mkVersion ns
+genVersion = Cabal.mkVersion <$> QuickCheck.listOf1 (QuickCheck.chooseInt (0, 999999999))
 
 zero :: VersionNumber
 zero = Witch.from Cabal.version0

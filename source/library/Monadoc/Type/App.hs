@@ -69,7 +69,7 @@ instance Base.MonadBase IO m => MonadSleep.MonadSleep (AppT m) where
 instance (Monad m, Control.MonadBaseControl IO m) => MonadSql.MonadSql (AppT m) where
   query template parameters = do
     context <- Reader.ask
-    Pool.liftResource (Context.pool context) $ \connection ->
+    Pool.withResourceLifted (Context.pool context) $ \connection ->
       Base.liftBase $ Sql.query connection (Witch.from template) parameters
 
 instance Base.MonadBase IO m => MonadTime.MonadTime (AppT m) where

@@ -54,7 +54,7 @@ run = do
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"
   MonadHttp.withResponse request $ \response -> do
     key <- insertBlob size
-    Pool.liftResource (Context.pool context) $ \connection -> do
+    Pool.withResourceLifted (Context.pool context) $ \connection -> do
       hashVar <- Base.liftBase . Stm.newTVarIO $ Crypto.hashInitWith Crypto.SHA256
       Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 key) True $ \blob -> do
         offsetRef <- Base.liftBase $ Stm.newTVarIO 0

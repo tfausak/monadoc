@@ -24,4 +24,4 @@ spec = Hspec.describe "Monadoc.Model.Migration" $ do
       ]
 
   Hspec.it "can be round-tripped through SQL" $
-    QuickCheck.property (Test.propertySqlRow @Migration.Migration)
+    QuickCheck.property (Test.propertySqlRow @Migration.Model)

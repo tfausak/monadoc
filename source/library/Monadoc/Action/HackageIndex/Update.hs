@@ -85,7 +85,7 @@ run hackageIndex = do
               InvalidSize.new = actualSize
             }
         newKey <- HackageIndex.Insert.insertBlob newSize
-        Pool.liftResource (Context.pool context) $ \connection -> do
+        Pool.withResourceLifted (Context.pool context) $ \connection -> do
           Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 newKey) True $ \newBlob -> do
             Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 oldKey) False $ \oldBlob -> do
               MonadLog.debug "copying old blob"

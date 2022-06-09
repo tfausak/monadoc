@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.6.7
+version: 0.2022.6.8
 
 build-type: Simple
 category: Documentation
@@ -130,6 +130,10 @@ library
     Monadoc.Action.Job.Release
     Monadoc.Action.Key.SelectLastInsert
     Monadoc.Action.Key.SelectLastInsertSpec
+    Monadoc.Action.License.Insert
+    Monadoc.Action.License.InsertSpec
+    Monadoc.Action.License.Upsert
+    Monadoc.Action.License.UpsertSpec
     Monadoc.Action.Migration.Insert
     Monadoc.Action.Migration.Migrate
     Monadoc.Action.Package.Upsert
@@ -141,6 +145,7 @@ library
     Monadoc.Action.Range.Upsert
     Monadoc.Action.Range.UpsertSpec
     Monadoc.Action.Task.Perform
+    Monadoc.Action.Upload.Process
     Monadoc.Action.Upload.Upsert
     Monadoc.Action.Upload.UpsertSpec
     Monadoc.Action.Version.Upsert
@@ -214,6 +219,8 @@ library
     Monadoc.Model.HackageUserSpec
     Monadoc.Model.Job
     Monadoc.Model.JobSpec
+    Monadoc.Model.License
+    Monadoc.Model.LicenseSpec
     Monadoc.Model.Migration
     Monadoc.Model.MigrationSpec
     Monadoc.Model.Package
@@ -231,6 +238,8 @@ library
     Monadoc.Query.CronEntry
     Monadoc.Query.CronEntrySpec
     Monadoc.Query.Job
+    Monadoc.Query.License
+    Monadoc.Query.LicenseSpec
     Monadoc.Query.Migration
     Monadoc.Query.Range
     Monadoc.Query.RangeSpec
@@ -263,8 +272,6 @@ library
     Monadoc.Type.Icon
     Monadoc.Type.Key
     Monadoc.Type.KeySpec
-    Monadoc.Type.License
-    Monadoc.Type.LicenseSpec
     Monadoc.Type.Manifest
     Monadoc.Type.Model
     Monadoc.Type.ModelSpec
@@ -284,6 +291,8 @@ library
     Monadoc.Type.Search
     Monadoc.Type.Severity
     Monadoc.Type.SeveritySpec
+    Monadoc.Type.Spdx
+    Monadoc.Type.SpdxSpec
     Monadoc.Type.Status
     Monadoc.Type.StatusSpec
     Monadoc.Type.Task

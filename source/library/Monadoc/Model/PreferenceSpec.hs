@@ -23,4 +23,4 @@ spec = Hspec.describe "Monadoc.Model.Preference" $ do
       ]
 
   Hspec.it "can be round-tripped through SQL" $
-    QuickCheck.property (Test.propertySqlRow @Preference.Preference)
+    QuickCheck.property (Test.propertySqlRow @Preference.Model)

@@ -36,4 +36,4 @@ spec = Hspec.describe "Monadoc.Model.Upload" $ do
       ]
 
   Hspec.it "can be round-tripped through SQL" $
-    QuickCheck.property (Test.propertySqlRow @Upload.Upload)
+    QuickCheck.property (Test.propertySqlRow @Upload.Model)

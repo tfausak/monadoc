@@ -2,7 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeApplications #-}
 
-module Monadoc.Type.License where
+module Monadoc.Type.Spdx where
 
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
@@ -12,33 +12,33 @@ import qualified Monadoc.Extra.Cabal as Cabal
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
-newtype License
-  = License Cabal.License
+newtype Spdx
+  = Spdx Cabal.License
   deriving (Eq, Show)
 
-instance Witch.From Cabal.License License
+instance Witch.From Cabal.License Spdx
 
-instance Witch.From License Cabal.License
+instance Witch.From Spdx Cabal.License
 
-instance Witch.TryFrom String License where
+instance Witch.TryFrom String Spdx where
   tryFrom =
     Witch.eitherTryFrom $
       fmap (Witch.from @Cabal.License)
         . Cabal.tryParsec
 
-instance Witch.From License String where
+instance Witch.From Spdx String where
   from = Cabal.prettyShow . Witch.into @Cabal.License
 
-instance Sql.FromField License where
+instance Sql.FromField Spdx where
   fromField field = do
     string <- Sql.fromField @String field
     either (Sql.returnError Sql.ConversionFailed field . show) pure $
       Witch.tryFrom string
 
-instance Sql.ToField License where
+instance Sql.ToField Spdx where
   toField = Sql.toField . Witch.into @String
 
-instance QuickCheck.Arbitrary License where
+instance QuickCheck.Arbitrary Spdx where
   arbitrary = Witch.from <$> genCabalLicense
 
 genCabalLicense :: QuickCheck.Gen Cabal.License
@@ -110,3 +110,6 @@ genIdChar = QuickCheck.elements idChars
 
 idChars :: [Char]
 idChars = '-' : '.' : (['0' .. '9'] <> ['A' .. 'Z'] <> ['a' .. 'z'])
+
+none :: Spdx
+none = Witch.from Cabal.NONE

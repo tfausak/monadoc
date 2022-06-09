@@ -21,4 +21,4 @@ spec = Hspec.describe "Monadoc.Model.Range" $ do
       ]
 
   Hspec.it "can be round-tripped through SQL" $
-    QuickCheck.property (Test.propertySqlRow @Range.Range)
+    QuickCheck.property (Test.propertySqlRow @Range.Model)

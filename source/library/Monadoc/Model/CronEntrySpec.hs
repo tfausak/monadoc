@@ -31,4 +31,4 @@ spec = Hspec.describe "Monadoc.Model.CronEntry" $ do
       ]
 
   Hspec.it "can be round-tripped through SQL" $
-    QuickCheck.property (Test.propertySqlRow @CronEntry.CronEntry)
+    QuickCheck.property (Test.propertySqlRow @CronEntry.Model)

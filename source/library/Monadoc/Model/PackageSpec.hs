@@ -21,4 +21,4 @@ spec = Hspec.describe "Monadoc.Model.Package" $ do
       ]
 
   Hspec.it "can be round-tripped through SQL" $
-    QuickCheck.property (Test.propertySqlRow @Package.Package)
+    QuickCheck.property (Test.propertySqlRow @Package.Model)

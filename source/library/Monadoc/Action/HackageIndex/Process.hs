@@ -81,7 +81,7 @@ run = do
         case xs of
           [] -> Exception.throwM NotFound.NotFound
           Sql.Only x : _ -> pure x
-      Pool.liftResource (Context.pool context) $ \connection ->
+      Pool.withResourceLifted (Context.pool context) $ \connection ->
         Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 blobKey) False $ \blob -> do
           contents <- Base.liftBase $ Sqlite.unsafeBlobRead blob size 0
           mapM_ (handleItem constraints revisions)

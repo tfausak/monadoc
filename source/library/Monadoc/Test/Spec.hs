@@ -13,6 +13,8 @@ import qualified Monadoc.Action.Database.VacuumSpec
 import qualified Monadoc.Action.HackageUser.UpsertSpec
 import qualified Monadoc.Action.Job.EnqueueSpec
 import qualified Monadoc.Action.Key.SelectLastInsertSpec
+import qualified Monadoc.Action.License.InsertSpec
+import qualified Monadoc.Action.License.UpsertSpec
 import qualified Monadoc.Action.Package.UpsertSpec
 import qualified Monadoc.Action.Preference.UpsertSpec
 import qualified Monadoc.Action.Range.InsertSpec
@@ -28,6 +30,7 @@ import qualified Monadoc.Model.CronEntrySpec
 import qualified Monadoc.Model.HackageIndexSpec
 import qualified Monadoc.Model.HackageUserSpec
 import qualified Monadoc.Model.JobSpec
+import qualified Monadoc.Model.LicenseSpec
 import qualified Monadoc.Model.MigrationSpec
 import qualified Monadoc.Model.PackageSpec
 import qualified Monadoc.Model.PreferenceSpec
@@ -36,6 +39,7 @@ import qualified Monadoc.Model.UploadSpec
 import qualified Monadoc.Model.VersionSpec
 import qualified Monadoc.Query.BlobSpec
 import qualified Monadoc.Query.CronEntrySpec
+import qualified Monadoc.Query.LicenseSpec
 import qualified Monadoc.Query.RangeSpec
 import qualified Monadoc.Type.ConfigSpec
 import qualified Monadoc.Type.ConstraintSpec
@@ -44,7 +48,6 @@ import qualified Monadoc.Type.GuidSpec
 import qualified Monadoc.Type.HackageUserNameSpec
 import qualified Monadoc.Type.HashSpec
 import qualified Monadoc.Type.KeySpec
-import qualified Monadoc.Type.LicenseSpec
 import qualified Monadoc.Type.ModelSpec
 import qualified Monadoc.Type.PackageNameSpec
 import qualified Monadoc.Type.PortSpec
@@ -53,6 +56,7 @@ import qualified Monadoc.Type.RevisionSpec
 import qualified Monadoc.Type.RouteSpec
 import qualified Monadoc.Type.ScheduleSpec
 import qualified Monadoc.Type.SeveritySpec
+import qualified Monadoc.Type.SpdxSpec
 import qualified Monadoc.Type.StatusSpec
 import qualified Monadoc.Type.TaskSpec
 import qualified Monadoc.Type.TimestampSpec
@@ -74,6 +78,8 @@ spec = do
   Monadoc.Action.HackageUser.UpsertSpec.spec
   Monadoc.Action.Job.EnqueueSpec.spec
   Monadoc.Action.Key.SelectLastInsertSpec.spec
+  Monadoc.Action.License.InsertSpec.spec
+  Monadoc.Action.License.UpsertSpec.spec
   Monadoc.Action.Package.UpsertSpec.spec
   Monadoc.Action.Preference.UpsertSpec.spec
   Monadoc.Action.Range.InsertSpec.spec
@@ -89,6 +95,7 @@ spec = do
   Monadoc.Model.HackageIndexSpec.spec
   Monadoc.Model.HackageUserSpec.spec
   Monadoc.Model.JobSpec.spec
+  Monadoc.Model.LicenseSpec.spec
   Monadoc.Model.MigrationSpec.spec
   Monadoc.Model.PackageSpec.spec
   Monadoc.Model.PreferenceSpec.spec
@@ -97,6 +104,7 @@ spec = do
   Monadoc.Model.VersionSpec.spec
   Monadoc.Query.BlobSpec.spec
   Monadoc.Query.CronEntrySpec.spec
+  Monadoc.Query.LicenseSpec.spec
   Monadoc.Query.RangeSpec.spec
   Monadoc.Type.ConfigSpec.spec
   Monadoc.Type.ConstraintSpec.spec
@@ -105,7 +113,6 @@ spec = do
   Monadoc.Type.HackageUserNameSpec.spec
   Monadoc.Type.HashSpec.spec
   Monadoc.Type.KeySpec.spec
-  Monadoc.Type.LicenseSpec.spec
   Monadoc.Type.ModelSpec.spec
   Monadoc.Type.PackageNameSpec.spec
   Monadoc.Type.PortSpec.spec
@@ -114,6 +121,7 @@ spec = do
   Monadoc.Type.RouteSpec.spec
   Monadoc.Type.ScheduleSpec.spec
   Monadoc.Type.SeveritySpec.spec
+  Monadoc.Type.SpdxSpec.spec
   Monadoc.Type.StatusSpec.spec
   Monadoc.Type.TaskSpec.spec
   Monadoc.Type.TimestampSpec.spec

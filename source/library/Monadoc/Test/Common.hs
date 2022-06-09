@@ -122,6 +122,9 @@ fromField = Sql.fromField . flip Sql.Field 0
 fromRow :: Sql.FromRow b => [Sql.SQLData] -> Sql.Ok b
 fromRow xs = State.evalStateT (Reader.runReaderT (Sql.unRP Sql.fromRow) . Sql.RowParseRO $ length xs) (0, xs)
 
+propertyJson :: (Eq a, Aeson.FromJSON a, Show a, Aeson.ToJSON a) => a -> QuickCheck.Property
+propertyJson x = Aeson.eitherDecode (Aeson.encode x) QuickCheck.=== Right x
+
 propertySqlField :: (Eq a, Sql.FromField a, Show a, Sql.ToField a) => a -> QuickCheck.Property
 propertySqlField x = fromField (Sql.toField x) QuickCheck.=== Sql.Ok x
 

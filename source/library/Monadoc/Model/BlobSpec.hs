@@ -25,4 +25,4 @@ spec = Hspec.describe "Monadoc.Model.Blob" $ do
       ]
 
   Hspec.it "can be round-tripped through SQL" $
-    QuickCheck.property (Test.propertySqlRow @Blob.Blob)
+    QuickCheck.property (Test.propertySqlRow @Blob.Model)

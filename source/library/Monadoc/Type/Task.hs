@@ -10,6 +10,7 @@ import qualified Test.QuickCheck as QuickCheck
 
 data Task
   = ProcessHackageIndex
+  | ProcessUploads
   | PruneHackageIndex
   | UpsertHackageIndex
   | Vacuum
@@ -20,6 +21,7 @@ instance Aeson.FromJSON Task where
     tag <- object Aeson..: "tag"
     case tag :: Text.Text of
       "ProcessHackageIndex" -> pure ProcessHackageIndex
+      "ProcessUploads" -> pure ProcessUploads
       "PruneHackageIndex" -> pure PruneHackageIndex
       "UpsertHackageIndex" -> pure UpsertHackageIndex
       "Vacuum" -> pure Vacuum
@@ -29,6 +31,7 @@ instance Aeson.ToJSON Task where
   toJSON task =
     let tag = case task of
           ProcessHackageIndex -> "ProcessHackageIndex"
+          ProcessUploads -> "ProcessUploads"
           PruneHackageIndex -> "PruneHackageIndex"
           UpsertHackageIndex -> "UpsertHackageIndex"
           Vacuum -> "Vacuum" :: Text.Text
@@ -47,6 +50,7 @@ instance QuickCheck.Arbitrary Task where
   arbitrary =
     QuickCheck.elements
       [ ProcessHackageIndex,
+        ProcessUploads,
         PruneHackageIndex,
         UpsertHackageIndex,
         Vacuum
