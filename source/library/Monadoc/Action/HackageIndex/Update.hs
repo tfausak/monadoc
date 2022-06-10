@@ -25,7 +25,6 @@ import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Extra.Read as Read
-import qualified Monadoc.Extra.ResourcePool as Pool
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Type.Config as Config
@@ -85,9 +84,9 @@ run hackageIndex = do
               InvalidSize.new = actualSize
             }
         newKey <- HackageIndex.Insert.insertBlob newSize
-        Pool.withResourceLifted (Context.pool context) $ \connection -> do
-          Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 newKey) True $ \newBlob -> do
-            Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 oldKey) False $ \oldBlob -> do
+        MonadSql.withConnection $ \connection -> do
+          Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 newKey) True $ \newBlob -> do
+            Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 oldKey) False $ \oldBlob -> do
               MonadLog.debug "copying old blob"
               contents <- Base.liftBase $ Sqlite.blobRead oldBlob oldSize 0
               Base.liftBase $ Sqlite.blobWrite newBlob contents 0
@@ -100,7 +99,7 @@ run hackageIndex = do
               MonadLog.debug "appending new blob"
               Base.liftBase $ loop start
           MonadLog.debug "updating new hash"
-          Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 newKey) False $ \blob -> do
+          Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 newKey) False $ \blob -> do
             contents <- Base.liftBase $ Sqlite.blobRead blob newSize 0
             MonadSql.execute "update blob set hash = ? where key = ?" (Hash.new contents, newKey)
         Monad.void $ HackageIndex.Insert.insertHackageIndex newKey

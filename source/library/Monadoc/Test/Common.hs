@@ -52,9 +52,9 @@ instance Monad m => MonadSay.MonadSay (FakeT m) where
   hSay = const . const $ pure ()
 
 instance Base.MonadBase IO m => MonadSql.MonadSql (FakeT m) where
-  query query row = do
+  withConnection callback = do
     connection <- Reader.ask
-    Base.liftBase $ Sql.query connection (Witch.from query) row
+    callback connection
 
 instance Base.MonadBase IO m => MonadTime.MonadTime (FakeT m) where
   getCurrentTime = Base.liftBase Time.getCurrentTime

@@ -10,7 +10,6 @@ import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Reader as Reader
 import qualified Control.Monad.Trans as Trans
 import qualified Control.Monad.Trans.Control as Control
-import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Class.MonadFile as MonadFile
 import qualified Monadoc.Class.MonadHttp as MonadHttp
 import qualified Monadoc.Class.MonadLog as MonadLog
@@ -24,7 +23,6 @@ import qualified Monadoc.Type.Context as Context
 import qualified Network.HTTP.Client as Client
 import qualified Say
 import qualified System.Directory as Directory
-import qualified Witch
 
 type App = AppT IO
 
@@ -67,10 +65,9 @@ instance Base.MonadBase IO m => MonadSleep.MonadSleep (AppT m) where
   sleep = Base.liftBase . MonadSleep.sleep
 
 instance (Monad m, Control.MonadBaseControl IO m) => MonadSql.MonadSql (AppT m) where
-  query template parameters = do
+  withConnection callback = do
     context <- Reader.ask
-    Pool.withResourceLifted (Context.pool context) $ \connection ->
-      Base.liftBase $ Sql.query connection (Witch.from template) parameters
+    Pool.withResourceLifted (Context.pool context) callback
 
 instance Base.MonadBase IO m => MonadTime.MonadTime (AppT m) where
   getCurrentTime = Base.liftBase MonadTime.getCurrentTime

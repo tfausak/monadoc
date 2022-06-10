@@ -26,7 +26,6 @@ import qualified Monadoc.Exception.TrailingBytes as TrailingBytes
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Extra.Read as Read
-import qualified Monadoc.Extra.ResourcePool as Pool
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Type.Config as Config
@@ -54,9 +53,9 @@ run = do
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"
   MonadHttp.withResponse request $ \response -> do
     key <- insertBlob size
-    Pool.withResourceLifted (Context.pool context) $ \connection -> do
+    MonadSql.withConnection $ \connection -> do
       hashVar <- Base.liftBase . Stm.newTVarIO $ Crypto.hashInitWith Crypto.SHA256
-      Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 key) True $ \blob -> do
+      Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 key) True $ \blob -> do
         offsetRef <- Base.liftBase $ Stm.newTVarIO 0
         Base.liftBase $
           Zlib.foldDecompressStream

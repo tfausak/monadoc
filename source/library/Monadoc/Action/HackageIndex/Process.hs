@@ -10,7 +10,6 @@ import qualified Control.Concurrent.STM as Stm
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Base as Base
 import qualified Control.Monad.Catch as Exception
-import qualified Control.Monad.Reader as Reader
 import qualified Control.Monad.Trans.Control as Control
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
@@ -39,7 +38,6 @@ import qualified Monadoc.Exception.UnexpectedEntry as UnexpectedEntry
 import qualified Monadoc.Extra.Cabal as Cabal
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Extra.Either as Either
-import qualified Monadoc.Extra.ResourcePool as Pool
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Model.HackageUser as HackageUser
@@ -49,7 +47,6 @@ import qualified Monadoc.Model.Range as Range
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.Constraint as Constraint
-import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
@@ -63,7 +60,6 @@ run ::
   ( Control.MonadBaseControl IO m,
     MonadLog.MonadLog m,
     Exception.MonadMask m,
-    Reader.MonadReader Context.Context m,
     MonadSql.MonadSql m
   ) =>
   m ()
@@ -74,15 +70,14 @@ run = do
     hackageIndex : _ -> do
       constraints <- Base.liftBase $ Stm.newTVarIO Map.empty
       revisions <- Base.liftBase $ Stm.newTVarIO Map.empty
-      context <- Reader.ask
       let blobKey = HackageIndex.blob $ Model.value hackageIndex
       size <- do
         xs <- MonadSql.query "select size from blob where key = ?" [blobKey]
         case xs of
           [] -> Exception.throwM NotFound.NotFound
           Sql.Only x : _ -> pure x
-      Pool.withResourceLifted (Context.pool context) $ \connection ->
-        Sqlite.withBlob (Sql.connectionHandle connection) "blob" "contents" (Witch.into @Int.Int64 blobKey) False $ \blob -> do
+      MonadSql.withConnection $ \connection ->
+        Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 blobKey) False $ \blob -> do
           contents <- Base.liftBase $ Sqlite.unsafeBlobRead blob size 0
           mapM_ (handleItem constraints revisions)
             . Tar.foldEntries ((:) . Right) [] (pure . Left)

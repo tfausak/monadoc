@@ -3,7 +3,6 @@
 
 module Monadoc.Extra.DirectSqlite where
 
-import qualified Control.Monad.Base as Base
 import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Trans.Control as Control
 import qualified Data.ByteString as ByteString
@@ -22,21 +21,34 @@ unsafeBlobRead blob total offset = do
     else pure []
 
 withBlob ::
-  (Control.MonadBaseControl IO m, Exception.MonadMask m) =>
   Sqlite.Database ->
+  Text.Text ->
+  Text.Text ->
+  Text.Text ->
+  Int.Int64 ->
+  Bool ->
+  (Sqlite.Blob -> IO a) ->
+  IO a
+withBlob database symbolic table column key write =
+  Exception.bracket
+    ( Sqlite.blobOpen
+        database
+        symbolic
+        table
+        column
+        key
+        write
+    )
+    Sqlite.blobClose
+
+withBlobLifted ::
+  Control.MonadBaseControl IO m =>
+  Sqlite.Database ->
+  Text.Text ->
   Text.Text ->
   Text.Text ->
   Int.Int64 ->
   Bool ->
   (Sqlite.Blob -> m a) ->
   m a
-withBlob database table column key write action = do
-  let acquire =
-        Sqlite.blobOpen
-          database
-          "main"
-          table
-          column
-          key
-          write
-  Exception.bracket (Base.liftBase acquire) (Base.liftBase . Sqlite.blobClose) action
+withBlobLifted d s t c k = Control.liftBaseOp . withBlob d s t c k

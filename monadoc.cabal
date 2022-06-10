@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.6.8
+version: 0.2022.6.10
 
 build-type: Simple
 category: Documentation
@@ -187,6 +187,7 @@ library
     Monadoc.Extra.ListSpec
     Monadoc.Extra.Read
     Monadoc.Extra.ResourcePool
+    Monadoc.Extra.SqliteSimple
     Monadoc.Extra.Time
     Monadoc.Extra.TimeSpec
     Monadoc.Handler.AppleTouchIcon.Get
