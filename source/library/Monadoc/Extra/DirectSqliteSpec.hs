@@ -6,7 +6,7 @@ module Monadoc.Extra.DirectSqliteSpec where
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite3 as Sqlite
 import qualified Monadoc.Extra.DirectSqlite as Extra
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Test.Hspec as Hspec
 
 spec :: Hspec.Spec

@@ -6,7 +6,7 @@ module Monadoc.Model.JobSpec where
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Extra.Time as Time
 import qualified Monadoc.Model.Job as Job
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Status as Status
 import qualified Monadoc.Type.Task as Task
 import qualified Test.Hspec as Hspec

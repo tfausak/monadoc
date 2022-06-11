@@ -5,7 +5,7 @@ module Monadoc.Action.Blob.InsertSpec where
 
 import qualified Control.Monad.Base as Base
 import qualified Monadoc.Action.Blob.Insert as Blob.Insert
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec
 import qualified Witch

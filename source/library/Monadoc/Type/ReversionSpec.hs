@@ -2,7 +2,7 @@
 
 module Monadoc.Type.ReversionSpec where
 
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Reversion as Reversion
 import qualified Monadoc.Type.Revision as Revision
 import qualified Monadoc.Type.VersionNumber as VersionNumber

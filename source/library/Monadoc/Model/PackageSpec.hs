@@ -5,7 +5,7 @@ module Monadoc.Model.PackageSpec where
 
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Model.Package as Package
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Test.Hspec as Hspec
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch

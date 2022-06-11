@@ -8,7 +8,7 @@ import qualified Control.Monad.Trans.Control as Control
 import qualified Monadoc.Action.Key.SelectLastInsert as Key.SelectLastInsert
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Exception.MissingRowid as MissingRowid
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Key as Key
 import qualified Test.Hspec as Hspec
 import qualified Witch

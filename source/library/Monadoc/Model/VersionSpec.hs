@@ -5,7 +5,7 @@ module Monadoc.Model.VersionSpec where
 
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Model.Version as Version
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Test.Hspec as Hspec
 import qualified Test.QuickCheck as QuickCheck

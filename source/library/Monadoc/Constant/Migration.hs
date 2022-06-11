@@ -9,6 +9,7 @@ import qualified Monadoc.Model.Job as Job
 import qualified Monadoc.Model.License as License
 import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Model.Package as Package
+import qualified Monadoc.Model.PackageMeta as PackageMeta
 import qualified Monadoc.Model.Preference as Preference
 import qualified Monadoc.Model.Range as Range
 import qualified Monadoc.Model.Upload as Upload
@@ -26,6 +27,7 @@ all =
         Job.migrations,
         Migration.migrations,
         Package.migrations,
+        PackageMeta.migrations,
         Preference.migrations,
         Range.migrations,
         Upload.migrations,

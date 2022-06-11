@@ -5,7 +5,7 @@ module Monadoc.Action.Version.UpsertSpec where
 import qualified Control.Monad.Base as Base
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
 import qualified Monadoc.Model.Version as Version
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec
 import qualified Witch

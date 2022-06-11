@@ -7,7 +7,7 @@ import qualified Control.Monad.Base as Base
 import qualified Monadoc.Action.Blob.Insert as Blob.Insert
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Query.Blob as Blob
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Hash as Hash
 import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec

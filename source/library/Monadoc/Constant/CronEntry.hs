@@ -36,7 +36,7 @@ all =
     CronEntry.CronEntry
       { CronEntry.guid = Just . Witch.from $ Uuid.fromWords64 0xde9e88dfd68549cb 0xb2c92386d3d388bc,
         CronEntry.runAt = Witch.from Time.epoch,
-        CronEntry.schedule = Witch.from Cron.hourly,
+        CronEntry.schedule = Witch.from Cron.everyMinute,
         CronEntry.task = Task.ProcessUploads
       }
   ]

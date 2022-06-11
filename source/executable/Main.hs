@@ -1,4 +1,4 @@
-import qualified Monadoc.Main.Executable as Monadoc
+import qualified Monadoc
 
 main :: IO ()
 main = Monadoc.executable

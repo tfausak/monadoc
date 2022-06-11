@@ -2,7 +2,7 @@
 
 module Monadoc.Type.PortSpec where
 
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Port as Port
 import qualified Test.Hspec as Hspec
 import qualified Witch

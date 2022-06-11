@@ -6,7 +6,7 @@ module Monadoc.Type.GuidSpec where
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.UUID as Uuid
 import qualified Database.SQLite.Simple as Sql
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Guid as Guid
 import qualified Test.Hspec as Hspec
 import qualified Test.QuickCheck as QuickCheck

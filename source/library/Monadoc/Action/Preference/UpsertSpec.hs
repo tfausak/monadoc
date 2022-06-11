@@ -11,7 +11,7 @@ import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.Preference as Preference
 import qualified Monadoc.Model.Range as Range
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName

@@ -6,7 +6,7 @@ module Monadoc.Type.PackageNameSpec where
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
 import qualified Distribution.Types.PackageName as Cabal
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.PackageName as PackageName
 import qualified Test.Hspec as Hspec
 import qualified Test.QuickCheck as QuickCheck

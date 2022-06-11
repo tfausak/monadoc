@@ -4,7 +4,7 @@
 module Monadoc.Type.HackageUserNameSpec where
 
 import qualified Database.SQLite.Simple as Sql
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Test.Hspec as Hspec
 import qualified Test.QuickCheck as QuickCheck

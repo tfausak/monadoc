@@ -7,7 +7,7 @@ import qualified Data.UUID as Uuid
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Extra.Time as Time
 import qualified Monadoc.Model.CronEntry as CronEntry
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Task as Task
 import qualified System.Cron as Cron
 import qualified Test.Hspec as Hspec

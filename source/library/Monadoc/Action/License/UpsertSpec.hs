@@ -6,7 +6,7 @@ module Monadoc.Action.License.UpsertSpec where
 import qualified Control.Monad.Base as Base
 import qualified Monadoc.Action.License.Upsert as License.Upsert
 import qualified Monadoc.Model.License as License
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec
 import qualified Witch

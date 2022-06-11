@@ -6,7 +6,7 @@ import qualified Control.Monad.Base as Base
 import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
 import qualified Monadoc.Action.CronEntry.Update as CronEntry.Update
 import qualified Monadoc.Query.CronEntry as CronEntry
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec
 

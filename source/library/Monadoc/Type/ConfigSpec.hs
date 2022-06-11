@@ -3,7 +3,7 @@
 
 module Monadoc.Type.ConfigSpec where
 
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Flag as Flag
 import qualified Monadoc.Type.Port as Port

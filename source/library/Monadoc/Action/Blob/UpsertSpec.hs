@@ -6,7 +6,7 @@ module Monadoc.Action.Blob.UpsertSpec where
 import qualified Control.Monad.Base as Base
 import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
 import qualified Monadoc.Model.Blob as Blob
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec
 import qualified Witch

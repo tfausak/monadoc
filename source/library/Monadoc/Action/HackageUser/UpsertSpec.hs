@@ -7,7 +7,7 @@ import qualified Control.Monad.Base as Base
 import qualified Data.Text as Text
 import qualified Monadoc.Action.HackageUser.Upsert as HackageUser.Upsert
 import qualified Monadoc.Model.HackageUser as HackageUser
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec
 import qualified Witch

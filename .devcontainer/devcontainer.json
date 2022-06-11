@@ -1,14 +1,14 @@
 {
   "dockerComposeFile": "docker-compose.yaml",
   "extensions": [
+    "EditorConfig.EditorConfig",
     "haskell.haskell"
   ],
   "overrideCommand": true,
   "postCreateCommand": ".devcontainer/postCreate.sh",
   "service": "devcontainer",
   "settings": {
-    "editor.formatOnSave": true,
-    "editor.tabSize": 2
+    "editor.formatOnSave": true
   },
   "workspaceFolder": "/workspace"
 }

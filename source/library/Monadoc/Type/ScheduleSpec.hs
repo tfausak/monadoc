@@ -5,7 +5,7 @@ module Monadoc.Type.ScheduleSpec where
 
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Schedule as Schedule
 import qualified System.Cron as Cron
 import qualified Test.Hspec as Hspec

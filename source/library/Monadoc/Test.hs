@@ -2,7 +2,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Monadoc.Test.Common where
+module Monadoc.Test where
 
 import qualified Control.Monad.Base as Base
 import qualified Control.Monad.Catch as Exception

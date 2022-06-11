@@ -5,7 +5,7 @@ module Monadoc.Type.HashSpec where
 
 import qualified Data.ByteString as ByteString
 import qualified Database.SQLite.Simple as Sql
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Hash as Hash
 import qualified Test.Hspec as Hspec
 import qualified Test.QuickCheck as QuickCheck

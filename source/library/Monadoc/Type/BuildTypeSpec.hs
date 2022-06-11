@@ -1,28 +1,28 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 
-module Monadoc.Type.ConstraintSpec where
+module Monadoc.Type.BuildTypeSpec where
 
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Test as Test
-import qualified Monadoc.Type.Constraint as Constraint
+import qualified Monadoc.Type.BuildType as BuildType
 import qualified Test.Hspec as Hspec
 import qualified Test.QuickCheck as QuickCheck
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Type.Constraint" $ do
+spec = Hspec.describe "Monadoc.Type.BuildType" $ do
   Hspec.it "can be converted from a string" $ do
-    Test.expectTryFrom (">=0" :: String) Constraint.any
+    Test.expectTryFrom ("Simple" :: String) BuildType.simple
 
   Hspec.it "can be converted into a string" $ do
-    Test.expectFrom Constraint.any (">=0" :: String)
+    Test.expectFrom BuildType.simple ("Simple" :: String)
 
   Hspec.it "can be round-tripped through SQL" $ do
-    Test.expectSqlField Constraint.any $ Sql.SQLText ">=0"
+    Test.expectSqlField BuildType.simple $ Sql.SQLText "Simple"
 
   Hspec.it "can be round-tripped through SQL" $
-    QuickCheck.property (Test.propertySqlField @Constraint.Constraint)
+    QuickCheck.property (Test.propertySqlField @BuildType.BuildType)
 
   Hspec.it "can be rendered as HTML" $ do
-    Test.expectHtml Constraint.any "&gt;=0"
-    Test.expectHtmlRaw Constraint.any ">=0"
+    Test.expectHtml BuildType.simple "Simple"
+    Test.expectHtmlRaw BuildType.simple "Simple"

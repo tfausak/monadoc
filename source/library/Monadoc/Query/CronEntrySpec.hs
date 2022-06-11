@@ -11,7 +11,7 @@ import qualified Data.Time as Time
 import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
 import qualified Monadoc.Model.CronEntry as CronEntry
 import qualified Monadoc.Query.CronEntry as CronEntry
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Test.Hspec as Hspec

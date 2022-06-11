@@ -37,6 +37,14 @@ render context breadcrumbs package version upload hackageUser maybeLatest = do
       route = Route.Version packageName reversion
       title = "Package " <> Witch.into @Text.Text packageName <> " version " <> Witch.into @Text.Text reversion <> " :: Monadoc"
   Common.base context route breadcrumbs title $ do
+    Monad.when (not . Upload.isPreferred $ Model.value upload)
+      . Html.div_ [Html.class_ "alert alert-warning"]
+      $ do
+        "Version "
+        Html.toHtml reversion
+        " of "
+        Html.toHtml packageName
+        " is deprecated."
     case maybeLatest of
       Nothing -> pure ()
       Just (upl Sql.:. ver) -> Html.div_ [Html.class_ "alert alert-info"] $ do
@@ -54,14 +62,6 @@ render context breadcrumbs package version upload hackageUser maybeLatest = do
           ]
           $ Html.toHtml rev
         "."
-    Monad.when (not . Upload.isPreferred $ Model.value upload)
-      . Html.div_ [Html.class_ "alert alert-warning"]
-      $ do
-        "Version "
-        Html.toHtml reversion
-        " of "
-        Html.toHtml packageName
-        " is deprecated."
     Html.h2_ $ Html.toHtml packageName
     Html.p_ $ do
       "Version "

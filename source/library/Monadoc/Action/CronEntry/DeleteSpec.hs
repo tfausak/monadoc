@@ -8,7 +8,7 @@ import qualified Monadoc.Action.CronEntry.Delete as CronEntry.Delete
 import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
 import qualified Monadoc.Model.CronEntry as CronEntry
 import qualified Monadoc.Query.CronEntry as CronEntry
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Test.Hspec as Hspec
 
 spec :: Hspec.Spec

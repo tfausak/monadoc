@@ -1,7 +1,7 @@
 module Monadoc.Type.SeveritySpec where
 
 import qualified Data.List as List
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Severity as Severity
 import qualified Test.Hspec as Hspec
 

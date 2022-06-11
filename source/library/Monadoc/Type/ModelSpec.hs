@@ -1,7 +1,7 @@
 module Monadoc.Type.ModelSpec where
 
 import qualified Database.SQLite.Simple as Sql
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec

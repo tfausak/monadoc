@@ -5,7 +5,7 @@ module Monadoc.Type.FlagSpec where
 import qualified Monadoc.Exception.InvalidOption as InvalidOption
 import qualified Monadoc.Exception.UnexpectedArgument as UnexpectedArgument
 import qualified Monadoc.Exception.UnknownOption as UnknownOption
-import qualified Monadoc.Test.Common as Test
+import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Flag as Flag
 import qualified Test.Hspec as Hspec
 

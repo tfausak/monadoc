@@ -1,4 +1,4 @@
-module Monadoc.Test.Spec where
+module MonadocSpec where
 
 import qualified Monadoc.Action.Blob.InsertSpec
 import qualified Monadoc.Action.Blob.UpsertSpec
@@ -16,6 +16,7 @@ import qualified Monadoc.Action.Key.SelectLastInsertSpec
 import qualified Monadoc.Action.License.InsertSpec
 import qualified Monadoc.Action.License.UpsertSpec
 import qualified Monadoc.Action.Package.UpsertSpec
+import qualified Monadoc.Action.PackageMeta.InsertSpec
 import qualified Monadoc.Action.Preference.UpsertSpec
 import qualified Monadoc.Action.Range.InsertSpec
 import qualified Monadoc.Action.Range.UpsertSpec
@@ -32,6 +33,7 @@ import qualified Monadoc.Model.HackageUserSpec
 import qualified Monadoc.Model.JobSpec
 import qualified Monadoc.Model.LicenseSpec
 import qualified Monadoc.Model.MigrationSpec
+import qualified Monadoc.Model.PackageMetaSpec
 import qualified Monadoc.Model.PackageSpec
 import qualified Monadoc.Model.PreferenceSpec
 import qualified Monadoc.Model.RangeSpec
@@ -40,7 +42,9 @@ import qualified Monadoc.Model.VersionSpec
 import qualified Monadoc.Query.BlobSpec
 import qualified Monadoc.Query.CronEntrySpec
 import qualified Monadoc.Query.LicenseSpec
+import qualified Monadoc.Query.PackageMetaSpec
 import qualified Monadoc.Query.RangeSpec
+import qualified Monadoc.Type.BuildTypeSpec
 import qualified Monadoc.Type.ConfigSpec
 import qualified Monadoc.Type.ConstraintSpec
 import qualified Monadoc.Type.FlagSpec
@@ -81,6 +85,7 @@ spec = do
   Monadoc.Action.License.InsertSpec.spec
   Monadoc.Action.License.UpsertSpec.spec
   Monadoc.Action.Package.UpsertSpec.spec
+  Monadoc.Action.PackageMeta.InsertSpec.spec
   Monadoc.Action.Preference.UpsertSpec.spec
   Monadoc.Action.Range.InsertSpec.spec
   Monadoc.Action.Range.UpsertSpec.spec
@@ -97,6 +102,7 @@ spec = do
   Monadoc.Model.JobSpec.spec
   Monadoc.Model.LicenseSpec.spec
   Monadoc.Model.MigrationSpec.spec
+  Monadoc.Model.PackageMetaSpec.spec
   Monadoc.Model.PackageSpec.spec
   Monadoc.Model.PreferenceSpec.spec
   Monadoc.Model.RangeSpec.spec
@@ -105,7 +111,9 @@ spec = do
   Monadoc.Query.BlobSpec.spec
   Monadoc.Query.CronEntrySpec.spec
   Monadoc.Query.LicenseSpec.spec
+  Monadoc.Query.PackageMetaSpec.spec
   Monadoc.Query.RangeSpec.spec
+  Monadoc.Type.BuildTypeSpec.spec
   Monadoc.Type.ConfigSpec.spec
   Monadoc.Type.ConstraintSpec.spec
   Monadoc.Type.FlagSpec.spec

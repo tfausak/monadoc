@@ -40,7 +40,11 @@ instance Sql.ToField Hash where
   toField = Sql.toField . Witch.into @ByteString.ByteString
 
 instance QuickCheck.Arbitrary Hash where
-  arbitrary = QuickCheck.suchThatMap (QuickCheck.vector 32) $ Either.hush . Witch.tryFrom . ByteString.pack
+  arbitrary =
+    QuickCheck.suchThatMap (QuickCheck.vector 32) $
+      Either.hush
+        . Witch.tryFrom
+        . ByteString.pack
 
 new :: ByteString.ByteString -> Hash
 new = Witch.from @(Crypto.Digest Crypto.SHA256) . Crypto.hash
