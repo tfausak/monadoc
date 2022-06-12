@@ -64,7 +64,7 @@ instance Base.MonadBase IO m => MonadSay.MonadSay (AppT m) where
 instance Base.MonadBase IO m => MonadSleep.MonadSleep (AppT m) where
   sleep = Base.liftBase . MonadSleep.sleep
 
-instance (Monad m, Control.MonadBaseControl IO m) => MonadSql.MonadSql (AppT m) where
+instance Control.MonadBaseControl IO m => MonadSql.MonadSql (AppT m) where
   withConnection callback = do
     context <- Reader.ask
     Pool.withResourceLifted (Context.pool context) callback
