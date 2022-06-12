@@ -12,8 +12,8 @@ run :: (MonadSql.MonadSql m, Exception.MonadThrow m) => PackageMeta.PackageMeta 
 run packageMeta = do
   MonadSql.execute
     "insert into packageMeta \
-    \ (buildType, cabalVersion, hash, license, upload) \
-    \ values (?, ?, ?, ?, ?)"
+    \ (buildType, cabalVersion, hash, license, upload, author, bugReports, category, copyright, description, homepage, maintainer, pkgUrl, stability, synopsis) \
+    \ values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     packageMeta
   key <- Key.SelectLastInsert.run
   pure Model.Model {Model.key = key, Model.value = packageMeta}

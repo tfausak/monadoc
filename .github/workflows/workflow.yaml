@@ -16,7 +16,7 @@ jobs:
       - run: cabal check
 
   hlint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-20.04 # See 1549016ad08a9852136140e02ec372bff7e07a44.
     name: HLint
     steps:
       - uses: actions/checkout@v3
@@ -62,7 +62,7 @@ jobs:
       - id: setup-haskell
         uses: haskell/actions/setup@v2
         with:
-          ghc-version: 9.2.2
+          ghc-version: 9.2.3
 
       - run: cabal configure --enable-optimization=2 --enable-tests --flags pedantic --jobs
 
@@ -101,7 +101,7 @@ jobs:
 
   docker:
     needs: build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-20.04 # See 3bf91d8247af8740c0723a170c867735efedf92f.
     name: Docker
     steps:
       - uses: actions/checkout@v3

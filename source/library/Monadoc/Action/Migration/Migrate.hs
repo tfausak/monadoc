@@ -8,7 +8,7 @@ import qualified Data.Text as Text
 import qualified Monadoc.Action.Migration.Insert as Migration.Insert
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
-import qualified Monadoc.Exception.MigrationMismatch as MigrationMismatch
+import qualified Monadoc.Exception.Mismatch as Mismatch
 import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Query.Migration as Migration
 import qualified Monadoc.Type.Model as Model
@@ -28,11 +28,10 @@ run migration = do
       Migration.Insert.run migration
     Just model -> do
       let oldQuery = Migration.query $ Model.value model
-      Monad.when (oldQuery /= query)
-        . Exception.throwM
-        $ MigrationMismatch.MigrationMismatch
-          { MigrationMismatch.createdAt = createdAt,
-            MigrationMismatch.expected = oldQuery,
-            MigrationMismatch.actual = query
-          }
+      Monad.when (oldQuery /= query) $
+        Exception.throwM
+          Mismatch.Mismatch
+            { Mismatch.expected = oldQuery,
+              Mismatch.actual = query
+            }
       pure model

@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.6.11
+version: 0.2022.6.12
 
 build-type: Simple
 category: Documentation
@@ -98,39 +98,65 @@ library
   exposed-modules:
     Monadoc
     Monadoc.Action.Blob.Insert
+    Monadoc.Action.Blob.InsertSpec
     Monadoc.Action.Blob.Upsert
+    Monadoc.Action.Blob.UpsertSpec
     Monadoc.Action.CronEntry.Delete
+    Monadoc.Action.CronEntry.DeleteSpec
     Monadoc.Action.CronEntry.Enqueue
+    Monadoc.Action.CronEntry.EnqueueSpec
     Monadoc.Action.CronEntry.Insert
+    Monadoc.Action.CronEntry.InsertSpec
     Monadoc.Action.CronEntry.Prune
+    Monadoc.Action.CronEntry.PruneSpec
     Monadoc.Action.CronEntry.Update
+    Monadoc.Action.CronEntry.UpdateSpec
     Monadoc.Action.CronEntry.Upsert
+    Monadoc.Action.CronEntry.UpsertSpec
     Monadoc.Action.Database.Initialize
+    Monadoc.Action.Database.InitializeSpec
     Monadoc.Action.Database.Vacuum
+    Monadoc.Action.Database.VacuumSpec
     Monadoc.Action.HackageIndex.Insert
     Monadoc.Action.HackageIndex.Process
     Monadoc.Action.HackageIndex.Prune
     Monadoc.Action.HackageIndex.Update
     Monadoc.Action.HackageIndex.Upsert
     Monadoc.Action.HackageUser.Upsert
+    Monadoc.Action.HackageUser.UpsertSpec
     Monadoc.Action.Job.Acquire
     Monadoc.Action.Job.Enqueue
+    Monadoc.Action.Job.EnqueueSpec
     Monadoc.Action.Job.Perform
     Monadoc.Action.Job.Release
     Monadoc.Action.Key.SelectLastInsert
+    Monadoc.Action.Key.SelectLastInsertSpec
     Monadoc.Action.License.Insert
+    Monadoc.Action.License.InsertSpec
     Monadoc.Action.License.Upsert
+    Monadoc.Action.License.UpsertSpec
     Monadoc.Action.Migration.Insert
     Monadoc.Action.Migration.Migrate
     Monadoc.Action.Package.Upsert
+    Monadoc.Action.Package.UpsertSpec
     Monadoc.Action.PackageMeta.Insert
+    Monadoc.Action.PackageMeta.InsertSpec
+    Monadoc.Action.PackageMeta.Update
+    Monadoc.Action.PackageMeta.UpdateSpec
+    Monadoc.Action.PackageMeta.Upsert
+    Monadoc.Action.PackageMeta.UpsertSpec
     Monadoc.Action.Preference.Upsert
+    Monadoc.Action.Preference.UpsertSpec
     Monadoc.Action.Range.Insert
+    Monadoc.Action.Range.InsertSpec
     Monadoc.Action.Range.Upsert
+    Monadoc.Action.Range.UpsertSpec
     Monadoc.Action.Task.Perform
     Monadoc.Action.Upload.Process
     Monadoc.Action.Upload.Upsert
+    Monadoc.Action.Upload.UpsertSpec
     Monadoc.Action.Version.Upsert
+    Monadoc.Action.Version.UpsertSpec
     Monadoc.Class.MonadFile
     Monadoc.Class.MonadHttp
     Monadoc.Class.MonadLog
@@ -143,10 +169,10 @@ library
     Monadoc.Constant.Header
     Monadoc.Constant.Migration
     Monadoc.Exception.Found
+    Monadoc.Exception.InvalidGenericPackageDescription
     Monadoc.Exception.InvalidOption
-    Monadoc.Exception.InvalidSize
     Monadoc.Exception.MethodNotAllowed
-    Monadoc.Exception.MigrationMismatch
+    Monadoc.Exception.Mismatch
     Monadoc.Exception.MissingHeader
     Monadoc.Exception.MissingRowid
     Monadoc.Exception.MissingSize
@@ -161,12 +187,18 @@ library
     Monadoc.Extra.Aeson
     Monadoc.Extra.Cabal
     Monadoc.Extra.DirectSqlite
+    Monadoc.Extra.DirectSqliteSpec
     Monadoc.Extra.Either
+    Monadoc.Extra.EitherSpec
     Monadoc.Extra.List
+    Monadoc.Extra.ListSpec
+    Monadoc.Extra.Maybe
+    Monadoc.Extra.MaybeSpec
     Monadoc.Extra.Read
     Monadoc.Extra.ResourcePool
     Monadoc.Extra.SqliteSimple
     Monadoc.Extra.Time
+    Monadoc.Extra.TimeSpec
     Monadoc.Handler.AppleTouchIcon.Get
     Monadoc.Handler.Common
     Monadoc.Handler.Favicon.Get
@@ -188,25 +220,43 @@ library
     Monadoc.Middleware.HandleExceptions
     Monadoc.Middleware.LogResponses
     Monadoc.Model.Blob
+    Monadoc.Model.BlobSpec
     Monadoc.Model.CronEntry
+    Monadoc.Model.CronEntrySpec
     Monadoc.Model.HackageIndex
+    Monadoc.Model.HackageIndexSpec
     Monadoc.Model.HackageUser
+    Monadoc.Model.HackageUserSpec
     Monadoc.Model.Job
+    Monadoc.Model.JobSpec
     Monadoc.Model.License
+    Monadoc.Model.LicenseSpec
     Monadoc.Model.Migration
+    Monadoc.Model.MigrationSpec
     Monadoc.Model.Package
     Monadoc.Model.PackageMeta
+    Monadoc.Model.PackageMetaSpec
+    Monadoc.Model.PackageSpec
     Monadoc.Model.Preference
+    Monadoc.Model.PreferenceSpec
     Monadoc.Model.Range
+    Monadoc.Model.RangeSpec
     Monadoc.Model.Upload
+    Monadoc.Model.UploadSpec
     Monadoc.Model.Version
+    Monadoc.Model.VersionSpec
     Monadoc.Query.Blob
+    Monadoc.Query.BlobSpec
     Monadoc.Query.CronEntry
+    Monadoc.Query.CronEntrySpec
     Monadoc.Query.Job
     Monadoc.Query.License
+    Monadoc.Query.LicenseSpec
     Monadoc.Query.Migration
     Monadoc.Query.PackageMeta
+    Monadoc.Query.PackageMetaSpec
     Monadoc.Query.Range
+    Monadoc.Query.RangeSpec
     Monadoc.Server.Application
     Monadoc.Server.Main
     Monadoc.Server.Middleware
@@ -216,105 +266,60 @@ library
     Monadoc.Template.Search.Get
     Monadoc.Template.User.Get
     Monadoc.Template.Version.Get
+    Monadoc.Test
     Monadoc.Type.App
     Monadoc.Type.Breadcrumb
     Monadoc.Type.BuildType
+    Monadoc.Type.BuildTypeSpec
     Monadoc.Type.Config
+    Monadoc.Type.ConfigSpec
     Monadoc.Type.Constraint
+    Monadoc.Type.ConstraintSpec
     Monadoc.Type.Context
     Monadoc.Type.Flag
+    Monadoc.Type.FlagSpec
     Monadoc.Type.Guid
+    Monadoc.Type.GuidSpec
     Monadoc.Type.HackageUserName
+    Monadoc.Type.HackageUserNameSpec
     Monadoc.Type.Hash
+    Monadoc.Type.HashSpec
     Monadoc.Type.Icon
     Monadoc.Type.Key
+    Monadoc.Type.KeySpec
     Monadoc.Type.Manifest
     Monadoc.Type.Model
+    Monadoc.Type.ModelSpec
     Monadoc.Type.PackageName
+    Monadoc.Type.PackageNameSpec
     Monadoc.Type.Port
+    Monadoc.Type.PortSpec
     Monadoc.Type.Query
     Monadoc.Type.Reversion
+    Monadoc.Type.ReversionSpec
     Monadoc.Type.Revision
+    Monadoc.Type.RevisionSpec
     Monadoc.Type.Route
+    Monadoc.Type.RouteSpec
     Monadoc.Type.Schedule
+    Monadoc.Type.ScheduleSpec
     Monadoc.Type.Search
     Monadoc.Type.Severity
-    Monadoc.Type.Spdx
-    Monadoc.Type.Status
-    Monadoc.Type.Task
-    Monadoc.Type.Timestamp
-    Monadoc.Type.VersionNumber
-    Monadoc.Worker.Main
-  hs-source-dirs: source/library
-  other-modules:
-    Monadoc.Action.Blob.InsertSpec
-    Monadoc.Action.Blob.UpsertSpec
-    Monadoc.Action.CronEntry.DeleteSpec
-    Monadoc.Action.CronEntry.EnqueueSpec
-    Monadoc.Action.CronEntry.InsertSpec
-    Monadoc.Action.CronEntry.PruneSpec
-    Monadoc.Action.CronEntry.UpdateSpec
-    Monadoc.Action.CronEntry.UpsertSpec
-    Monadoc.Action.Database.InitializeSpec
-    Monadoc.Action.Database.VacuumSpec
-    Monadoc.Action.HackageUser.UpsertSpec
-    Monadoc.Action.Job.EnqueueSpec
-    Monadoc.Action.Key.SelectLastInsertSpec
-    Monadoc.Action.License.InsertSpec
-    Monadoc.Action.License.UpsertSpec
-    Monadoc.Action.Package.UpsertSpec
-    Monadoc.Action.PackageMeta.InsertSpec
-    Monadoc.Action.Preference.UpsertSpec
-    Monadoc.Action.Range.InsertSpec
-    Monadoc.Action.Range.UpsertSpec
-    Monadoc.Action.Upload.UpsertSpec
-    Monadoc.Action.Version.UpsertSpec
-    Monadoc.Extra.DirectSqliteSpec
-    Monadoc.Extra.EitherSpec
-    Monadoc.Extra.ListSpec
-    Monadoc.Extra.TimeSpec
-    Monadoc.Model.BlobSpec
-    Monadoc.Model.CronEntrySpec
-    Monadoc.Model.HackageIndexSpec
-    Monadoc.Model.HackageUserSpec
-    Monadoc.Model.JobSpec
-    Monadoc.Model.LicenseSpec
-    Monadoc.Model.MigrationSpec
-    Monadoc.Model.PackageMetaSpec
-    Monadoc.Model.PackageSpec
-    Monadoc.Model.PreferenceSpec
-    Monadoc.Model.RangeSpec
-    Monadoc.Model.UploadSpec
-    Monadoc.Model.VersionSpec
-    Monadoc.Query.BlobSpec
-    Monadoc.Query.CronEntrySpec
-    Monadoc.Query.LicenseSpec
-    Monadoc.Query.PackageMetaSpec
-    Monadoc.Query.RangeSpec
-    Monadoc.Test
-    Monadoc.Type.BuildTypeSpec
-    Monadoc.Type.ConfigSpec
-    Monadoc.Type.ConstraintSpec
-    Monadoc.Type.FlagSpec
-    Monadoc.Type.GuidSpec
-    Monadoc.Type.HackageUserNameSpec
-    Monadoc.Type.HashSpec
-    Monadoc.Type.KeySpec
-    Monadoc.Type.ModelSpec
-    Monadoc.Type.PackageNameSpec
-    Monadoc.Type.PortSpec
-    Monadoc.Type.ReversionSpec
-    Monadoc.Type.RevisionSpec
-    Monadoc.Type.RouteSpec
-    Monadoc.Type.ScheduleSpec
     Monadoc.Type.SeveritySpec
+    Monadoc.Type.Spdx
     Monadoc.Type.SpdxSpec
+    Monadoc.Type.Status
     Monadoc.Type.StatusSpec
+    Monadoc.Type.Task
     Monadoc.Type.TaskSpec
+    Monadoc.Type.Timestamp
     Monadoc.Type.TimestampSpec
+    Monadoc.Type.VersionNumber
     Monadoc.Type.VersionNumberSpec
+    Monadoc.Worker.Main
     MonadocSpec
     Paths_monadoc
+  hs-source-dirs: source/library
 
 executable monadoc
   import: executable

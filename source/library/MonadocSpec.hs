@@ -17,6 +17,8 @@ import qualified Monadoc.Action.License.InsertSpec
 import qualified Monadoc.Action.License.UpsertSpec
 import qualified Monadoc.Action.Package.UpsertSpec
 import qualified Monadoc.Action.PackageMeta.InsertSpec
+import qualified Monadoc.Action.PackageMeta.UpdateSpec
+import qualified Monadoc.Action.PackageMeta.UpsertSpec
 import qualified Monadoc.Action.Preference.UpsertSpec
 import qualified Monadoc.Action.Range.InsertSpec
 import qualified Monadoc.Action.Range.UpsertSpec
@@ -25,6 +27,7 @@ import qualified Monadoc.Action.Version.UpsertSpec
 import qualified Monadoc.Extra.DirectSqliteSpec
 import qualified Monadoc.Extra.EitherSpec
 import qualified Monadoc.Extra.ListSpec
+import qualified Monadoc.Extra.MaybeSpec
 import qualified Monadoc.Extra.TimeSpec
 import qualified Monadoc.Model.BlobSpec
 import qualified Monadoc.Model.CronEntrySpec
@@ -86,6 +89,8 @@ spec = do
   Monadoc.Action.License.UpsertSpec.spec
   Monadoc.Action.Package.UpsertSpec.spec
   Monadoc.Action.PackageMeta.InsertSpec.spec
+  Monadoc.Action.PackageMeta.UpdateSpec.spec
+  Monadoc.Action.PackageMeta.UpsertSpec.spec
   Monadoc.Action.Preference.UpsertSpec.spec
   Monadoc.Action.Range.InsertSpec.spec
   Monadoc.Action.Range.UpsertSpec.spec
@@ -94,6 +99,7 @@ spec = do
   Monadoc.Extra.DirectSqliteSpec.spec
   Monadoc.Extra.EitherSpec.spec
   Monadoc.Extra.ListSpec.spec
+  Monadoc.Extra.MaybeSpec.spec
   Monadoc.Extra.TimeSpec.spec
   Monadoc.Model.BlobSpec.spec
   Monadoc.Model.CronEntrySpec.spec

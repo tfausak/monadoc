@@ -24,36 +24,7 @@ import qualified Witch
 spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Action.PackageMeta.Insert" . Hspec.around Test.withConnection $ do
   Hspec.it "inserts a new package meta" . Test.runFake $ do
-    license <- do
-      x <- Test.arbitrary
-      License.Upsert.run x
-    blob <- do
-      x <- Test.arbitrary
-      Blob.Upsert.run x
-    package <- do
-      x <- Test.arbitrary
-      Package.Upsert.run x
-    hackageUser <- do
-      x <- Test.arbitrary
-      HackageUser.Upsert.run x
-    version <- do
-      x <- Test.arbitrary
-      Version.Upsert.run x
-    upload <- do
-      x <- Test.arbitraryWith $ \y ->
-        y
-          { Upload.blob = Model.key blob,
-            Upload.package = Model.key package,
-            Upload.uploadedBy = Model.key hackageUser,
-            Upload.version = Model.key version
-          }
-      Upload.Upsert.run x
-    packageMeta <- Test.arbitraryWith $ \x ->
-      x
-        { PackageMeta.cabalVersion = Model.key version,
-          PackageMeta.license = Model.key license,
-          PackageMeta.upload = Model.key upload
-        }
+    packageMeta <- makePackageMeta
     model <- PackageMeta.Insert.run packageMeta
     let expected =
           Model.Model
@@ -62,8 +33,20 @@ spec = Hspec.describe "Monadoc.Action.PackageMeta.Insert" . Hspec.around Test.wi
             }
     Base.liftBase $ model `Hspec.shouldBe` expected
 
-insertPackageMeta :: (Base.MonadBase IO m, MonadSql.MonadSql m, Exception.MonadThrow m) => m PackageMeta.Model
+insertPackageMeta ::
+  (Base.MonadBase IO m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
+  m PackageMeta.Model
 insertPackageMeta = do
+  x <- makePackageMeta
+  PackageMeta.Insert.run x
+
+makePackageMeta ::
+  (Base.MonadBase IO m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
+  m PackageMeta.PackageMeta
+makePackageMeta = do
+  version <- do
+    x <- Test.arbitrary
+    Version.Upsert.run x
   license <- do
     x <- Test.arbitrary
     License.Upsert.run x
@@ -76,9 +59,6 @@ insertPackageMeta = do
   hackageUser <- do
     x <- Test.arbitrary
     HackageUser.Upsert.run x
-  version <- do
-    x <- Test.arbitrary
-    Version.Upsert.run x
   upload <- do
     x <- Test.arbitraryWith $ \y ->
       y
@@ -88,10 +68,9 @@ insertPackageMeta = do
           Upload.version = Model.key version
         }
     Upload.Upsert.run x
-  x <- Test.arbitraryWith $ \y ->
-    y
+  Test.arbitraryWith $ \x ->
+    x
       { PackageMeta.cabalVersion = Model.key version,
         PackageMeta.license = Model.key license,
         PackageMeta.upload = Model.key upload
       }
-  PackageMeta.Insert.run x

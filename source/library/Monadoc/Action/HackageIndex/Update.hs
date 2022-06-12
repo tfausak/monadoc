@@ -19,7 +19,7 @@ import qualified Monadoc.Class.MonadHttp as MonadHttp
 import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Constant.Header as Header
-import qualified Monadoc.Exception.InvalidSize as InvalidSize
+import qualified Monadoc.Exception.Mismatch as Mismatch
 import qualified Monadoc.Exception.MissingHeader as MissingHeader
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
@@ -65,10 +65,10 @@ run hackageIndex = do
       range = Witch.into @ByteString.ByteString $ "bytes=" <> show start <> "-" <> show end
   case compare oldSize newSize of
     GT ->
-      Exception.throwM $
-        InvalidSize.InvalidSize
-          { InvalidSize.old = oldSize,
-            InvalidSize.new = newSize
+      Exception.throwM
+        Mismatch.Mismatch
+          { Mismatch.expected = oldSize,
+            Mismatch.actual = newSize
           }
     EQ -> MonadLog.debug "nothing to update"
     LT -> do
@@ -79,9 +79,9 @@ run hackageIndex = do
       MonadHttp.withResponse request {Client.requestHeaders = headers} $ \response -> do
         actualSize <- getActualSize response
         Monad.when (actualSize /= newSize) . Exception.throwM $
-          InvalidSize.InvalidSize
-            { InvalidSize.old = newSize,
-              InvalidSize.new = actualSize
+          Mismatch.Mismatch
+            { Mismatch.expected = newSize,
+              Mismatch.actual = actualSize
             }
         newKey <- HackageIndex.Insert.insertBlob newSize
         MonadSql.withConnection $ \connection -> do
