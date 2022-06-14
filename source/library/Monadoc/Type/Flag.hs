@@ -9,6 +9,7 @@ import qualified System.Console.GetOpt as Console
 data Flag
   = Base String
   | Data String
+  | Dsn String
   | Hackage String
   | Help
   | Host String
@@ -73,5 +74,10 @@ options =
       []
       ["port-number"]
       (Console.ReqArg Port "NUMBER")
-      "Sets the port number to listen on.\nDefault: 3000"
+      "Sets the port number to listen on.\nDefault: 3000",
+    Console.Option
+      []
+      ["sentry-dsn"]
+      (Console.ReqArg Dsn "DSN")
+      "Sets the Sentry client key.\nDefault: empty string"
   ]

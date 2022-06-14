@@ -30,7 +30,7 @@ getSettings context =
   let config = Context.config context
    in Warp.setBeforeMainLoop (beforeMainLoop config)
         . Warp.setHost (Config.host config)
-        . Warp.setOnException (const HandleExceptions.onException)
+        . Warp.setOnException (const $ HandleExceptions.onException context)
         . Warp.setOnExceptionResponse (HandleExceptions.onExceptionResponse context)
         . Warp.setPort (Witch.into @Int $ Config.port config)
         $ Warp.setServerName ByteString.empty Warp.defaultSettings

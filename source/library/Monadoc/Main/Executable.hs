@@ -10,7 +10,7 @@ import qualified Control.Monad.Trans.Control as Control
 import qualified Data.Pool as Pool
 import qualified GHC.Conc as Conc
 import qualified Monadoc.Action.Database.Initialize as Database.Initialize
-import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
+import qualified Monadoc.Action.Exception.Log as Exception.Log
 import qualified Monadoc.Server.Main as Server
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
@@ -32,7 +32,7 @@ mainWith name arguments = do
 
   handler <- Conc.getUncaughtExceptionHandler
   Conc.setUncaughtExceptionHandler $
-    Exception.handle handler . HandleExceptions.onException
+    Exception.handle handler . Exception.Log.run
 
   flags <- Flag.fromArguments arguments
   config <- Config.fromFlags flags

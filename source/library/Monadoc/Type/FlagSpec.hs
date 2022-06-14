@@ -25,6 +25,7 @@ spec = Hspec.describe "Monadoc.Type.Flag" $ do
     Flag.fromArguments ["--host-preference=x"] `Hspec.shouldBe` Just [Flag.Host "x"]
     Flag.fromArguments ["--log-severity=x"] `Hspec.shouldBe` Just [Flag.Severity "x"]
     Flag.fromArguments ["--port-number=x"] `Hspec.shouldBe` Just [Flag.Port "x"]
+    Flag.fromArguments ["--sentry-dsn=a://b@c/d"] `Hspec.shouldBe` Just [Flag.Dsn "a://b@c/d"]
 
   Hspec.it "rejects invalid options" $ do
     Flag.fromArguments ["--help=invalid"] `Hspec.shouldThrow` Test.exceptionSelector @InvalidOption.InvalidOption

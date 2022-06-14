@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.6.12
+version: 0.2022.6.13
 
 build-type: Simple
 category: Documentation
@@ -81,6 +81,7 @@ library
     , monad-control ^>= 1.0.3
     , mtl ^>= 2.2.2
     , QuickCheck ^>= 2.14.2
+    , patrol ^>= 0.0.3
     , resource-pool ^>= 0.3.0
     , say ^>= 0.1.0
     , sqlite-simple ^>= 0.4.18
@@ -117,6 +118,8 @@ library
     Monadoc.Action.Database.InitializeSpec
     Monadoc.Action.Database.Vacuum
     Monadoc.Action.Database.VacuumSpec
+    Monadoc.Action.Exception.Log
+    Monadoc.Action.Exception.NotifySentry
     Monadoc.Action.HackageIndex.Insert
     Monadoc.Action.HackageIndex.Process
     Monadoc.Action.HackageIndex.Prune
@@ -169,6 +172,7 @@ library
     Monadoc.Constant.Header
     Monadoc.Constant.Migration
     Monadoc.Exception.Found
+    Monadoc.Exception.InvalidDsn
     Monadoc.Exception.InvalidGenericPackageDescription
     Monadoc.Exception.InvalidOption
     Monadoc.Exception.MethodNotAllowed
@@ -190,6 +194,7 @@ library
     Monadoc.Extra.DirectSqliteSpec
     Monadoc.Extra.Either
     Monadoc.Extra.EitherSpec
+    Monadoc.Extra.Exception
     Monadoc.Extra.List
     Monadoc.Extra.ListSpec
     Monadoc.Extra.Maybe
@@ -324,12 +329,14 @@ library
 executable monadoc
   import: executable
 
+  ghc-options: -threaded -rtsopts
   hs-source-dirs: source/executable
   main-is: Main.hs
 
 test-suite monadoc-test-suite
   import: executable
 
+  ghc-options: -threaded -rtsopts
   hs-source-dirs: source/test-suite
   main-is: Main.hs
   type: exitcode-stdio-1.0

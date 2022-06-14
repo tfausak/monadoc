@@ -20,7 +20,6 @@ import qualified Monadoc.Class.MonadTime as MonadTime
 import qualified Monadoc.Extra.ResourcePool as Pool
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
-import qualified Network.HTTP.Client as Client
 import qualified Say
 import qualified System.Directory as Directory
 
@@ -46,10 +45,9 @@ instance Base.MonadBase IO m => MonadFile.MonadFile (AppT m) where
   getModificationTime = Base.liftBase . Directory.getModificationTime
 
 instance Control.MonadBaseControl IO m => MonadHttp.MonadHttp (AppT m) where
-  withResponse request f = do
+  withManager callback = do
     context <- Reader.ask
-    Control.control $ \runInBase ->
-      Client.withResponse request (Context.manager context) $ runInBase . f
+    callback $ Context.manager context
 
 instance Base.MonadBase IO m => MonadLog.MonadLog (AppT m) where
   log severity message = do

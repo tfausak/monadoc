@@ -4,18 +4,23 @@ module Monadoc.Type.Config where
 
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
+import qualified Data.Bifunctor as Bifunctor
 import qualified Data.String as String
+import qualified Monadoc.Exception.InvalidDsn as InvalidDsn
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Extra.List as List
 import qualified Monadoc.Type.Flag as Flag
 import qualified Monadoc.Type.Port as Port
 import qualified Monadoc.Type.Severity as Severity
 import qualified Network.Wai.Handler.Warp as Warp
+import qualified Patrol
+import qualified Patrol.Type.Dsn as Patrol.Dsn
 import qualified Witch
 
 data Config = Config
   { base :: String,
     data_ :: Maybe FilePath,
+    dsn :: Maybe Patrol.Dsn,
     hackage :: String,
     help :: Bool,
     host :: Warp.HostPreference,
@@ -33,6 +38,7 @@ initial =
       hackage = "https://hackage.haskell.org/",
       sql = "monadoc.sqlite",
       data_ = Nothing,
+      dsn = Nothing,
       help = False,
       host = String.fromString "127.0.0.1",
       port = Witch.from @Int 3000,
@@ -44,6 +50,12 @@ applyFlag :: Exception.MonadThrow m => Config -> Flag.Flag -> m Config
 applyFlag config flag = case flag of
   Flag.Base str -> pure config {base = List.ensureSuffix '/' str}
   Flag.Data str -> pure config {data_ = Just str}
+  Flag.Dsn str ->
+    if null str
+      then pure config {dsn = Nothing}
+      else do
+        x <- Either.throw . Bifunctor.first InvalidDsn.InvalidDsn $ Patrol.Dsn.fromString str
+        pure config {dsn = Just x}
   Flag.Hackage str -> pure config {hackage = List.ensureSuffix '/' str}
   Flag.Help -> pure config {help = True}
   Flag.Host str -> pure config {host = String.fromString str}
