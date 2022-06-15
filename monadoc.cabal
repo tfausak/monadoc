@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.6.13
+version: 0.2022.6.14
 
 build-type: Simple
 category: Documentation
@@ -64,6 +64,7 @@ library
     , async ^>= 2.2.4
     , bytestring ^>= 0.11.1
     , Cabal ^>= 3.6.3
+    , case-insensitive ^>= 1.2.1
     , containers ^>= 0.6.5
     , cron ^>= 0.7.0
     , cryptonite ^>= 0.30
@@ -183,6 +184,7 @@ library
     Monadoc.Exception.NoNextMatch
     Monadoc.Exception.NotFound
     Monadoc.Exception.Sick
+    Monadoc.Exception.Traced
     Monadoc.Exception.TrailingBytes
     Monadoc.Exception.UnexpectedArgument
     Monadoc.Exception.UnexpectedEntry
