@@ -104,11 +104,12 @@ insertHackageIndex blob = do
         Model.value = hackageIndex
       }
 
-insertBlob :: (MonadSql.MonadSql m, Exception.MonadThrow m) => Int -> m Blob.Key
+insertBlob :: (MonadSql.MonadSql m, MonadTime.MonadTime m, Exception.MonadThrow m) => Int -> m Blob.Key
 insertBlob size = do
+  now <- MonadTime.getCurrentTime
   MonadSql.execute
     "insert into blob (size, hash, contents) values (?, ?, zeroblob(?))"
-    (size, Hash.new . Witch.into @ByteString.ByteString $ show size, size)
+    (size, Hash.new . Witch.into @ByteString.ByteString $ show now, size)
   Key.SelectLastInsert.run
 
 getSize :: (MonadHttp.MonadHttp m, Reader.MonadReader Context.Context m, Exception.MonadThrow m) => m Int

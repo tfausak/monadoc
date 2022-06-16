@@ -84,8 +84,8 @@ onExceptionResponse :: Context.Context -> Exception.SomeException -> Wai.Respons
 onExceptionResponse context e
   | Just (Found.Found route) <- Exception.fromException e =
       Handler.statusResponse Http.found302 [(Http.hLocation, Witch.into @ByteString.ByteString $ Template.route context route)]
-  | Exception.isType @MethodNotAllowed.MethodNotAllowed e =
-      Handler.statusResponse Http.methodNotAllowed405 []
+  | Just (MethodNotAllowed.MethodNotAllowed _ _ ms) <- Exception.fromException e =
+      Handler.statusResponse Http.methodNotAllowed405 [MethodNotAllowed.toAllowHeader ms]
   | Exception.isType @NotFound.NotFound e =
       Handler.statusResponse Http.notFound404 []
   | Exception.isType @UnknownRoute.UnknownRoute e =

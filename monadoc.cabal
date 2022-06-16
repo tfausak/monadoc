@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.6.14
+version: 0.2022.6.15
 
 build-type: Simple
 category: Documentation
@@ -60,7 +60,7 @@ library
 
   autogen-modules: Paths_monadoc
   build-depends:
-    , aeson ^>= 2.0.3
+    , aeson ^>= 2.1.0
     , async ^>= 2.2.4
     , bytestring ^>= 0.11.1
     , Cabal ^>= 3.6.3
@@ -81,8 +81,8 @@ library
     , memory ^>= 0.17.0
     , monad-control ^>= 1.0.3
     , mtl ^>= 2.2.2
+    , patrol ^>= 0.0.4
     , QuickCheck ^>= 2.14.2
-    , patrol ^>= 0.0.3
     , resource-pool ^>= 0.3.0
     , say ^>= 0.1.0
     , sqlite-simple ^>= 0.4.18

@@ -10,6 +10,7 @@ import qualified Control.Monad.Reader as Reader
 import qualified Data.Text as Text
 import qualified Monadoc.Class.MonadHttp as MonadHttp
 import qualified Monadoc.Class.MonadLog as MonadLog
+import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
 import qualified Monadoc.Extra.Exception as Exception
@@ -62,3 +63,4 @@ shouldNotify e =
   Warp.defaultShouldDisplayException e
     && Exception.isSync e
     && Exception.isNotType @UnknownRoute.UnknownRoute e
+    && Exception.isNotType @MethodNotAllowed.MethodNotAllowed e
