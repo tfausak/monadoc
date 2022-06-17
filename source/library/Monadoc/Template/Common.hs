@@ -131,6 +131,6 @@ timestamp ts =
   Html.abbr_ [Html.title_ $ Witch.into @Text.Text ts]
     . Html.time_
       [ Html.datetime_ $ Witch.into @Text.Text ts,
-        Html.class_ "timeago"
+        Html.class_ "relative"
       ]
     $ Html.toHtml ts

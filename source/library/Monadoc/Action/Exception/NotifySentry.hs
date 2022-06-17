@@ -10,6 +10,7 @@ import qualified Control.Monad.Reader as Reader
 import qualified Data.Text as Text
 import qualified Monadoc.Class.MonadHttp as MonadHttp
 import qualified Monadoc.Class.MonadLog as MonadLog
+import qualified Monadoc.Exception.Found as Found
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
@@ -64,3 +65,4 @@ shouldNotify e =
     && Exception.isSync e
     && Exception.isNotType @UnknownRoute.UnknownRoute e
     && Exception.isNotType @MethodNotAllowed.MethodNotAllowed e
+    && Exception.isNotType @Found.Found e
