@@ -4,11 +4,11 @@
 
 module Monadoc.Type.PackageName where
 
+import qualified Data.List as List
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Distribution.Package as Cabal
-import qualified Distribution.Pretty as Cabal
 import qualified Lucid as Html
 import qualified Monadoc.Extra.Cabal as Cabal
 import qualified Monadoc.Extra.Either as Either
@@ -30,7 +30,7 @@ instance Witch.TryFrom String PackageName where
         . Cabal.tryParsec
 
 instance Witch.From PackageName String where
-  from = Cabal.prettyShow . Witch.into @Cabal.PackageName
+  from = Cabal.unPackageName . Witch.into @Cabal.PackageName
 
 instance Witch.TryFrom Text.Text PackageName where
   tryFrom = Witch.eitherTryFrom $ Witch.tryFrom . Witch.into @String
@@ -52,4 +52,23 @@ instance Html.ToHtml PackageName where
   toHtmlRaw = Html.toHtmlRaw . Witch.into @String
 
 instance QuickCheck.Arbitrary PackageName where
-  arbitrary = QuickCheck.suchThatMap @String QuickCheck.arbitrary $ Either.hush . Witch.tryFrom
+  arbitrary = QuickCheck.suchThatMap genString $ Either.hush . Witch.tryFrom
+
+-- | Package names are made up of parts separated by hyphens. There must be
+-- at least one part.
+genString :: QuickCheck.Gen String
+genString = List.intercalate "-" <$> QuickCheck.listOf1 genPart
+
+-- | Each part of a package name is made up of one or more alphanumeric
+-- characters. There must be at least one non-numeric character in each part.
+-- Although Cabal technically allows Unicode, Hackage requires ASCII.
+genPart :: QuickCheck.Gen String
+genPart = do
+  xs <- (:) <$> genAlpha <*> QuickCheck.listOf genAlphaNum
+  QuickCheck.shuffle xs
+
+genAlpha :: QuickCheck.Gen Char
+genAlpha = QuickCheck.elements $ ['A' .. 'Z'] <> ['a' .. 'z']
+
+genAlphaNum :: QuickCheck.Gen Char
+genAlphaNum = QuickCheck.oneof [genAlpha, QuickCheck.elements ['0' .. '9']]

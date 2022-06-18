@@ -2,6 +2,7 @@ module Monadoc.Constant.Migration where
 
 import qualified Data.List as List
 import qualified Monadoc.Model.Blob as Blob
+import qualified Monadoc.Model.Component as Component
 import qualified Monadoc.Model.CronEntry as CronEntry
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Model.HackageUser as HackageUser
@@ -20,6 +21,7 @@ all =
   List.sortOn Migration.createdAt $
     mconcat
       [ Blob.migrations,
+        Component.migrations,
         CronEntry.migrations,
         HackageIndex.migrations,
         HackageUser.migrations,

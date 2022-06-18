@@ -43,10 +43,19 @@ instance Html.ToHtml HackageUserName where
   toHtmlRaw = Html.toHtmlRaw . Witch.into @String
 
 instance QuickCheck.Arbitrary HackageUserName where
-  arbitrary = QuickCheck.suchThatMap @String QuickCheck.arbitrary $ Either.hush . Witch.tryFrom
+  arbitrary = QuickCheck.suchThatMap genString $ Either.hush . Witch.tryFrom
 
 instance Witch.TryFrom Text.Text HackageUserName where
   tryFrom = Witch.eitherTryFrom $ Witch.tryFrom . Witch.into @String
 
 instance Witch.From HackageUserName Text.Text where
   from = Witch.via @String
+
+genString :: QuickCheck.Gen String
+genString = QuickCheck.listOf1 genChar
+
+genChar :: QuickCheck.Gen Char
+genChar =
+  QuickCheck.elements $
+    mconcat
+      [['A' .. 'Z'], ['a' .. 'z'], ['0' .. '9'], "_"]

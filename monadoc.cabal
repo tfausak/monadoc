@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.6.16
+version: 0.2022.6.18
 
 build-type: Simple
 category: Documentation
@@ -103,6 +103,10 @@ library
     Monadoc.Action.Blob.InsertSpec
     Monadoc.Action.Blob.Upsert
     Monadoc.Action.Blob.UpsertSpec
+    Monadoc.Action.Component.Insert
+    Monadoc.Action.Component.InsertSpec
+    Monadoc.Action.Component.Upsert
+    Monadoc.Action.Component.UpsertSpec
     Monadoc.Action.CronEntry.Delete
     Monadoc.Action.CronEntry.DeleteSpec
     Monadoc.Action.CronEntry.Enqueue
@@ -228,6 +232,8 @@ library
     Monadoc.Middleware.LogResponses
     Monadoc.Model.Blob
     Monadoc.Model.BlobSpec
+    Monadoc.Model.Component
+    Monadoc.Model.ComponentSpec
     Monadoc.Model.CronEntry
     Monadoc.Model.CronEntrySpec
     Monadoc.Model.HackageIndex
@@ -254,6 +260,8 @@ library
     Monadoc.Model.VersionSpec
     Monadoc.Query.Blob
     Monadoc.Query.BlobSpec
+    Monadoc.Query.Component
+    Monadoc.Query.ComponentSpec
     Monadoc.Query.CronEntry
     Monadoc.Query.CronEntrySpec
     Monadoc.Query.Job
@@ -278,6 +286,10 @@ library
     Monadoc.Type.Breadcrumb
     Monadoc.Type.BuildType
     Monadoc.Type.BuildTypeSpec
+    Monadoc.Type.ComponentName
+    Monadoc.Type.ComponentNameSpec
+    Monadoc.Type.ComponentType
+    Monadoc.Type.ComponentTypeSpec
     Monadoc.Type.Config
     Monadoc.Type.ConfigSpec
     Monadoc.Type.Constraint

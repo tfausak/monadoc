@@ -17,7 +17,11 @@ import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 import qualified Witch
 
-handler :: (Reader.MonadReader Context.Context m, MonadSql.MonadSql m) => Search.Search -> Wai.Request -> m Wai.Response
+handler ::
+  (Reader.MonadReader Context.Context m, MonadSql.MonadSql m) =>
+  Search.Search ->
+  Wai.Request ->
+  m Wai.Response
 handler query _ = do
   context <- Reader.ask
   packages <-
@@ -25,14 +29,22 @@ handler query _ = do
       then pure []
       else
         MonadSql.query
-          "select * from package where name like ? escape '\\' order by name collate nocase asc limit 16"
+          "select * \
+          \ from package \
+          \ where name like ? escape '\\' \
+          \ order by name collate nocase asc \
+          \ limit 64"
           [like query]
   hackageUsers <-
     if Search.isBlank query
       then pure []
       else
         MonadSql.query
-          "select * from hackageUser where name like ? escape '\\' order by name collate nocase asc limit 16"
+          "select * \
+          \ from hackageUser \
+          \ where name like ? escape '\\' \
+          \ order by name collate nocase asc \
+          \ limit 64"
           [like query]
   let breadcrumbs =
         Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home}

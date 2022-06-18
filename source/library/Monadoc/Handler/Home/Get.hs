@@ -30,7 +30,7 @@ handler _ = do
       \ inner join hackageUser \
       \ on hackageUser.key = upload.uploadedBy \
       \ order by upload.uploadedAt desc \
-      \ limit 16"
+      \ limit 64"
   let eTag = Common.makeETag $ case rows of
         (upload Sql.:. _) : _ -> Just . Upload.uploadedAt $ Model.value upload
         _ -> Nothing

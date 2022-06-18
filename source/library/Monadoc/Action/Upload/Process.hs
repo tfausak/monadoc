@@ -17,6 +17,7 @@ import qualified Distribution.PackageDescription as Cabal
 import qualified Distribution.PackageDescription.Parsec as Cabal
 import qualified Distribution.Types.Version as Cabal
 import qualified Distribution.Utils.ShortText as Cabal
+import qualified Monadoc.Action.Component.Upsert as Component.Upsert
 import qualified Monadoc.Action.License.Upsert as License.Upsert
 import qualified Monadoc.Action.PackageMeta.Upsert as PackageMeta.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
@@ -25,14 +26,17 @@ import qualified Monadoc.Exception.InvalidGenericPackageDescription as InvalidGe
 import qualified Monadoc.Exception.Mismatch as Mismatch
 import qualified Monadoc.Extra.SqliteSimple as Sql
 import qualified Monadoc.Model.Blob as Blob
+import qualified Monadoc.Model.Component as Component
 import qualified Monadoc.Model.License as License
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PackageMeta as PackageMeta
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Query.PackageMeta as PackageMeta
+import qualified Monadoc.Type.ComponentType as ComponentType
 import qualified Monadoc.Type.Hash as Hash
 import qualified Monadoc.Type.Model as Model
+import qualified Monadoc.Type.PackageName as PackageName
 import qualified Witch
 
 run ::
@@ -77,6 +81,8 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
         License.License
           { License.spdx = Witch.from $ Cabal.license pd
           }
+    -- TODO: Associate components with packages.
+    mapM_ Component.Upsert.run $ getComponents gpd
     Monad.void $
       PackageMeta.Upsert.run
         PackageMeta.PackageMeta
@@ -96,6 +102,19 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
             PackageMeta.stability = shortTextToMaybeText $ Cabal.stability pd,
             PackageMeta.synopsis = shortTextToMaybeText $ Cabal.synopsis pd
           }
+
+getComponents :: Cabal.GenericPackageDescription -> [Component.Component]
+getComponents gpd =
+  mconcat
+    [ case Cabal.condLibrary gpd of
+        Nothing -> []
+        Just _ -> [Component.Component ComponentType.Library . Witch.via @PackageName.PackageName . Cabal.pkgName . Cabal.package $ Cabal.packageDescription gpd],
+      Component.Component ComponentType.Benchmark . Witch.from . fst <$> Cabal.condBenchmarks gpd,
+      Component.Component ComponentType.Executable . Witch.from . fst <$> Cabal.condExecutables gpd,
+      Component.Component ComponentType.ForeignLibrary . Witch.from . fst <$> Cabal.condForeignLibs gpd,
+      Component.Component ComponentType.Library . Witch.from . fst <$> Cabal.condSubLibraries gpd,
+      Component.Component ComponentType.TestSuite . Witch.from . fst <$> Cabal.condTestSuites gpd
+    ]
 
 checkPackageName :: Exception.MonadThrow m => Package.Model -> Cabal.PackageDescription -> m ()
 checkPackageName p pd = do
@@ -120,7 +139,7 @@ checkPackageVersion v pd = do
         }
 
 salt :: ByteString.ByteString
-salt = "1"
+salt = "2"
 
 hashBlob :: Blob.Model -> Hash.Hash
 hashBlob = Hash.new . mappend salt . Witch.from . Blob.hash . Model.value

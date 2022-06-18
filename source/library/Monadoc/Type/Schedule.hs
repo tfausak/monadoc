@@ -79,10 +79,16 @@ genBaseField =
     ]
 
 genSpecificField :: QuickCheck.Gen Cron.SpecificField
-genSpecificField = QuickCheck.suchThatMap QuickCheck.arbitrary Cron.mkSpecificField
+genSpecificField = QuickCheck.suchThatMap genNonNegativeInt Cron.mkSpecificField
+
+genNonNegativeInt :: QuickCheck.Gen Int
+genNonNegativeInt = QuickCheck.chooseInt (0, maxBound)
 
 genRangeField :: QuickCheck.Gen Cron.RangeField
-genRangeField = QuickCheck.suchThatMap QuickCheck.arbitrary $ uncurry Cron.mkRangeField
+genRangeField = do
+  x <- QuickCheck.arbitrary
+  y <- QuickCheck.arbitrary
+  QuickCheck.suchThatMap (pure (min x y, max x y)) $ uncurry Cron.mkRangeField
 
 genListField :: QuickCheck.Gen (NonEmpty.NonEmpty Cron.BaseField)
 genListField = genNonEmpty genBaseField
@@ -91,4 +97,4 @@ genNonEmpty :: QuickCheck.Gen a -> QuickCheck.Gen (NonEmpty.NonEmpty a)
 genNonEmpty g = (NonEmpty.:|) <$> g <*> QuickCheck.listOf g
 
 genStepField :: QuickCheck.Gen Cron.StepField
-genStepField = QuickCheck.suchThatMap ((,) <$> genBaseField <*> QuickCheck.arbitrary) $ uncurry Cron.mkStepField
+genStepField = QuickCheck.suchThatMap ((,) <$> genBaseField <*> genNonNegativeInt) $ uncurry Cron.mkStepField

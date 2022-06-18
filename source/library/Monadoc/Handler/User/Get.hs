@@ -41,7 +41,7 @@ handler hackageUserName _ = do
       \ on package.key = upload.package \
       \ where upload.uploadedBy = ? \
       \ order by upload.uploadedAt desc \
-      \ limit 16"
+      \ limit 64"
       [Model.key hackageUser]
   let eTag = Common.makeETag $ case rows of
         (upload Sql.:. _) : _ -> Just . Upload.uploadedAt $ Model.value upload
