@@ -7,6 +7,7 @@ module Monadoc.Type.ComponentName where
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Distribution.Types.UnqualComponentName as Cabal
+import qualified Lucid as Html
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Type.PackageName as PackageName
 import qualified Test.QuickCheck as QuickCheck
@@ -46,3 +47,7 @@ instance QuickCheck.Arbitrary ComponentName where
 
 instance Witch.From PackageName.PackageName ComponentName where
   from = Witch.from . Cabal.packageNameToUnqualComponentName . Witch.from
+
+instance Html.ToHtml ComponentName where
+  toHtml = Html.toHtml . Witch.into @String
+  toHtmlRaw = Html.toHtmlRaw . Witch.into @String

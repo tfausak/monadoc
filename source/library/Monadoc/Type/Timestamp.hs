@@ -25,7 +25,7 @@ instance Witch.From Timestamp Time.UTCTime
 
 instance Witch.From Timestamp String where
   from =
-    Time.formatTime Time.defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ"
+    Time.formatTime Time.defaultTimeLocale "%0Y-%m-%dT%H:%M:%SZ"
       . Witch.into @Time.UTCTime
 
 instance Sql.FromField Timestamp where
@@ -57,12 +57,10 @@ getCurrentTime = Witch.into @Timestamp <$> MonadTime.getCurrentTime
 genUtcTime :: QuickCheck.Gen Time.UTCTime
 genUtcTime = Time.UTCTime <$> genDay <*> genDiffTime
 
--- The sqlite-simple package requires years to have at least 4 digits. The
--- Julian Day Number (JDN) @-313698@ is @1000-01-01@. The JDN @2973483@ is
+-- The Julian Day Number (JDN) @-678941@ is @0001-01-01@. The JDN @2973483@ is
 -- @9999-12-31@. This function generates a day between those two, inclusive.
--- https://github.com/nurpax/sqlite-simple/blob/9190080/Database/SQLite/Simple/Time/Implementation.hs#L50
 genDay :: QuickCheck.Gen Time.Day
-genDay = Time.ModifiedJulianDay <$> QuickCheck.chooseInteger (-313698, 2973483)
+genDay = Time.ModifiedJulianDay <$> QuickCheck.chooseInteger (-678941, 2973483)
 
 genDiffTime :: QuickCheck.Gen Time.DiffTime
 genDiffTime = Time.picosecondsToDiffTime <$> QuickCheck.chooseInteger (0, 24 * 60 * 60 * 1000000000000)

@@ -25,3 +25,7 @@ spec = Hspec.describe "Monadoc.Type.ComponentName" $ do
 
   Hspec.it "can be round-tripped through SQL" $
     QuickCheck.property (Test.propertySqlField @ComponentName.ComponentName)
+
+  Hspec.it "can be rendered as HTML" $ do
+    Test.expectHtml componentName "example"
+    Test.expectHtmlRaw componentName "example"

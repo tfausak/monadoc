@@ -21,6 +21,8 @@ import qualified Monadoc.Action.Package.UpsertSpec
 import qualified Monadoc.Action.PackageMeta.InsertSpec
 import qualified Monadoc.Action.PackageMeta.UpdateSpec
 import qualified Monadoc.Action.PackageMeta.UpsertSpec
+import qualified Monadoc.Action.PackageMetaComponent.InsertSpec
+import qualified Monadoc.Action.PackageMetaComponent.UpsertSpec
 import qualified Monadoc.Action.Preference.UpsertSpec
 import qualified Monadoc.Action.Range.InsertSpec
 import qualified Monadoc.Action.Range.UpsertSpec
@@ -39,6 +41,7 @@ import qualified Monadoc.Model.HackageUserSpec
 import qualified Monadoc.Model.JobSpec
 import qualified Monadoc.Model.LicenseSpec
 import qualified Monadoc.Model.MigrationSpec
+import qualified Monadoc.Model.PackageMetaComponentSpec
 import qualified Monadoc.Model.PackageMetaSpec
 import qualified Monadoc.Model.PackageSpec
 import qualified Monadoc.Model.PreferenceSpec
@@ -49,6 +52,7 @@ import qualified Monadoc.Query.BlobSpec
 import qualified Monadoc.Query.ComponentSpec
 import qualified Monadoc.Query.CronEntrySpec
 import qualified Monadoc.Query.LicenseSpec
+import qualified Monadoc.Query.PackageMetaComponentSpec
 import qualified Monadoc.Query.PackageMetaSpec
 import qualified Monadoc.Query.RangeSpec
 import qualified Monadoc.Type.BuildTypeSpec
@@ -99,6 +103,8 @@ spec = do
   Monadoc.Action.PackageMeta.InsertSpec.spec
   Monadoc.Action.PackageMeta.UpdateSpec.spec
   Monadoc.Action.PackageMeta.UpsertSpec.spec
+  Monadoc.Action.PackageMetaComponent.InsertSpec.spec
+  Monadoc.Action.PackageMetaComponent.UpsertSpec.spec
   Monadoc.Action.Preference.UpsertSpec.spec
   Monadoc.Action.Range.InsertSpec.spec
   Monadoc.Action.Range.UpsertSpec.spec
@@ -117,6 +123,7 @@ spec = do
   Monadoc.Model.JobSpec.spec
   Monadoc.Model.LicenseSpec.spec
   Monadoc.Model.MigrationSpec.spec
+  Monadoc.Model.PackageMetaComponentSpec.spec
   Monadoc.Model.PackageMetaSpec.spec
   Monadoc.Model.PackageSpec.spec
   Monadoc.Model.PreferenceSpec.spec
@@ -127,6 +134,7 @@ spec = do
   Monadoc.Query.ComponentSpec.spec
   Monadoc.Query.CronEntrySpec.spec
   Monadoc.Query.LicenseSpec.spec
+  Monadoc.Query.PackageMetaComponentSpec.spec
   Monadoc.Query.PackageMetaSpec.spec
   Monadoc.Query.RangeSpec.spec
   Monadoc.Type.BuildTypeSpec.spec

@@ -6,6 +6,7 @@ module Monadoc.Type.ComponentType where
 
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
+import qualified Lucid as Html
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
@@ -52,3 +53,7 @@ instance QuickCheck.Arbitrary ComponentType where
         Library,
         TestSuite
       ]
+
+instance Html.ToHtml ComponentType where
+  toHtml = Html.toHtml . Witch.into @String
+  toHtmlRaw = Html.toHtmlRaw . Witch.into @String

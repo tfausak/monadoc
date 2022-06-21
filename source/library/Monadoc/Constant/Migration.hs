@@ -11,6 +11,7 @@ import qualified Monadoc.Model.License as License
 import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PackageMeta as PackageMeta
+import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Model.Preference as Preference
 import qualified Monadoc.Model.Range as Range
 import qualified Monadoc.Model.Upload as Upload
@@ -30,6 +31,7 @@ all =
         Migration.migrations,
         Package.migrations,
         PackageMeta.migrations,
+        PackageMetaComponent.migrations,
         Preference.migrations,
         Range.migrations,
         Upload.migrations,

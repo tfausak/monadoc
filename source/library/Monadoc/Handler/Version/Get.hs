@@ -15,6 +15,7 @@ import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
+import qualified Monadoc.Query.PackageMeta as PackageMeta
 import qualified Monadoc.Template.Version.Get as Template
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.Context as Context
@@ -79,13 +80,26 @@ handler packageName reversion _ = do
         \ and upload.key != ? \
         \ limit 1"
         (Model.key package, Model.key upload)
+  packageMeta <- do
+    x <- PackageMeta.selectByUpload $ Model.key upload
+    maybe (Exception.throwM NotFound.NotFound) pure x
+  components <-
+    MonadSql.query
+      "select * \
+      \ from packageMetaComponent \
+      \ inner join component \
+      \ on component.key = packageMetaComponent.component \
+      \ where packageMetaComponent.packageMeta = ?"
+      [Model.key packageMeta]
   let eTag = Common.makeETag . Upload.uploadedAt $ Model.value upload
       breadcrumbs =
         [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home},
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text packageName, Breadcrumb.route = Just $ Route.Package packageName},
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text reversion, Breadcrumb.route = Nothing}
         ]
-  pure . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)] $ Template.render context breadcrumbs package version upload hackageUser maybeLatest
+  pure
+    . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)]
+    $ Template.render context breadcrumbs package version upload hackageUser maybeLatest packageMeta components
 
 selectFirst :: Exception.MonadThrow m => m [a] -> m a
 selectFirst query = do

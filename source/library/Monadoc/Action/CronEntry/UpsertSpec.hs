@@ -1,15 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Action.CronEntry.UpsertSpec where
 
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Base as Base
+import qualified Data.Text as Text
 import qualified Monadoc.Action.CronEntry.Upsert as CronEntry.Upsert
 import qualified Monadoc.Model.CronEntry as CronEntry
 import qualified Monadoc.Query.CronEntry as CronEntry
 import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec
+import qualified Witch
 
 spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Action.CronEntry.Upsert" . Hspec.around Test.withConnection $ do
@@ -43,8 +46,16 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Upsert" . Hspec.around Test.with
 
   Hspec.it "updates a static cron entry" . Test.runFake $ do
     guid <- Test.arbitrary
-    cronEntry1 <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Just guid}
-    cronEntry2 <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Just guid}
+    cronEntry1 <- Test.arbitraryWith $ \x ->
+      x
+        { CronEntry.guid = Just guid,
+          CronEntry.schedule = Witch.unsafeFrom @Text.Text "1 * * * *"
+        }
+    cronEntry2 <- Test.arbitraryWith $ \x ->
+      x
+        { CronEntry.guid = Just guid,
+          CronEntry.schedule = Witch.unsafeFrom @Text.Text "2 * * * *"
+        }
     Monad.void $ CronEntry.Upsert.run cronEntry1
     Monad.void $ CronEntry.Upsert.run cronEntry2
     cronEntries <- CronEntry.selectAll

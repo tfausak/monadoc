@@ -20,6 +20,7 @@ import qualified Distribution.Utils.ShortText as Cabal
 import qualified Monadoc.Action.Component.Upsert as Component.Upsert
 import qualified Monadoc.Action.License.Upsert as License.Upsert
 import qualified Monadoc.Action.PackageMeta.Upsert as PackageMeta.Upsert
+import qualified Monadoc.Action.PackageMetaComponent.Upsert as PackageMetaComponent.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Exception.InvalidGenericPackageDescription as InvalidGenericPackageDescription
@@ -30,6 +31,7 @@ import qualified Monadoc.Model.Component as Component
 import qualified Monadoc.Model.License as License
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PackageMeta as PackageMeta
+import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Query.PackageMeta as PackageMeta
@@ -81,9 +83,7 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
         License.License
           { License.spdx = Witch.from $ Cabal.license pd
           }
-    -- TODO: Associate components with packages.
-    mapM_ Component.Upsert.run $ getComponents gpd
-    Monad.void $
+    packageMeta <-
       PackageMeta.Upsert.run
         PackageMeta.PackageMeta
           { PackageMeta.buildType = Witch.from $ Cabal.buildType pd,
@@ -102,6 +102,12 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
             PackageMeta.stability = shortTextToMaybeText $ Cabal.stability pd,
             PackageMeta.synopsis = shortTextToMaybeText $ Cabal.synopsis pd
           }
+    Monad.forM_ (getComponents gpd) $ \component -> do
+      model <- Component.Upsert.run component
+      Monad.void . PackageMetaComponent.Upsert.run $
+        PackageMetaComponent.PackageMetaComponent
+          (Model.key packageMeta)
+          (Model.key model)
 
 getComponents :: Cabal.GenericPackageDescription -> [Component.Component]
 getComponents gpd =
@@ -139,7 +145,7 @@ checkPackageVersion v pd = do
         }
 
 salt :: ByteString.ByteString
-salt = "2"
+salt = "3"
 
 hashBlob :: Blob.Model -> Hash.Hash
 hashBlob = Hash.new . mappend salt . Witch.from . Blob.hash . Model.value

@@ -8,8 +8,11 @@ import qualified Control.Monad as Monad
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
 import qualified Lucid as Html
+import qualified Monadoc.Model.Component as Component
 import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
+import qualified Monadoc.Model.PackageMeta as PackageMeta
+import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Template.Common as Common
@@ -28,8 +31,10 @@ render ::
   Upload.Model ->
   HackageUser.Model ->
   Maybe (Upload.Model Sql.:. Version.Model) ->
+  PackageMeta.Model ->
+  [PackageMetaComponent.Model Sql.:. Component.Model] ->
   Html.Html ()
-render context breadcrumbs package version upload hackageUser maybeLatest = do
+render context breadcrumbs package version upload hackageUser maybeLatest packageMeta components = do
   let packageName = Package.name $ Model.value package
       versionNumber = Version.number $ Model.value version
       revision = Upload.revision $ Model.value upload
@@ -76,3 +81,32 @@ render context breadcrumbs package version upload hackageUser maybeLatest = do
         . HackageUser.name
         $ Model.value hackageUser
       "."
+    Html.h3_ "Package meta"
+    Html.dl_ $ do
+      Html.dt_ "Author"
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.author $ Model.value packageMeta
+      Html.dt_ "Bug reports"
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.bugReports $ Model.value packageMeta
+      Html.dt_ "Category"
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.category $ Model.value packageMeta
+      Html.dt_ "Copyright"
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.copyright $ Model.value packageMeta
+      -- TODO: haddock
+      Html.dt_ "Description"
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.description $ Model.value packageMeta
+      Html.dt_ "Homepage"
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.homepage $ Model.value packageMeta
+      Html.dt_ "Maintainer"
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.maintainer $ Model.value packageMeta
+      Html.dt_ "Package URL"
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.pkgUrl $ Model.value packageMeta
+      Html.dt_ "Stability"
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.stability $ Model.value packageMeta
+      Html.dt_ "Synopsis"
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.synopsis $ Model.value packageMeta
+    Html.h3_ "Components"
+    -- TODO: sort
+    Html.ul_ . Monad.forM_ components $ \(_ Sql.:. component) -> Html.li_ $ do
+      Html.toHtml . Component.type_ $ Model.value component
+      ":"
+      Html.toHtml . Component.name $ Model.value component
