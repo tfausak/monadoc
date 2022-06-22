@@ -111,7 +111,7 @@ base ctx rt breadcrumbs title html = do
 og :: Text.Text -> Text.Text -> Html.Html ()
 og property content =
   Html.meta_
-    [ Html.makeAttribute "property" $ "og:" <> property,
+    [ Html.makeAttributes "property" $ "og:" <> property,
       Html.content_ content
     ]
 

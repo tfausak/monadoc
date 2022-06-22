@@ -13,9 +13,12 @@ import qualified Monadoc.Exception.Found as Found
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Model.Package as Package
+import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
+import qualified Monadoc.Query.Component as Component
 import qualified Monadoc.Query.PackageMeta as PackageMeta
+import qualified Monadoc.Query.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Template.Version.Get as Template
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.Context as Context
@@ -83,14 +86,8 @@ handler packageName reversion _ = do
   packageMeta <- do
     x <- PackageMeta.selectByUpload $ Model.key upload
     maybe (Exception.throwM NotFound.NotFound) pure x
-  components <-
-    MonadSql.query
-      "select * \
-      \ from packageMetaComponent \
-      \ inner join component \
-      \ on component.key = packageMetaComponent.component \
-      \ where packageMetaComponent.packageMeta = ?"
-      [Model.key packageMeta]
+  packageMetaComponents <- PackageMetaComponent.selectByPackageMeta $ Model.key packageMeta
+  components <- Component.selectByKeys $ fmap (PackageMetaComponent.component . Model.value) packageMetaComponents
   let eTag = Common.makeETag . Upload.uploadedAt $ Model.value upload
       breadcrumbs =
         [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home},
