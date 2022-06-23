@@ -77,6 +77,7 @@ import qualified Monadoc.Type.SpdxSpec
 import qualified Monadoc.Type.StatusSpec
 import qualified Monadoc.Type.TaskSpec
 import qualified Monadoc.Type.TimestampSpec
+import qualified Monadoc.Type.UrlSpec
 import qualified Monadoc.Type.VersionNumberSpec
 import qualified Test.Hspec as Hspec
 
@@ -159,4 +160,5 @@ spec = do
   Monadoc.Type.StatusSpec.spec
   Monadoc.Type.TaskSpec.spec
   Monadoc.Type.TimestampSpec.spec
+  Monadoc.Type.UrlSpec.spec
   Monadoc.Type.VersionNumberSpec.spec

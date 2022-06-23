@@ -4,15 +4,19 @@
 
 module Monadoc.Type.Hash where
 
+import qualified Control.Monad.Catch as Exception
 import qualified Crypto.Hash as Crypto
 import qualified Data.ByteArray as ByteArray
+import qualified Data.ByteArray.Encoding as Encoding
 import qualified Data.ByteString as ByteString
+import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Monadoc.Extra.Either as Either
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
+import qualified Witch.Utility as Witch
 
 newtype Hash
   = Hash (Crypto.Digest Crypto.SHA256)
@@ -45,6 +49,19 @@ instance QuickCheck.Arbitrary Hash where
       Either.hush
         . Witch.tryFrom
         . ByteString.pack
+
+instance Witch.TryFrom Text.Text Hash where
+  tryFrom text = case Encoding.convertFromBase Encoding.Base16 $ Witch.into @ByteString.ByteString text of
+    Left string -> Left . Witch.TryFromException text . Just . Exception.toException $ userError string
+    Right byteString -> case Witch.tryFrom @ByteString.ByteString byteString of
+      Left tryFromException -> Left $ Witch.withSource text tryFromException
+      Right hash -> pure hash
+
+instance Witch.From Hash Text.Text where
+  from =
+    Witch.unsafeFrom @ByteString.ByteString
+      . Encoding.convertToBase Encoding.Base16
+      . Witch.into @ByteString.ByteString
 
 new :: ByteString.ByteString -> Hash
 new = Witch.from @(Crypto.Digest Crypto.SHA256) . Crypto.hash

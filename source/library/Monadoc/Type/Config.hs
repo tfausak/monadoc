@@ -6,6 +6,7 @@ import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
 import qualified Data.Bifunctor as Bifunctor
 import qualified Data.String as String
+import qualified Data.Text as Text
 import qualified Monadoc.Exception.InvalidDsn as InvalidDsn
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Extra.List as List
@@ -25,6 +26,7 @@ data Config = Config
     help :: Bool,
     host :: Warp.HostPreference,
     port :: Port.Port,
+    salt :: Text.Text,
     severity :: Severity.Severity,
     sql :: FilePath,
     version :: Bool
@@ -42,6 +44,7 @@ initial =
       help = False,
       host = String.fromString "127.0.0.1",
       port = Witch.from @Int 3000,
+      salt = Text.empty,
       severity = Severity.Debug,
       version = False
     }
@@ -62,6 +65,7 @@ applyFlag config flag = case flag of
   Flag.Port str -> do
     x <- Either.throw $ Witch.tryInto @Port.Port str
     pure config {port = x}
+  Flag.Salt str -> pure config {salt = Witch.from str}
   Flag.Severity svr -> do
     x <- Either.throw $ Witch.tryInto @Severity.Severity svr
     pure config {severity = x}

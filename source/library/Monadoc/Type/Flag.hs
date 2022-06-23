@@ -14,6 +14,7 @@ data Flag
   | Help
   | Host String
   | Port String
+  | Salt String
   | Severity String
   | Sql String
   | Version
@@ -75,6 +76,11 @@ options =
       ["port-number"]
       (Console.ReqArg Port "NUMBER")
       "Sets the port number to listen on.\nDefault: 3000",
+    Console.Option
+      []
+      ["proxy-salt"]
+      (Console.ReqArg Salt "STRING")
+      "Sets the salt to use for the proxy's HMAC.\nDefault: empty string",
     Console.Option
       []
       ["sentry-dsn"]

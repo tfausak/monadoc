@@ -13,6 +13,7 @@ import qualified Monadoc.Handler.HealthCheck.Get as HealthCheck.Get
 import qualified Monadoc.Handler.Home.Get as Home.Get
 import qualified Monadoc.Handler.Manifest.Get as Manifest.Get
 import qualified Monadoc.Handler.Package.Get as Package.Get
+import qualified Monadoc.Handler.Proxy.Get as Proxy.Get
 import qualified Monadoc.Handler.Robots.Get as Robots.Get
 import qualified Monadoc.Handler.Script.Get as Script.Get
 import qualified Monadoc.Handler.Search.Get as Search.Get
@@ -33,7 +34,7 @@ application context request respond = do
       . parseMethod
       $ Wai.requestMethod request
   route <- Route.parse (Wai.pathInfo request) (Wai.queryString request)
-  handler <- getHandler method route
+  handler <- getHandler context method route
   response <- Reader.runReaderT (App.runAppT $ handler request) context
   respond response
 
@@ -42,16 +43,18 @@ parseMethod m = Bifunctor.first (const $ Witch.TryFromException m Nothing) $ Htt
 
 getHandler ::
   Exception.MonadThrow m =>
+  Context.Context ->
   Http.StdMethod ->
   Route.Route ->
   m (Wai.Request -> App.App Wai.Response)
-getHandler method route = case route of
+getHandler context method route = case route of
   Route.AppleTouchIcon -> resource method route $ Map.singleton Http.GET AppleTouchIcon.Get.handler
   Route.Favicon -> resource method route $ Map.singleton Http.GET Favicon.Get.handler
   Route.HealthCheck -> resource method route $ Map.singleton Http.GET HealthCheck.Get.handler
   Route.Home -> resource method route $ Map.singleton Http.GET Home.Get.handler
   Route.Manifest -> resource method route $ Map.singleton Http.GET Manifest.Get.handler
   Route.Package p -> resource method route . Map.singleton Http.GET $ Package.Get.handler p
+  Route.Proxy h u -> resource method route . Map.singleton Http.GET $ Proxy.Get.handler context h u
   Route.Robots -> resource method route $ Map.singleton Http.GET Robots.Get.handler
   Route.Script -> resource method route $ Map.singleton Http.GET Script.Get.handler
   Route.Search q -> resource method route . Map.singleton Http.GET $ Search.Get.handler q

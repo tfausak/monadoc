@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.6.21
+version: 0.2022.6.22
 
 build-type: Simple
 category: Documentation
@@ -82,6 +82,7 @@ library
     , memory ^>= 0.17.0
     , monad-control ^>= 1.0.3
     , mtl ^>= 2.2.2
+    , network-uri ^>= 2.6.4
     , patrol ^>= 0.0.4
     , QuickCheck ^>= 2.14.2
     , resource-pool ^>= 0.3.0
@@ -222,6 +223,7 @@ library
     Monadoc.Handler.Home.Get
     Monadoc.Handler.Manifest.Get
     Monadoc.Handler.Package.Get
+    Monadoc.Handler.Proxy.Get
     Monadoc.Handler.Robots.Get
     Monadoc.Handler.Script.Get
     Monadoc.Handler.Search.Get
@@ -342,6 +344,8 @@ library
     Monadoc.Type.TaskSpec
     Monadoc.Type.Timestamp
     Monadoc.Type.TimestampSpec
+    Monadoc.Type.Url
+    Monadoc.Type.UrlSpec
     Monadoc.Type.VersionNumber
     Monadoc.Type.VersionNumberSpec
     Monadoc.Worker.Main

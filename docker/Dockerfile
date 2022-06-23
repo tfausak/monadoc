@@ -22,6 +22,7 @@ ENV MONADOC_HACKAGE_URL=https://hackage.haskell.org/
 ENV MONADOC_HOST_PREFERENCE=*
 ENV MONADOC_LOG_SEVERITY=debug
 ENV MONADOC_PORT_NUMBER=8080
+ENV MONADOC_PROXY_SALT=
 ENV MONADOC_SENTRY_DSN=
 
 ARG MONADOC_SHA
@@ -35,5 +36,6 @@ CMD [ "sh", "-c", "exec /usr/local/bin/monadoc \
   --host-preference=$MONADOC_HOST_PREFERENCE \
   --log-severity=$MONADOC_LOG_SEVERITY \
   --port-number=$MONADOC_PORT_NUMBER \
+  --proxy-salt=$MONADOC_PROXY_SALT \
   --sentry-dsn=$MONADOC_SENTRY_DSN" \
   ]

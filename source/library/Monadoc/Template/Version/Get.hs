@@ -14,6 +14,7 @@ import qualified Documentation.Haddock.Markup as Haddock
 import qualified Documentation.Haddock.Parser as Haddock
 import qualified Documentation.Haddock.Types as Haddock
 import qualified Lucid as Html
+import qualified Monadoc.Handler.Proxy.Get as Proxy.Get
 import qualified Monadoc.Model.Component as Component
 import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
@@ -101,7 +102,7 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
       Html.dt_ "Description"
       Html.dd_
         . Html.toHtml
-        . Haddock.markup markup
+        . Haddock.markup (markup context)
         . Haddock.overIdentifier (curry Just)
         . Haddock._doc
         . Haddock.parseParas Nothing
@@ -132,8 +133,8 @@ sortComponents packageName = List.sortOn $ \component ->
         Witch.into @String $ Component.name it
       )
 
-markup :: Haddock.DocMarkupH Void.Void (Haddock.Namespace, String) (Html.Html ())
-markup =
+markup :: Context.Context -> Haddock.DocMarkupH Void.Void (Haddock.Namespace, String) (Html.Html ())
+markup context =
   Haddock.Markup
     { Haddock.markupAName = \x -> Html.a_ [Html.name_ $ Witch.from x] mempty,
       Haddock.markupAppend = mappend,
@@ -174,12 +175,13 @@ markup =
       Haddock.markupMonospaced = Html.code_,
       Haddock.markupOrderedList = Html.ol_ . mapM_ Html.li_,
       Haddock.markupParagraph = Html.p_,
-      -- TODO: Proxy images? (If so, update CSP.)
       Haddock.markupPic = \x ->
         Html.img_
           [ Html.alt_ . maybe "" Witch.from $ Haddock.pictureTitle x,
             Html.loading_ "lazy",
-            Html.src_ . Witch.from $ Haddock.pictureUri x
+            Html.src_ $ case Witch.tryFrom $ Haddock.pictureUri x of
+              Left _ -> Witch.from $ Haddock.pictureUri x
+              Right url -> Common.route context $ Proxy.Get.makeRoute context url
           ],
       Haddock.markupProperty = \x -> Html.pre_ . Html.code_ $ "prop> " <> Html.toHtml x,
       Haddock.markupString = Html.toHtml,
