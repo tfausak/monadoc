@@ -29,6 +29,7 @@ import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
 import qualified Monadoc.Type.Reversion as Reversion
 import qualified Monadoc.Type.Route as Route
+import qualified Monadoc.Type.Url as Url
 import qualified Witch
 
 render ::
@@ -180,8 +181,13 @@ markup context =
           [ Html.alt_ . maybe "" Witch.from $ Haddock.pictureTitle x,
             Html.loading_ "lazy",
             Html.src_ $ case Witch.tryFrom $ Haddock.pictureUri x of
-              Left _ -> Witch.from $ Haddock.pictureUri x
-              Right url -> Common.route context $ Proxy.Get.makeRoute context url
+              Left _ ->
+                -- TODO: Handle relative paths.
+                Witch.from $ Haddock.pictureUri x
+              Right url ->
+                if Url.isData url
+                  then Witch.from url
+                  else Common.route context $ Proxy.Get.makeRoute context url
           ],
       Haddock.markupProperty = \x -> Html.pre_ . Html.code_ $ "prop> " <> Html.toHtml x,
       Haddock.markupString = Html.toHtml,

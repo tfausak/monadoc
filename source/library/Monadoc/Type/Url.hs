@@ -27,3 +27,6 @@ instance Witch.From Url String where
 
 instance Witch.From Url Text.Text where
   from = Witch.via @String
+
+isData :: Url -> Bool
+isData = (==) "data:" . Uri.uriScheme . Witch.from
