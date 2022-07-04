@@ -148,7 +148,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: superflt/flyctl-actions/setup-flyctl@1.3
+      - uses: superfly/flyctl-actions/setup-flyctl@1.3
 
       - run: fly deploy --image ghcr.io/tfausak/monadoc:sha-${{ github.sha }}
         env:
