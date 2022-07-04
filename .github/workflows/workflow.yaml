@@ -139,3 +139,17 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           push: ${{ github.event_name != 'schedule' }}
           tags: ${{ steps.meta.outputs.tags }}
+
+  deploy:
+    needs: docker
+    runs-on: ubuntu-22.04
+    name: Deploy
+    if: github.event_name != 'schedule' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: superfly/flyctl-actions/setup-flyctl@67ddda2a87628f1aff28a54b8a708879ec62c80f
+
+      - run: flyctl deploy --image ghcr.io/tfausak/monadoc:sha-${{ github.sha }}
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
