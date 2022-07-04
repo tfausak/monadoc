@@ -5,7 +5,6 @@ image = "ghcr.io/tfausak/monadoc:latest"
 
 [env]
 MONADOC_BASE_URL = "https://monadoc.com"
-MONADOC_HOST_PREFERENCE = "*"
 
 [mounts]
 destination = "/home/monadoc/volume"
