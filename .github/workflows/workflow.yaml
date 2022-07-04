@@ -144,7 +144,7 @@ jobs:
     needs: docker
     runs-on: ubuntu-22.04
     name: Deploy
-    # if: github.event_name != 'schedule' && github.ref == 'refs/heads/main'
+    if: github.event_name != 'schedule' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v3
 
