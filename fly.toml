@@ -1,0 +1,28 @@
+app = "green-hill-3802"
+
+[build]
+image = "ghcr.io/tfausak/monadoc:latest"
+
+[env]
+MONADOC_BASE_URL = "https://monadoc.com"
+MONADOC_HOST_PREFERENCE = "*"
+
+[mounts]
+destination = "/home/monadoc/volume"
+source = "monadoc_volume"
+
+[[services]]
+internal_port = 8080
+protocol = "tcp"
+
+[[services.http_checks]]
+path = "/health-check"
+
+[[services.ports]]
+force_https = true
+handlers = ["http"]
+port = 80
+
+[[services.ports]]
+handlers = ["tls", "http"]
+port = 443
