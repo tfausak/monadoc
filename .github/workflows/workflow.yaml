@@ -150,6 +150,6 @@ jobs:
 
       - uses: superfly/flyctl-actions/setup-flyctl@67ddda2a87628f1aff28a54b8a708879ec62c80f
 
-      - run: fly deploy --image ghcr.io/tfausak/monadoc:sha-${{ github.sha }}
+      - run: flyctl deploy --image ghcr.io/tfausak/monadoc:sha-${{ github.sha }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
