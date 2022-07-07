@@ -16,7 +16,10 @@ jobs:
       - run: cabal check
 
   hlint:
-    runs-on: ubuntu-20.04 # See 1549016ad08a9852136140e02ec372bff7e07a44.
+    # This uses ubuntu-20.04 rather than ubuntu-22.04 because libtinfo.so.5 is
+    # missing on ubuntu-22.04.
+    # https://github.com/tfausak/monadoc/runs/6435591724?check_suite_focus=true#step:3:9
+    runs-on: ubuntu-20.04
     name: HLint
     steps:
       - uses: actions/checkout@v3
@@ -101,7 +104,11 @@ jobs:
 
   docker:
     needs: build
-    runs-on: ubuntu-20.04 # See 3bf91d8247af8740c0723a170c867735efedf92f.
+    # This uses ubuntu-20.04 rather than ubuntu-22.04 because the Docker daemon
+    # does not seem to be running on ubuntu-22.04.
+    # https://github.com/tfausak/monadoc/runs/6435666240?check_suite_focus=true#step:9:29
+    # https://github.com/actions/virtual-environments/issues/5490#issuecomment-1118319996
+    runs-on: ubuntu-20.04
     name: Docker
     steps:
       - uses: actions/checkout@v3

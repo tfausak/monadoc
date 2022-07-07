@@ -171,8 +171,11 @@ markup context =
       -- TODO: MathJax
       Haddock.markupMathDisplay = Html.pre_ . Html.code_ . Html.toHtml,
       Haddock.markupMathInline = Html.code_ . Html.toHtml,
-      -- TODO: Link to module.
-      Haddock.markupModule = \x -> Maybe.fromMaybe (Html.toHtml $ Haddock.modLinkName x) $ Haddock.modLinkLabel x,
+      Haddock.markupModule = \x ->
+        -- TODO: Search for module specifically.
+        Html.a_ [Html.href_ . Common.route context . Route.Search . Witch.via @Text.Text $ Haddock.modLinkName x]
+          . Maybe.fromMaybe (Html.toHtml $ Haddock.modLinkName x)
+          $ Haddock.modLinkLabel x,
       Haddock.markupMonospaced = Html.code_,
       Haddock.markupOrderedList = Html.ol_ . mapM_ Html.li_,
       Haddock.markupParagraph = Html.p_,
