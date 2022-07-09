@@ -2,7 +2,7 @@
 
 module Monadoc.Query.LicenseSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.License.Insert as License.Insert
 import qualified Monadoc.Model.License as License
 import qualified Monadoc.Query.License as License
@@ -15,10 +15,10 @@ spec = Hspec.describe "Monadoc.Query.License" $ do
     Hspec.it "returns nothing when there is no license" . Test.run $ do
       spdx <- Test.arbitrary
       result <- License.selectBySpdx spdx
-      Base.liftBase $ result `Hspec.shouldBe` Nothing
+      IO.liftIO $ result `Hspec.shouldBe` Nothing
 
     Hspec.it "returns a license when one exists" . Test.run $ do
       license <- Test.arbitrary
       model <- License.Insert.run license
       result <- License.selectBySpdx $ License.spdx license
-      Base.liftBase $ result `Hspec.shouldBe` Just model
+      IO.liftIO $ result `Hspec.shouldBe` Just model

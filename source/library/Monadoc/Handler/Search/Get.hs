@@ -4,13 +4,12 @@
 
 module Monadoc.Handler.Search.Get where
 
-import qualified Control.Monad.Reader as Reader
+import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.Text as Text
-import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Template.Search.Get as Template
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
-import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Route as Route
 import qualified Monadoc.Type.Search as Search
 import qualified Network.HTTP.Types as Http
@@ -18,17 +17,16 @@ import qualified Network.Wai as Wai
 import qualified Witch
 
 handler ::
-  (Reader.MonadReader Context.Context m, MonadSql.MonadSql m) =>
   Search.Search ->
   Wai.Request ->
-  m Wai.Response
+  App.App Wai.Response
 handler query _ = do
   context <- Reader.ask
   packages <-
     if Search.isBlank query
       then pure []
       else
-        MonadSql.query
+        App.query
           "select * \
           \ from package \
           \ where name like ? escape '\\' \
@@ -39,7 +37,7 @@ handler query _ = do
     if Search.isBlank query
       then pure []
       else
-        MonadSql.query
+        App.query
           "select * \
           \ from hackageUser \
           \ where name like ? escape '\\' \

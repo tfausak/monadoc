@@ -2,7 +2,7 @@
 
 module Monadoc.Action.Component.UpsertSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.Component.Upsert as Component.Upsert
 import qualified Monadoc.Model.Component as Component
 import qualified Monadoc.Test as Test
@@ -15,7 +15,7 @@ spec = Hspec.describe "Monadoc.Action.Component.Upsert" $ do
   Hspec.it "inserts a new component" . Test.run $ do
     component <- Test.arbitrary
     model <- Component.Upsert.run component
-    Base.liftBase $
+    IO.liftIO $
       model
         `Hspec.shouldBe` Model.Model
           { Model.key = Witch.from @Int 1,
@@ -26,7 +26,7 @@ spec = Hspec.describe "Monadoc.Action.Component.Upsert" $ do
     component <- Test.arbitrary
     old <- Component.Upsert.run component
     new <- Component.Upsert.run component
-    Base.liftBase $ new `Hspec.shouldBe` old
+    IO.liftIO $ new `Hspec.shouldBe` old
 
   Hspec.it "inserts two components" . Test.run $ do
     component1 <- do
@@ -35,4 +35,4 @@ spec = Hspec.describe "Monadoc.Action.Component.Upsert" $ do
     component2 <- do
       x <- Test.arbitraryWith $ \y -> y {Component.name = Witch.unsafeFrom @String "b"}
       Component.Upsert.run x
-    Base.liftBase $ Model.key component1 `Hspec.shouldNotBe` Model.key component2
+    IO.liftIO $ Model.key component1 `Hspec.shouldNotBe` Model.key component2

@@ -1,15 +1,11 @@
 module Monadoc.Action.Blob.Upsert where
 
-import qualified Control.Monad.Catch as Exception
 import qualified Monadoc.Action.Blob.Insert as Blob.Insert
-import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Query.Blob as Blob
+import qualified Monadoc.Type.App as App
 
-run ::
-  (MonadSql.MonadSql m, Exception.MonadThrow m) =>
-  Blob.Blob ->
-  m Blob.Model
+run :: Blob.Blob -> App.App Blob.Model
 run blob = do
   maybeBlob <- Blob.selectByHash $ Blob.hash blob
   case maybeBlob of

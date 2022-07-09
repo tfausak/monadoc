@@ -2,8 +2,8 @@
 
 module Monadoc.Action.CronEntry.Delete where
 
-import qualified Monadoc.Class.MonadSql as MonadSql
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Guid as Guid
 
-run :: MonadSql.MonadSql m => Guid.Guid -> m ()
-run guid = MonadSql.execute "delete from cronEntry where guid = ?" [guid]
+run :: Guid.Guid -> App.App ()
+run guid = App.execute "delete from cronEntry where guid = ?" [guid]

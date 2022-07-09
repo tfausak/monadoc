@@ -8,8 +8,7 @@ import qualified Codec.Archive.Tar as Tar
 import qualified Codec.Archive.Tar.Entry as Tar
 import qualified Control.Concurrent.STM as Stm
 import qualified Control.Monad as Monad
-import qualified Control.Monad.Base as Base
-import qualified Control.Monad.Catch as Exception
+import qualified Control.Monad.IO.Class as IO
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Int as Int
@@ -31,8 +30,8 @@ import qualified Monadoc.Action.Preference.Upsert as Preference.Upsert
 import qualified Monadoc.Action.Range.Upsert as Range.Upsert
 import qualified Monadoc.Action.Upload.Upsert as Upload.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
-import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Exception.NotFound as NotFound
+import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Exception.UnexpectedEntry as UnexpectedEntry
 import qualified Monadoc.Extra.Cabal as Cabal
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
@@ -58,21 +57,21 @@ import qualified Witch
 
 run :: App.App ()
 run = do
-  rows <- MonadSql.query_ "select * from hackageIndex where processedAt is null order by createdAt asc limit 1"
+  rows <- App.query_ "select * from hackageIndex where processedAt is null order by createdAt asc limit 1"
   case rows of
     [] -> Log.debug "no new hackage index to process"
     hackageIndex : _ -> do
-      constraints <- Base.liftBase $ Stm.newTVarIO Map.empty
-      revisions <- Base.liftBase $ Stm.newTVarIO Map.empty
+      constraints <- IO.liftIO $ Stm.newTVarIO Map.empty
+      revisions <- IO.liftIO $ Stm.newTVarIO Map.empty
       let blobKey = HackageIndex.blob $ Model.value hackageIndex
       size <- do
-        xs <- MonadSql.query "select size from blob where key = ?" [blobKey]
+        xs <- App.query "select size from blob where key = ?" [blobKey]
         case xs of
-          [] -> Exception.throwM NotFound.NotFound
+          [] -> Traced.throw NotFound.NotFound
           Sql.Only x : _ -> pure x
-      MonadSql.withConnection $ \connection ->
+      App.withConnection $ \connection ->
         Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 blobKey) False $ \blob -> do
-          contents <- Base.liftBase $ Sqlite.unsafeBlobRead blob size 0
+          contents <- IO.liftIO $ Sqlite.unsafeBlobRead blob size 0
           mapM_ (handleItem constraints revisions)
             . Tar.foldEntries ((:) . Right) [] (pure . Left)
             . Tar.read
@@ -80,7 +79,7 @@ run = do
       upsertPreferences constraints
       updateLatest
       now <- Timestamp.getCurrentTime
-      MonadSql.execute "update hackageIndex set processedAt = ? where key = ?" (Just now, Model.key hackageIndex)
+      App.execute "update hackageIndex set processedAt = ? where key = ?" (Just now, Model.key hackageIndex)
 
 handleItem ::
   Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->
@@ -88,7 +87,7 @@ handleItem ::
   Either Tar.FormatError Tar.Entry ->
   App.App ()
 handleItem constraints =
-  either Exception.throwM . handleEntry constraints
+  either Traced.throw . handleEntry constraints
 
 handleEntry ::
   Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->
@@ -102,22 +101,21 @@ handleEntry constraints revisions entry =
     [pkg, ver, base] -> case FilePath.splitExtensions base of
       ("package", ".json") -> handlePackageJson entry
       (p, ".cabal") | p == pkg -> handleCabal revisions entry pkg ver
-      _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
-    _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
+      _ -> Traced.throw $ UnexpectedEntry.UnexpectedEntry entry
+    _ -> Traced.throw $ UnexpectedEntry.UnexpectedEntry entry
 
 handlePreference ::
-  (Base.MonadBase IO m, Exception.MonadThrow m) =>
   Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->
   Tar.Entry ->
   String ->
-  m ()
+  App.App ()
 handlePreference constraints entry pkg = do
   packageName <-
     Either.throw $
       Witch.tryInto @PackageName.PackageName pkg
   lazyByteString <- case Tar.entryContent entry of
     Tar.NormalFile lazyByteString _ -> pure lazyByteString
-    _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
+    _ -> Traced.throw $ UnexpectedEntry.UnexpectedEntry entry
   string <- Either.throw $ Witch.tryInto @String lazyByteString
   versionRange <-
     if null string
@@ -125,10 +123,10 @@ handlePreference constraints entry pkg = do
       else do
         Cabal.PackageVersionConstraint name range <- Either.throw $ Cabal.tryParsec string
         Monad.when (name /= Witch.into @Cabal.PackageName packageName)
-          . Exception.throwM
+          . Traced.throw
           $ UnexpectedEntry.UnexpectedEntry entry
         pure range
-  Base.liftBase
+  IO.liftIO
     . Stm.atomically
     . Stm.modifyTVar' constraints
     . Map.insert packageName
@@ -151,14 +149,14 @@ handleCabal revisions entry pkg ver = do
     Either.throw $
       Witch.tryInto @VersionNumber.VersionNumber ver
   let key = (packageName, versionNumber)
-  revision <- Base.liftBase . Stm.atomically . Stm.stateTVar revisions $ \m ->
+  revision <- IO.liftIO . Stm.atomically . Stm.stateTVar revisions $ \m ->
     let revision = Map.findWithDefault Revision.zero key m
      in (revision, Map.insert key (Revision.increment revision) m)
   byteString <- case Tar.entryContent entry of
     Tar.NormalFile lazyByteString _ ->
       pure $
         Witch.into @ByteString.ByteString lazyByteString
-    _ -> Exception.throwM $ UnexpectedEntry.UnexpectedEntry entry
+    _ -> Traced.throw $ UnexpectedEntry.UnexpectedEntry entry
   blob <- Blob.Upsert.run $ Blob.new byteString
   package <- Package.Upsert.run Package.Package {Package.name = packageName}
   version <- Version.Upsert.run Version.Version {Version.number = versionNumber}
@@ -198,18 +196,16 @@ epochTimeToPosixTime :: Tar.EpochTime -> Time.POSIXTime
 epochTimeToPosixTime = fromIntegral
 
 upsertPreferences ::
-  (Base.MonadBase IO m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
   Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->
-  m ()
+  App.App ()
 upsertPreferences var = do
-  constraints <- Base.liftBase $ Stm.readTVarIO var
+  constraints <- IO.liftIO $ Stm.readTVarIO var
   mapM_ (uncurry upsertPreference) $ Map.toList constraints
 
 upsertPreference ::
-  (MonadSql.MonadSql m, Exception.MonadThrow m) =>
   PackageName.PackageName ->
   Constraint.Constraint ->
-  m ()
+  App.App ()
 upsertPreference packageName constraint = do
   package <- Package.Upsert.run Package.Package {Package.name = packageName}
   range <- Range.Upsert.run Range.Range {Range.constraint = constraint}
@@ -219,18 +215,18 @@ upsertPreference packageName constraint = do
         { Preference.package = Model.key package,
           Preference.range = Model.key range
         }
-  rows <- MonadSql.query "select * from upload inner join version on version.key = upload.version where upload.package = ?" [Model.key package]
+  rows <- App.query "select * from upload inner join version on version.key = upload.version where upload.package = ?" [Model.key package]
   Monad.forM_ rows $ \(upload Sql.:. version) -> do
     let isPreferred = Constraint.includes (Version.number $ Model.value version) constraint
     Monad.when (Upload.isPreferred (Model.value upload) /= isPreferred) $
-      MonadSql.execute "update upload set isPreferred = ? where key = ?" (isPreferred, Model.key upload)
+      App.execute "update upload set isPreferred = ? where key = ?" (isPreferred, Model.key upload)
 
-updateLatest :: MonadSql.MonadSql m => m ()
+updateLatest :: App.App ()
 updateLatest = do
-  keys <- MonadSql.query_ "select key from package"
+  keys <- App.query_ "select key from package"
   Monad.forM_ keys $ \(Sql.Only key) -> do
     rows <-
-      MonadSql.query
+      App.query
         "select * \
         \ from upload \
         \ inner join version \
@@ -246,6 +242,6 @@ updateLatest = do
     case Maybe.listToMaybe $ List.sortOn f rows of
       Nothing -> pure ()
       Just (upload Sql.:. _) ->
-        MonadSql.execute
+        App.execute
           "update upload set isLatest = (key = ?) where package = ?"
           (Model.key upload, key)

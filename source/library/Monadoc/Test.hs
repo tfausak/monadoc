@@ -1,11 +1,14 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Test where
 
-import qualified Control.Monad.Base as Base
 import qualified Control.Monad.Catch as Exception
-import qualified Control.Monad.Reader as Reader
-import qualified Control.Monad.State.Strict as State
+import qualified Control.Monad.IO.Class as IO
+import qualified Control.Monad.Trans.Reader as Reader
+import qualified Control.Monad.Trans.State.Strict as State
 import qualified Data.Aeson as Aeson
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Text.Lazy as LazyText
@@ -18,6 +21,7 @@ import qualified Database.SQLite.Simple.ToField as Sql
 import qualified GHC.Stack as Stack
 import qualified Lucid as Html
 import qualified Monadoc.Action.Database.Initialize as Database.Initialize
+import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
@@ -27,14 +31,17 @@ import qualified Test.Hspec as Hspec
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
-arbitrary :: (QuickCheck.Arbitrary a, Base.MonadBase IO m) => m a
+arbitrary :: (QuickCheck.Arbitrary a, IO.MonadIO m) => m a
 arbitrary = arbitraryWith id
 
-arbitraryWith :: (QuickCheck.Arbitrary a, Base.MonadBase IO m) => (a -> a) -> m a
-arbitraryWith f = fmap f . Base.liftBase $ QuickCheck.generate QuickCheck.arbitrary
+arbitraryWith :: (QuickCheck.Arbitrary a, IO.MonadIO m) => (a -> a) -> m a
+arbitraryWith f = fmap f . IO.liftIO $ QuickCheck.generate QuickCheck.arbitrary
 
-exceptionSelector :: Hspec.Selector e
-exceptionSelector = const True
+exceptionSelector :: forall e. Exception.Exception e => Hspec.Selector Exception.SomeException
+exceptionSelector x
+  | Just (Traced.Traced y _) <- Exception.fromException x = exceptionSelector @e y
+  | Just _ <- Exception.fromException @e x = True
+  | otherwise = False
 
 expectFrom :: (Stack.HasCallStack, Eq t, Witch.From s t, Show t) => s -> t -> IO ()
 expectFrom s t = Witch.from s `Hspec.shouldBe` t

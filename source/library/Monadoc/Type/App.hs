@@ -1,56 +1,37 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Monadoc.Type.App where
 
-import qualified Control.Monad.Base as Base
-import qualified Control.Monad.Catch as Exception
-import qualified Control.Monad.Reader as Reader
-import qualified Control.Monad.Trans as Trans
+import qualified Control.Monad.IO.Class as IO
 import qualified Control.Monad.Trans.Control as Control
-import qualified Monadoc.Class.MonadHttp as MonadHttp
-import qualified Monadoc.Class.MonadSay as MonadSay
-import qualified Monadoc.Class.MonadSql as MonadSql
-import qualified Monadoc.Class.MonadTime as MonadTime
+import qualified Control.Monad.Trans.Reader as Reader
+import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Extra.ResourcePool as Pool
 import qualified Monadoc.Type.Context as Context
-import qualified Say
+import qualified Monadoc.Type.Query as Query
+import qualified Witch
 
-type App = AppT IO
+type App a = AppT IO a
 
 runApp :: Context.Context -> App a -> IO a
-runApp context = flip Reader.runReaderT context . runAppT
+runApp = flip Reader.runReaderT
 
-newtype AppT m a = AppT
-  { runAppT :: Reader.ReaderT Context.Context m a
-  }
-  deriving
-    ( Applicative,
-      Functor,
-      Monad,
-      Base.MonadBase b,
-      Control.MonadBaseControl b,
-      Exception.MonadCatch,
-      Exception.MonadMask,
-      Reader.MonadReader Context.Context,
-      Exception.MonadThrow,
-      Trans.MonadTrans
-    )
+type AppT m a = Reader.ReaderT Context.Context m a
 
-instance Control.MonadBaseControl IO m => MonadHttp.MonadHttp (AppT m) where
-  withManager callback = do
-    context <- Reader.ask
-    callback $ Context.manager context
+withConnection :: Control.MonadBaseControl IO m => (Sql.Connection -> AppT m a) -> AppT m a
+withConnection callback = do
+  context <- Reader.ask
+  Pool.withResourceLifted (Context.pool context) callback
 
-instance Base.MonadBase IO m => MonadSay.MonadSay (AppT m) where
-  hSay h = Base.liftBase . Say.hSay h
+query :: (Sql.ToRow q, Sql.FromRow r) => Query.Query -> q -> App [r]
+query q r = withConnection $ \c -> IO.liftIO $ Sql.query c (Witch.from q) r
 
-instance Control.MonadBaseControl IO m => MonadSql.MonadSql (AppT m) where
-  withConnection callback = do
-    context <- Reader.ask
-    Pool.withResourceLifted (Context.pool context) callback
+query_ :: Sql.FromRow r => Query.Query -> App [r]
+query_ q = withConnection $ \c -> IO.liftIO . Sql.query_ c $ Witch.from q
 
-instance Base.MonadBase IO m => MonadTime.MonadTime (AppT m) where
-  getCurrentTime = Base.liftBase MonadTime.getCurrentTime
-  getMonotonicTime = Base.liftBase MonadTime.getMonotonicTime
+execute :: Sql.ToRow q => Query.Query -> q -> App ()
+execute q r = withConnection $ \c -> IO.liftIO $ Sql.execute c (Witch.from q) r
+
+execute_ :: Query.Query -> App ()
+execute_ q = withConnection $ \c -> IO.liftIO . Sql.execute_ c $ Witch.from q

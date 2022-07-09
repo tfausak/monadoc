@@ -3,28 +3,26 @@
 module Monadoc.Query.PackageMetaComponent where
 
 import qualified Data.Maybe as Maybe
-import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Model.Component as Component
 import qualified Monadoc.Model.PackageMeta as PackageMeta
 import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
+import qualified Monadoc.Type.App as App
 
 selectByPackageMeta ::
-  MonadSql.MonadSql m =>
   PackageMeta.Key ->
-  m [PackageMetaComponent.Model]
+  App.App [PackageMetaComponent.Model]
 selectByPackageMeta packageMeta =
-  MonadSql.query
+  App.query
     "select * from packageMetaComponent where packageMeta = ?"
     [packageMeta]
 
 selectByPackageMetaAndComponent ::
-  MonadSql.MonadSql m =>
   PackageMeta.Key ->
   Component.Key ->
-  m (Maybe PackageMetaComponent.Model)
+  App.App (Maybe PackageMetaComponent.Model)
 selectByPackageMetaAndComponent packageMeta component = do
   rows <-
-    MonadSql.query
+    App.query
       "select * from packageMetaComponent where packageMeta = ? and component = ? limit 1"
       (packageMeta, component)
   pure $ Maybe.listToMaybe rows

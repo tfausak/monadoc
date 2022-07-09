@@ -3,7 +3,7 @@
 
 module Monadoc.Action.Blob.UpsertSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Test as Test
@@ -16,7 +16,7 @@ spec = Hspec.describe "Monadoc.Action.Blob.Upsert" $ do
   Hspec.it "inserts a new blob" . Test.run $ do
     blob <- Test.arbitrary
     model <- Blob.Upsert.run blob
-    Base.liftBase $
+    IO.liftIO $
       model
         `Hspec.shouldBe` Model.Model
           { Model.key = Witch.from @Int 1,
@@ -27,9 +27,9 @@ spec = Hspec.describe "Monadoc.Action.Blob.Upsert" $ do
     blob <- Test.arbitrary
     old <- Blob.Upsert.run blob
     new <- Blob.Upsert.run blob
-    Base.liftBase $ new `Hspec.shouldBe` old
+    IO.liftIO $ new `Hspec.shouldBe` old
 
   Hspec.it "inserts two blobs" . Test.run $ do
     blob1 <- Blob.Upsert.run $ Blob.new "a"
     blob2 <- Blob.Upsert.run $ Blob.new "b"
-    Base.liftBase $ Model.key blob1 `Hspec.shouldNotBe` Model.key blob2
+    IO.liftIO $ Model.key blob1 `Hspec.shouldNotBe` Model.key blob2

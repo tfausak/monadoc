@@ -16,6 +16,7 @@ import qualified Monadoc.Action.Exception.NotifySentry as Exception.NotifySentry
 import qualified Monadoc.Exception.Found as Found
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Exception.NotFound as NotFound
+import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
 import qualified Monadoc.Extra.Exception as Exception
 import qualified Monadoc.Handler.Common as Handler
@@ -84,6 +85,7 @@ fromUtf8 = Text.decodeUtf8With Text.lenientDecode
 
 onExceptionResponse :: Context.Context -> Exception.SomeException -> Wai.Response
 onExceptionResponse context e
+  | Just (Traced.Traced e2 _) <- Exception.fromException e = onExceptionResponse context e2
   | Just (Found.Found route) <- Exception.fromException e =
       Handler.statusResponse Http.found302 [(Http.hLocation, Witch.into @ByteString.ByteString $ Template.route context route)]
   | Just (MethodNotAllowed.MethodNotAllowed _ _ ms) <- Exception.fromException e =

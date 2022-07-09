@@ -2,7 +2,7 @@
 
 module Monadoc.Action.Job.EnqueueSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.Job.Enqueue as Job.Enqueue
 import qualified Monadoc.Model.Job as Job
 import qualified Monadoc.Test as Test
@@ -16,7 +16,7 @@ spec = Hspec.describe "Monadoc.Action.Job.Enqueue" $ do
   Hspec.it "succeeds" . Test.run $ do
     task <- Test.arbitrary
     model <- Job.Enqueue.run task
-    Base.liftBase $ do
+    IO.liftIO $ do
       Model.key model `Hspec.shouldBe` Witch.from @Int 1
       Job.finishedAt (Model.value model) `Hspec.shouldBe` Nothing
       Job.startedAt (Model.value model) `Hspec.shouldBe` Nothing

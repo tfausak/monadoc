@@ -2,7 +2,7 @@
 
 module Monadoc.Action.Upload.UpsertSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
 import qualified Monadoc.Action.HackageUser.Upsert as HackageUser.Upsert
 import qualified Monadoc.Action.Package.Upsert as Package.Upsert
@@ -37,7 +37,7 @@ spec = Hspec.describe "Monadoc.Action.Upload.Upsert" $ do
           Upload.version = Model.key version
         }
     model <- Upload.Upsert.run upload
-    Base.liftBase $
+    IO.liftIO $
       model
         `Hspec.shouldBe` Model.Model
           { Model.key = Witch.from @Int 1,
@@ -66,7 +66,7 @@ spec = Hspec.describe "Monadoc.Action.Upload.Upsert" $ do
         }
     old <- Upload.Upsert.run upload
     new <- Upload.Upsert.run upload
-    Base.liftBase $ new `Hspec.shouldBe` old
+    IO.liftIO $ new `Hspec.shouldBe` old
 
   Hspec.it "inserts two uploads" . Test.run $ do
     blob <- do
@@ -90,4 +90,4 @@ spec = Hspec.describe "Monadoc.Action.Upload.Upsert" $ do
         }
     model1 <- Upload.Upsert.run upload {Upload.revision = Witch.from @Word 1}
     model2 <- Upload.Upsert.run upload {Upload.revision = Witch.from @Word 2}
-    Base.liftBase $ Model.key model1 `Hspec.shouldNotBe` Model.key model2
+    IO.liftIO $ Model.key model1 `Hspec.shouldNotBe` Model.key model2

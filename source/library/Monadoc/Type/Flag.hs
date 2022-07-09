@@ -2,6 +2,7 @@ module Monadoc.Type.Flag where
 
 import qualified Control.Monad.Catch as Exception
 import qualified Monadoc.Exception.InvalidOption as InvalidOption
+import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Exception.UnexpectedArgument as UnexpectedArgument
 import qualified Monadoc.Exception.UnknownOption as UnknownOption
 import qualified System.Console.GetOpt as Console
@@ -24,9 +25,9 @@ fromArguments :: Exception.MonadThrow m => [String] -> m [Flag]
 fromArguments arguments = do
   let (flags, args, opts, errs) =
         Console.getOpt' Console.Permute options arguments
-  mapM_ (Exception.throwM . InvalidOption.InvalidOption) errs
-  mapM_ (Exception.throwM . UnknownOption.UnknownOption) opts
-  mapM_ (Exception.throwM . UnexpectedArgument.UnexpectedArgument) args
+  mapM_ (Traced.throw . InvalidOption.InvalidOption) errs
+  mapM_ (Traced.throw . UnknownOption.UnknownOption) opts
+  mapM_ (Traced.throw . UnexpectedArgument.UnexpectedArgument) args
   pure flags
 
 options :: [Console.OptDescr Flag]

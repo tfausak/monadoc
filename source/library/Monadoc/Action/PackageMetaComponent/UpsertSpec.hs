@@ -2,7 +2,7 @@
 
 module Monadoc.Action.PackageMetaComponent.UpsertSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.Component.Insert as Component.Insert
 import qualified Monadoc.Action.PackageMeta.InsertSpec as PackageMeta.InsertSpec
 import qualified Monadoc.Action.PackageMetaComponent.Upsert as PackageMetaComponent.Upsert
@@ -25,7 +25,7 @@ spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Upsert" $ do
           PackageMetaComponent.component = Model.key component
         }
     model <- PackageMetaComponent.Upsert.run packageMetaComponent
-    Base.liftBase $
+    IO.liftIO $
       model
         `Hspec.shouldBe` Model.Model
           { Model.key = Witch.from @Int 1,
@@ -44,7 +44,7 @@ spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Upsert" $ do
         }
     old <- PackageMetaComponent.Upsert.run packageMetaComponent
     new <- PackageMetaComponent.Upsert.run packageMetaComponent
-    Base.liftBase $ new `Hspec.shouldBe` old
+    IO.liftIO $ new `Hspec.shouldBe` old
 
   Hspec.it "inserts two components" . Test.run $ do
     packageMeta <- PackageMeta.InsertSpec.insertPackageMeta
@@ -66,4 +66,4 @@ spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Upsert" $ do
           PackageMetaComponent.component = Model.key component2
         }
     model2 <- PackageMetaComponent.Upsert.run packageMetaComponent2
-    Base.liftBase $ Model.key model1 `Hspec.shouldNotBe` Model.key model2
+    IO.liftIO $ Model.key model1 `Hspec.shouldNotBe` Model.key model2

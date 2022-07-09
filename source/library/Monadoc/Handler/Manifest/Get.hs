@@ -3,11 +3,12 @@
 
 module Monadoc.Handler.Manifest.Get where
 
-import qualified Control.Monad.Reader as Reader
+import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.Aeson as Aeson
 import qualified Monadoc.Constant.ContentType as ContentType
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Template.Common as Common
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Icon as Icon
@@ -17,7 +18,7 @@ import qualified Network.HTTP.Types as Http
 import qualified Network.HTTP.Types.Header as Http
 import qualified Network.Wai as Wai
 
-handler :: Reader.MonadReader Context.Context m => Wai.Request -> m Wai.Response
+handler :: Wai.Request -> App.App Wai.Response
 handler _ = do
   context <- Reader.ask
   let manifest = makeManifest context

@@ -2,7 +2,7 @@
 
 module Monadoc.Action.CronEntry.PruneSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
 import qualified Monadoc.Action.CronEntry.Prune as CronEntry.Prune
 import qualified Monadoc.Constant.CronEntry as CronEntry
@@ -23,7 +23,7 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Prune" $ do
       CronEntry.Insert.run x
     CronEntry.Prune.run
     result <- CronEntry.selectByKey $ Model.key cronEntry
-    Base.liftBase $ result `Hspec.shouldBe` Just cronEntry
+    IO.liftIO $ result `Hspec.shouldBe` Just cronEntry
 
   Hspec.it "removes a cron entry with a guid" . Test.run $ do
     guid <- Test.arbitrary
@@ -32,7 +32,7 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Prune" $ do
       CronEntry.Insert.run x
     CronEntry.Prune.run
     result <- CronEntry.selectByKey $ Model.key cronEntry
-    Base.liftBase $ result `Hspec.shouldBe` Nothing
+    IO.liftIO $ result `Hspec.shouldBe` Nothing
 
   Hspec.it "keeps a cron entry with a static guid" . Test.run $
     case fmap CronEntry.guid CronEntry.all of
@@ -42,5 +42,5 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Prune" $ do
           CronEntry.Insert.run x
         CronEntry.Prune.run
         result <- CronEntry.selectByKey $ Model.key cronEntry
-        Base.liftBase $ result `Hspec.shouldBe` Just cronEntry
-      _ -> Base.liftBase $ False `Hspec.shouldBe` True
+        IO.liftIO $ result `Hspec.shouldBe` Just cronEntry
+      _ -> IO.liftIO $ False `Hspec.shouldBe` True

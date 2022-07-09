@@ -5,12 +5,12 @@
 module Monadoc.Handler.Version.Get where
 
 import qualified Control.Monad.Catch as Exception
-import qualified Control.Monad.Reader as Reader
+import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.Maybe as Maybe
 import qualified Data.Text as Text
-import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Exception.Found as Found
 import qualified Monadoc.Exception.NotFound as NotFound
+import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
@@ -20,8 +20,8 @@ import qualified Monadoc.Query.Component as Component
 import qualified Monadoc.Query.PackageMeta as PackageMeta
 import qualified Monadoc.Query.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Template.Version.Get as Template
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
-import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
 import qualified Monadoc.Type.Reversion as Reversion
@@ -32,28 +32,27 @@ import qualified Network.Wai as Wai
 import qualified Witch
 
 handler ::
-  (Reader.MonadReader Context.Context m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
   PackageName.PackageName ->
   Reversion.Reversion ->
   Wai.Request ->
-  m Wai.Response
+  App.App Wai.Response
 handler packageName reversion _ = do
   context <- Reader.ask
   package <-
     selectFirst $
-      MonadSql.query
+      App.query
         "select * from package where name = ?"
         [packageName]
   version <-
     selectFirst $
-      MonadSql.query
+      App.query
         "select * from version where number = ?"
         [Reversion.version reversion]
   revision <- case Reversion.revision reversion of
     Nothing -> do
       upload <-
         selectFirst $
-          MonadSql.query
+          App.query
             "select * from upload where package = ? and version = ? order by revision desc limit 1"
             (Model.key package, Model.key version)
       let route =
@@ -63,17 +62,17 @@ handler packageName reversion _ = do
                 { Reversion.revision = Just . Upload.revision $ Model.value upload,
                   Reversion.version = Version.number $ Model.value version
                 }
-      Exception.throwM $ Found.Found route
+      Traced.throw $ Found.Found route
     Just revision -> pure revision
   upload <-
     selectFirst $
-      MonadSql.query
+      App.query
         "select * from upload where package = ? and version = ? and revision = ? limit 1"
         (Model.key package, Model.key version, revision)
-  hackageUser <- selectFirst $ MonadSql.query "select * from hackageUser where key = ?" [Upload.uploadedBy $ Model.value upload]
+  hackageUser <- selectFirst $ App.query "select * from hackageUser where key = ?" [Upload.uploadedBy $ Model.value upload]
   maybeLatest <-
     Maybe.listToMaybe
-      <$> MonadSql.query
+      <$> App.query
         "select * \
         \ from upload \
         \ inner join version \
@@ -85,7 +84,7 @@ handler packageName reversion _ = do
         (Model.key package, Model.key upload)
   packageMeta <- do
     x <- PackageMeta.selectByUpload $ Model.key upload
-    maybe (Exception.throwM NotFound.NotFound) pure x
+    maybe (Traced.throw NotFound.NotFound) pure x
   packageMetaComponents <- PackageMetaComponent.selectByPackageMeta $ Model.key packageMeta
   components <- Component.selectByKeys $ fmap (PackageMetaComponent.component . Model.value) packageMetaComponents
   let eTag = Common.makeETag . Upload.uploadedAt $ Model.value upload
@@ -102,5 +101,5 @@ selectFirst :: Exception.MonadThrow m => m [a] -> m a
 selectFirst query = do
   rows <- query
   case rows of
-    [] -> Exception.throwM NotFound.NotFound
+    [] -> Traced.throw NotFound.NotFound
     row : _ -> pure row

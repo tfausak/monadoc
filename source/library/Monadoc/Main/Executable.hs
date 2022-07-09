@@ -3,10 +3,10 @@
 module Monadoc.Main.Executable where
 
 import qualified Control.Concurrent.Async as Async
-import qualified Control.Monad.Base as Base
 import qualified Control.Monad.Catch as Exception
-import qualified Control.Monad.Reader as Reader
+import qualified Control.Monad.IO.Class as IO
 import qualified Control.Monad.Trans.Control as Control
+import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.Pool as Pool
 import qualified GHC.Conc as Conc
 import qualified Monadoc.Action.Database.Initialize as Database.Initialize
@@ -48,7 +48,7 @@ start = do
       (runInBase Server.server)
       (runInBase Worker.worker)
 
-stop :: (Base.MonadBase IO m, Reader.MonadReader Context.Context m) => m ()
+stop :: App.App ()
 stop = do
   context <- Reader.ask
-  Base.liftBase . Pool.destroyAllResources $ Context.pool context
+  IO.liftIO . Pool.destroyAllResources $ Context.pool context

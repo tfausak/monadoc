@@ -10,7 +10,6 @@
 - group:
     name: Monadoc
     rules:
-      - warn: { lhs: Control.Monad.IO.Class.liftIO, rhs: Control.Monad.Base.liftBase }
       - warn: { lhs: Data.IORef.newIORef, rhs: Control.Concurrent.STM.newTVarIO }
 
 - group:

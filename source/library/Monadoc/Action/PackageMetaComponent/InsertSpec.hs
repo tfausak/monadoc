@@ -3,7 +3,7 @@
 
 module Monadoc.Action.PackageMetaComponent.InsertSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.Component.Insert as Component.Insert
 import qualified Monadoc.Action.PackageMeta.InsertSpec as PackageMeta.InsertSpec
 import qualified Monadoc.Action.PackageMetaComponent.Insert as PackageMetaComponent.Insert
@@ -31,4 +31,4 @@ spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Insert" $ do
             { Model.key = Witch.from @Int 1,
               Model.value = packageMetaComponent
             }
-    Base.liftBase $ actual `Hspec.shouldBe` expected
+    IO.liftIO $ actual `Hspec.shouldBe` expected

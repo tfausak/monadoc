@@ -4,12 +4,12 @@
 module Monadoc.Action.CronEntry.EnqueueSpec where
 
 import qualified Control.Monad as Monad
-import qualified Control.Monad.Base as Base
-import qualified Control.Monad.Catch as Exception
+import qualified Control.Monad.IO.Class as IO
 import qualified Data.Text as Text
 import qualified Data.Time as Time
 import qualified Monadoc.Action.CronEntry.Enqueue as CronEntry.Enqueue
 import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
+import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Model.CronEntry as CronEntry
 import qualified Monadoc.Query.CronEntry as CronEntry
 import qualified Monadoc.Query.Job as Job
@@ -26,12 +26,12 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Enqueue" $ do
 
   Hspec.it "updates the cron entry's next run at" . Test.run $ do
     now <- Timestamp.getCurrentTime
-    schedule <- either Exception.throwM pure $ Witch.tryFrom @Text.Text "* * * * *"
+    schedule <- Either.throw $ Witch.tryFrom @Text.Text "* * * * *"
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.runAt = now, CronEntry.schedule = schedule}
     model <- CronEntry.Insert.run cronEntry
     CronEntry.Enqueue.run
     result <- CronEntry.selectByKey $ Model.key model
-    Base.liftBase $
+    IO.liftIO $
       result
         `Hspec.shouldBe` Just
           model
@@ -40,12 +40,12 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Enqueue" $ do
 
   Hspec.it "inserts a job" . Test.run $ do
     now <- Timestamp.getCurrentTime
-    schedule <- either Exception.throwM pure $ Witch.tryFrom @Text.Text "* * * * *"
+    schedule <- Either.throw $ Witch.tryFrom @Text.Text "* * * * *"
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.runAt = now, CronEntry.schedule = schedule}
     Monad.void $ CronEntry.Insert.run cronEntry
     CronEntry.Enqueue.run
     result <- Job.selectAll
-    Base.liftBase $ result `Hspec.shouldNotBe` []
+    IO.liftIO $ result `Hspec.shouldNotBe` []
 
 nextMinute :: Timestamp.Timestamp -> Timestamp.Timestamp
 nextMinute = Witch.over @Time.UTCTime $ \t ->

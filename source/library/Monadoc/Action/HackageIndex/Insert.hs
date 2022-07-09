@@ -7,20 +7,20 @@ module Monadoc.Action.HackageIndex.Insert where
 import qualified Codec.Compression.Zlib.Internal as Zlib
 import qualified Control.Concurrent.STM as Stm
 import qualified Control.Monad as Monad
-import qualified Control.Monad.Base as Base
-import qualified Control.Monad.Catch as Exception
-import qualified Control.Monad.Reader as Reader
+import qualified Control.Monad.IO.Class as IO
+import qualified Control.Monad.Trans.Class as Trans
+import qualified Control.Monad.Trans.Control as Control
+import qualified Control.Monad.Trans.Reader as Reader
 import qualified Crypto.Hash as Crypto
 import qualified Data.ByteString as ByteString
 import qualified Data.Int as Int
+import qualified Data.Time as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite3 as Sqlite
 import qualified Monadoc.Action.Key.SelectLastInsert as Key.SelectLastInsert
 import qualified Monadoc.Action.Log as Log
-import qualified Monadoc.Class.MonadHttp as MonadHttp
-import qualified Monadoc.Class.MonadSql as MonadSql
-import qualified Monadoc.Class.MonadTime as MonadTime
 import qualified Monadoc.Exception.MissingSize as MissingSize
+import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Exception.TrailingBytes as TrailingBytes
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Extra.Either as Either
@@ -43,13 +43,13 @@ run = do
   size <- getSize
   context <- Reader.ask
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"
-  MonadHttp.withResponse request $ \response -> do
+  Control.control $ \runInBase -> Client.withResponse request (Context.manager context) $ \response -> runInBase $ do
     key <- insertBlob size
-    MonadSql.withConnection $ \connection -> do
-      hashVar <- Base.liftBase . Stm.newTVarIO $ Crypto.hashInitWith Crypto.SHA256
+    App.withConnection $ \connection -> do
+      hashVar <- IO.liftIO . Stm.newTVarIO $ Crypto.hashInitWith Crypto.SHA256
       Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 key) True $ \blob -> do
-        offsetRef <- Base.liftBase $ Stm.newTVarIO 0
-        Base.liftBase $
+        offsetRef <- IO.liftIO $ Stm.newTVarIO 0
+        IO.liftIO $
           Zlib.foldDecompressStream
             ( \f -> do
                 chunk <- Client.brRead $ Client.responseBody response
@@ -58,26 +58,23 @@ run = do
             ( \chunk io -> do
                 offset <- Stm.atomically . Stm.stateTVar offsetRef $ \n -> (n, n + ByteString.length chunk)
                 Sqlite.blobWrite blob chunk offset
-                Base.liftBase . Stm.atomically . Stm.modifyTVar' hashVar $ flip Crypto.hashUpdate chunk
+                IO.liftIO . Stm.atomically . Stm.modifyTVar' hashVar $ flip Crypto.hashUpdate chunk
                 io
             )
             ( \leftovers ->
                 Monad.when (not $ ByteString.null leftovers)
-                  . Exception.throwM
+                  . Traced.throw
                   $ TrailingBytes.TrailingBytes leftovers
             )
-            Exception.throwM
+            Traced.throw
             (Zlib.decompressIO Zlib.gzipFormat Zlib.defaultDecompressParams)
-      hash <- Base.liftBase $ Stm.readTVarIO hashVar
-      MonadSql.execute
+      hash <- IO.liftIO $ Stm.readTVarIO hashVar
+      App.execute
         "update blob set hash = ? where key = ?"
         (Witch.into @Hash.Hash $ Crypto.hashFinalize hash, key)
     Monad.void $ insertHackageIndex key
 
-insertHackageIndex ::
-  (MonadSql.MonadSql m, Exception.MonadThrow m, MonadTime.MonadTime m) =>
-  Blob.Key ->
-  m HackageIndex.Model
+insertHackageIndex :: Blob.Key -> App.App HackageIndex.Model
 insertHackageIndex blob = do
   now <- Timestamp.getCurrentTime
   let hackageIndex =
@@ -86,7 +83,7 @@ insertHackageIndex blob = do
             HackageIndex.createdAt = now,
             HackageIndex.processedAt = Nothing
           }
-  MonadSql.execute
+  App.execute
     "insert into hackageIndex (blob, createdAt, processedAt) values (?, ?, null)"
     (HackageIndex.blob hackageIndex, HackageIndex.createdAt hackageIndex)
   key <- Key.SelectLastInsert.run
@@ -96,23 +93,23 @@ insertHackageIndex blob = do
         Model.value = hackageIndex
       }
 
-insertBlob :: (MonadSql.MonadSql m, MonadTime.MonadTime m, Exception.MonadThrow m) => Int -> m Blob.Key
+insertBlob :: Int -> App.App Blob.Key
 insertBlob size = do
-  now <- MonadTime.getCurrentTime
-  MonadSql.execute
+  now <- Trans.lift Time.getCurrentTime
+  App.execute
     "insert into blob (size, hash, contents) values (?, ?, zeroblob(?))"
     (size, Hash.new . Witch.into @ByteString.ByteString $ show now, size)
   Key.SelectLastInsert.run
 
-getSize :: (MonadHttp.MonadHttp m, Reader.MonadReader Context.Context m, Exception.MonadThrow m) => m Int
+getSize :: App.App Int
 getSize = do
   context <- Reader.ask
   request <-
     Client.parseUrlThrow $
       Config.hackage (Context.config context) <> "01-index.tar"
-  response <- MonadHttp.httpNoBody request {Client.method = Http.methodHead}
+  response <- Trans.lift . Client.httpNoBody request {Client.method = Http.methodHead} $ Context.manager context
   byteString <-
-    maybe (Exception.throwM $ MissingSize.MissingSize response) pure
+    maybe (Traced.throw $ MissingSize.MissingSize response) pure
       . lookup Http.hContentLength
       $ Client.responseHeaders response
   string <- Either.throw $ Witch.tryInto @String byteString

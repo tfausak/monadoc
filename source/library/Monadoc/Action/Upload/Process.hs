@@ -6,8 +6,6 @@
 module Monadoc.Action.Upload.Process where
 
 import qualified Control.Monad as Monad
-import qualified Control.Monad.Catch as Exception
-import qualified Control.Monad.Trans.Control as Control
 import qualified Data.ByteString as ByteString
 import qualified Data.Char as Char
 import qualified Data.Text as Text
@@ -22,9 +20,9 @@ import qualified Monadoc.Action.License.Upsert as License.Upsert
 import qualified Monadoc.Action.PackageMeta.Upsert as PackageMeta.Upsert
 import qualified Monadoc.Action.PackageMetaComponent.Upsert as PackageMetaComponent.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
-import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Exception.InvalidGenericPackageDescription as InvalidGenericPackageDescription
 import qualified Monadoc.Exception.Mismatch as Mismatch
+import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Extra.SqliteSimple as Sql
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.Component as Component
@@ -35,20 +33,16 @@ import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Query.PackageMeta as PackageMeta
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.ComponentType as ComponentType
 import qualified Monadoc.Type.Hash as Hash
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
 import qualified Witch
 
-run ::
-  ( Control.MonadBaseControl IO m,
-    MonadSql.MonadSql m,
-    Exception.MonadThrow m
-  ) =>
-  m ()
+run :: App.App ()
 run =
-  MonadSql.withConnection $ \connection ->
+  App.withConnection $ \connection ->
     Sql.streamLifted
       connection
       "select * from upload \
@@ -59,16 +53,15 @@ run =
       handleRow
 
 handleRow ::
-  (MonadSql.MonadSql m, Exception.MonadThrow m) =>
   (Upload.Model Sql.:. Blob.Model Sql.:. Package.Model Sql.:. Version.Model) ->
-  m ()
+  App.App ()
 handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
   maybePackageMeta <- PackageMeta.selectByUpload $ Model.key upload
   let hash = hashBlob blob
   Monad.when (fmap hashPackageMeta maybePackageMeta /= Just hash) $ do
     let bs = Blob.contents $ Model.value blob
     gpd <- case Cabal.parseGenericPackageDescriptionMaybe bs of
-      Nothing -> Exception.throwM $ InvalidGenericPackageDescription.InvalidGenericPackageDescription bs
+      Nothing -> Traced.throw $ InvalidGenericPackageDescription.InvalidGenericPackageDescription bs
       Just gpd -> pure gpd
     let pd = Cabal.packageDescription gpd
     checkPackageName package pd
@@ -122,23 +115,23 @@ getComponents gpd =
       Component.Component ComponentType.TestSuite . Witch.from . fst <$> Cabal.condTestSuites gpd
     ]
 
-checkPackageName :: Exception.MonadThrow m => Package.Model -> Cabal.PackageDescription -> m ()
+checkPackageName :: Package.Model -> Cabal.PackageDescription -> App.App ()
 checkPackageName p pd = do
   let expected = Witch.into @Cabal.PackageName . Package.name $ Model.value p
       actual = Cabal.pkgName $ Cabal.package pd
   Monad.when (actual /= expected) $
-    Exception.throwM
+    Traced.throw
       Mismatch.Mismatch
         { Mismatch.expected = expected,
           Mismatch.actual = actual
         }
 
-checkPackageVersion :: Exception.MonadThrow m => Version.Model -> Cabal.PackageDescription -> m ()
+checkPackageVersion :: Version.Model -> Cabal.PackageDescription -> App.App ()
 checkPackageVersion v pd = do
   let expected = Witch.into @Cabal.Version . Version.number $ Model.value v
       actual = Cabal.pkgVersion $ Cabal.package pd
   Monad.when (actual /= expected) $
-    Exception.throwM
+    Traced.throw
       Mismatch.Mismatch
         { Mismatch.expected = expected,
           Mismatch.actual = actual

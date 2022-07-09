@@ -3,7 +3,7 @@
 
 module Monadoc.Action.Range.UpsertSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.Range.Upsert as Range.Upsert
 import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Model as Model
@@ -20,17 +20,17 @@ spec = Hspec.describe "Monadoc.Action.Range.Upsert" $ do
             { Model.key = Witch.from @Int 1,
               Model.value = range
             }
-    Base.liftBase $ actual `Hspec.shouldBe` expected
+    IO.liftIO $ actual `Hspec.shouldBe` expected
 
   Hspec.it "updates an existing range" . Test.run $ do
     range <- Test.arbitrary
     old <- Range.Upsert.run range
     new <- Range.Upsert.run range
-    Base.liftBase $ new `Hspec.shouldBe` old
+    IO.liftIO $ new `Hspec.shouldBe` old
 
   Hspec.it "inesrts two ranges" . Test.run $ do
     range1 <- Test.arbitrary
     range2 <- Test.arbitrary
     model1 <- Range.Upsert.run range1
     model2 <- Range.Upsert.run range2
-    Base.liftBase $ Model.key model1 `Hspec.shouldNotBe` Model.key model2
+    IO.liftIO $ Model.key model1 `Hspec.shouldNotBe` Model.key model2

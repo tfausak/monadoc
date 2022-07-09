@@ -2,15 +2,14 @@
 
 module Monadoc.Action.PackageMeta.Insert where
 
-import qualified Control.Monad.Catch as Exception
 import qualified Monadoc.Action.Key.SelectLastInsert as Key.SelectLastInsert
-import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Model.PackageMeta as PackageMeta
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Model as Model
 
-run :: (MonadSql.MonadSql m, Exception.MonadThrow m) => PackageMeta.PackageMeta -> m PackageMeta.Model
+run :: PackageMeta.PackageMeta -> App.App PackageMeta.Model
 run packageMeta = do
-  MonadSql.execute
+  App.execute
     "insert into packageMeta \
     \ (buildType, cabalVersion, hash, license, upload, author, bugReports, category, copyright, description, homepage, maintainer, pkgUrl, stability, synopsis) \
     \ values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"

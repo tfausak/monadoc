@@ -2,7 +2,7 @@
 
 module Monadoc.Action.CronEntry.UpdateSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
 import qualified Monadoc.Action.CronEntry.Update as CronEntry.Update
 import qualified Monadoc.Query.CronEntry as CronEntry
@@ -22,7 +22,7 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Update" $ do
       CronEntry.Insert.run x
     CronEntry.Update.run cronEntry
     result <- CronEntry.selectByKey $ Model.key cronEntry
-    Base.liftBase $ result `Hspec.shouldBe` Just cronEntry
+    IO.liftIO $ result `Hspec.shouldBe` Just cronEntry
 
   Hspec.it "updates a cron entry" . Test.run $ do
     cronEntry1 <- do
@@ -31,4 +31,4 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Update" $ do
     cronEntry2 <- Test.arbitraryWith $ \x -> x {Model.key = Model.key cronEntry1}
     CronEntry.Update.run cronEntry2
     result <- CronEntry.selectByKey $ Model.key cronEntry2
-    Base.liftBase $ result `Hspec.shouldBe` Just cronEntry2
+    IO.liftIO $ result `Hspec.shouldBe` Just cronEntry2

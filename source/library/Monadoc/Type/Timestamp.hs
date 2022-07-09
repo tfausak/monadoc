@@ -1,9 +1,11 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Type.Timestamp where
 
+import qualified Control.Monad.IO.Class as IO
 import qualified Data.Fixed as Fixed
 import qualified Data.Hashable as Hashable
 import qualified Data.Text as Text
@@ -11,7 +13,6 @@ import qualified Data.Time as Time
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Lucid as Html
-import qualified Monadoc.Class.MonadTime as MonadTime
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
@@ -51,8 +52,8 @@ instance Hashable.Hashable Timestamp where
       . Witch.into @Time.NominalDiffTime
       . Witch.into @Time.UTCTime
 
-getCurrentTime :: MonadTime.MonadTime m => m Timestamp
-getCurrentTime = Witch.into @Timestamp <$> MonadTime.getCurrentTime
+getCurrentTime :: IO.MonadIO m => m Timestamp
+getCurrentTime = Witch.into @Timestamp <$> IO.liftIO Time.getCurrentTime
 
 genUtcTime :: QuickCheck.Gen Time.UTCTime
 genUtcTime = Time.UTCTime <$> genDay <*> genDiffTime

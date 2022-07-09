@@ -3,7 +3,7 @@
 
 module Monadoc.Action.CronEntry.InsertSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
 import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Model as Model
@@ -20,4 +20,4 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Insert" $ do
             { Model.key = Witch.from @Int 1,
               Model.value = cronEntry
             }
-    Base.liftBase $ actual `Hspec.shouldBe` expected
+    IO.liftIO $ actual `Hspec.shouldBe` expected

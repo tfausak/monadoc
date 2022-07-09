@@ -7,7 +7,7 @@ module Monadoc.Extra.Exception where
 import qualified Control.Concurrent.Async as Async
 import qualified Control.Exception as Exception (AsyncException, SomeAsyncException)
 import qualified Control.Monad.Catch as Exception
-import qualified Data.Maybe as Maybe
+import qualified Monadoc.Exception.Traced as Traced
 
 isAsync :: Exception.SomeException -> Bool
 isAsync e =
@@ -22,4 +22,7 @@ isSync :: Exception.SomeException -> Bool
 isSync = not . isAsync
 
 isType :: forall e. Exception.Exception e => Exception.SomeException -> Bool
-isType = Maybe.isJust . Exception.fromException @e
+isType x
+  | Just (Traced.Traced y _) <- Exception.fromException x = isType @e y
+  | Just _ <- Exception.fromException @e x = True
+  | otherwise = False

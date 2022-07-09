@@ -3,7 +3,7 @@
 module Monadoc.Action.CronEntry.DeleteSpec where
 
 import qualified Control.Monad as Monad
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.CronEntry.Delete as CronEntry.Delete
 import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
 import qualified Monadoc.Model.CronEntry as CronEntry
@@ -23,4 +23,4 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Delete" $ do
     Monad.void $ CronEntry.Insert.run cronEntry
     CronEntry.Delete.run guid
     maybeModel <- CronEntry.selectByGuid guid
-    Base.liftBase $ maybeModel `Hspec.shouldBe` Nothing
+    IO.liftIO $ maybeModel `Hspec.shouldBe` Nothing

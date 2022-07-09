@@ -3,7 +3,7 @@
 
 module Monadoc.Query.BlobSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.Blob.Insert as Blob.Insert
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Query.Blob as Blob
@@ -18,21 +18,21 @@ spec = Hspec.describe "Monadoc.Query.Blob" $ do
   Hspec.describe "selectByHash" $ do
     Hspec.it "returns nothing when the blob doesn't exist" . Test.run $ do
       result <- Blob.selectByHash $ Hash.new ""
-      Base.liftBase $ result `Hspec.shouldBe` Nothing
+      IO.liftIO $ result `Hspec.shouldBe` Nothing
 
     Hspec.it "returns just when the blob exists" . Test.run $ do
       blob <- Test.arbitrary
       model <- Blob.Insert.run blob
       result <- Blob.selectByHash $ Blob.hash blob
-      Base.liftBase $ result `Hspec.shouldBe` Just model
+      IO.liftIO $ result `Hspec.shouldBe` Just model
 
   Hspec.describe "selectByKey" $ do
     Hspec.it "returns nothing when the blob doesn't exist" . Test.run $ do
       result <- Blob.selectByKey $ Witch.from @Int 0
-      Base.liftBase $ result `Hspec.shouldBe` Nothing
+      IO.liftIO $ result `Hspec.shouldBe` Nothing
 
     Hspec.it "returns just when the blob exists" . Test.run $ do
       blob <- Test.arbitrary
       model <- Blob.Insert.run blob
       result <- Blob.selectByKey $ Model.key model
-      Base.liftBase $ result `Hspec.shouldBe` Just model
+      IO.liftIO $ result `Hspec.shouldBe` Just model

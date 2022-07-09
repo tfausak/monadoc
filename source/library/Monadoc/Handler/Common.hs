@@ -3,8 +3,8 @@
 
 module Monadoc.Handler.Common where
 
-import qualified Control.Monad.Reader as Reader
 import qualified Control.Monad.Trans.Class as Trans
+import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Hashable as Hashable

@@ -4,8 +4,8 @@
 
 module Monadoc.Server.Main where
 
-import qualified Control.Monad.Base as Base
-import qualified Control.Monad.Reader as Reader
+import qualified Control.Monad.IO.Class as IO
+import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.ByteString as ByteString
 import qualified Data.Text as Text
 import qualified Monadoc.Action.Log as Log
@@ -18,10 +18,10 @@ import qualified Monadoc.Type.Context as Context
 import qualified Network.Wai.Handler.Warp as Warp
 import qualified Witch
 
-server :: (Base.MonadBase IO m, Reader.MonadReader Context.Context m) => m ()
+server :: App.App ()
 server = do
   context <- Reader.ask
-  Base.liftBase
+  IO.liftIO
     . Warp.runSettings (getSettings context)
     . Middleware.middleware context
     $ Application.application context

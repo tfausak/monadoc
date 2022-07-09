@@ -2,7 +2,7 @@
 
 module Monadoc.Action.Version.UpsertSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Test as Test
@@ -15,7 +15,7 @@ spec = Hspec.describe "Monadoc.Action.Version.Upsert" $ do
   Hspec.it "inserts a new version" . Test.run $ do
     version <- Test.arbitrary
     model <- Version.Upsert.run version
-    Base.liftBase $
+    IO.liftIO $
       model
         `Hspec.shouldBe` Model.Model
           { Model.key = Witch.from @Int 1,
@@ -26,7 +26,7 @@ spec = Hspec.describe "Monadoc.Action.Version.Upsert" $ do
     version <- Test.arbitrary
     old <- Version.Upsert.run version
     new <- Version.Upsert.run version
-    Base.liftBase $ new `Hspec.shouldBe` old
+    IO.liftIO $ new `Hspec.shouldBe` old
 
   Hspec.it "inserts two versions" . Test.run $ do
     version1 <- do
@@ -35,4 +35,4 @@ spec = Hspec.describe "Monadoc.Action.Version.Upsert" $ do
     version2 <- do
       x <- Test.arbitraryWith $ \y -> y {Version.number = Witch.unsafeFrom @String "2"}
       Version.Upsert.run x
-    Base.liftBase $ Model.key version1 `Hspec.shouldNotBe` Model.key version2
+    IO.liftIO $ Model.key version1 `Hspec.shouldNotBe` Model.key version2

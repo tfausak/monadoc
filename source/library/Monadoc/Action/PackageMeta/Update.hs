@@ -3,14 +3,14 @@
 module Monadoc.Action.PackageMeta.Update where
 
 import qualified Database.SQLite.Simple as Sql
-import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Model.PackageMeta as PackageMeta
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Model as Model
 
-run :: MonadSql.MonadSql m => PackageMeta.Model -> m ()
+run :: PackageMeta.Model -> App.App ()
 run model = do
   let packageMeta = Model.value model
-  MonadSql.execute
+  App.execute
     "update packageMeta \
     \ set buildType = ? \
     \ , cabalVersion = ? \

@@ -4,8 +4,7 @@
 
 module Monadoc.Action.PackageMeta.InsertSpec where
 
-import qualified Control.Monad.Base as Base
-import qualified Control.Monad.Catch as Exception
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
 import qualified Monadoc.Action.HackageUser.Upsert as HackageUser.Upsert
 import qualified Monadoc.Action.License.Upsert as License.Upsert
@@ -13,10 +12,10 @@ import qualified Monadoc.Action.Package.Upsert as Package.Upsert
 import qualified Monadoc.Action.PackageMeta.Insert as PackageMeta.Insert
 import qualified Monadoc.Action.Upload.Upsert as Upload.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
-import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Model.PackageMeta as PackageMeta
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Test as Test
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec
 import qualified Witch
@@ -31,18 +30,14 @@ spec = Hspec.describe "Monadoc.Action.PackageMeta.Insert" $ do
             { Model.key = Witch.from @Int 1,
               Model.value = packageMeta
             }
-    Base.liftBase $ model `Hspec.shouldBe` expected
+    IO.liftIO $ model `Hspec.shouldBe` expected
 
-insertPackageMeta ::
-  (Base.MonadBase IO m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
-  m PackageMeta.Model
+insertPackageMeta :: App.App PackageMeta.Model
 insertPackageMeta = do
   x <- makePackageMeta
   PackageMeta.Insert.run x
 
-makePackageMeta ::
-  (Base.MonadBase IO m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
-  m PackageMeta.PackageMeta
+makePackageMeta :: App.App PackageMeta.PackageMeta
 makePackageMeta = do
   version <- do
     x <- Test.arbitrary

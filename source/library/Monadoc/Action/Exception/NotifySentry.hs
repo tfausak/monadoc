@@ -3,14 +3,13 @@
 module Monadoc.Action.Exception.NotifySentry where
 
 import qualified Control.Monad as Monad
-import qualified Control.Monad.Base as Base
 import qualified Control.Monad.Catch as Exception
-import qualified Control.Monad.Reader as Reader
+import qualified Control.Monad.IO.Class as IO
+import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.Bifunctor as Bifunctor
 import qualified Data.Map as Map
 import qualified Data.Text as Text
 import qualified Monadoc.Action.Log as Log
-import qualified Monadoc.Class.MonadHttp as MonadHttp
 import qualified Monadoc.Exception.Found as Found
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Exception.Traced as Traced
@@ -36,11 +35,12 @@ run f exception = Monad.when (shouldNotify exception) $ do
   context <- Reader.ask
   case Config.dsn $ Context.config context of
     Nothing -> pure ()
-    Just dsn -> MonadHttp.withManager $ \manager -> do
-      event <- Base.liftBase Patrol.Event.new
-      environment <- Base.liftBase Environment.getEnvironment
+    Just dsn -> do
+      let manager = Context.manager context
+      event <- IO.liftIO Patrol.Event.new
+      environment <- IO.liftIO Environment.getEnvironment
       eventId <-
-        Base.liftBase
+        IO.liftIO
           . Patrol.store
             manager
             dsn

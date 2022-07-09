@@ -5,7 +5,6 @@ module Monadoc.Action.Database.Initialize where
 import qualified Data.Text as Text
 import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Action.Migration.Migrate as Migration.Migrate
-import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Constant.Migration as Migration
 import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Type.App as App
@@ -26,7 +25,7 @@ runPragmas = do
 runPragma :: Query.Query -> App.App ()
 runPragma pragma = do
   Log.debug $ "executing pragma: " <> Text.pack (show pragma)
-  MonadSql.execute_ pragma
+  App.execute_ pragma
 
 pragmas :: [Query.Query]
 pragmas =
@@ -38,5 +37,5 @@ pragmas =
 runMigrations :: App.App ()
 runMigrations = do
   Log.info "running migrations"
-  MonadSql.execute_ Migration.createTable
+  App.execute_ Migration.createTable
   mapM_ Migration.Migrate.run Migration.all

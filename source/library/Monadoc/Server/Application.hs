@@ -4,6 +4,7 @@ import qualified Control.Monad.Catch as Exception
 import qualified Data.Bifunctor as Bifunctor
 import qualified Data.Map as Map
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
+import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Handler.AppleTouchIcon.Get as AppleTouchIcon.Get
 import qualified Monadoc.Handler.Common as Common
@@ -78,5 +79,5 @@ resource method route m =
         . MethodNotAllowed.toAllowHeader
         $ Map.keysSet m
     else case Map.lookup method m of
-      Nothing -> Exception.throwM . MethodNotAllowed.MethodNotAllowed method route $ Map.keysSet m
+      Nothing -> Traced.throw . MethodNotAllowed.MethodNotAllowed method route $ Map.keysSet m
       Just f -> pure f

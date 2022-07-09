@@ -2,7 +2,7 @@
 
 module Monadoc.Action.Database.Vacuum where
 
-import qualified Monadoc.Class.MonadSql as MonadSql
+import qualified Monadoc.Type.App as App
 
-run :: MonadSql.MonadSql m => m ()
-run = MonadSql.execute_ "pragma incremental_vacuum"
+run :: App.App ()
+run = App.execute_ "pragma incremental_vacuum"

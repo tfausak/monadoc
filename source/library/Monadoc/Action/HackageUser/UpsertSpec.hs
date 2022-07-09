@@ -3,7 +3,7 @@
 
 module Monadoc.Action.HackageUser.UpsertSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Data.Text as Text
 import qualified Monadoc.Action.HackageUser.Upsert as HackageUser.Upsert
 import qualified Monadoc.Model.HackageUser as HackageUser
@@ -17,7 +17,7 @@ spec = Hspec.describe "Monadoc.Action.HackageUser.Upsert" $ do
   Hspec.it "inserts a new hackage user" . Test.run $ do
     hackageUser <- Test.arbitrary
     model <- HackageUser.Upsert.run hackageUser
-    Base.liftBase $
+    IO.liftIO $
       model
         `Hspec.shouldBe` Model.Model
           { Model.key = Witch.from @Int 1,
@@ -28,7 +28,7 @@ spec = Hspec.describe "Monadoc.Action.HackageUser.Upsert" $ do
     hackageUser <- Test.arbitrary
     old <- HackageUser.Upsert.run hackageUser
     new <- HackageUser.Upsert.run hackageUser
-    Base.liftBase $ new `Hspec.shouldBe` old
+    IO.liftIO $ new `Hspec.shouldBe` old
 
   Hspec.it "inserts two hackage users" . Test.run $ do
     hackageUser1 <- do
@@ -37,4 +37,4 @@ spec = Hspec.describe "Monadoc.Action.HackageUser.Upsert" $ do
     hackageUser2 <- do
       x <- Test.arbitraryWith $ \y -> y {HackageUser.name = Witch.unsafeFrom @Text.Text "b"}
       HackageUser.Upsert.run x
-    Base.liftBase $ Model.key hackageUser1 `Hspec.shouldNotBe` Model.key hackageUser2
+    IO.liftIO $ Model.key hackageUser1 `Hspec.shouldNotBe` Model.key hackageUser2

@@ -3,7 +3,7 @@
 
 module Monadoc.Action.Range.InsertSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.Range.Insert as Range.Insert
 import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Model as Model
@@ -20,4 +20,4 @@ spec = Hspec.describe "Monadoc.Action.Range.Insert" $ do
             { Model.key = Witch.from @Int 1,
               Model.value = range
             }
-    Base.liftBase $ actual `Hspec.shouldBe` expected
+    IO.liftIO $ actual `Hspec.shouldBe` expected

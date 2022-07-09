@@ -10,6 +10,7 @@ import qualified Data.ByteString as ByteString
 import qualified Data.Maybe as Maybe
 import qualified Data.Text as Text
 import qualified Data.Typeable as Typeable
+import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Type.HackageUserName as HackageUserName
@@ -53,7 +54,7 @@ parse path query = case path of
   ["static", "monadoc.js"] -> pure Script
   ["static", "monadoc.webmanifest"] -> pure Manifest
   ["user", u] -> User <$> tryFrom u
-  _ -> Exception.throwM $ UnknownRoute.UnknownRoute path
+  _ -> Traced.throw $ UnknownRoute.UnknownRoute path
 
 render :: Route -> ([Text.Text], Http.Query)
 render route = case route of

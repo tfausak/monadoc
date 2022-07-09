@@ -2,16 +2,15 @@
 
 module Monadoc.Action.Preference.UpsertSpec where
 
-import qualified Control.Monad.Base as Base
-import qualified Control.Monad.Catch as Exception
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.Package.Upsert as Package.Upsert
 import qualified Monadoc.Action.Preference.Upsert as Preference.Upsert
 import qualified Monadoc.Action.Range.Upsert as Range.Upsert
-import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.Preference as Preference
 import qualified Monadoc.Model.Range as Range
 import qualified Monadoc.Test as Test
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
@@ -33,7 +32,7 @@ spec = Hspec.describe "Monadoc.Action.Preference.Upsert" $ do
               Preference.range = Model.key range
             }
     model <- Preference.Upsert.run preference
-    Base.liftBase $
+    IO.liftIO $
       model
         `Hspec.shouldBe` Model.Model
           { Model.key = Witch.from @Int 1,
@@ -43,20 +42,19 @@ spec = Hspec.describe "Monadoc.Action.Preference.Upsert" $ do
   Hspec.it "updates an existing preference" . Test.run $ do
     old <- upsertPreference (Witch.unsafeFrom @String "a") (Witch.unsafeFrom @String ">1")
     new <- upsertPreference (Witch.unsafeFrom @String "a") (Witch.unsafeFrom @String ">2")
-    Base.liftBase $ do
+    IO.liftIO $ do
       Model.key new `Hspec.shouldBe` Model.key old
       Preference.range (Model.value new) `Hspec.shouldNotBe` Preference.range (Model.value old)
 
   Hspec.it "inserts two preferences" . Test.run $ do
     preference1 <- upsertPreference (Witch.unsafeFrom @String "a") (Witch.unsafeFrom @String ">1")
     preference2 <- upsertPreference (Witch.unsafeFrom @String "b") (Witch.unsafeFrom @String ">1")
-    Base.liftBase $ Model.key preference1 `Hspec.shouldNotBe` Model.key preference2
+    IO.liftIO $ Model.key preference1 `Hspec.shouldNotBe` Model.key preference2
 
 upsertPreference ::
-  (MonadSql.MonadSql m, Exception.MonadThrow m) =>
   PackageName.PackageName ->
   Constraint.Constraint ->
-  m Preference.Model
+  App.App Preference.Model
 upsertPreference packageName constraint = do
   package <- Package.Upsert.run Package.Package {Package.name = packageName}
   range <- Range.Upsert.run Range.Range {Range.constraint = constraint}

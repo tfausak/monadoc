@@ -1,6 +1,6 @@
 module Monadoc.Query.PackageMetaComponentSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.Component.Insert as Component.Insert
 import qualified Monadoc.Action.PackageMeta.InsertSpec as PackageMeta.InsertSpec
 import qualified Monadoc.Action.PackageMetaComponent.Insert as PackageMetaComponent.Insert
@@ -16,7 +16,7 @@ spec = Hspec.describe "Monadoc.Query.PackageMetaComponent" $ do
     Hspec.it "works when there is no package meta component" . Test.run $ do
       packageMeta <- Test.arbitrary
       result <- PackageMetaComponent.selectByPackageMeta packageMeta
-      Base.liftBase $ result `Hspec.shouldBe` []
+      IO.liftIO $ result `Hspec.shouldBe` []
 
     Hspec.it "works when there is a package meta component" . Test.run $ do
       packageMeta <- PackageMeta.InsertSpec.insertPackageMeta
@@ -30,14 +30,14 @@ spec = Hspec.describe "Monadoc.Query.PackageMetaComponent" $ do
           }
       model <- PackageMetaComponent.Insert.run packageMetaComponent
       result <- PackageMetaComponent.selectByPackageMeta $ Model.key packageMeta
-      Base.liftBase $ result `Hspec.shouldBe` [model]
+      IO.liftIO $ result `Hspec.shouldBe` [model]
 
   Hspec.describe "selectByPackageMetaAndComponent" $ do
     Hspec.it "works when there is no package meta component" . Test.run $ do
       packageMeta <- Test.arbitrary
       component <- Test.arbitrary
       result <- PackageMetaComponent.selectByPackageMetaAndComponent packageMeta component
-      Base.liftBase $ result `Hspec.shouldBe` Nothing
+      IO.liftIO $ result `Hspec.shouldBe` Nothing
 
     Hspec.it "works when there is a package meta component" . Test.run $ do
       packageMeta <- PackageMeta.InsertSpec.insertPackageMeta
@@ -54,4 +54,4 @@ spec = Hspec.describe "Monadoc.Query.PackageMetaComponent" $ do
         PackageMetaComponent.selectByPackageMetaAndComponent
           (Model.key packageMeta)
           (Model.key component)
-      Base.liftBase $ result `Hspec.shouldBe` Just model
+      IO.liftIO $ result `Hspec.shouldBe` Just model

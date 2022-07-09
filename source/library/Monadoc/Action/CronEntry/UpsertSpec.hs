@@ -4,7 +4,7 @@
 module Monadoc.Action.CronEntry.UpsertSpec where
 
 import qualified Control.Monad as Monad
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Data.Text as Text
 import qualified Monadoc.Action.CronEntry.Upsert as CronEntry.Upsert
 import qualified Monadoc.Model.CronEntry as CronEntry
@@ -20,21 +20,21 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Upsert" $ do
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Nothing}
     Monad.void $ CronEntry.Upsert.run cronEntry
     cronEntries <- CronEntry.selectAll
-    Base.liftBase $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry]
+    IO.liftIO $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry]
 
   Hspec.it "duplicates a dynamic cron entry" . Test.run $ do
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Nothing}
     Monad.void $ CronEntry.Upsert.run cronEntry
     Monad.void $ CronEntry.Upsert.run cronEntry
     cronEntries <- CronEntry.selectAll
-    Base.liftBase $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry, cronEntry]
+    IO.liftIO $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry, cronEntry]
 
   Hspec.it "inserts a static cron entry" . Test.run $ do
     guid <- Test.arbitrary
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Just guid}
     Monad.void $ CronEntry.Upsert.run cronEntry
     cronEntries <- CronEntry.selectAll
-    Base.liftBase $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry]
+    IO.liftIO $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry]
 
   Hspec.it "does not duplicate a static cron entry" . Test.run $ do
     guid <- Test.arbitrary
@@ -42,7 +42,7 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Upsert" $ do
     Monad.void $ CronEntry.Upsert.run cronEntry
     Monad.void $ CronEntry.Upsert.run cronEntry
     cronEntries <- CronEntry.selectAll
-    Base.liftBase $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry]
+    IO.liftIO $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry]
 
   Hspec.it "updates a static cron entry" . Test.run $ do
     guid <- Test.arbitrary
@@ -59,7 +59,7 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Upsert" $ do
     Monad.void $ CronEntry.Upsert.run cronEntry1
     Monad.void $ CronEntry.Upsert.run cronEntry2
     cronEntries <- CronEntry.selectAll
-    Base.liftBase $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry2]
+    IO.liftIO $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry2]
 
   Hspec.it "does not update a static cron entry with the same schedule and task" . Test.run $ do
     guid <- Test.arbitrary
@@ -73,4 +73,4 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Upsert" $ do
     Monad.void $ CronEntry.Upsert.run cronEntry1
     Monad.void $ CronEntry.Upsert.run cronEntry2
     cronEntries <- CronEntry.selectAll
-    Base.liftBase $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry1]
+    IO.liftIO $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry1]

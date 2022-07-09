@@ -2,7 +2,7 @@
 
 module Monadoc.Action.PackageMeta.UpdateSpec where
 
-import qualified Control.Monad.Base as Base
+import qualified Control.Monad.IO.Class as IO
 import qualified Monadoc.Action.PackageMeta.InsertSpec as PackageMeta.InsertSpec
 import qualified Monadoc.Action.PackageMeta.Update as PackageMeta.Update
 import qualified Monadoc.Model.PackageMeta as PackageMeta
@@ -22,11 +22,11 @@ spec = Hspec.describe "Monadoc.Action.PackageMeta.Update" $ do
     model <- PackageMeta.InsertSpec.insertPackageMeta
     PackageMeta.Update.run model
     result <- PackageMeta.selectByKey $ Model.key model
-    Base.liftBase $ result `Hspec.shouldBe` Just model
+    IO.liftIO $ result `Hspec.shouldBe` Just model
 
   Hspec.it "updates a package meta" . Test.run $ do
     old <- PackageMeta.InsertSpec.insertPackageMeta
     let new = old {Model.value = (Model.value old) {PackageMeta.hash = Hash.new "updated"}}
     PackageMeta.Update.run new
     result <- PackageMeta.selectByKey $ Model.key old
-    Base.liftBase $ result `Hspec.shouldBe` Just new
+    IO.liftIO $ result `Hspec.shouldBe` Just new
