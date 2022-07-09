@@ -13,11 +13,11 @@ import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.CronEntry.Prune" . Hspec.around Test.withConnection $ do
-  Hspec.it "works when there are no cron entries" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.CronEntry.Prune" $ do
+  Hspec.it "works when there are no cron entries" . Test.run $ do
     CronEntry.Prune.run
 
-  Hspec.it "keeps a cron entry with no guid" . Test.runFake $ do
+  Hspec.it "keeps a cron entry with no guid" . Test.run $ do
     cronEntry <- do
       x <- Test.arbitraryWith $ \y -> y {CronEntry.guid = Nothing}
       CronEntry.Insert.run x
@@ -25,7 +25,7 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Prune" . Hspec.around Test.withC
     result <- CronEntry.selectByKey $ Model.key cronEntry
     Base.liftBase $ result `Hspec.shouldBe` Just cronEntry
 
-  Hspec.it "removes a cron entry with a guid" . Test.runFake $ do
+  Hspec.it "removes a cron entry with a guid" . Test.run $ do
     guid <- Test.arbitrary
     cronEntry <- do
       x <- Test.arbitraryWith $ \y -> y {CronEntry.guid = Just guid}
@@ -34,7 +34,7 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Prune" . Hspec.around Test.withC
     result <- CronEntry.selectByKey $ Model.key cronEntry
     Base.liftBase $ result `Hspec.shouldBe` Nothing
 
-  Hspec.it "keeps a cron entry with a static guid" . Test.runFake $
+  Hspec.it "keeps a cron entry with a static guid" . Test.run $
     case fmap CronEntry.guid CronEntry.all of
       Just guid : _ -> do
         cronEntry <- do

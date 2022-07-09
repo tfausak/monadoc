@@ -19,8 +19,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.Preference.Upsert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new preference" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.Preference.Upsert" $ do
+  Hspec.it "inserts a new preference" . Test.run $ do
     package <- do
       x <- Test.arbitrary
       Package.Upsert.run x
@@ -40,14 +40,14 @@ spec = Hspec.describe "Monadoc.Action.Preference.Upsert" . Hspec.around Test.wit
             Model.value = preference
           }
 
-  Hspec.it "updates an existing preference" . Test.runFake $ do
+  Hspec.it "updates an existing preference" . Test.run $ do
     old <- upsertPreference (Witch.unsafeFrom @String "a") (Witch.unsafeFrom @String ">1")
     new <- upsertPreference (Witch.unsafeFrom @String "a") (Witch.unsafeFrom @String ">2")
     Base.liftBase $ do
       Model.key new `Hspec.shouldBe` Model.key old
       Preference.range (Model.value new) `Hspec.shouldNotBe` Preference.range (Model.value old)
 
-  Hspec.it "inserts two preferences" . Test.runFake $ do
+  Hspec.it "inserts two preferences" . Test.run $ do
     preference1 <- upsertPreference (Witch.unsafeFrom @String "a") (Witch.unsafeFrom @String ">1")
     preference2 <- upsertPreference (Witch.unsafeFrom @String "b") (Witch.unsafeFrom @String ">1")
     Base.liftBase $ Model.key preference1 `Hspec.shouldNotBe` Model.key preference2

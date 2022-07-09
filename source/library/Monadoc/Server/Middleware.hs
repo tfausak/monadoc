@@ -11,7 +11,7 @@ import qualified Network.Wai as Wai
 
 middleware :: Context.Context -> Wai.Middleware
 middleware context =
-  LogResponses.middleware
+  LogResponses.middleware context
     . CacheResponses.middleware
     . CompressResponses.middleware (Context.temporaryDirectory context)
     . AddHeaders.middleware (Config.base $ Context.config context)

@@ -12,8 +12,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.Blob.Upsert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new blob" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.Blob.Upsert" $ do
+  Hspec.it "inserts a new blob" . Test.run $ do
     blob <- Test.arbitrary
     model <- Blob.Upsert.run blob
     Base.liftBase $
@@ -23,13 +23,13 @@ spec = Hspec.describe "Monadoc.Action.Blob.Upsert" . Hspec.around Test.withConne
             Model.value = blob
           }
 
-  Hspec.it "updates an existing blob" . Test.runFake $ do
+  Hspec.it "updates an existing blob" . Test.run $ do
     blob <- Test.arbitrary
     old <- Blob.Upsert.run blob
     new <- Blob.Upsert.run blob
     Base.liftBase $ new `Hspec.shouldBe` old
 
-  Hspec.it "inserts two blobs" . Test.runFake $ do
+  Hspec.it "inserts two blobs" . Test.run $ do
     blob1 <- Blob.Upsert.run $ Blob.new "a"
     blob2 <- Blob.Upsert.run $ Blob.new "b"
     Base.liftBase $ Model.key blob1 `Hspec.shouldNotBe` Model.key blob2

@@ -12,8 +12,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.License.Upsert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new license" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.License.Upsert" $ do
+  Hspec.it "inserts a new license" . Test.run $ do
     license <- Test.arbitrary
     actual <- License.Upsert.run license
     let expected =
@@ -23,13 +23,13 @@ spec = Hspec.describe "Monadoc.Action.License.Upsert" . Hspec.around Test.withCo
             }
     Base.liftBase $ actual `Hspec.shouldBe` expected
 
-  Hspec.it "updates an existing license" . Test.runFake $ do
+  Hspec.it "updates an existing license" . Test.run $ do
     license <- Test.arbitrary
     old <- License.Upsert.run license
     new <- License.Upsert.run license
     Base.liftBase $ new `Hspec.shouldBe` old
 
-  Hspec.it "inesrts two licenses" . Test.runFake $ do
+  Hspec.it "inesrts two licenses" . Test.run $ do
     license1 <- Test.arbitraryWith $ \x -> x {License.spdx = Witch.unsafeFrom @String "MIT"}
     license2 <- Test.arbitraryWith $ \x -> x {License.spdx = Witch.unsafeFrom @String "ISC"}
     model1 <- License.Upsert.run license1

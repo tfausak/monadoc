@@ -13,8 +13,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Upsert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new component" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Upsert" $ do
+  Hspec.it "inserts a new component" . Test.run $ do
     packageMeta <- PackageMeta.InsertSpec.insertPackageMeta
     component <- do
       x <- Test.arbitrary
@@ -32,7 +32,7 @@ spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Upsert" . Hspec.aroun
             Model.value = packageMetaComponent
           }
 
-  Hspec.it "updates an existing component" . Test.runFake $ do
+  Hspec.it "updates an existing component" . Test.run $ do
     packageMeta <- PackageMeta.InsertSpec.insertPackageMeta
     component <- do
       x <- Test.arbitrary
@@ -46,7 +46,7 @@ spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Upsert" . Hspec.aroun
     new <- PackageMetaComponent.Upsert.run packageMetaComponent
     Base.liftBase $ new `Hspec.shouldBe` old
 
-  Hspec.it "inserts two components" . Test.runFake $ do
+  Hspec.it "inserts two components" . Test.run $ do
     packageMeta <- PackageMeta.InsertSpec.insertPackageMeta
     component1 <- do
       x <- Test.arbitrary

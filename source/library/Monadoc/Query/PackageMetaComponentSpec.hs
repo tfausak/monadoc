@@ -11,14 +11,14 @@ import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Query.PackageMetaComponent" . Hspec.around Test.withConnection $ do
+spec = Hspec.describe "Monadoc.Query.PackageMetaComponent" $ do
   Hspec.describe "selectByPackageMeta" $ do
-    Hspec.it "works when there is no package meta component" . Test.runFake $ do
+    Hspec.it "works when there is no package meta component" . Test.run $ do
       packageMeta <- Test.arbitrary
       result <- PackageMetaComponent.selectByPackageMeta packageMeta
       Base.liftBase $ result `Hspec.shouldBe` []
 
-    Hspec.it "works when there is a package meta component" . Test.runFake $ do
+    Hspec.it "works when there is a package meta component" . Test.run $ do
       packageMeta <- PackageMeta.InsertSpec.insertPackageMeta
       component <- do
         x <- Test.arbitrary
@@ -33,13 +33,13 @@ spec = Hspec.describe "Monadoc.Query.PackageMetaComponent" . Hspec.around Test.w
       Base.liftBase $ result `Hspec.shouldBe` [model]
 
   Hspec.describe "selectByPackageMetaAndComponent" $ do
-    Hspec.it "works when there is no package meta component" . Test.runFake $ do
+    Hspec.it "works when there is no package meta component" . Test.run $ do
       packageMeta <- Test.arbitrary
       component <- Test.arbitrary
       result <- PackageMetaComponent.selectByPackageMetaAndComponent packageMeta component
       Base.liftBase $ result `Hspec.shouldBe` Nothing
 
-    Hspec.it "works when there is a package meta component" . Test.runFake $ do
+    Hspec.it "works when there is a package meta component" . Test.run $ do
       packageMeta <- PackageMeta.InsertSpec.insertPackageMeta
       component <- do
         x <- Test.arbitrary

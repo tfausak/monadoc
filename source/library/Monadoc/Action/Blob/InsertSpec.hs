@@ -11,8 +11,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.Blob.Insert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new blob" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.Blob.Insert" $ do
+  Hspec.it "inserts a new blob" . Test.run $ do
     blob <- Test.arbitrary
     actual <- Blob.Insert.run blob
     let expected =

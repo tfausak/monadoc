@@ -12,8 +12,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.Job.Enqueue" . Hspec.around Test.withConnection $ do
-  Hspec.it "succeeds" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.Job.Enqueue" $ do
+  Hspec.it "succeeds" . Test.run $ do
     task <- Test.arbitrary
     model <- Job.Enqueue.run task
     Base.liftBase $ do

@@ -8,10 +8,11 @@ import qualified Control.Monad.Base as Base
 import qualified Control.Monad.Reader as Reader
 import qualified Data.ByteString as ByteString
 import qualified Data.Text as Text
-import qualified Monadoc.Class.MonadLog as MonadLog
+import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
 import qualified Monadoc.Server.Application as Application
 import qualified Monadoc.Server.Middleware as Middleware
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Network.Wai.Handler.Warp as Warp
@@ -28,16 +29,17 @@ server = do
 getSettings :: Context.Context -> Warp.Settings
 getSettings context =
   let config = Context.config context
-   in Warp.setBeforeMainLoop (beforeMainLoop config)
+   in Warp.setBeforeMainLoop (beforeMainLoop context)
         . Warp.setHost (Config.host config)
         . Warp.setOnException (HandleExceptions.onException context)
         . Warp.setOnExceptionResponse (HandleExceptions.onExceptionResponse context)
         . Warp.setPort (Witch.into @Int $ Config.port config)
         $ Warp.setServerName ByteString.empty Warp.defaultSettings
 
-beforeMainLoop :: MonadLog.MonadLog m => Config.Config -> m ()
-beforeMainLoop config = do
-  MonadLog.info $
+beforeMainLoop :: Context.Context -> IO ()
+beforeMainLoop context = do
+  let config = Context.config context
+  App.runApp context . Log.info $
     Text.unwords
       [ "listening on",
         Text.pack . show $ Config.host config,

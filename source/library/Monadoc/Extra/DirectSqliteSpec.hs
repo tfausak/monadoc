@@ -56,4 +56,4 @@ spec = Hspec.describe "Monadoc.Extra.DirectSqlite" . Hspec.around withDatabase $
         bs `Hspec.shouldBe` "hs"
 
 withDatabase :: (Sqlite.Database -> IO a) -> IO a
-withDatabase f = Test.withConnection $ f . Sql.connectionHandle
+withDatabase f = Sql.withConnection ":memory:" $ f . Sql.connectionHandle

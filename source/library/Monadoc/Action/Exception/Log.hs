@@ -2,7 +2,8 @@ module Monadoc.Action.Exception.Log where
 
 import qualified Control.Monad.Catch as Exception
 import qualified Data.Text as Text
-import qualified Monadoc.Class.MonadLog as MonadLog
+import qualified Monadoc.Action.Log as Log
+import qualified Monadoc.Type.App as App
 
-run :: MonadLog.MonadLog m => Exception.SomeException -> m ()
-run = MonadLog.error . Text.pack . Exception.displayException
+run :: Exception.SomeException -> App.App ()
+run = Log.error . Text.pack . Exception.displayException

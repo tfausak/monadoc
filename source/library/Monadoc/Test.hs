@@ -1,6 +1,4 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE UndecidableInstances #-}
 
 module Monadoc.Test where
 
@@ -8,57 +6,26 @@ import qualified Control.Monad.Base as Base
 import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Reader as Reader
 import qualified Control.Monad.State.Strict as State
-import qualified Control.Monad.Trans as Trans
-import qualified Control.Monad.Trans.Control as Control
 import qualified Data.Aeson as Aeson
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Text.Lazy as LazyText
-import qualified Data.Time as Time
 import qualified Data.Typeable as Typeable
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.Internal as Sql
 import qualified Database.SQLite.Simple.Ok as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
-import qualified GHC.Clock as Clock
 import qualified GHC.Stack as Stack
 import qualified Lucid as Html
 import qualified Monadoc.Action.Database.Initialize as Database.Initialize
-import qualified Monadoc.Class.MonadLog as MonadLog
-import qualified Monadoc.Class.MonadSay as MonadSay
-import qualified Monadoc.Class.MonadSql as MonadSql
-import qualified Monadoc.Class.MonadTime as MonadTime
+import qualified Monadoc.Type.App as App
+import qualified Monadoc.Type.Config as Config
+import qualified Monadoc.Type.Context as Context
+import qualified Monadoc.Type.Severity as Severity
+import qualified System.Environment as Environment
 import qualified Test.Hspec as Hspec
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
-
-newtype FakeT m a = FakeT
-  { runFakeT :: Reader.ReaderT Sql.Connection m a
-  }
-  deriving
-    ( Applicative,
-      Functor,
-      Monad,
-      Base.MonadBase b,
-      Control.MonadBaseControl b,
-      Trans.MonadIO,
-      Reader.MonadReader Sql.Connection,
-      Exception.MonadThrow
-    )
-
-instance Base.MonadBase IO m => MonadLog.MonadLog (FakeT m)
-
-instance Monad m => MonadSay.MonadSay (FakeT m) where
-  hSay = const . const $ pure ()
-
-instance Base.MonadBase IO m => MonadSql.MonadSql (FakeT m) where
-  withConnection callback = do
-    connection <- Reader.ask
-    callback connection
-
-instance Base.MonadBase IO m => MonadTime.MonadTime (FakeT m) where
-  getCurrentTime = Base.liftBase Time.getCurrentTime
-  getMonotonicTime = Base.liftBase Clock.getMonotonicTime
 
 arbitrary :: (QuickCheck.Arbitrary a, Base.MonadBase IO m) => m a
 arbitrary = arbitraryWith id
@@ -131,8 +98,15 @@ propertySqlField x = fromField (Sql.toField x) QuickCheck.=== Sql.Ok x
 propertySqlRow :: (Eq a, Sql.FromRow a, Show a, Sql.ToRow a) => a -> QuickCheck.Property
 propertySqlRow x = fromRow (Sql.toRow x) QuickCheck.=== Sql.Ok x
 
-runFake :: FakeT IO a -> Sql.Connection -> IO a
-runFake = Reader.runReaderT . runFakeT . (*>) Database.Initialize.run
-
-withConnection :: (Sql.Connection -> IO a) -> IO a
-withConnection = Sql.withConnection ":memory:"
+run :: App.App a -> IO a
+run app = do
+  name <- Environment.getProgName
+  let config =
+        Config.initial
+          { Config.sql = ":memory:",
+            Config.severity = Severity.Error
+          }
+  context <- Context.fromConfig name config
+  App.runApp context $ do
+    Database.Initialize.run
+    app

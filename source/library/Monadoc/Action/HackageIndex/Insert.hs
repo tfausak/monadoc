@@ -10,15 +10,14 @@ import qualified Control.Monad as Monad
 import qualified Control.Monad.Base as Base
 import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Reader as Reader
-import qualified Control.Monad.Trans.Control as Control
 import qualified Crypto.Hash as Crypto
 import qualified Data.ByteString as ByteString
 import qualified Data.Int as Int
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite3 as Sqlite
 import qualified Monadoc.Action.Key.SelectLastInsert as Key.SelectLastInsert
+import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Class.MonadHttp as MonadHttp
-import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Class.MonadTime as MonadTime
 import qualified Monadoc.Exception.MissingSize as MissingSize
@@ -28,6 +27,7 @@ import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Extra.Read as Read
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Hash as Hash
@@ -37,17 +37,9 @@ import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Types as Http
 import qualified Witch
 
-run ::
-  ( Control.MonadBaseControl IO m,
-    MonadHttp.MonadHttp m,
-    MonadLog.MonadLog m,
-    Exception.MonadMask m,
-    Reader.MonadReader Context.Context m,
-    MonadSql.MonadSql m
-  ) =>
-  m ()
+run :: App.App ()
 run = do
-  MonadLog.debug "inserting hackage index"
+  Log.debug "inserting hackage index"
   size <- getSize
   context <- Reader.ask
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"

@@ -1,7 +1,6 @@
 module Monadoc.Server.Application where
 
 import qualified Control.Monad.Catch as Exception
-import qualified Control.Monad.Reader as Reader
 import qualified Data.Bifunctor as Bifunctor
 import qualified Data.Map as Map
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
@@ -35,7 +34,7 @@ application context request respond = do
       $ Wai.requestMethod request
   route <- Route.parse (Wai.pathInfo request) (Wai.queryString request)
   handler <- getHandler context method route
-  response <- Reader.runReaderT (App.runAppT $ handler request) context
+  response <- App.runApp context $ handler request
   respond response
 
 parseMethod :: Http.Method -> Either (Witch.TryFromException Http.Method Http.StdMethod) Http.StdMethod

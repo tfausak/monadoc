@@ -11,8 +11,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.Range.Upsert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new range" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.Range.Upsert" $ do
+  Hspec.it "inserts a new range" . Test.run $ do
     range <- Test.arbitrary
     actual <- Range.Upsert.run range
     let expected =
@@ -22,13 +22,13 @@ spec = Hspec.describe "Monadoc.Action.Range.Upsert" . Hspec.around Test.withConn
             }
     Base.liftBase $ actual `Hspec.shouldBe` expected
 
-  Hspec.it "updates an existing range" . Test.runFake $ do
+  Hspec.it "updates an existing range" . Test.run $ do
     range <- Test.arbitrary
     old <- Range.Upsert.run range
     new <- Range.Upsert.run range
     Base.liftBase $ new `Hspec.shouldBe` old
 
-  Hspec.it "inesrts two ranges" . Test.runFake $ do
+  Hspec.it "inesrts two ranges" . Test.run $ do
     range1 <- Test.arbitrary
     range2 <- Test.arbitrary
     model1 <- Range.Upsert.run range1

@@ -14,24 +14,24 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Query.Blob" . Hspec.around Test.withConnection $ do
+spec = Hspec.describe "Monadoc.Query.Blob" $ do
   Hspec.describe "selectByHash" $ do
-    Hspec.it "returns nothing when the blob doesn't exist" . Test.runFake $ do
+    Hspec.it "returns nothing when the blob doesn't exist" . Test.run $ do
       result <- Blob.selectByHash $ Hash.new ""
       Base.liftBase $ result `Hspec.shouldBe` Nothing
 
-    Hspec.it "returns just when the blob exists" . Test.runFake $ do
+    Hspec.it "returns just when the blob exists" . Test.run $ do
       blob <- Test.arbitrary
       model <- Blob.Insert.run blob
       result <- Blob.selectByHash $ Blob.hash blob
       Base.liftBase $ result `Hspec.shouldBe` Just model
 
   Hspec.describe "selectByKey" $ do
-    Hspec.it "returns nothing when the blob doesn't exist" . Test.runFake $ do
+    Hspec.it "returns nothing when the blob doesn't exist" . Test.run $ do
       result <- Blob.selectByKey $ Witch.from @Int 0
       Base.liftBase $ result `Hspec.shouldBe` Nothing
 
-    Hspec.it "returns just when the blob exists" . Test.runFake $ do
+    Hspec.it "returns just when the blob exists" . Test.run $ do
       blob <- Test.arbitrary
       model <- Blob.Insert.run blob
       result <- Blob.selectByKey $ Model.key model

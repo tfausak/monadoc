@@ -30,14 +30,15 @@ mainWith :: String -> [String] -> IO ()
 mainWith name arguments = do
   mapM_ (flip IO.hSetBuffering IO.LineBuffering) [IO.stdout, IO.stderr]
 
-  handler <- Conc.getUncaughtExceptionHandler
-  Conc.setUncaughtExceptionHandler $
-    Exception.handle handler . Exception.Log.run
-
   flags <- Flag.fromArguments arguments
   config <- Config.fromFlags flags
   context <- Context.fromConfig name config
-  Reader.runReaderT (App.runAppT $ Exception.finally start stop) context
+
+  handler <- Conc.getUncaughtExceptionHandler
+  Conc.setUncaughtExceptionHandler $
+    Exception.handle handler . App.runApp context . Exception.Log.run
+
+  App.runApp context $ Exception.finally start stop
 
 start :: App.App ()
 start = do

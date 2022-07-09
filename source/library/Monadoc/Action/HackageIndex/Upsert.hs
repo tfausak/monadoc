@@ -1,29 +1,16 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Monadoc.Action.HackageIndex.Upsert where
 
-import qualified Control.Monad.Catch as Exception
-import qualified Control.Monad.Reader as Reader
-import qualified Control.Monad.Trans.Control as Control
 import qualified Monadoc.Action.HackageIndex.Insert as Insert
 import qualified Monadoc.Action.HackageIndex.Update as Update
-import qualified Monadoc.Class.MonadHttp as MonadHttp
-import qualified Monadoc.Class.MonadLog as MonadLog
+import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Class.MonadSql as MonadSql
-import qualified Monadoc.Type.Context as Context
+import qualified Monadoc.Type.App as App
 
-run ::
-  ( Control.MonadBaseControl IO m,
-    MonadHttp.MonadHttp m,
-    MonadLog.MonadLog m,
-    Exception.MonadMask m,
-    Reader.MonadReader Context.Context m,
-    MonadSql.MonadSql m
-  ) =>
-  m ()
+run :: App.App ()
 run = do
-  MonadLog.debug "upserting hackage index"
+  Log.debug "upserting hackage index"
   rows <- MonadSql.query_ "select * from hackageIndex order by createdAt desc limit 1"
   case rows of
     [] -> Insert.run

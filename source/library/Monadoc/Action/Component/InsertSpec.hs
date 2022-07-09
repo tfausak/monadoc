@@ -11,8 +11,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.Component.Insert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new component" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.Component.Insert" $ do
+  Hspec.it "inserts a new component" . Test.run $ do
     component <- Test.arbitrary
     actual <- Component.Insert.run component
     let expected =

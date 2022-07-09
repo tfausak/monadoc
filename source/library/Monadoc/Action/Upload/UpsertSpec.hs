@@ -15,8 +15,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.Upload.Upsert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new upload" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.Upload.Upsert" $ do
+  Hspec.it "inserts a new upload" . Test.run $ do
     blob <- do
       x <- Test.arbitrary
       Blob.Upsert.run x
@@ -44,7 +44,7 @@ spec = Hspec.describe "Monadoc.Action.Upload.Upsert" . Hspec.around Test.withCon
             Model.value = upload
           }
 
-  Hspec.it "updates an existing upload" . Test.runFake $ do
+  Hspec.it "updates an existing upload" . Test.run $ do
     blob <- do
       x <- Test.arbitrary
       Blob.Upsert.run x
@@ -68,7 +68,7 @@ spec = Hspec.describe "Monadoc.Action.Upload.Upsert" . Hspec.around Test.withCon
     new <- Upload.Upsert.run upload
     Base.liftBase $ new `Hspec.shouldBe` old
 
-  Hspec.it "inserts two uploads" . Test.runFake $ do
+  Hspec.it "inserts two uploads" . Test.run $ do
     blob <- do
       x <- Test.arbitrary
       Blob.Upsert.run x

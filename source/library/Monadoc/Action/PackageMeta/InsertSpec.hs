@@ -22,8 +22,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.PackageMeta.Insert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new package meta" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.PackageMeta.Insert" $ do
+  Hspec.it "inserts a new package meta" . Test.run $ do
     packageMeta <- makePackageMeta
     model <- PackageMeta.Insert.run packageMeta
     let expected =

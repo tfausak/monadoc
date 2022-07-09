@@ -10,14 +10,14 @@ import qualified Monadoc.Test as Test
 import qualified Test.Hspec as Hspec
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Query.License" . Hspec.around Test.withConnection $ do
+spec = Hspec.describe "Monadoc.Query.License" $ do
   Hspec.describe "selectBySpdx" $ do
-    Hspec.it "returns nothing when there is no license" . Test.runFake $ do
+    Hspec.it "returns nothing when there is no license" . Test.run $ do
       spdx <- Test.arbitrary
       result <- License.selectBySpdx spdx
       Base.liftBase $ result `Hspec.shouldBe` Nothing
 
-    Hspec.it "returns a license when one exists" . Test.runFake $ do
+    Hspec.it "returns a license when one exists" . Test.run $ do
       license <- Test.arbitrary
       model <- License.Insert.run license
       result <- License.selectBySpdx $ License.spdx license

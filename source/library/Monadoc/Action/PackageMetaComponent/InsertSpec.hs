@@ -14,8 +14,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Insert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new package meta component" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Insert" $ do
+  Hspec.it "inserts a new package meta component" . Test.run $ do
     packageMeta <- PackageMeta.InsertSpec.insertPackageMeta
     component <- do
       x <- Test.arbitrary

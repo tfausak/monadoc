@@ -10,7 +10,6 @@ import qualified Control.Concurrent.STM as Stm
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Base as Base
 import qualified Control.Monad.Catch as Exception
-import qualified Control.Monad.Trans.Control as Control
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Int as Int
@@ -26,12 +25,12 @@ import qualified Distribution.Types.PackageVersionConstraint as Cabal
 import qualified Distribution.Version as Cabal
 import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
 import qualified Monadoc.Action.HackageUser.Upsert as HackageUser.Upsert
+import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Action.Package.Upsert as Package.Upsert
 import qualified Monadoc.Action.Preference.Upsert as Preference.Upsert
 import qualified Monadoc.Action.Range.Upsert as Range.Upsert
 import qualified Monadoc.Action.Upload.Upsert as Upload.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
-import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Exception.UnexpectedEntry as UnexpectedEntry
@@ -46,6 +45,7 @@ import qualified Monadoc.Model.Preference as Preference
 import qualified Monadoc.Model.Range as Range
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Monadoc.Type.Model as Model
@@ -56,17 +56,11 @@ import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified System.FilePath as FilePath
 import qualified Witch
 
-run ::
-  ( Control.MonadBaseControl IO m,
-    MonadLog.MonadLog m,
-    Exception.MonadMask m,
-    MonadSql.MonadSql m
-  ) =>
-  m ()
+run :: App.App ()
 run = do
   rows <- MonadSql.query_ "select * from hackageIndex where processedAt is null order by createdAt asc limit 1"
   case rows of
-    [] -> MonadLog.debug "no new hackage index to process"
+    [] -> Log.debug "no new hackage index to process"
     hackageIndex : _ -> do
       constraints <- Base.liftBase $ Stm.newTVarIO Map.empty
       revisions <- Base.liftBase $ Stm.newTVarIO Map.empty
@@ -89,20 +83,18 @@ run = do
       MonadSql.execute "update hackageIndex set processedAt = ? where key = ?" (Just now, Model.key hackageIndex)
 
 handleItem ::
-  (Base.MonadBase IO m, MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
   Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->
   Stm.TVar (Map.Map (PackageName.PackageName, VersionNumber.VersionNumber) Revision.Revision) ->
   Either Tar.FormatError Tar.Entry ->
-  m ()
+  App.App ()
 handleItem constraints =
   either Exception.throwM . handleEntry constraints
 
 handleEntry ::
-  (Base.MonadBase IO m, MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
   Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->
   Stm.TVar (Map.Map (PackageName.PackageName, VersionNumber.VersionNumber) Revision.Revision) ->
   Tar.Entry ->
-  m ()
+  App.App ()
 handleEntry constraints revisions entry =
   case FilePath.splitDirectories $ Tar.entryPath entry of
     [pkg, "preferred-versions"] ->
@@ -146,12 +138,11 @@ handlePackageJson :: Applicative m => Tar.Entry -> m ()
 handlePackageJson _ = pure ()
 
 handleCabal ::
-  (Base.MonadBase IO m, MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) =>
   Stm.TVar (Map.Map (PackageName.PackageName, VersionNumber.VersionNumber) Revision.Revision) ->
   Tar.Entry ->
   String ->
   String ->
-  m ()
+  App.App ()
 handleCabal revisions entry pkg ver = do
   packageName <-
     Either.throw $
@@ -198,7 +189,7 @@ handleCabal revisions entry pkg ver = do
           Upload.isLatest = False
         }
   Monad.when (rem (Witch.into @Int.Int64 (Model.key upload)) 10000 == 1)
-    . MonadLog.debug
+    . Log.debug
     . Text.pack
     $ show upload
 

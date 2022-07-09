@@ -11,8 +11,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.CronEntry.Insert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new cron entry" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.CronEntry.Insert" $ do
+  Hspec.it "inserts a new cron entry" . Test.run $ do
     cronEntry <- Test.arbitrary
     actual <- CronEntry.Insert.run cronEntry
     let expected =

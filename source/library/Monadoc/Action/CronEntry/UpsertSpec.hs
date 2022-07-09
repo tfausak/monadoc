@@ -15,28 +15,28 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.CronEntry.Upsert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a dynamic cron entry" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.CronEntry.Upsert" $ do
+  Hspec.it "inserts a dynamic cron entry" . Test.run $ do
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Nothing}
     Monad.void $ CronEntry.Upsert.run cronEntry
     cronEntries <- CronEntry.selectAll
     Base.liftBase $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry]
 
-  Hspec.it "duplicates a dynamic cron entry" . Test.runFake $ do
+  Hspec.it "duplicates a dynamic cron entry" . Test.run $ do
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Nothing}
     Monad.void $ CronEntry.Upsert.run cronEntry
     Monad.void $ CronEntry.Upsert.run cronEntry
     cronEntries <- CronEntry.selectAll
     Base.liftBase $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry, cronEntry]
 
-  Hspec.it "inserts a static cron entry" . Test.runFake $ do
+  Hspec.it "inserts a static cron entry" . Test.run $ do
     guid <- Test.arbitrary
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Just guid}
     Monad.void $ CronEntry.Upsert.run cronEntry
     cronEntries <- CronEntry.selectAll
     Base.liftBase $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry]
 
-  Hspec.it "does not duplicate a static cron entry" . Test.runFake $ do
+  Hspec.it "does not duplicate a static cron entry" . Test.run $ do
     guid <- Test.arbitrary
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Just guid}
     Monad.void $ CronEntry.Upsert.run cronEntry
@@ -44,7 +44,7 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Upsert" . Hspec.around Test.with
     cronEntries <- CronEntry.selectAll
     Base.liftBase $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry]
 
-  Hspec.it "updates a static cron entry" . Test.runFake $ do
+  Hspec.it "updates a static cron entry" . Test.run $ do
     guid <- Test.arbitrary
     cronEntry1 <- Test.arbitraryWith $ \x ->
       x
@@ -61,7 +61,7 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Upsert" . Hspec.around Test.with
     cronEntries <- CronEntry.selectAll
     Base.liftBase $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry2]
 
-  Hspec.it "does not update a static cron entry with the same schedule and task" . Test.runFake $ do
+  Hspec.it "does not update a static cron entry with the same schedule and task" . Test.run $ do
     guid <- Test.arbitrary
     cronEntry1 <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Just guid}
     cronEntry2 <- Test.arbitraryWith $ \x ->

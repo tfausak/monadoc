@@ -11,8 +11,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.Package.Upsert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new package" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.Package.Upsert" $ do
+  Hspec.it "inserts a new package" . Test.run $ do
     package <- Test.arbitrary
     model <- Package.Upsert.run package
     Base.liftBase $
@@ -22,13 +22,13 @@ spec = Hspec.describe "Monadoc.Action.Package.Upsert" . Hspec.around Test.withCo
             Model.value = package
           }
 
-  Hspec.it "updates an existing package" . Test.runFake $ do
+  Hspec.it "updates an existing package" . Test.run $ do
     package <- Test.arbitrary
     old <- Package.Upsert.run package
     new <- Package.Upsert.run package
     Base.liftBase $ new `Hspec.shouldBe` old
 
-  Hspec.it "inserts two packages" . Test.runFake $ do
+  Hspec.it "inserts two packages" . Test.run $ do
     package1 <- do
       x <- Test.arbitraryWith $ \y -> y {Package.name = Witch.unsafeFrom @String "a"}
       Package.Upsert.run x

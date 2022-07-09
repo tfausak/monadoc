@@ -11,8 +11,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.Range.Insert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new range" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.Range.Insert" $ do
+  Hspec.it "inserts a new range" . Test.run $ do
     range <- Test.arbitrary
     actual <- Range.Insert.run range
     let expected =

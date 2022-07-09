@@ -11,8 +11,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.License.Insert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new license" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.License.Insert" $ do
+  Hspec.it "inserts a new license" . Test.run $ do
     license <- Test.arbitrary
     actual <- License.Insert.run license
     let expected =

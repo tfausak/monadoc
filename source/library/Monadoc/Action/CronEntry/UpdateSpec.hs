@@ -11,12 +11,12 @@ import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.CronEntry.Update" . Hspec.around Test.withConnection $ do
-  Hspec.it "does not throw an error when the cron entry doesn't exist" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.CronEntry.Update" $ do
+  Hspec.it "does not throw an error when the cron entry doesn't exist" . Test.run $ do
     cronEntry <- Test.arbitrary
     CronEntry.Update.run cronEntry
 
-  Hspec.it "succeeds when the cron entry doesn't need to be updated" . Test.runFake $ do
+  Hspec.it "succeeds when the cron entry doesn't need to be updated" . Test.run $ do
     cronEntry <- do
       x <- Test.arbitrary
       CronEntry.Insert.run x
@@ -24,7 +24,7 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Update" . Hspec.around Test.with
     result <- CronEntry.selectByKey $ Model.key cronEntry
     Base.liftBase $ result `Hspec.shouldBe` Just cronEntry
 
-  Hspec.it "updates a cron entry" . Test.runFake $ do
+  Hspec.it "updates a cron entry" . Test.run $ do
     cronEntry1 <- do
       x <- Test.arbitrary
       CronEntry.Insert.run x

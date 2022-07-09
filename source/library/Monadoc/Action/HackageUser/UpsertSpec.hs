@@ -13,8 +13,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.HackageUser.Upsert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new hackage user" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.HackageUser.Upsert" $ do
+  Hspec.it "inserts a new hackage user" . Test.run $ do
     hackageUser <- Test.arbitrary
     model <- HackageUser.Upsert.run hackageUser
     Base.liftBase $
@@ -24,13 +24,13 @@ spec = Hspec.describe "Monadoc.Action.HackageUser.Upsert" . Hspec.around Test.wi
             Model.value = hackageUser
           }
 
-  Hspec.it "updates an existing hackage user" . Test.runFake $ do
+  Hspec.it "updates an existing hackage user" . Test.run $ do
     hackageUser <- Test.arbitrary
     old <- HackageUser.Upsert.run hackageUser
     new <- HackageUser.Upsert.run hackageUser
     Base.liftBase $ new `Hspec.shouldBe` old
 
-  Hspec.it "inserts two hackage users" . Test.runFake $ do
+  Hspec.it "inserts two hackage users" . Test.run $ do
     hackageUser1 <- do
       x <- Test.arbitraryWith $ \y -> y {HackageUser.name = Witch.unsafeFrom @Text.Text "a"}
       HackageUser.Upsert.run x

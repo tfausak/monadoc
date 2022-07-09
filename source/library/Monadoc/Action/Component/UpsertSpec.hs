@@ -11,8 +11,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.Component.Upsert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new component" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.Component.Upsert" $ do
+  Hspec.it "inserts a new component" . Test.run $ do
     component <- Test.arbitrary
     model <- Component.Upsert.run component
     Base.liftBase $
@@ -22,13 +22,13 @@ spec = Hspec.describe "Monadoc.Action.Component.Upsert" . Hspec.around Test.with
             Model.value = component
           }
 
-  Hspec.it "updates an existing component" . Test.runFake $ do
+  Hspec.it "updates an existing component" . Test.run $ do
     component <- Test.arbitrary
     old <- Component.Upsert.run component
     new <- Component.Upsert.run component
     Base.liftBase $ new `Hspec.shouldBe` old
 
-  Hspec.it "inserts two components" . Test.runFake $ do
+  Hspec.it "inserts two components" . Test.run $ do
     component1 <- do
       x <- Test.arbitraryWith $ \y -> y {Component.name = Witch.unsafeFrom @String "a"}
       Component.Upsert.run x

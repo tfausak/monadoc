@@ -12,12 +12,12 @@ import qualified Monadoc.Test as Test
 import qualified Test.Hspec as Hspec
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.CronEntry.Delete" . Hspec.around Test.withConnection $ do
-  Hspec.it "does not throw an error when the cron entry doesn't exist" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.CronEntry.Delete" $ do
+  Hspec.it "does not throw an error when the cron entry doesn't exist" . Test.run $ do
     guid <- Test.arbitrary
     CronEntry.Delete.run guid
 
-  Hspec.it "deletes the cron entry" . Test.runFake $ do
+  Hspec.it "deletes the cron entry" . Test.run $ do
     guid <- Test.arbitrary
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Just guid}
     Monad.void $ CronEntry.Insert.run cronEntry

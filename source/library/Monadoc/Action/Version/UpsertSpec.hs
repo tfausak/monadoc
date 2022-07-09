@@ -11,8 +11,8 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.Version.Upsert" . Hspec.around Test.withConnection $ do
-  Hspec.it "inserts a new version" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.Version.Upsert" $ do
+  Hspec.it "inserts a new version" . Test.run $ do
     version <- Test.arbitrary
     model <- Version.Upsert.run version
     Base.liftBase $
@@ -22,13 +22,13 @@ spec = Hspec.describe "Monadoc.Action.Version.Upsert" . Hspec.around Test.withCo
             Model.value = version
           }
 
-  Hspec.it "updates an existing version" . Test.runFake $ do
+  Hspec.it "updates an existing version" . Test.run $ do
     version <- Test.arbitrary
     old <- Version.Upsert.run version
     new <- Version.Upsert.run version
     Base.liftBase $ new `Hspec.shouldBe` old
 
-  Hspec.it "inserts two versions" . Test.runFake $ do
+  Hspec.it "inserts two versions" . Test.run $ do
     version1 <- do
       x <- Test.arbitraryWith $ \y -> y {Version.number = Witch.unsafeFrom @String "1"}
       Version.Upsert.run x

@@ -2,30 +2,30 @@
 
 module Monadoc.Action.Database.Initialize where
 
-import qualified Control.Monad.Catch as Exception
 import qualified Data.Text as Text
+import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Action.Migration.Migrate as Migration.Migrate
-import qualified Monadoc.Class.MonadLog as MonadLog
 import qualified Monadoc.Class.MonadSql as MonadSql
 import qualified Monadoc.Constant.Migration as Migration
 import qualified Monadoc.Model.Migration as Migration
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Query as Query
 
-run :: (MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) => m ()
+run :: App.App ()
 run = do
-  MonadLog.info "initializing database"
+  Log.info "initializing database"
   runPragmas
   runMigrations
-  MonadLog.debug "initialized database"
+  Log.debug "initialized database"
 
-runPragmas :: (MonadLog.MonadLog m, MonadSql.MonadSql m) => m ()
+runPragmas :: App.App ()
 runPragmas = do
-  MonadLog.info "executing pragmas"
+  Log.info "executing pragmas"
   mapM_ runPragma pragmas
 
-runPragma :: (MonadLog.MonadLog m, MonadSql.MonadSql m) => Query.Query -> m ()
+runPragma :: Query.Query -> App.App ()
 runPragma pragma = do
-  MonadLog.debug $ "executing pragma: " <> Text.pack (show pragma)
+  Log.debug $ "executing pragma: " <> Text.pack (show pragma)
   MonadSql.execute_ pragma
 
 pragmas :: [Query.Query]
@@ -35,8 +35,8 @@ pragmas =
     "pragma journal_mode = 'wal'"
   ]
 
-runMigrations :: (MonadLog.MonadLog m, MonadSql.MonadSql m, Exception.MonadThrow m) => m ()
+runMigrations :: App.App ()
 runMigrations = do
-  MonadLog.info "running migrations"
+  Log.info "running migrations"
   MonadSql.execute_ Migration.createTable
   mapM_ Migration.Migrate.run Migration.all

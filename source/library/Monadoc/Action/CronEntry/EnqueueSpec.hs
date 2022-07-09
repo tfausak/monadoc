@@ -20,11 +20,11 @@ import qualified Test.Hspec as Hspec
 import qualified Witch
 
 spec :: Hspec.Spec
-spec = Hspec.describe "Monadoc.Action.CronEntry.Enqueue" . Hspec.around Test.withConnection $ do
-  Hspec.it "succeeds with no cron entries" . Test.runFake $ do
+spec = Hspec.describe "Monadoc.Action.CronEntry.Enqueue" $ do
+  Hspec.it "succeeds with no cron entries" . Test.run $ do
     CronEntry.Enqueue.run
 
-  Hspec.it "updates the cron entry's next run at" . Test.runFake $ do
+  Hspec.it "updates the cron entry's next run at" . Test.run $ do
     now <- Timestamp.getCurrentTime
     schedule <- either Exception.throwM pure $ Witch.tryFrom @Text.Text "* * * * *"
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.runAt = now, CronEntry.schedule = schedule}
@@ -38,7 +38,7 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Enqueue" . Hspec.around Test.wit
             { Model.value = cronEntry {CronEntry.runAt = nextMinute now}
             }
 
-  Hspec.it "inserts a job" . Test.runFake $ do
+  Hspec.it "inserts a job" . Test.run $ do
     now <- Timestamp.getCurrentTime
     schedule <- either Exception.throwM pure $ Witch.tryFrom @Text.Text "* * * * *"
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.runAt = now, CronEntry.schedule = schedule}
