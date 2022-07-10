@@ -44,7 +44,7 @@ htmlResponse status headers =
     . Html.renderBS
 
 makeETag :: Hashable.Hashable a => a -> ByteString.ByteString
-makeETag = Witch.from . F.format ("\"" F.% F.hex F.% "\"") . Hashable.hashWithSalt 0
+makeETag = Witch.from . F.format ("\"" F.% F.int F.% "\"") . Hashable.hashWithSalt 0
 
 statusResponse :: Http.Status -> Http.ResponseHeaders -> Wai.Response
 statusResponse status headers =
