@@ -1,15 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Action.HackageIndex.Prune where
 
 import qualified Control.Monad as Monad
-import qualified Data.Text as Text
+import qualified Formatting as F
 import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Type.App as App
+import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
-import qualified Witch
 
 run :: App.App ()
 run = do
@@ -17,9 +16,8 @@ run = do
   case rows of
     [] -> Log.warn "no hackage indexes to prune"
     keep : rest -> do
-      Log.info $ "keeping hackage index: " <> Witch.into @Text.Text (Model.key keep)
-      Log.debug $ "pruning hackage indexes: " <> (Witch.into @Text.Text . show $ length rest)
+      Log.info $ F.sformat ("keeping " F.% Key.format) (Model.key keep)
       Monad.forM_ rest $ \hackageIndex -> do
-        Log.debug $ "pruning hackage index: " <> Witch.into @Text.Text (Model.key hackageIndex)
+        Log.debug $ F.sformat ("pruning " F.% Key.format) (Model.key hackageIndex)
         App.execute "delete from hackageIndex where key = ?" [Model.key hackageIndex]
         App.execute "delete from blob where key = ?" [HackageIndex.blob $ Model.value hackageIndex]

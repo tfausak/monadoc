@@ -1,6 +1,7 @@
 module Monadoc.Server.Application where
 
 import qualified Control.Monad.Catch as Exception
+import qualified Control.Monad.IO.Class as IO
 import qualified Data.Bifunctor as Bifunctor
 import qualified Data.Map as Map
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
@@ -22,6 +23,7 @@ import qualified Monadoc.Handler.User.Get as User.Get
 import qualified Monadoc.Handler.Version.Get as Version.Get
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Context as Context
+import qualified Monadoc.Type.Handler as Handler
 import qualified Monadoc.Type.Route as Route
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
@@ -35,8 +37,7 @@ application context request respond = do
       $ Wai.requestMethod request
   route <- Route.parse (Wai.pathInfo request) (Wai.queryString request)
   handler <- getHandler context method route
-  response <- App.runApp context $ handler request
-  respond response
+  App.runApp context . handler request $ IO.liftIO . respond
 
 parseMethod :: Http.Method -> Either (Witch.TryFromException Http.Method Http.StdMethod) Http.StdMethod
 parseMethod m = Bifunctor.first (const $ Witch.TryFromException m Nothing) $ Http.parseMethod m
@@ -46,7 +47,7 @@ getHandler ::
   Context.Context ->
   Http.StdMethod ->
   Route.Route ->
-  m (Wai.Request -> App.App Wai.Response)
+  m Handler.Handler
 getHandler context method route = case route of
   Route.AppleTouchIcon -> resource method route $ Map.singleton Http.GET AppleTouchIcon.Get.handler
   Route.Favicon -> resource method route $ Map.singleton Http.GET Favicon.Get.handler
@@ -66,14 +67,12 @@ resource ::
   Exception.MonadThrow m =>
   Http.StdMethod ->
   Route.Route ->
-  Map.Map Http.StdMethod (Wai.Request -> App.App Wai.Response) ->
-  m (Wai.Request -> App.App Wai.Response)
+  Map.Map Http.StdMethod Handler.Handler ->
+  m Handler.Handler
 resource method route m =
   if method == Http.OPTIONS
-    then
-      pure
-        . const
-        . pure
+    then pure $ \_ respond ->
+      respond
         . Common.statusResponse Http.ok200
         . pure
         . MethodNotAllowed.toAllowHeader

@@ -1,12 +1,16 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Type.Key where
 
 import qualified Data.Int as Int
 import qualified Data.Text as Text
+import qualified Data.Typeable as Typeable
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
+import qualified Formatting as F
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
 
@@ -35,3 +39,10 @@ instance Witch.From (Key a) Text.Text where
 
 zero :: Key a
 zero = Witch.from @Int 0
+
+format :: forall a r. Typeable.Typeable a => F.Format r (Key a -> r)
+format = F.later $ \key ->
+  F.bprint
+    (F.string F.% "-" F.% F.int)
+    (Typeable.tyConName . Typeable.typeRepTyCon $ Typeable.typeRep (Typeable.Proxy @a))
+    (Witch.into @Int.Int64 key)

@@ -59,7 +59,7 @@ base ctx rt breadcrumbs title html = do
       Html.header_ [Html.class_ "bg-dark navbar navbar-dark"]
         . Html.div_ [Html.class_ "container"]
         $ do
-          Html.h1_ [Html.class_ "h3"] $
+          Html.h1_ [Html.class_ "h3 lh-1 mb-0"] $
             Html.a_
               [ Html.class_ "navbar-brand",
                 Html.href_ $ route ctx Route.Home

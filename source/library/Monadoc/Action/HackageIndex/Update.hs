@@ -10,9 +10,9 @@ import qualified Control.Monad.Trans.Control as Control
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.ByteString as ByteString
 import qualified Data.Int as Int
-import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite3 as Sqlite
+import qualified Formatting as F
 import qualified Monadoc.Action.HackageIndex.Insert as HackageIndex.Insert
 import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Constant.Header as Header
@@ -63,7 +63,7 @@ run hackageIndex = do
     EQ -> Log.debug "nothing to update"
     LT -> do
       context <- Reader.ask
-      Log.debug $ "new index to get: " <> Text.pack (show $ newSize - oldSize)
+      Log.debug $ F.sformat ("new index to get: " F.% F.int) (newSize - oldSize)
       request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar"
       let headers = (Http.hRange, range) : Client.requestHeaders request
       Control.control $ \runInBase -> Client.withResponse request {Client.requestHeaders = headers} (Context.manager context) $ \response -> runInBase $ do

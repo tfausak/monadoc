@@ -14,16 +14,16 @@ import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Template.Package.Get as Template
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
+import qualified Monadoc.Type.Handler as Handler
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
 import qualified Monadoc.Type.Route as Route
 import qualified Network.HTTP.Types as Http
 import qualified Network.HTTP.Types.Header as Http
-import qualified Network.Wai as Wai
 import qualified Witch
 
-handler :: PackageName.PackageName -> Wai.Request -> App.App Wai.Response
-handler packageName _ = do
+handler :: PackageName.PackageName -> Handler.Handler
+handler packageName _ respond = do
   context <- Reader.ask
   package <- do
     rows <- App.query "select * from package where name = ?" [packageName]
@@ -49,4 +49,4 @@ handler packageName _ = do
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text packageName, Breadcrumb.route = Nothing}
         ]
   hackageUsers <- App.query "select * from hackageUser where key in (select distinct uploadedBy from upload where upload.package = ?) order by name collate nocase asc" [Model.key package]
-  pure . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)] $ Template.render context breadcrumbs package rows hackageUsers
+  respond . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)] $ Template.render context breadcrumbs package rows hackageUsers

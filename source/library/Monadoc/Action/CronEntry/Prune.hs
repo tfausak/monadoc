@@ -5,6 +5,7 @@ module Monadoc.Action.CronEntry.Prune where
 import qualified Control.Monad as Monad
 import qualified Data.Maybe as Maybe
 import qualified Data.Set as Set
+import qualified Formatting as F
 import qualified Monadoc.Action.CronEntry.Delete as CronEntry.Delete
 import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Constant.CronEntry as CronEntry
@@ -23,4 +24,4 @@ run = do
       Nothing -> pure ()
       Just guid -> Monad.when (Set.notMember guid toKeep) $ do
         CronEntry.Delete.run guid
-        Log.debug $ "deleted static cron entry: " <> Witch.from guid
+        Log.debug $ F.sformat ("deleted static cron entry: " F.% F.stext) (Witch.from guid)

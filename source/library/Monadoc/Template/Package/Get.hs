@@ -1,12 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Monadoc.Template.Package.Get where
 
 import qualified Control.Monad as Monad
-import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
+import qualified Formatting as F
 import qualified Lucid as Html
 import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
@@ -30,7 +29,7 @@ render ::
 render context breadcrumbs package rows hackageUsers = do
   let packageName = Package.name $ Model.value package
       route = Route.Package packageName
-      title = "Package " <> Witch.into @Text.Text packageName <> " :: Monadoc"
+      title = F.sformat ("Package " F.% F.stext F.% " :: Monadoc") (Witch.from packageName)
   Common.base context route breadcrumbs title $ do
     Html.h2_ $ Html.toHtml packageName
     Html.h3_ "Uploads"

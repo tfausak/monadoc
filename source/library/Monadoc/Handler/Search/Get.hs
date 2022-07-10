@@ -10,17 +10,14 @@ import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Template.Search.Get as Template
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
+import qualified Monadoc.Type.Handler as Handler
 import qualified Monadoc.Type.Route as Route
 import qualified Monadoc.Type.Search as Search
 import qualified Network.HTTP.Types as Http
-import qualified Network.Wai as Wai
 import qualified Witch
 
-handler ::
-  Search.Search ->
-  Wai.Request ->
-  App.App Wai.Response
-handler query _ = do
+handler :: Search.Search -> Handler.Handler
+handler query _ respond = do
   context <- Reader.ask
   packages <-
     if Search.isBlank query
@@ -52,7 +49,7 @@ handler query _ = do
               [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Search", Breadcrumb.route = Just $ Route.Search Search.empty},
                 Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text query, Breadcrumb.route = Nothing}
               ]
-  pure . Common.htmlResponse Http.ok200 [] $ Template.render context breadcrumbs query packages hackageUsers
+  respond . Common.htmlResponse Http.ok200 [] $ Template.render context breadcrumbs query packages hackageUsers
 
 like :: Search.Search -> Text.Text
 like = Text.cons '%' . flip Text.snoc '%' . escape . Witch.into @Text.Text

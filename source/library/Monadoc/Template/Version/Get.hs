@@ -13,6 +13,7 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Documentation.Haddock.Markup as Haddock
 import qualified Documentation.Haddock.Parser as Haddock
 import qualified Documentation.Haddock.Types as Haddock
+import qualified Formatting as F
 import qualified Lucid as Html
 import qualified Monadoc.Handler.Proxy.Get as Proxy.Get
 import qualified Monadoc.Model.Component as Component
@@ -49,7 +50,11 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
       revision = Upload.revision $ Model.value upload
       reversion = Reversion.Reversion {Reversion.revision = Just revision, Reversion.version = versionNumber}
       route = Route.Version packageName reversion
-      title = "Package " <> Witch.into @Text.Text packageName <> " version " <> Witch.into @Text.Text reversion <> " :: Monadoc"
+      title =
+        F.sformat
+          ("Package " F.% F.stext F.% " version " F.% F.stext F.% " :: Monadoc")
+          (Witch.from packageName)
+          (Witch.from reversion)
   Common.base context route breadcrumbs title $ do
     Monad.when (not . Upload.isPreferred $ Model.value upload)
       . Html.div_ [Html.class_ "alert alert-warning"]

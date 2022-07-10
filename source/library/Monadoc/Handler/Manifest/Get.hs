@@ -8,9 +8,9 @@ import qualified Data.Aeson as Aeson
 import qualified Monadoc.Constant.ContentType as ContentType
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Template.Common as Common
-import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
+import qualified Monadoc.Type.Handler as Handler
 import qualified Monadoc.Type.Icon as Icon
 import qualified Monadoc.Type.Manifest as Manifest
 import qualified Monadoc.Type.Route as Route
@@ -18,13 +18,13 @@ import qualified Network.HTTP.Types as Http
 import qualified Network.HTTP.Types.Header as Http
 import qualified Network.Wai as Wai
 
-handler :: Wai.Request -> App.App Wai.Response
-handler _ = do
+handler :: Handler.Handler
+handler _ respond = do
   context <- Reader.ask
   let manifest = makeManifest context
       body = Aeson.encode manifest
       eTag = Common.makeETag manifest
-  pure $
+  respond $
     Wai.responseLBS Http.ok200 [(Http.hContentType, ContentType.manifest), (Http.hETag, eTag)] body
 
 makeManifest :: Context.Context -> Manifest.Manifest

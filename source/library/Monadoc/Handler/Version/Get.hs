@@ -22,21 +22,20 @@ import qualified Monadoc.Query.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Template.Version.Get as Template
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
+import qualified Monadoc.Type.Handler as Handler
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
 import qualified Monadoc.Type.Reversion as Reversion
 import qualified Monadoc.Type.Route as Route
 import qualified Network.HTTP.Types as Http
 import qualified Network.HTTP.Types.Header as Http
-import qualified Network.Wai as Wai
 import qualified Witch
 
 handler ::
   PackageName.PackageName ->
   Reversion.Reversion ->
-  Wai.Request ->
-  App.App Wai.Response
-handler packageName reversion _ = do
+  Handler.Handler
+handler packageName reversion _ respond = do
   context <- Reader.ask
   package <-
     selectFirst $
@@ -93,7 +92,7 @@ handler packageName reversion _ = do
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text packageName, Breadcrumb.route = Just $ Route.Package packageName},
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text reversion, Breadcrumb.route = Nothing}
         ]
-  pure
+  respond
     . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)]
     $ Template.render context breadcrumbs package version upload hackageUser maybeLatest packageMeta components
 

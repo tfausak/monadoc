@@ -16,7 +16,6 @@ import qualified Data.List as List
 import qualified Data.Map.Strict as Map
 import qualified Data.Maybe as Maybe
 import qualified Data.Ord as Ord
-import qualified Data.Text as Text
 import qualified Data.Time.Clock.POSIX as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Distribution.Package as Cabal
@@ -170,7 +169,7 @@ handleCabal revisions entry pkg ver = do
       HackageUser.HackageUser
         { HackageUser.name = hackageUserName
         }
-  upload <-
+  Monad.void $
     Upload.Upsert.run
       Upload.Upload
         { Upload.blob = Model.key blob,
@@ -186,10 +185,6 @@ handleCabal revisions entry pkg ver = do
           Upload.isPreferred = True,
           Upload.isLatest = False
         }
-  Monad.when (rem (Witch.into @Int.Int64 (Model.key upload)) 10000 == 1)
-    . Log.debug
-    . Text.pack
-    $ show upload
 
 {- hlint ignore epochTimeToPosixTime "Use from" -}
 epochTimeToPosixTime :: Tar.EpochTime -> Time.POSIXTime

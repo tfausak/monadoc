@@ -7,7 +7,7 @@ module Monadoc.Server.Main where
 import qualified Control.Monad.IO.Class as IO
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.ByteString as ByteString
-import qualified Data.Text as Text
+import qualified Formatting as F
 import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
 import qualified Monadoc.Server.Application as Application
@@ -40,9 +40,7 @@ beforeMainLoop :: Context.Context -> IO ()
 beforeMainLoop context = do
   let config = Context.config context
   App.runApp context . Log.info $
-    Text.unwords
-      [ "listening on",
-        Text.pack . show $ Config.host config,
-        "port",
-        Text.pack . show $ Config.port config
-      ]
+    F.sformat
+      ("listening on " F.% F.shown F.% " port " F.% F.int)
+      (Config.host config)
+      (Witch.into @Int $ Config.port config)

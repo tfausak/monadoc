@@ -102,6 +102,17 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
           (Model.key packageMeta)
           (Model.key model)
 
+-- TODO
+-- App.execute_ "create table if not exists module (key integer primary key, name text not null unique)"
+-- Monad.forM_ (getModules gpd) $ \module_ ->
+--   App.execute "insert into module (name) values (?) on conflict do nothing" [Cabal.prettyShow module_]
+
+-- getModules :: Cabal.GenericPackageDescription -> [Cabal.ModuleName]
+-- getModules gpd =
+--   concatMap (Cabal.exposedModules . fst . Cabal.ignoreConditions) $
+--     Maybe.maybeToList (Cabal.condLibrary gpd)
+--       <> fmap snd (Cabal.condSubLibraries gpd)
+
 getComponents :: Cabal.GenericPackageDescription -> [Component.Component]
 getComponents gpd =
   mconcat
@@ -138,7 +149,7 @@ checkPackageVersion v pd = do
         }
 
 salt :: ByteString.ByteString
-salt = "3"
+salt = "2022-07-10 "
 
 hashBlob :: Blob.Model -> Hash.Hash
 hashBlob = Hash.new . mappend salt . Witch.from . Blob.hash . Model.value

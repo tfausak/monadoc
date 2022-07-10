@@ -1,13 +1,15 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Handler.Common where
 
-import qualified Control.Monad.Trans.Class as Trans
+import qualified Control.Monad.IO.Class as IO
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.ByteString as ByteString
-import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Hashable as Hashable
+import qualified Data.Text.Lazy as LazyText
+import qualified Formatting as F
 import qualified Lucid as Html
 import qualified Monadoc.Constant.ContentType as ContentType
 import qualified Monadoc.Type.App as App
@@ -18,7 +20,6 @@ import qualified Network.HTTP.Types.Header as Http
 import qualified Network.Wai as Wai
 import qualified System.Directory as Directory
 import qualified System.FilePath as FilePath
-import qualified Text.Printf as Printf
 import qualified Witch
 
 fileResponse ::
@@ -29,7 +30,7 @@ fileResponse ::
 fileResponse status headers file = do
   context <- Reader.ask
   let path = FilePath.combine (Context.data_ context) file
-  modificationTime <- Trans.lift $ Directory.getModificationTime path
+  modificationTime <- IO.liftIO $ Directory.getModificationTime path
   let eTag = makeETag $ Witch.into @Timestamp.Timestamp modificationTime
   pure $ Wai.responseFile status ((Http.hETag, eTag) : headers) path Nothing
 
@@ -43,14 +44,13 @@ htmlResponse status headers =
     . Html.renderBS
 
 makeETag :: Hashable.Hashable a => a -> ByteString.ByteString
-makeETag =
-  Witch.from @String @ByteString.ByteString
-    . Printf.printf "\"%x\""
-    . Hashable.hashWithSalt 0
+makeETag = Witch.from . F.format ("\"" F.% F.hex F.% "\"") . Hashable.hashWithSalt 0
 
 statusResponse :: Http.Status -> Http.ResponseHeaders -> Wai.Response
 statusResponse status headers =
   Wai.responseLBS status ((Http.hContentType, ContentType.text) : headers)
-    . Witch.into @LazyByteString.ByteString
-    $ (Witch.into @ByteString.ByteString $ show (Http.statusCode status) <> " ")
-      <> Http.statusMessage status
+    . Witch.from
+    $ F.format
+      (F.int F.% " " F.% F.text)
+      (Http.statusCode status)
+      (Witch.unsafeInto @LazyText.Text $ Http.statusMessage status)

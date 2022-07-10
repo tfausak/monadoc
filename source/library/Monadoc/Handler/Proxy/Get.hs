@@ -3,14 +3,15 @@
 module Monadoc.Handler.Proxy.Get where
 
 import qualified Control.Monad as Monad
-import qualified Control.Monad.IO.Class as IO
+import qualified Control.Monad.Loops as Loops
 import qualified Control.Monad.Trans.Control as Control
-import qualified Data.ByteString.Lazy as LazyByteString
+import qualified Data.ByteString as ByteString
+import qualified Data.ByteString.Builder as Builder
 import qualified Monadoc.Exception.Mismatch as Mismatch
 import qualified Monadoc.Exception.Traced as Traced
-import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
+import qualified Monadoc.Type.Handler as Handler
 import qualified Monadoc.Type.Hash as Hash
 import qualified Monadoc.Type.Route as Route
 import qualified Monadoc.Type.Url as Url
@@ -22,9 +23,8 @@ handler ::
   Context.Context ->
   Hash.Hash ->
   Url.Url ->
-  Wai.Request ->
-  App.App Wai.Response
-handler context actual url _ = do
+  Handler.Handler
+handler context actual url _ respond = do
   let expected = makeHash context url
   Monad.when (actual /= expected) . Traced.throw $
     Mismatch.Mismatch
@@ -32,12 +32,17 @@ handler context actual url _ = do
         Mismatch.actual = actual
       }
   request <- Client.requestFromURI $ Witch.from url
-  Control.control $ \runInBase -> Client.withResponse request {Client.checkResponse = Client.throwErrorStatusCodes} (Context.manager context) $ \response -> runInBase $ do
-    -- TODO: Stream response body.
-    chunks <- IO.liftIO . Client.brConsume $ Client.responseBody response
-    pure
-      . Wai.responseLBS (Client.responseStatus response) (Client.responseHeaders response)
-      $ LazyByteString.fromChunks chunks
+  Control.control $ \runInBase ->
+    Client.withResponse request {Client.checkResponse = Client.throwErrorStatusCodes} (Context.manager context) $ \response ->
+      runInBase . respond . Wai.responseStream (Client.responseStatus response) (Client.responseHeaders response) $ \send flush ->
+        Loops.whileJust_ (readChunk response) $ \chunk -> do
+          send $ Builder.byteString chunk
+          flush
+
+readChunk :: Client.Response Client.BodyReader -> IO (Maybe ByteString.ByteString)
+readChunk response = do
+  chunk <- Client.brRead $ Client.responseBody response
+  pure $ if ByteString.null chunk then Nothing else Just chunk
 
 makeRoute :: Context.Context -> Url.Url -> Route.Route
 makeRoute context url = Route.Proxy (makeHash context url) url

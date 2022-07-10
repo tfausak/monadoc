@@ -2,13 +2,14 @@
 
 module Monadoc.Action.Database.Initialize where
 
-import qualified Data.Text as Text
+import qualified Formatting as F
 import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Action.Migration.Migrate as Migration.Migrate
 import qualified Monadoc.Constant.Migration as Migration
 import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Query as Query
+import qualified Witch
 
 run :: App.App ()
 run = do
@@ -24,7 +25,7 @@ runPragmas = do
 
 runPragma :: Query.Query -> App.App ()
 runPragma pragma = do
-  Log.debug $ "executing pragma: " <> Text.pack (show pragma)
+  Log.debug $ F.sformat ("executing pragma: " F.% F.stext) (Witch.from pragma)
   App.execute_ pragma
 
 pragmas :: [Query.Query]

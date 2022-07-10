@@ -10,13 +10,13 @@ import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Template.Home.Get as Template
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
+import qualified Monadoc.Type.Handler as Handler
 import qualified Monadoc.Type.Model as Model
 import qualified Network.HTTP.Types as Http
 import qualified Network.HTTP.Types.Header as Http
-import qualified Network.Wai as Wai
 
-handler :: Wai.Request -> App.App Wai.Response
-handler _ = do
+handler :: Handler.Handler
+handler _ respond = do
   context <- Reader.ask
   rows <-
     App.query_
@@ -41,6 +41,6 @@ handler _ = do
           { Template.breadcrumbs = breadcrumbs,
             Template.rows = rows
           }
-  pure
+  respond
     . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)]
     $ Template.render context input

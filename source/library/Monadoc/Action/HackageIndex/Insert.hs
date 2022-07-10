@@ -8,7 +8,6 @@ import qualified Codec.Compression.Zlib.Internal as Zlib
 import qualified Control.Concurrent.STM as Stm
 import qualified Control.Monad as Monad
 import qualified Control.Monad.IO.Class as IO
-import qualified Control.Monad.Trans.Class as Trans
 import qualified Control.Monad.Trans.Control as Control
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Crypto.Hash as Crypto
@@ -95,7 +94,7 @@ insertHackageIndex blob = do
 
 insertBlob :: Int -> App.App Blob.Key
 insertBlob size = do
-  now <- Trans.lift Time.getCurrentTime
+  now <- IO.liftIO Time.getCurrentTime
   App.execute
     "insert into blob (size, hash, contents) values (?, ?, zeroblob(?))"
     (size, Hash.new . Witch.into @ByteString.ByteString $ show now, size)
@@ -107,7 +106,11 @@ getSize = do
   request <-
     Client.parseUrlThrow $
       Config.hackage (Context.config context) <> "01-index.tar"
-  response <- Trans.lift . Client.httpNoBody request {Client.method = Http.methodHead} $ Context.manager context
+  response <-
+    Traced.wrap
+      . IO.liftIO
+      . Client.httpNoBody request {Client.method = Http.methodHead}
+      $ Context.manager context
   byteString <-
     maybe (Traced.throw $ MissingSize.MissingSize response) pure
       . lookup Http.hContentLength

@@ -3,7 +3,7 @@
 module Monadoc.Action.Migration.Migrate where
 
 import qualified Control.Monad as Monad
-import qualified Data.Text as Text
+import qualified Formatting as F
 import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Action.Migration.Insert as Migration.Insert
 import qualified Monadoc.Exception.Mismatch as Mismatch
@@ -12,6 +12,7 @@ import qualified Monadoc.Model.Migration as Migration
 import qualified Monadoc.Query.Migration as Migration
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Model as Model
+import qualified Witch
 
 run ::
   Migration.Migration ->
@@ -22,7 +23,7 @@ run migration = do
   maybeModel <- Migration.selectByCreatedAt createdAt
   case maybeModel of
     Nothing -> do
-      Log.debug $ "running migration: " <> Text.pack (show createdAt)
+      Log.debug $ F.sformat ("running migration: " F.% F.stext) (Witch.from createdAt)
       App.execute_ query
       Migration.Insert.run migration
     Just model -> do

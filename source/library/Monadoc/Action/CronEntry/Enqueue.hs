@@ -3,6 +3,7 @@
 
 module Monadoc.Action.CronEntry.Enqueue where
 
+import qualified Formatting as F
 import qualified Monadoc.Action.CronEntry.Update as CronEntry.Update
 import qualified Monadoc.Action.Job.Enqueue as Job.Enqueue
 import qualified Monadoc.Action.Log as Log
@@ -12,6 +13,7 @@ import qualified Monadoc.Model.CronEntry as CronEntry
 import qualified Monadoc.Model.Job as Job
 import qualified Monadoc.Query.CronEntry as CronEntry
 import qualified Monadoc.Type.App as App
+import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified System.Cron as Cron
@@ -24,10 +26,10 @@ run = do
     Nothing -> pure ()
     Just (job, cronEntry) -> do
       Log.debug $
-        "enqueued cron entry "
-          <> Witch.from (Model.key cronEntry)
-          <> " as job "
-          <> Witch.from (Model.key job)
+        F.sformat
+          ("enqueued " F.% Key.format F.% " as " F.% Key.format)
+          (Model.key cronEntry)
+          (Model.key job)
       run
 
 maybeRunOne :: App.App (Maybe (Job.Model, CronEntry.Model))
