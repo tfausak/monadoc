@@ -23,6 +23,7 @@ import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Exception.TrailingBytes as TrailingBytes
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Extra.Either as Either
+import qualified Monadoc.Extra.HttpClient as Client
 import qualified Monadoc.Extra.Read as Read
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
@@ -42,7 +43,7 @@ run = do
   size <- getSize
   context <- Reader.ask
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"
-  Control.control $ \runInBase -> Client.withResponse request (Context.manager context) $ \response -> runInBase $ do
+  Control.control $ \runInBase -> Client.withResponse (Client.ensureUserAgent request) (Context.manager context) $ \response -> runInBase $ do
     key <- insertBlob size
     App.withConnection $ \connection -> do
       hashVar <- IO.liftIO . Stm.newTVarIO $ Crypto.hashInitWith Crypto.SHA256
@@ -109,7 +110,7 @@ getSize = do
   response <-
     Traced.wrap
       . IO.liftIO
-      . Client.httpNoBody request {Client.method = Http.methodHead}
+      . Client.httpNoBody (Client.ensureUserAgent request) {Client.method = Http.methodHead}
       $ Context.manager context
   byteString <-
     maybe (Traced.throw $ MissingSize.MissingSize response) pure

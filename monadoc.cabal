@@ -202,6 +202,8 @@ library
     Monadoc.Extra.Either
     Monadoc.Extra.EitherSpec
     Monadoc.Extra.Exception
+    Monadoc.Extra.HttpClient
+    Monadoc.Extra.HttpClientSpec
     Monadoc.Extra.List
     Monadoc.Extra.ListSpec
     Monadoc.Extra.Maybe

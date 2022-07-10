@@ -9,6 +9,7 @@ import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Builder as Builder
 import qualified Monadoc.Exception.Mismatch as Mismatch
 import qualified Monadoc.Exception.Traced as Traced
+import qualified Monadoc.Extra.HttpClient as Client
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Handler as Handler
@@ -33,7 +34,7 @@ handler context actual url _ respond = do
       }
   request <- Client.requestFromURI $ Witch.from url
   Control.control $ \runInBase ->
-    Client.withResponse request {Client.checkResponse = Client.throwErrorStatusCodes} (Context.manager context) $ \response ->
+    Client.withResponse (Client.ensureUserAgent request) {Client.checkResponse = Client.throwErrorStatusCodes} (Context.manager context) $ \response ->
       runInBase . respond . Wai.responseStream (Client.responseStatus response) (Client.responseHeaders response) $ \send flush ->
         Loops.whileJust_ (readChunk response) $ \chunk -> do
           send $ Builder.byteString chunk

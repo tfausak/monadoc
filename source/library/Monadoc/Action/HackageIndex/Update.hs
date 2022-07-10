@@ -22,6 +22,7 @@ import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Extra.Either as Either
+import qualified Monadoc.Extra.HttpClient as Client
 import qualified Monadoc.Extra.Read as Read
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
@@ -66,7 +67,7 @@ run hackageIndex = do
       Log.debug $ F.sformat ("new index to get: " F.% F.int) (newSize - oldSize)
       request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar"
       let headers = (Http.hRange, range) : Client.requestHeaders request
-      Control.control $ \runInBase -> Client.withResponse request {Client.requestHeaders = headers} (Context.manager context) $ \response -> runInBase $ do
+      Control.control $ \runInBase -> Client.withResponse (Client.ensureUserAgent request {Client.requestHeaders = headers}) (Context.manager context) $ \response -> runInBase $ do
         actualSize <- getActualSize response
         Monad.when (actualSize /= newSize) . Traced.throw $
           Mismatch.Mismatch

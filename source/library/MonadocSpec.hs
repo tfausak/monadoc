@@ -30,6 +30,7 @@ import qualified Monadoc.Action.Upload.UpsertSpec
 import qualified Monadoc.Action.Version.UpsertSpec
 import qualified Monadoc.Extra.DirectSqliteSpec
 import qualified Monadoc.Extra.EitherSpec
+import qualified Monadoc.Extra.HttpClientSpec
 import qualified Monadoc.Extra.ListSpec
 import qualified Monadoc.Extra.MaybeSpec
 import qualified Monadoc.Extra.TimeSpec
@@ -113,6 +114,7 @@ spec = do
   Monadoc.Action.Version.UpsertSpec.spec
   Monadoc.Extra.DirectSqliteSpec.spec
   Monadoc.Extra.EitherSpec.spec
+  Monadoc.Extra.HttpClientSpec.spec
   Monadoc.Extra.ListSpec.spec
   Monadoc.Extra.MaybeSpec.spec
   Monadoc.Extra.TimeSpec.spec
