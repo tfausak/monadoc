@@ -9,6 +9,7 @@ import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Job as Job
 import qualified Monadoc.Model.License as License
 import qualified Monadoc.Model.Migration as Migration
+import qualified Monadoc.Model.Module as Module
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PackageMeta as PackageMeta
 import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
@@ -29,6 +30,7 @@ all =
         License.migrations,
         Job.migrations,
         Migration.migrations,
+        Module.migrations,
         Package.migrations,
         PackageMeta.migrations,
         PackageMetaComponent.migrations,

@@ -8,6 +8,7 @@ module Monadoc.Action.Upload.Process where
 import qualified Control.Monad as Monad
 import qualified Data.ByteString as ByteString
 import qualified Data.Char as Char
+import qualified Data.Maybe as Maybe
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
 import qualified Distribution.CabalSpecVersion as Cabal
@@ -17,6 +18,7 @@ import qualified Distribution.Types.Version as Cabal
 import qualified Distribution.Utils.ShortText as Cabal
 import qualified Monadoc.Action.Component.Upsert as Component.Upsert
 import qualified Monadoc.Action.License.Upsert as License.Upsert
+import qualified Monadoc.Action.Module.Upsert as Module.Upsert
 import qualified Monadoc.Action.PackageMeta.Upsert as PackageMeta.Upsert
 import qualified Monadoc.Action.PackageMetaComponent.Upsert as PackageMetaComponent.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
@@ -27,6 +29,7 @@ import qualified Monadoc.Extra.SqliteSimple as Sql
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.Component as Component
 import qualified Monadoc.Model.License as License
+import qualified Monadoc.Model.Module as Module
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PackageMeta as PackageMeta
 import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
@@ -37,6 +40,7 @@ import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.ComponentType as ComponentType
 import qualified Monadoc.Type.Hash as Hash
 import qualified Monadoc.Type.Model as Model
+import qualified Monadoc.Type.ModuleName as ModuleName
 import qualified Monadoc.Type.PackageName as PackageName
 import qualified Witch
 
@@ -102,16 +106,15 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
           (Model.key packageMeta)
           (Model.key model)
 
--- TODO
--- App.execute_ "create table if not exists module (key integer primary key, name text not null unique)"
--- Monad.forM_ (getModules gpd) $ \module_ ->
---   App.execute "insert into module (name) values (?) on conflict do nothing" [Cabal.prettyShow module_]
+    Monad.forM_ (getModuleNames gpd) $ \moduleName ->
+      Module.Upsert.run $ Module.Module {Module.name = moduleName}
 
--- getModules :: Cabal.GenericPackageDescription -> [Cabal.ModuleName]
--- getModules gpd =
---   concatMap (Cabal.exposedModules . fst . Cabal.ignoreConditions) $
---     Maybe.maybeToList (Cabal.condLibrary gpd)
---       <> fmap snd (Cabal.condSubLibraries gpd)
+getModuleNames :: Cabal.GenericPackageDescription -> [ModuleName.ModuleName]
+getModuleNames gpd =
+  fmap Witch.from
+    . concatMap (Cabal.exposedModules . fst . Cabal.ignoreConditions)
+    $ Maybe.maybeToList (Cabal.condLibrary gpd)
+      <> fmap snd (Cabal.condSubLibraries gpd)
 
 getComponents :: Cabal.GenericPackageDescription -> [Component.Component]
 getComponents gpd =
@@ -149,7 +152,7 @@ checkPackageVersion v pd = do
         }
 
 salt :: ByteString.ByteString
-salt = "2022-07-10 "
+salt = "2022-07-11"
 
 hashBlob :: Blob.Model -> Hash.Hash
 hashBlob = Hash.new . mappend salt . Witch.from . Blob.hash . Model.value

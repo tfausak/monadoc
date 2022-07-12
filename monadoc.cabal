@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.7.10
+version: 0.2022.7.11
 
 build-type: Simple
 category: Documentation
@@ -149,6 +149,10 @@ library
     Monadoc.Action.Log
     Monadoc.Action.Migration.Insert
     Monadoc.Action.Migration.Migrate
+    Monadoc.Action.Module.Insert
+    Monadoc.Action.Module.InsertSpec
+    Monadoc.Action.Module.Upsert
+    Monadoc.Action.Module.UpsertSpec
     Monadoc.Action.Package.Upsert
     Monadoc.Action.Package.UpsertSpec
     Monadoc.Action.PackageMeta.Insert
@@ -250,6 +254,8 @@ library
     Monadoc.Model.LicenseSpec
     Monadoc.Model.Migration
     Monadoc.Model.MigrationSpec
+    Monadoc.Model.Module
+    Monadoc.Model.ModuleSpec
     Monadoc.Model.Package
     Monadoc.Model.PackageMeta
     Monadoc.Model.PackageMetaComponent
@@ -274,6 +280,8 @@ library
     Monadoc.Query.License
     Monadoc.Query.LicenseSpec
     Monadoc.Query.Migration
+    Monadoc.Query.Module
+    Monadoc.Query.ModuleSpec
     Monadoc.Query.PackageMeta
     Monadoc.Query.PackageMetaComponent
     Monadoc.Query.PackageMetaComponentSpec
@@ -318,6 +326,8 @@ library
     Monadoc.Type.Manifest
     Monadoc.Type.Model
     Monadoc.Type.ModelSpec
+    Monadoc.Type.ModuleName
+    Monadoc.Type.ModuleNameSpec
     Monadoc.Type.PackageName
     Monadoc.Type.PackageNameSpec
     Monadoc.Type.Port

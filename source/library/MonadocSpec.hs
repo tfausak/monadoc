@@ -17,6 +17,8 @@ import qualified Monadoc.Action.Job.EnqueueSpec
 import qualified Monadoc.Action.Key.SelectLastInsertSpec
 import qualified Monadoc.Action.License.InsertSpec
 import qualified Monadoc.Action.License.UpsertSpec
+import qualified Monadoc.Action.Module.InsertSpec
+import qualified Monadoc.Action.Module.UpsertSpec
 import qualified Monadoc.Action.Package.UpsertSpec
 import qualified Monadoc.Action.PackageMeta.InsertSpec
 import qualified Monadoc.Action.PackageMeta.UpdateSpec
@@ -42,6 +44,7 @@ import qualified Monadoc.Model.HackageUserSpec
 import qualified Monadoc.Model.JobSpec
 import qualified Monadoc.Model.LicenseSpec
 import qualified Monadoc.Model.MigrationSpec
+import qualified Monadoc.Model.ModuleSpec
 import qualified Monadoc.Model.PackageMetaComponentSpec
 import qualified Monadoc.Model.PackageMetaSpec
 import qualified Monadoc.Model.PackageSpec
@@ -53,6 +56,7 @@ import qualified Monadoc.Query.BlobSpec
 import qualified Monadoc.Query.ComponentSpec
 import qualified Monadoc.Query.CronEntrySpec
 import qualified Monadoc.Query.LicenseSpec
+import qualified Monadoc.Query.ModuleSpec
 import qualified Monadoc.Query.PackageMetaComponentSpec
 import qualified Monadoc.Query.PackageMetaSpec
 import qualified Monadoc.Query.RangeSpec
@@ -67,6 +71,7 @@ import qualified Monadoc.Type.HackageUserNameSpec
 import qualified Monadoc.Type.HashSpec
 import qualified Monadoc.Type.KeySpec
 import qualified Monadoc.Type.ModelSpec
+import qualified Monadoc.Type.ModuleNameSpec
 import qualified Monadoc.Type.PackageNameSpec
 import qualified Monadoc.Type.PortSpec
 import qualified Monadoc.Type.ReversionSpec
@@ -101,6 +106,8 @@ spec = do
   Monadoc.Action.Key.SelectLastInsertSpec.spec
   Monadoc.Action.License.InsertSpec.spec
   Monadoc.Action.License.UpsertSpec.spec
+  Monadoc.Action.Module.InsertSpec.spec
+  Monadoc.Action.Module.UpsertSpec.spec
   Monadoc.Action.Package.UpsertSpec.spec
   Monadoc.Action.PackageMeta.InsertSpec.spec
   Monadoc.Action.PackageMeta.UpdateSpec.spec
@@ -126,6 +133,7 @@ spec = do
   Monadoc.Model.JobSpec.spec
   Monadoc.Model.LicenseSpec.spec
   Monadoc.Model.MigrationSpec.spec
+  Monadoc.Model.ModuleSpec.spec
   Monadoc.Model.PackageMetaComponentSpec.spec
   Monadoc.Model.PackageMetaSpec.spec
   Monadoc.Model.PackageSpec.spec
@@ -137,6 +145,7 @@ spec = do
   Monadoc.Query.ComponentSpec.spec
   Monadoc.Query.CronEntrySpec.spec
   Monadoc.Query.LicenseSpec.spec
+  Monadoc.Query.ModuleSpec.spec
   Monadoc.Query.PackageMetaComponentSpec.spec
   Monadoc.Query.PackageMetaSpec.spec
   Monadoc.Query.RangeSpec.spec
@@ -151,6 +160,7 @@ spec = do
   Monadoc.Type.HashSpec.spec
   Monadoc.Type.KeySpec.spec
   Monadoc.Type.ModelSpec.spec
+  Monadoc.Type.ModuleNameSpec.spec
   Monadoc.Type.PackageNameSpec.spec
   Monadoc.Type.PortSpec.spec
   Monadoc.Type.ReversionSpec.spec
