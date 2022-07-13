@@ -52,7 +52,7 @@ onException ::
   Maybe Wai.Request ->
   Exception.SomeException ->
   IO ()
-onException context maybeRequest exception = App.runApp context $ do
+onException context maybeRequest exception = App.run context $ do
   Exception.Log.run exception
   Exception.NotifySentry.run (maybe id (withRequest context) maybeRequest) exception
 

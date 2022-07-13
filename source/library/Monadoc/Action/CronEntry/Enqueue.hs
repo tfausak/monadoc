@@ -4,9 +4,9 @@
 module Monadoc.Action.CronEntry.Enqueue where
 
 import qualified Formatting as F
+import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Action.CronEntry.Update as CronEntry.Update
 import qualified Monadoc.Action.Job.Enqueue as Job.Enqueue
-import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Exception.NoNextMatch as NoNextMatch
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Model.CronEntry as CronEntry
@@ -25,7 +25,7 @@ run = do
   case m of
     Nothing -> pure ()
     Just (job, cronEntry) -> do
-      Log.debug $
+      App.Log.debug $
         F.sformat
           ("enqueued " F.% Key.format F.% " as " F.% Key.format)
           (Model.key cronEntry)

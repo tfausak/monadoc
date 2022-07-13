@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -7,12 +6,12 @@ module Monadoc.Handler.Package.Get where
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
+import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Template.Package.Get as Template
-import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.Handler as Handler
 import qualified Monadoc.Type.Model as Model
@@ -26,12 +25,12 @@ handler :: PackageName.PackageName -> Handler.Handler
 handler packageName _ respond = do
   context <- Reader.ask
   package <- do
-    rows <- App.query "select * from package where name = ?" [packageName]
+    rows <- App.Sql.query "select * from package where name = ?" [packageName]
     case rows of
       [] -> Traced.throw NotFound.NotFound
       row : _ -> pure row
   rows <-
-    App.query
+    App.Sql.query
       "select * \
       \ from upload \
       \ inner join version \
@@ -48,5 +47,5 @@ handler packageName _ respond = do
         [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home},
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text packageName, Breadcrumb.route = Nothing}
         ]
-  hackageUsers <- App.query "select * from hackageUser where key in (select distinct uploadedBy from upload where upload.package = ?) order by name collate nocase asc" [Model.key package]
+  hackageUsers <- App.Sql.query "select * from hackageUser where key in (select distinct uploadedBy from upload where upload.package = ?) order by name collate nocase asc" [Model.key package]
   respond . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)] $ Template.render context breadcrumbs package rows hackageUsers

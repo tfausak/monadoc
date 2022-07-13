@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-
 module Monadoc.Main.Executable where
 
 import qualified Control.Concurrent.Async as Async
@@ -36,9 +34,9 @@ mainWith name arguments = do
 
   handler <- Conc.getUncaughtExceptionHandler
   Conc.setUncaughtExceptionHandler $
-    Exception.handle handler . App.runApp context . Exception.Log.run
+    Exception.handle handler . App.run context . Exception.Log.run
 
-  App.runApp context $ Exception.finally start stop
+  App.run context $ Exception.finally start stop
 
 start :: App.App ()
 start = do

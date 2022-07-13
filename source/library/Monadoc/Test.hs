@@ -1,5 +1,4 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -114,6 +113,6 @@ run app = do
             Config.severity = Severity.Error
           }
   context <- Context.fromConfig name config
-  App.runApp context $ do
+  App.run context $ do
     Database.Initialize.run
     app

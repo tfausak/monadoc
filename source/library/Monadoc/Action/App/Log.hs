@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Monadoc.Action.Log where
+module Monadoc.Action.App.Log where
 
 import qualified Control.Monad as Monad
 import qualified Control.Monad.IO.Class as IO

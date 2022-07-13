@@ -9,7 +9,7 @@ import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.Bifunctor as Bifunctor
 import qualified Data.Map as Map
 import qualified Data.Text as Text
-import qualified Monadoc.Action.Log as Log
+import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Exception.Found as Found
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Exception.Traced as Traced
@@ -65,7 +65,7 @@ run f exception = Monad.when (shouldNotify exception) $ do
                             $ fmap (Bifunctor.bimap Text.pack Text.pack) environment
                       }
               }
-      Log.warn . Text.pack $ show eventId
+      App.Log.warn . Text.pack $ show eventId
 
 emptyRequest :: Patrol.Request.Request
 emptyRequest =

@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-
 module Monadoc.Handler.Proxy.Get where
 
 import qualified Control.Monad as Monad

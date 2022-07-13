@@ -37,7 +37,7 @@ application context request respond = do
       $ Wai.requestMethod request
   route <- Route.parse (Wai.pathInfo request) (Wai.queryString request)
   handler <- getHandler context method route
-  App.runApp context . handler request $ IO.liftIO . respond
+  App.run context . handler request $ IO.liftIO . respond
 
 parseMethod :: Http.Method -> Either (Witch.TryFromException Http.Method Http.StdMethod) Http.StdMethod
 parseMethod m = Bifunctor.first (const $ Witch.TryFromException m Nothing) $ Http.parseMethod m

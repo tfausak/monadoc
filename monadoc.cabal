@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.7.12
+version: 0.2022.7.13
 
 build-type: Simple
 category: Documentation
@@ -102,6 +102,8 @@ library
     , zlib ^>= 0.6.3
   exposed-modules:
     Monadoc
+    Monadoc.Action.App.Log
+    Monadoc.Action.App.Sql
     Monadoc.Action.Blob.Insert
     Monadoc.Action.Blob.InsertSpec
     Monadoc.Action.Blob.Upsert
@@ -146,7 +148,6 @@ library
     Monadoc.Action.License.InsertSpec
     Monadoc.Action.License.Upsert
     Monadoc.Action.License.UpsertSpec
-    Monadoc.Action.Log
     Monadoc.Action.Migration.Insert
     Monadoc.Action.Migration.Migrate
     Monadoc.Action.Module.Insert

@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -16,8 +15,9 @@ import qualified Data.Int as Int
 import qualified Data.Time as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite3 as Sqlite
+import qualified Monadoc.Action.App.Log as App.Log
+import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Action.Key.SelectLastInsert as Key.SelectLastInsert
-import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Exception.MissingSize as MissingSize
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Exception.TrailingBytes as TrailingBytes
@@ -39,13 +39,13 @@ import qualified Witch
 
 run :: App.App ()
 run = do
-  Log.debug "inserting hackage index"
+  App.Log.debug "inserting hackage index"
   size <- getSize
   context <- Reader.ask
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"
   Control.control $ \runInBase -> Client.withResponse (Client.ensureUserAgent request) (Context.manager context) $ \response -> runInBase $ do
     key <- insertBlob size
-    App.withConnection $ \connection -> do
+    App.Sql.withConnection $ \connection -> do
       hashVar <- IO.liftIO . Stm.newTVarIO $ Crypto.hashInitWith Crypto.SHA256
       Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 key) True $ \blob -> do
         offsetRef <- IO.liftIO $ Stm.newTVarIO 0
@@ -69,7 +69,7 @@ run = do
             Traced.throw
             (Zlib.decompressIO Zlib.gzipFormat Zlib.defaultDecompressParams)
       hash <- IO.liftIO $ Stm.readTVarIO hashVar
-      App.execute
+      App.Sql.execute
         "update blob set hash = ? where key = ?"
         (Witch.into @Hash.Hash $ Crypto.hashFinalize hash, key)
     Monad.void $ insertHackageIndex key
@@ -83,7 +83,7 @@ insertHackageIndex blob = do
             HackageIndex.createdAt = now,
             HackageIndex.processedAt = Nothing
           }
-  App.execute
+  App.Sql.execute
     "insert into hackageIndex (blob, createdAt, processedAt) values (?, ?, null)"
     (HackageIndex.blob hackageIndex, HackageIndex.createdAt hackageIndex)
   key <- Key.SelectLastInsert.run
@@ -96,7 +96,7 @@ insertHackageIndex blob = do
 insertBlob :: Int -> App.App Blob.Key
 insertBlob size = do
   now <- IO.liftIO Time.getCurrentTime
-  App.execute
+  App.Sql.execute
     "insert into blob (size, hash, contents) values (?, ?, zeroblob(?))"
     (size, Hash.new . Witch.into @ByteString.ByteString $ show now, size)
   Key.SelectLastInsert.run

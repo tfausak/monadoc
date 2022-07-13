@@ -1,14 +1,13 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Monadoc.Handler.Home.Get where
 
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Database.SQLite.Simple as Sql
+import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Template.Home.Get as Template
-import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.Handler as Handler
 import qualified Monadoc.Type.Model as Model
@@ -19,7 +18,7 @@ handler :: Handler.Handler
 handler _ respond = do
   context <- Reader.ask
   rows <-
-    App.query_
+    App.Sql.query_
       "select * \
       \ from upload \
       \ inner join package \

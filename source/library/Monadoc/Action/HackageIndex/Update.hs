@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -13,8 +12,9 @@ import qualified Data.Int as Int
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite3 as Sqlite
 import qualified Formatting as F
+import qualified Monadoc.Action.App.Log as App.Log
+import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Action.HackageIndex.Insert as HackageIndex.Insert
-import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Constant.Header as Header
 import qualified Monadoc.Exception.Mismatch as Mismatch
 import qualified Monadoc.Exception.MissingHeader as MissingHeader
@@ -37,10 +37,10 @@ import qualified Witch
 
 run :: HackageIndex.Model -> App.App ()
 run hackageIndex = do
-  Log.debug "updating hackage index"
+  App.Log.debug "updating hackage index"
   (oldKey, oldSize) <- do
     rows <-
-      App.query
+      App.Sql.query
         "select blob.key, blob.size \
         \ from hackageIndex \
         \ inner join blob \
@@ -61,10 +61,10 @@ run hackageIndex = do
           { Mismatch.expected = oldSize,
             Mismatch.actual = newSize
           }
-    EQ -> Log.debug "nothing to update"
+    EQ -> App.Log.debug "nothing to update"
     LT -> do
       context <- Reader.ask
-      Log.debug $ F.sformat ("new index to get: " F.% F.int) (newSize - oldSize)
+      App.Log.debug $ F.sformat ("new index to get: " F.% F.int) (newSize - oldSize)
       request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar"
       let headers = (Http.hRange, range) : Client.requestHeaders request
       Control.control $ \runInBase -> Client.withResponse (Client.ensureUserAgent request {Client.requestHeaders = headers}) (Context.manager context) $ \response -> runInBase $ do
@@ -75,10 +75,10 @@ run hackageIndex = do
               Mismatch.actual = actualSize
             }
         newKey <- HackageIndex.Insert.insertBlob newSize
-        App.withConnection $ \connection -> do
+        App.Sql.withConnection $ \connection -> do
           Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 newKey) True $ \newBlob -> do
             Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 oldKey) False $ \oldBlob -> do
-              Log.debug "copying old blob"
+              App.Log.debug "copying old blob"
               contents <- IO.liftIO $ Sqlite.blobRead oldBlob oldSize 0
               IO.liftIO $ Sqlite.blobWrite newBlob contents 0
               let loop offset = do
@@ -87,12 +87,12 @@ run hackageIndex = do
                     Monad.when (not $ ByteString.null chunk) $ do
                       Sqlite.blobWrite newBlob chunk offset
                       loop $ offset + size
-              Log.debug "appending new blob"
+              App.Log.debug "appending new blob"
               IO.liftIO $ loop start
-          Log.debug "updating new hash"
+          App.Log.debug "updating new hash"
           Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 newKey) False $ \blob -> do
             contents <- IO.liftIO $ Sqlite.blobRead blob newSize 0
-            App.execute "update blob set hash = ? where key = ?" (Hash.new contents, newKey)
+            App.Sql.execute "update blob set hash = ? where key = ?" (Hash.new contents, newKey)
         Monad.void $ HackageIndex.Insert.insertHackageIndex newKey
 
 getActualSize :: Client.Response a -> App.App Int

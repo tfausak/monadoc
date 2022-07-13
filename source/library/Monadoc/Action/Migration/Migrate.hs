@@ -4,7 +4,8 @@ module Monadoc.Action.Migration.Migrate where
 
 import qualified Control.Monad as Monad
 import qualified Formatting as F
-import qualified Monadoc.Action.Log as Log
+import qualified Monadoc.Action.App.Log as App.Log
+import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Action.Migration.Insert as Migration.Insert
 import qualified Monadoc.Exception.Mismatch as Mismatch
 import qualified Monadoc.Exception.Traced as Traced
@@ -23,8 +24,8 @@ run migration = do
   maybeModel <- Migration.selectByCreatedAt createdAt
   case maybeModel of
     Nothing -> do
-      Log.debug $ F.sformat ("running migration: " F.% F.stext) (Witch.from createdAt)
-      App.execute_ query
+      App.Log.debug $ F.sformat ("running migration: " F.% F.stext) (Witch.from createdAt)
+      App.Sql.execute_ query
       Migration.Insert.run migration
     Just model -> do
       let oldQuery = Migration.query $ Model.value model

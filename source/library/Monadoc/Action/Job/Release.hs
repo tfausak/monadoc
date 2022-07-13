@@ -3,6 +3,7 @@
 module Monadoc.Action.Job.Release where
 
 import qualified Control.Monad.Catch as Exception
+import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Model.Job as Job
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Model as Model
@@ -21,6 +22,6 @@ run maybeJob exitCase = case maybeJob of
           Exception.ExitCaseSuccess _ -> Status.Passed
           Exception.ExitCaseException _ -> Status.Failed
           Exception.ExitCaseAbort -> Status.Failed
-    App.execute
+    App.Sql.execute
       "update job set finishedAt = ?, status = ? where key = ?"
       (now, status, Model.key job)

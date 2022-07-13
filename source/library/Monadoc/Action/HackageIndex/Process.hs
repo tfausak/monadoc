@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -21,9 +20,10 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Distribution.Package as Cabal
 import qualified Distribution.Types.PackageVersionConstraint as Cabal
 import qualified Distribution.Version as Cabal
+import qualified Monadoc.Action.App.Log as App.Log
+import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
 import qualified Monadoc.Action.HackageUser.Upsert as HackageUser.Upsert
-import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Action.Package.Upsert as Package.Upsert
 import qualified Monadoc.Action.Preference.Upsert as Preference.Upsert
 import qualified Monadoc.Action.Range.Upsert as Range.Upsert
@@ -56,19 +56,19 @@ import qualified Witch
 
 run :: App.App ()
 run = do
-  rows <- App.query_ "select * from hackageIndex where processedAt is null order by createdAt asc limit 1"
+  rows <- App.Sql.query_ "select * from hackageIndex where processedAt is null order by createdAt asc limit 1"
   case rows of
-    [] -> Log.debug "no new hackage index to process"
+    [] -> App.Log.debug "no new hackage index to process"
     hackageIndex : _ -> do
       constraints <- IO.liftIO $ Stm.newTVarIO Map.empty
       revisions <- IO.liftIO $ Stm.newTVarIO Map.empty
       let blobKey = HackageIndex.blob $ Model.value hackageIndex
       size <- do
-        xs <- App.query "select size from blob where key = ?" [blobKey]
+        xs <- App.Sql.query "select size from blob where key = ?" [blobKey]
         case xs of
           [] -> Traced.throw NotFound.NotFound
           Sql.Only x : _ -> pure x
-      App.withConnection $ \connection ->
+      App.Sql.withConnection $ \connection ->
         Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 blobKey) False $ \blob -> do
           contents <- IO.liftIO $ Sqlite.unsafeBlobRead blob size 0
           mapM_ (handleItem constraints revisions)
@@ -78,7 +78,7 @@ run = do
       upsertPreferences constraints
       updateLatest
       now <- Timestamp.getCurrentTime
-      App.execute "update hackageIndex set processedAt = ? where key = ?" (Just now, Model.key hackageIndex)
+      App.Sql.execute "update hackageIndex set processedAt = ? where key = ?" (Just now, Model.key hackageIndex)
 
 handleItem ::
   Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->
@@ -210,18 +210,18 @@ upsertPreference packageName constraint = do
         { Preference.package = Model.key package,
           Preference.range = Model.key range
         }
-  rows <- App.query "select * from upload inner join version on version.key = upload.version where upload.package = ?" [Model.key package]
+  rows <- App.Sql.query "select * from upload inner join version on version.key = upload.version where upload.package = ?" [Model.key package]
   Monad.forM_ rows $ \(upload Sql.:. version) -> do
     let isPreferred = Constraint.includes (Version.number $ Model.value version) constraint
     Monad.when (Upload.isPreferred (Model.value upload) /= isPreferred) $
-      App.execute "update upload set isPreferred = ? where key = ?" (isPreferred, Model.key upload)
+      App.Sql.execute "update upload set isPreferred = ? where key = ?" (isPreferred, Model.key upload)
 
 updateLatest :: App.App ()
 updateLatest = do
-  keys <- App.query_ "select key from package"
+  keys <- App.Sql.query_ "select key from package"
   Monad.forM_ keys $ \(Sql.Only key) -> do
     rows <-
-      App.query
+      App.Sql.query
         "select * \
         \ from upload \
         \ inner join version \
@@ -237,6 +237,6 @@ updateLatest = do
     case Maybe.listToMaybe $ List.sortOn f rows of
       Nothing -> pure ()
       Just (upload Sql.:. _) ->
-        App.execute
+        App.Sql.execute
           "update upload set isLatest = (key = ?) where package = ?"
           (Model.key upload, key)

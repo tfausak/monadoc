@@ -2,6 +2,7 @@
 
 module Monadoc.Action.PackageMetaComponent.Insert where
 
+import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Action.Key.SelectLastInsert as Key.SelectLastInsert
 import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Type.App as App
@@ -11,7 +12,7 @@ run ::
   PackageMetaComponent.PackageMetaComponent ->
   App.App PackageMetaComponent.Model
 run packageMetaComponent = do
-  App.execute
+  App.Sql.execute
     "insert into packageMetaComponent (packageMeta, component) values (?, ?)"
     packageMetaComponent
   key <- Key.SelectLastInsert.run

@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
@@ -18,6 +17,7 @@ import qualified Distribution.PackageDescription.Parsec as Cabal
 import qualified Distribution.Types.Component as Cabal
 import qualified Distribution.Types.Version as Cabal
 import qualified Distribution.Utils.ShortText as Cabal
+import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Action.Component.Upsert as Component.Upsert
 import qualified Monadoc.Action.License.Upsert as License.Upsert
 import qualified Monadoc.Action.Module.Upsert as Module.Upsert
@@ -47,7 +47,7 @@ import qualified Witch
 
 run :: App.App ()
 run =
-  App.withConnection $ \connection ->
+  App.Sql.withConnection $ \connection ->
     Sql.streamLifted
       connection
       "select * from upload \
@@ -113,8 +113,9 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
 
       Monad.void . PackageMetaComponent.Upsert.run $
         PackageMetaComponent.PackageMetaComponent
-          (Model.key packageMeta)
-          (Model.key component)
+          { PackageMetaComponent.packageMeta = Model.key packageMeta,
+            PackageMetaComponent.component = Model.key component
+          }
 
       Monad.forM_ (toModuleNames c) $ \mn -> do
         _module <- Module.Upsert.run $ Module.Module {Module.name = mn}

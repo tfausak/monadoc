@@ -2,6 +2,7 @@
 
 module Monadoc.Action.Job.Acquire where
 
+import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Model.Job as Job
 import qualified Monadoc.Query.Job as Job
 import qualified Monadoc.Type.App as App
@@ -16,7 +17,7 @@ run = do
     Nothing -> pure ()
     Just job -> do
       now <- Timestamp.getCurrentTime
-      App.execute
+      App.Sql.execute
         "update job set startedAt = ?, status = ? where key = ?"
         (now, Status.Locked, Model.key job)
   pure maybeJob

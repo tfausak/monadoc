@@ -2,6 +2,7 @@
 
 module Monadoc.Action.Job.Enqueue where
 
+import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Action.Key.SelectLastInsert as Key.SelectLastInsert
 import qualified Monadoc.Model.Job as Job
 import qualified Monadoc.Type.App as App
@@ -22,6 +23,6 @@ run task = do
             Job.status = Status.Queued,
             Job.task = task
           }
-  App.execute "insert into job (createdAt, finishedAt, startedAt, status, task) values (?, ?, ?, ?, ?)" job
+  App.Sql.execute "insert into job (createdAt, finishedAt, startedAt, status, task) values (?, ?, ?, ?, ?)" job
   key <- Key.SelectLastInsert.run
   pure Model.Model {Model.key = key, Model.value = job}

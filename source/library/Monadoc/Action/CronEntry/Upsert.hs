@@ -4,9 +4,9 @@ module Monadoc.Action.CronEntry.Upsert where
 
 import qualified Data.Function as Function
 import qualified Formatting as F
+import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
 import qualified Monadoc.Action.CronEntry.Update as CronEntry.Update
-import qualified Monadoc.Action.Log as Log
 import qualified Monadoc.Model.CronEntry as CronEntry
 import qualified Monadoc.Query.CronEntry as CronEntry
 import qualified Monadoc.Type.App as App
@@ -18,14 +18,14 @@ run cronEntry =
   case CronEntry.guid cronEntry of
     Nothing -> do
       model <- CronEntry.Insert.run cronEntry
-      Log.info $ F.sformat ("inserting dynamic " F.% Key.format) (Model.key model)
+      App.Log.info $ F.sformat ("inserting dynamic " F.% Key.format) (Model.key model)
       pure model
     Just guid -> do
       maybeCronEntry <- CronEntry.selectByGuid guid
       case maybeCronEntry of
         Nothing -> do
           model <- CronEntry.Insert.run cronEntry
-          Log.info $ F.sformat ("inserted static " F.% Key.format) (Model.key model)
+          App.Log.info $ F.sformat ("inserted static " F.% Key.format) (Model.key model)
           pure model
         Just model -> do
           let existing = Model.value model
@@ -35,6 +35,6 @@ run cronEntry =
             then do
               let newModel = model {Model.value = cronEntry}
               CronEntry.Update.run newModel
-              Log.info $ F.sformat ("updated static " F.% Key.format) (Model.key newModel)
+              App.Log.info $ F.sformat ("updated static " F.% Key.format) (Model.key newModel)
               pure newModel
             else pure model

@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -8,7 +7,7 @@ import qualified Control.Monad.IO.Class as IO
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.ByteString as ByteString
 import qualified Formatting as F
-import qualified Monadoc.Action.Log as Log
+import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
 import qualified Monadoc.Server.Application as Application
 import qualified Monadoc.Server.Middleware as Middleware
@@ -39,7 +38,7 @@ getSettings context =
 beforeMainLoop :: Context.Context -> IO ()
 beforeMainLoop context = do
   let config = Context.config context
-  App.runApp context . Log.info $
+  App.run context . App.Log.info $
     F.sformat
       ("listening on " F.% F.shown F.% " port " F.% F.int)
       (Config.host config)

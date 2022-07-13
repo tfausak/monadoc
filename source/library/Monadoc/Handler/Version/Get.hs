@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -8,6 +7,7 @@ import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.Maybe as Maybe
 import qualified Data.Text as Text
+import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.Found as Found
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Exception.Traced as Traced
@@ -20,7 +20,6 @@ import qualified Monadoc.Query.Component as Component
 import qualified Monadoc.Query.PackageMeta as PackageMeta
 import qualified Monadoc.Query.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Template.Version.Get as Template
-import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.Handler as Handler
 import qualified Monadoc.Type.Model as Model
@@ -39,19 +38,19 @@ handler packageName reversion _ respond = do
   context <- Reader.ask
   package <-
     selectFirst $
-      App.query
+      App.Sql.query
         "select * from package where name = ?"
         [packageName]
   version <-
     selectFirst $
-      App.query
+      App.Sql.query
         "select * from version where number = ?"
         [Reversion.version reversion]
   revision <- case Reversion.revision reversion of
     Nothing -> do
       upload <-
         selectFirst $
-          App.query
+          App.Sql.query
             "select * from upload where package = ? and version = ? order by revision desc limit 1"
             (Model.key package, Model.key version)
       let route =
@@ -65,13 +64,13 @@ handler packageName reversion _ respond = do
     Just revision -> pure revision
   upload <-
     selectFirst $
-      App.query
+      App.Sql.query
         "select * from upload where package = ? and version = ? and revision = ? limit 1"
         (Model.key package, Model.key version, revision)
-  hackageUser <- selectFirst $ App.query "select * from hackageUser where key = ?" [Upload.uploadedBy $ Model.value upload]
+  hackageUser <- selectFirst $ App.Sql.query "select * from hackageUser where key = ?" [Upload.uploadedBy $ Model.value upload]
   maybeLatest <-
     Maybe.listToMaybe
-      <$> App.query
+      <$> App.Sql.query
         "select * \
         \ from upload \
         \ inner join version \

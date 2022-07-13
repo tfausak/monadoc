@@ -3,7 +3,8 @@
 module Monadoc.Action.Database.Initialize where
 
 import qualified Formatting as F
-import qualified Monadoc.Action.Log as Log
+import qualified Monadoc.Action.App.Log as App.Log
+import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Action.Migration.Migrate as Migration.Migrate
 import qualified Monadoc.Constant.Migration as Migration
 import qualified Monadoc.Model.Migration as Migration
@@ -13,20 +14,20 @@ import qualified Witch
 
 run :: App.App ()
 run = do
-  Log.info "initializing database"
+  App.Log.info "initializing database"
   runPragmas
   runMigrations
-  Log.debug "initialized database"
+  App.Log.debug "initialized database"
 
 runPragmas :: App.App ()
 runPragmas = do
-  Log.info "executing pragmas"
+  App.Log.info "executing pragmas"
   mapM_ runPragma pragmas
 
 runPragma :: Query.Query -> App.App ()
 runPragma pragma = do
-  Log.debug $ F.sformat ("executing pragma: " F.% F.stext) (Witch.from pragma)
-  App.execute_ pragma
+  App.Log.debug $ F.sformat ("executing pragma: " F.% F.stext) (Witch.from pragma)
+  App.Sql.execute_ pragma
 
 pragmas :: [Query.Query]
 pragmas =
@@ -37,6 +38,6 @@ pragmas =
 
 runMigrations :: App.App ()
 runMigrations = do
-  Log.info "running migrations"
-  App.execute_ Migration.createTable
+  App.Log.info "running migrations"
+  App.Sql.execute_ Migration.createTable
   mapM_ Migration.Migrate.run Migration.all

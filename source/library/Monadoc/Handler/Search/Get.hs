@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -6,9 +5,9 @@ module Monadoc.Handler.Search.Get where
 
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.Text as Text
+import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Template.Search.Get as Template
-import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.Handler as Handler
 import qualified Monadoc.Type.Route as Route
@@ -23,7 +22,7 @@ handler query _ respond = do
     if Search.isBlank query
       then pure []
       else
-        App.query
+        App.Sql.query
           "select * \
           \ from package \
           \ where name like ? escape '\\' \
@@ -34,7 +33,7 @@ handler query _ respond = do
     if Search.isBlank query
       then pure []
       else
-        App.query
+        App.Sql.query
           "select * \
           \ from hackageUser \
           \ where name like ? escape '\\' \
