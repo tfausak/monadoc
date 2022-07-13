@@ -32,7 +32,13 @@ fileResponse status headers file = do
   let path = FilePath.combine (Context.data_ context) file
   modificationTime <- IO.liftIO $ Directory.getModificationTime path
   let eTag = makeETag $ Witch.into @Timestamp.Timestamp modificationTime
-  pure $ Wai.responseFile status ((Http.hETag, eTag) : headers) path Nothing
+      cacheControl = "max-age=604800, stale-while-revalidate=86400" :: ByteString.ByteString
+  pure $
+    Wai.responseFile
+      status
+      ((Http.hCacheControl, cacheControl) : (Http.hETag, eTag) : headers)
+      path
+      Nothing
 
 htmlResponse ::
   Http.Status ->

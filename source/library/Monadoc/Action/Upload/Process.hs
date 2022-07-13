@@ -6,6 +6,7 @@
 module Monadoc.Action.Upload.Process where
 
 import qualified Control.Monad as Monad
+import qualified Data.Bifunctor as Bifunctor
 import qualified Data.ByteString as ByteString
 import qualified Data.Char as Char
 import qualified Data.Maybe as Maybe
@@ -14,6 +15,7 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Distribution.CabalSpecVersion as Cabal
 import qualified Distribution.PackageDescription as Cabal
 import qualified Distribution.PackageDescription.Parsec as Cabal
+import qualified Distribution.Types.Component as Cabal
 import qualified Distribution.Types.Version as Cabal
 import qualified Distribution.Utils.ShortText as Cabal
 import qualified Monadoc.Action.Component.Upsert as Component.Upsert
@@ -41,7 +43,6 @@ import qualified Monadoc.Type.ComponentType as ComponentType
 import qualified Monadoc.Type.Hash as Hash
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.ModuleName as ModuleName
-import qualified Monadoc.Type.PackageName as PackageName
 import qualified Witch
 
 run :: App.App ()
@@ -99,35 +100,56 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
             PackageMeta.stability = shortTextToMaybeText $ Cabal.stability pd,
             PackageMeta.synopsis = shortTextToMaybeText $ Cabal.synopsis pd
           }
-    Monad.forM_ (getComponents gpd) $ \component -> do
-      model <- Component.Upsert.run component
+
+    Monad.forM_ (toComponents gpd) $ \(ucn, (c, _ds)) -> do
+      -- TODO: Store dependencies.
+
+      component <- Component.Upsert.run $ case c of
+        Cabal.CBench _ -> Component.Component ComponentType.Benchmark $ Witch.from ucn
+        Cabal.CExe _ -> Component.Component ComponentType.Executable $ Witch.from ucn
+        Cabal.CFLib _ -> Component.Component ComponentType.ForeignLibrary $ Witch.from ucn
+        Cabal.CLib _ -> Component.Component ComponentType.Library $ Witch.from ucn
+        Cabal.CTest _ -> Component.Component ComponentType.TestSuite $ Witch.from ucn
+
       Monad.void . PackageMetaComponent.Upsert.run $
         PackageMetaComponent.PackageMetaComponent
           (Model.key packageMeta)
-          (Model.key model)
+          (Model.key component)
 
-    Monad.forM_ (getModuleNames gpd) $ \moduleName ->
-      Module.Upsert.run $ Module.Module {Module.name = moduleName}
+      Monad.forM_ (toModuleNames c) $ \mn -> do
+        _module <- Module.Upsert.run $ Module.Module {Module.name = mn}
+        -- TODO: Connect module to component.
+        pure ()
 
-getModuleNames :: Cabal.GenericPackageDescription -> [ModuleName.ModuleName]
-getModuleNames gpd =
-  fmap Witch.from
-    . concatMap (Cabal.exposedModules . fst . Cabal.ignoreConditions)
-    $ Maybe.maybeToList (Cabal.condLibrary gpd)
-      <> fmap snd (Cabal.condSubLibraries gpd)
+toComponents ::
+  Cabal.GenericPackageDescription ->
+  [(Cabal.UnqualComponentName, (Cabal.Component, [Cabal.Dependency]))]
+toComponents gpd =
+  let ucn = Cabal.packageNameToUnqualComponentName . Cabal.pkgName . Cabal.package $ Cabal.packageDescription gpd
+   in mconcat
+        [ toComponent Cabal.CLib . (,) ucn <$> Maybe.maybeToList (Cabal.condLibrary gpd),
+          toComponent Cabal.CBench <$> Cabal.condBenchmarks gpd,
+          toComponent Cabal.CExe <$> Cabal.condExecutables gpd,
+          toComponent Cabal.CFLib <$> Cabal.condForeignLibs gpd,
+          toComponent Cabal.CLib <$> Cabal.condSubLibraries gpd,
+          toComponent Cabal.CTest <$> Cabal.condTestSuites gpd
+        ]
 
-getComponents :: Cabal.GenericPackageDescription -> [Component.Component]
-getComponents gpd =
-  mconcat
-    [ case Cabal.condLibrary gpd of
-        Nothing -> []
-        Just _ -> [Component.Component ComponentType.Library . Witch.via @PackageName.PackageName . Cabal.pkgName . Cabal.package $ Cabal.packageDescription gpd],
-      Component.Component ComponentType.Benchmark . Witch.from . fst <$> Cabal.condBenchmarks gpd,
-      Component.Component ComponentType.Executable . Witch.from . fst <$> Cabal.condExecutables gpd,
-      Component.Component ComponentType.ForeignLibrary . Witch.from . fst <$> Cabal.condForeignLibs gpd,
-      Component.Component ComponentType.Library . Witch.from . fst <$> Cabal.condSubLibraries gpd,
-      Component.Component ComponentType.TestSuite . Witch.from . fst <$> Cabal.condTestSuites gpd
-    ]
+toComponent ::
+  (Semigroup a, Semigroup c) =>
+  (a -> Cabal.Component) ->
+  (Cabal.UnqualComponentName, Cabal.CondTree v c a) ->
+  (Cabal.UnqualComponentName, (Cabal.Component, c))
+toComponent f = fmap $ Bifunctor.first f . Cabal.ignoreConditions
+
+toModuleNames :: Cabal.Component -> [ModuleName.ModuleName]
+toModuleNames c = case c of
+  -- TODO: Handle autogen, other, and virtual modules.
+  Cabal.CBench _ -> []
+  Cabal.CExe _ -> []
+  Cabal.CFLib _ -> []
+  Cabal.CLib l -> Witch.from <$> Cabal.exposedModules l
+  Cabal.CTest _ -> []
 
 checkPackageName :: Package.Model -> Cabal.PackageDescription -> App.App ()
 checkPackageName p pd = do
@@ -152,7 +174,7 @@ checkPackageVersion v pd = do
         }
 
 salt :: ByteString.ByteString
-salt = "2022-07-11"
+salt = "2022-07-12"
 
 hashBlob :: Blob.Model -> Hash.Hash
 hashBlob = Hash.new . mappend salt . Witch.from . Blob.hash . Model.value

@@ -25,7 +25,13 @@ handler _ respond = do
       body = Aeson.encode manifest
       eTag = Common.makeETag manifest
   respond $
-    Wai.responseLBS Http.ok200 [(Http.hContentType, ContentType.manifest), (Http.hETag, eTag)] body
+    Wai.responseLBS
+      Http.ok200
+      [ (Http.hCacheControl, "max-age=604800, stale-while-revalidate=86400"),
+        (Http.hContentType, ContentType.manifest),
+        (Http.hETag, eTag)
+      ]
+      body
 
 makeManifest :: Context.Context -> Manifest.Manifest
 makeManifest context =

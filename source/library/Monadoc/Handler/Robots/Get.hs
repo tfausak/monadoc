@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 
 module Monadoc.Handler.Robots.Get where
@@ -16,4 +17,10 @@ handler _ respond = do
   let body = Witch.into @LazyByteString.ByteString $ unlines ["User-Agent: *", "Allow: /"]
       eTag = Common.makeETag body
   respond $
-    Wai.responseLBS Http.ok200 [(Http.hContentType, ContentType.text), (Http.hETag, eTag)] body
+    Wai.responseLBS
+      Http.ok200
+      [ (Http.hCacheControl, "max-age=604800, stale-while-revalidate=86400"),
+        (Http.hContentType, ContentType.text),
+        (Http.hETag, eTag)
+      ]
+      body

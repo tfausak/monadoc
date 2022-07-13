@@ -37,6 +37,7 @@ base ctx rt breadcrumbs title html = do
           Html.content_ "initial-scale = 1, width = device-width"
         ]
       Html.meta_ [Html.name_ "description", Html.content_ description]
+      Html.meta_ [Html.name_ "theme-color", Html.content_ "#5e2ca5"]
       Html.title_ $ Html.toHtml title
       Html.link_
         [ Html.rel_ "stylesheet",
@@ -44,6 +45,7 @@ base ctx rt breadcrumbs title html = do
         ]
       Html.link_ [Html.rel_ "manifest", Html.href_ $ route ctx Route.Manifest]
       Html.link_ [Html.rel_ "canonical", Html.href_ canonical]
+      Html.link_ [Html.rel_ "apple-touch-icon", Html.href_ $ route ctx Route.AppleTouchIcon]
       og "title" title
       og "type" "website"
       og "url" canonical
