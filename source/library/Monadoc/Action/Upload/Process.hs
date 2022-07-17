@@ -19,6 +19,7 @@ import qualified Distribution.Types.Version as Cabal
 import qualified Distribution.Utils.ShortText as Cabal
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Action.Component.Upsert as Component.Upsert
+import qualified Monadoc.Action.ComponentModule.Upsert as ComponentModule.Upsert
 import qualified Monadoc.Action.License.Upsert as License.Upsert
 import qualified Monadoc.Action.Module.Upsert as Module.Upsert
 import qualified Monadoc.Action.PackageMeta.Upsert as PackageMeta.Upsert
@@ -30,6 +31,7 @@ import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Extra.SqliteSimple as Sql
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.Component as Component
+import qualified Monadoc.Model.ComponentModule as ComponentModule
 import qualified Monadoc.Model.License as License
 import qualified Monadoc.Model.Module as Module
 import qualified Monadoc.Model.Package as Package
@@ -118,9 +120,13 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
           }
 
       Monad.forM_ (toModuleNames c) $ \mn -> do
-        _module <- Module.Upsert.run $ Module.Module {Module.name = mn}
-        -- TODO: Connect module to component.
-        pure ()
+        module_ <- Module.Upsert.run Module.Module {Module.name = mn}
+        Monad.void $
+          ComponentModule.Upsert.run
+            ComponentModule.ComponentModule
+              { ComponentModule.component = Model.key component,
+                ComponentModule.module_ = Model.key module_
+              }
 
 toComponents ::
   Cabal.GenericPackageDescription ->
@@ -175,7 +181,7 @@ checkPackageVersion v pd = do
         }
 
 salt :: ByteString.ByteString
-salt = "2022-07-12"
+salt = "2022-07-17"
 
 hashBlob :: Blob.Model -> Hash.Hash
 hashBlob = Hash.new . mappend salt . Witch.from . Blob.hash . Model.value

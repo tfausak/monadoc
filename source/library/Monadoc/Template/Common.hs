@@ -91,7 +91,7 @@ base ctx rt breadcrumbs title html = do
               $ Breadcrumb.label breadcrumb
       Html.main_ [Html.class_ "my-3"] $
         Html.div_ [Html.class_ "container"] html
-      Html.footer_ [Html.class_ "my-3 text-muted"]
+      Html.footer_ [Html.class_ "mb-5 mt-3 text-muted"]
         . Html.div_ [Html.class_ "border-top container pt-3"]
         $ do
           "Powered by "

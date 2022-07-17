@@ -1,0 +1,26 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
+
+module Monadoc.Model.ComponentModuleSpec where
+
+import qualified Database.SQLite.Simple as Sql
+import qualified Monadoc.Model.ComponentModule as ComponentModule
+import qualified Monadoc.Test as Test
+import qualified Test.Hspec as Hspec
+import qualified Test.QuickCheck as QuickCheck
+import qualified Witch
+
+spec :: Hspec.Spec
+spec = Hspec.describe "Monadoc.Model.ComponentModule" $ do
+  Hspec.it "can be round-tripped through SQL" $ do
+    Test.expectSqlRow
+      ComponentModule.ComponentModule
+        { ComponentModule.component = Witch.from @Int 1,
+          ComponentModule.module_ = Witch.from @Int 2
+        }
+      [ Sql.SQLInteger 1,
+        Sql.SQLInteger 2
+      ]
+
+  Hspec.it "can be round-tripped through SQL" $
+    QuickCheck.property (Test.propertySqlRow @ComponentModule.Model)

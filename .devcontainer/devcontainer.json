@@ -8,6 +8,9 @@
   "service": "monadoc",
   "settings": {
     "editor.formatOnSave": true,
+    "editor.rulers": [
+      80
+    ],
     "purple-yolk.brittany.command": ".devcontainer/ormolu.sh --mode inplace",
     "purple-yolk.ghci.command": "cabal repl --repl-options -ddump-json",
     "purple-yolk.hlint.command": ".devcontainer/hlint.sh --json --no-exit-code",

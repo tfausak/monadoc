@@ -4,6 +4,8 @@ import qualified Monadoc.Action.Blob.InsertSpec
 import qualified Monadoc.Action.Blob.UpsertSpec
 import qualified Monadoc.Action.Component.InsertSpec
 import qualified Monadoc.Action.Component.UpsertSpec
+import qualified Monadoc.Action.ComponentModule.InsertSpec
+import qualified Monadoc.Action.ComponentModule.UpsertSpec
 import qualified Monadoc.Action.CronEntry.DeleteSpec
 import qualified Monadoc.Action.CronEntry.EnqueueSpec
 import qualified Monadoc.Action.CronEntry.InsertSpec
@@ -37,6 +39,7 @@ import qualified Monadoc.Extra.ListSpec
 import qualified Monadoc.Extra.MaybeSpec
 import qualified Monadoc.Extra.TimeSpec
 import qualified Monadoc.Model.BlobSpec
+import qualified Monadoc.Model.ComponentModuleSpec
 import qualified Monadoc.Model.ComponentSpec
 import qualified Monadoc.Model.CronEntrySpec
 import qualified Monadoc.Model.HackageIndexSpec
@@ -53,6 +56,7 @@ import qualified Monadoc.Model.RangeSpec
 import qualified Monadoc.Model.UploadSpec
 import qualified Monadoc.Model.VersionSpec
 import qualified Monadoc.Query.BlobSpec
+import qualified Monadoc.Query.ComponentModuleSpec
 import qualified Monadoc.Query.ComponentSpec
 import qualified Monadoc.Query.CronEntrySpec
 import qualified Monadoc.Query.LicenseSpec
@@ -93,6 +97,8 @@ spec = do
   Monadoc.Action.Blob.UpsertSpec.spec
   Monadoc.Action.Component.InsertSpec.spec
   Monadoc.Action.Component.UpsertSpec.spec
+  Monadoc.Action.ComponentModule.InsertSpec.spec
+  Monadoc.Action.ComponentModule.UpsertSpec.spec
   Monadoc.Action.CronEntry.DeleteSpec.spec
   Monadoc.Action.CronEntry.EnqueueSpec.spec
   Monadoc.Action.CronEntry.InsertSpec.spec
@@ -126,6 +132,7 @@ spec = do
   Monadoc.Extra.MaybeSpec.spec
   Monadoc.Extra.TimeSpec.spec
   Monadoc.Model.BlobSpec.spec
+  Monadoc.Model.ComponentModuleSpec.spec
   Monadoc.Model.ComponentSpec.spec
   Monadoc.Model.CronEntrySpec.spec
   Monadoc.Model.HackageIndexSpec.spec
@@ -142,6 +149,7 @@ spec = do
   Monadoc.Model.UploadSpec.spec
   Monadoc.Model.VersionSpec.spec
   Monadoc.Query.BlobSpec.spec
+  Monadoc.Query.ComponentModuleSpec.spec
   Monadoc.Query.ComponentSpec.spec
   Monadoc.Query.CronEntrySpec.spec
   Monadoc.Query.LicenseSpec.spec
