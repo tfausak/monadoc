@@ -119,7 +119,8 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
             PackageMetaComponent.component = Model.key component
           }
 
-      Monad.forM_ (toModuleNames c) $ \mn -> do
+      -- TODO: Handle module visibility (exposed, other, autogen, virtual).
+      Monad.forM_ (componentModuleNames c) $ \mn -> do
         module_ <- Module.Upsert.run Module.Module {Module.name = mn}
         Monad.void $
           ComponentModule.Upsert.run
@@ -149,14 +150,22 @@ toComponent ::
   (Cabal.UnqualComponentName, (Cabal.Component, c))
 toComponent f = fmap $ Bifunctor.first f . Cabal.ignoreConditions
 
-toModuleNames :: Cabal.Component -> [ModuleName.ModuleName]
-toModuleNames c = case c of
-  -- TODO: Handle autogen, other, and virtual modules.
-  Cabal.CBench _ -> []
-  Cabal.CExe _ -> []
-  Cabal.CFLib _ -> []
-  Cabal.CLib l -> Witch.from <$> Cabal.exposedModules l
-  Cabal.CTest _ -> []
+componentModuleNames :: Cabal.Component -> [ModuleName.ModuleName]
+componentModuleNames c = case c of
+  Cabal.CBench x -> buildInfoModuleNames $ Cabal.benchmarkBuildInfo x
+  Cabal.CExe x -> buildInfoModuleNames $ Cabal.buildInfo x
+  Cabal.CFLib x -> buildInfoModuleNames $ Cabal.foreignLibBuildInfo x
+  Cabal.CLib x -> fmap Witch.from (Cabal.exposedModules x) <> buildInfoModuleNames (Cabal.libBuildInfo x)
+  Cabal.CTest x -> buildInfoModuleNames $ Cabal.testBuildInfo x
+
+buildInfoModuleNames :: Cabal.BuildInfo -> [ModuleName.ModuleName]
+buildInfoModuleNames bi =
+  Witch.from
+    <$> mconcat
+      [ Cabal.autogenModules bi,
+        Cabal.otherModules bi,
+        Cabal.virtualModules bi
+      ]
 
 checkPackageName :: Package.Model -> Cabal.PackageDescription -> App.App ()
 checkPackageName p pd = do
@@ -181,7 +190,7 @@ checkPackageVersion v pd = do
         }
 
 salt :: ByteString.ByteString
-salt = "2022-07-17"
+salt = "2022-07-18"
 
 hashBlob :: Blob.Model -> Hash.Hash
 hashBlob = Hash.new . mappend salt . Witch.from . Blob.hash . Model.value

@@ -1,7 +1,7 @@
 #! /usr/bin/env sh
-set -o errexit
+set -o errexit -o xtrace
 
-if ! command -v hlint > /dev/null
+if ! command -v hlint 1>&2
 then
   cabal install hlint
 fi

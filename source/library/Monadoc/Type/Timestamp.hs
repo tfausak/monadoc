@@ -25,7 +25,7 @@ instance Witch.From Timestamp Time.UTCTime
 
 instance Witch.From Timestamp String where
   from =
-    Time.formatTime Time.defaultTimeLocale "%0Y-%m-%dT%H:%M:%SZ"
+    Time.formatTime Time.defaultTimeLocale "%0Y-%m-%dT%H:%M:%S%3QZ"
       . Witch.into @Time.UTCTime
 
 instance Sql.FromField Timestamp where

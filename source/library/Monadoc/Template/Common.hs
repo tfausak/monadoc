@@ -103,9 +103,8 @@ base ctx rt breadcrumbs title html = do
             Nothing -> ""
             Just sha -> do
               " commit "
-              Html.a_
-                [ Html.href_ $ github <> "/commit/" <> Witch.into @Text.Text sha
-                ]
+              Html.code_
+                . Html.a_ [Html.href_ $ github <> "/commit/" <> Witch.into @Text.Text sha]
                 . Html.toHtml
                 $ take 7 sha
           ". \x1f516"
