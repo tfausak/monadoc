@@ -1,9 +1,9 @@
 module Monadoc.Worker.Main where
 
 import qualified Control.Monad as Monad
-import qualified Control.Monad.Trans.Reader as Reader
 import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.IO.Class as IO
+import qualified Control.Monad.Trans.Reader as Reader
 import qualified Monadoc.Action.CronEntry.Enqueue as CronEntry.Enqueue
 import qualified Monadoc.Action.CronEntry.Prune as CronEntry.Prune
 import qualified Monadoc.Action.CronEntry.Upsert as CronEntry.Upsert

@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.7.18
+version: 0.2022.7.20
 
 build-type: Simple
 category: Documentation
