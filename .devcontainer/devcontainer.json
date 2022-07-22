@@ -1,5 +1,5 @@
 {
-  "dockerComposeFile": "docker-compose.yaml",
+  "dockerComposeFile": "compose.yaml",
   "extensions": [
     "EditorConfig.EditorConfig",
     "taylorfausak.purple-yolk"
@@ -11,9 +11,9 @@
     "editor.rulers": [
       80
     ],
-    "purple-yolk.brittany.command": ".devcontainer/ormolu.sh --mode inplace",
+    "purple-yolk.brittany.command": ".devcontainer/run.sh ormolu --mode inplace",
     "purple-yolk.ghci.command": "cabal repl --repl-options -ddump-json",
-    "purple-yolk.hlint.command": ".devcontainer/hlint.sh --json --no-exit-code",
+    "purple-yolk.hlint.command": ".devcontainer/run.sh hlint --json --no-exit-code",
     "purple-yolk.hlint.onSave": true
   },
   "workspaceFolder": "/workspaces/monadoc"
