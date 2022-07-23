@@ -76,6 +76,7 @@ import qualified Monadoc.Type.HashSpec
 import qualified Monadoc.Type.KeySpec
 import qualified Monadoc.Type.ModelSpec
 import qualified Monadoc.Type.ModuleNameSpec
+import qualified Monadoc.Type.ModuleTypeSpec
 import qualified Monadoc.Type.PackageNameSpec
 import qualified Monadoc.Type.PortSpec
 import qualified Monadoc.Type.ReversionSpec
@@ -169,6 +170,7 @@ spec = do
   Monadoc.Type.KeySpec.spec
   Monadoc.Type.ModelSpec.spec
   Monadoc.Type.ModuleNameSpec.spec
+  Monadoc.Type.ModuleTypeSpec.spec
   Monadoc.Type.PackageNameSpec.spec
   Monadoc.Type.PortSpec.spec
   Monadoc.Type.ReversionSpec.spec

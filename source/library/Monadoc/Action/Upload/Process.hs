@@ -12,6 +12,7 @@ import qualified Data.Maybe as Maybe
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
 import qualified Distribution.CabalSpecVersion as Cabal
+import qualified Distribution.ModuleName as Cabal
 import qualified Distribution.PackageDescription as Cabal
 import qualified Distribution.PackageDescription.Parsec as Cabal
 import qualified Distribution.Types.Component as Cabal
@@ -44,7 +45,7 @@ import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.ComponentType as ComponentType
 import qualified Monadoc.Type.Hash as Hash
 import qualified Monadoc.Type.Model as Model
-import qualified Monadoc.Type.ModuleName as ModuleName
+import qualified Monadoc.Type.ModuleType as ModuleType
 import qualified Witch
 
 run :: App.App ()
@@ -119,14 +120,13 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
             PackageMetaComponent.component = Model.key component
           }
 
-      -- TODO: Handle module visibility (exposed, other, autogen, virtual).
-      Monad.forM_ (componentModuleNames c) $ \mn -> do
-        module_ <- Module.Upsert.run Module.Module {Module.name = mn}
+      Monad.forM_ (componentModules c) $ \module_ -> do
+        model <- Module.Upsert.run module_
         Monad.void $
           ComponentModule.Upsert.run
             ComponentModule.ComponentModule
               { ComponentModule.component = Model.key component,
-                ComponentModule.module_ = Model.key module_
+                ComponentModule.module_ = Model.key model
               }
 
 toComponents ::
@@ -143,6 +143,7 @@ toComponents gpd =
           toComponent Cabal.CTest <$> Cabal.condTestSuites gpd
         ]
 
+-- TODO: Somehow track conditionals.
 toComponent ::
   (Semigroup a, Semigroup c) =>
   (a -> Cabal.Component) ->
@@ -150,22 +151,27 @@ toComponent ::
   (Cabal.UnqualComponentName, (Cabal.Component, c))
 toComponent f = fmap $ Bifunctor.first f . Cabal.ignoreConditions
 
-componentModuleNames :: Cabal.Component -> [ModuleName.ModuleName]
-componentModuleNames c = case c of
-  Cabal.CBench x -> buildInfoModuleNames $ Cabal.benchmarkBuildInfo x
-  Cabal.CExe x -> buildInfoModuleNames $ Cabal.buildInfo x
-  Cabal.CFLib x -> buildInfoModuleNames $ Cabal.foreignLibBuildInfo x
-  Cabal.CLib x -> fmap Witch.from (Cabal.exposedModules x) <> buildInfoModuleNames (Cabal.libBuildInfo x)
-  Cabal.CTest x -> buildInfoModuleNames $ Cabal.testBuildInfo x
+componentModules :: Cabal.Component -> [Module.Module]
+componentModules c = case c of
+  Cabal.CBench x -> buildInfoModules $ Cabal.benchmarkBuildInfo x
+  Cabal.CExe x -> buildInfoModules $ Cabal.buildInfo x
+  Cabal.CFLib x -> buildInfoModules $ Cabal.foreignLibBuildInfo x
+  Cabal.CLib x ->
+    fmap (toModule ModuleType.Exposed) (Cabal.exposedModules x)
+      <> buildInfoModules (Cabal.libBuildInfo x)
+  Cabal.CTest x -> buildInfoModules $ Cabal.testBuildInfo x
 
-buildInfoModuleNames :: Cabal.BuildInfo -> [ModuleName.ModuleName]
-buildInfoModuleNames bi =
-  Witch.from
-    <$> mconcat
-      [ Cabal.autogenModules bi,
-        Cabal.otherModules bi,
-        Cabal.virtualModules bi
-      ]
+buildInfoModules :: Cabal.BuildInfo -> [Module.Module]
+buildInfoModules bi =
+  mconcat
+    [ toModule ModuleType.Autogen <$> Cabal.autogenModules bi,
+      toModule ModuleType.Other <$> Cabal.otherModules bi,
+      toModule ModuleType.Virtual <$> Cabal.virtualModules bi
+    ]
+
+-- TODO: Handle module types.
+toModule :: ModuleType.ModuleType -> Cabal.ModuleName -> Module.Module
+toModule _ n = Module.Module {Module.name = Witch.from n}
 
 checkPackageName :: Package.Model -> Cabal.PackageDescription -> App.App ()
 checkPackageName p pd = do
@@ -190,7 +196,7 @@ checkPackageVersion v pd = do
         }
 
 salt :: ByteString.ByteString
-salt = "2022-07-18"
+salt = "2022-07-23"
 
 hashBlob :: Blob.Model -> Hash.Hash
 hashBlob = Hash.new . mappend salt . Witch.from . Blob.hash . Model.value

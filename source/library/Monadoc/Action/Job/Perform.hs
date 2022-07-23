@@ -18,11 +18,16 @@ run :: Maybe Job.Model -> App.App ()
 run maybeJob = case maybeJob of
   Nothing -> IO.liftIO $ Concurrent.threadDelay 1000000
   Just job -> do
+    let task = Job.task $ Model.value job
     App.Log.info $
       F.sformat
         ("starting " F.% Key.format F.% ": " F.% F.shown)
         (Model.key job)
-        (Job.task $ Model.value job)
+        task
     () <- Control.control $ \runInBase ->
       Async.withAsync (runInBase . Task.Perform.run . Job.task $ Model.value job) Async.wait
-    App.Log.info $ F.sformat ("finished " F.% Key.format) (Model.key job)
+    App.Log.info $
+      F.sformat
+        ("finished " F.% Key.format F.% ": " F.% F.shown)
+        (Model.key job)
+        task

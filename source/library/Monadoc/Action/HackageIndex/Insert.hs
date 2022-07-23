@@ -41,10 +41,10 @@ run :: App.App ()
 run = do
   App.Log.debug "inserting hackage index"
   size <- getSize
+  key <- insertBlob size
   context <- Reader.ask
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"
   Control.control $ \runInBase -> Client.withResponse (Client.ensureUserAgent request) (Context.manager context) $ \response -> runInBase $ do
-    key <- insertBlob size
     App.Sql.withConnection $ \connection -> do
       hashVar <- IO.liftIO . Stm.newTVarIO $ Crypto.hashInitWith Crypto.SHA256
       Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 key) True $ \blob -> do

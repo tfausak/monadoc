@@ -4,7 +4,7 @@
     "EditorConfig.EditorConfig",
     "taylorfausak.purple-yolk"
   ],
-  "postCreateCommand": "cabal update",
+  "postCreateCommand": "cabal --ignore-project update",
   "service": "monadoc",
   "settings": {
     "editor.formatOnSave": true,
