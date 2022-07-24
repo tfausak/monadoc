@@ -9,9 +9,9 @@ import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Handler.AppleTouchIcon.Get as AppleTouchIcon.Get
 import qualified Monadoc.Handler.Common as Common
+import qualified Monadoc.Handler.Component.Get as Component.Get
 import qualified Monadoc.Handler.Favicon.Get as Favicon.Get
 import qualified Monadoc.Handler.HealthCheck.Get as HealthCheck.Get
-import qualified Monadoc.Handler.Component.Get as Component.Get
 import qualified Monadoc.Handler.Home.Get as Home.Get
 import qualified Monadoc.Handler.Manifest.Get as Manifest.Get
 import qualified Monadoc.Handler.Package.Get as Package.Get
