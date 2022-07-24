@@ -11,6 +11,7 @@ import qualified Monadoc.Handler.AppleTouchIcon.Get as AppleTouchIcon.Get
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Handler.Favicon.Get as Favicon.Get
 import qualified Monadoc.Handler.HealthCheck.Get as HealthCheck.Get
+import qualified Monadoc.Handler.Component.Get as Component.Get
 import qualified Monadoc.Handler.Home.Get as Home.Get
 import qualified Monadoc.Handler.Manifest.Get as Manifest.Get
 import qualified Monadoc.Handler.Package.Get as Package.Get
@@ -50,6 +51,7 @@ getHandler ::
   m Handler.Handler
 getHandler context method route = case route of
   Route.AppleTouchIcon -> resource method route $ Map.singleton Http.GET AppleTouchIcon.Get.handler
+  Route.Component p v c -> resource method route . Map.singleton Http.GET $ Component.Get.handler p v c
   Route.Favicon -> resource method route $ Map.singleton Http.GET Favicon.Get.handler
   Route.HealthCheck -> resource method route $ Map.singleton Http.GET HealthCheck.Get.handler
   Route.Home -> resource method route $ Map.singleton Http.GET Home.Get.handler

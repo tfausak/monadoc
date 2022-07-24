@@ -17,7 +17,7 @@ import qualified Witch
 
 newtype ModuleName
   = ModuleName Cabal.ModuleName
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
 
 instance Witch.From Cabal.ModuleName ModuleName
 

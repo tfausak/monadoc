@@ -20,11 +20,11 @@ import qualified Distribution.Types.Version as Cabal
 import qualified Distribution.Utils.ShortText as Cabal
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Action.Component.Upsert as Component.Upsert
-import qualified Monadoc.Action.ComponentModule.Upsert as ComponentModule.Upsert
 import qualified Monadoc.Action.License.Upsert as License.Upsert
 import qualified Monadoc.Action.Module.Upsert as Module.Upsert
 import qualified Monadoc.Action.PackageMeta.Upsert as PackageMeta.Upsert
 import qualified Monadoc.Action.PackageMetaComponent.Upsert as PackageMetaComponent.Upsert
+import qualified Monadoc.Action.PackageMetaComponentModule.Upsert as PackageMetaComponentModule.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
 import qualified Monadoc.Exception.InvalidGenericPackageDescription as InvalidGenericPackageDescription
 import qualified Monadoc.Exception.Mismatch as Mismatch
@@ -32,12 +32,12 @@ import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Extra.SqliteSimple as Sql
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.Component as Component
-import qualified Monadoc.Model.ComponentModule as ComponentModule
 import qualified Monadoc.Model.License as License
 import qualified Monadoc.Model.Module as Module
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PackageMeta as PackageMeta
 import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
+import qualified Monadoc.Model.PackageMetaComponentModule as PackageMetaComponentModule
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Query.PackageMeta as PackageMeta
@@ -105,8 +105,6 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
           }
 
     Monad.forM_ (toComponents gpd) $ \(ucn, (c, _ds)) -> do
-      -- TODO: Store dependencies.
-
       component <- Component.Upsert.run $ case c of
         Cabal.CBench _ -> Component.Component ComponentType.Benchmark $ Witch.from ucn
         Cabal.CExe _ -> Component.Component ComponentType.Executable $ Witch.from ucn
@@ -114,20 +112,27 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
         Cabal.CLib _ -> Component.Component ComponentType.Library $ Witch.from ucn
         Cabal.CTest _ -> Component.Component ComponentType.TestSuite $ Witch.from ucn
 
-      Monad.void . PackageMetaComponent.Upsert.run $
-        PackageMetaComponent.PackageMetaComponent
-          { PackageMetaComponent.packageMeta = Model.key packageMeta,
-            PackageMetaComponent.component = Model.key component
-          }
+      packageMetaComponent <-
+        PackageMetaComponent.Upsert.run
+          PackageMetaComponent.PackageMetaComponent
+            { PackageMetaComponent.packageMeta = Model.key packageMeta,
+              PackageMetaComponent.component = Model.key component
+            }
 
-      Monad.forM_ (componentModules c) $ \module_ -> do
-        model <- Module.Upsert.run module_
-        Monad.void $
-          ComponentModule.Upsert.run
-            ComponentModule.ComponentModule
-              { ComponentModule.component = Model.key component,
-                ComponentModule.module_ = Model.key model
-              }
+      -- TODO: Store dependencies.
+
+      Monad.forM_ (componentModules c) $ \(mt, mn) -> do
+        module_ <- Module.Upsert.run Module.Module {Module.name = Witch.from mn}
+
+        -- TODO: Handle other module types.
+        Monad.when (mt == ModuleType.Exposed) $ do
+          _packageMetaComponentModule <-
+            PackageMetaComponentModule.Upsert.run
+              PackageMetaComponentModule.PackageMetaComponentModule
+                { PackageMetaComponentModule.packageMetaComponent = Model.key packageMetaComponent,
+                  PackageMetaComponentModule.module_ = Model.key module_
+                }
+          pure ()
 
 toComponents ::
   Cabal.GenericPackageDescription ->
@@ -143,7 +148,7 @@ toComponents gpd =
           toComponent Cabal.CTest <$> Cabal.condTestSuites gpd
         ]
 
--- TODO: Somehow track conditionals.
+-- TODO: Track conditionals.
 toComponent ::
   (Semigroup a, Semigroup c) =>
   (a -> Cabal.Component) ->
@@ -151,27 +156,23 @@ toComponent ::
   (Cabal.UnqualComponentName, (Cabal.Component, c))
 toComponent f = fmap $ Bifunctor.first f . Cabal.ignoreConditions
 
-componentModules :: Cabal.Component -> [Module.Module]
+componentModules :: Cabal.Component -> [(ModuleType.ModuleType, Cabal.ModuleName)]
 componentModules c = case c of
   Cabal.CBench x -> buildInfoModules $ Cabal.benchmarkBuildInfo x
   Cabal.CExe x -> buildInfoModules $ Cabal.buildInfo x
   Cabal.CFLib x -> buildInfoModules $ Cabal.foreignLibBuildInfo x
   Cabal.CLib x ->
-    fmap (toModule ModuleType.Exposed) (Cabal.exposedModules x)
+    fmap ((,) ModuleType.Exposed) (Cabal.exposedModules x)
       <> buildInfoModules (Cabal.libBuildInfo x)
   Cabal.CTest x -> buildInfoModules $ Cabal.testBuildInfo x
 
-buildInfoModules :: Cabal.BuildInfo -> [Module.Module]
+buildInfoModules :: Cabal.BuildInfo -> [(ModuleType.ModuleType, Cabal.ModuleName)]
 buildInfoModules bi =
   mconcat
-    [ toModule ModuleType.Autogen <$> Cabal.autogenModules bi,
-      toModule ModuleType.Other <$> Cabal.otherModules bi,
-      toModule ModuleType.Virtual <$> Cabal.virtualModules bi
+    [ (,) ModuleType.Autogen <$> Cabal.autogenModules bi,
+      (,) ModuleType.Other <$> Cabal.otherModules bi,
+      (,) ModuleType.Virtual <$> Cabal.virtualModules bi
     ]
-
--- TODO: Handle module types.
-toModule :: ModuleType.ModuleType -> Cabal.ModuleName -> Module.Module
-toModule _ n = Module.Module {Module.name = Witch.from n}
 
 checkPackageName :: Package.Model -> Cabal.PackageDescription -> App.App ()
 checkPackageName p pd = do
@@ -196,7 +197,7 @@ checkPackageVersion v pd = do
         }
 
 salt :: ByteString.ByteString
-salt = "2022-07-23"
+salt = "2022-07-24"
 
 hashBlob :: Blob.Model -> Hash.Hash
 hashBlob = Hash.new . mappend salt . Witch.from . Blob.hash . Model.value

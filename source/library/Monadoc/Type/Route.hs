@@ -13,6 +13,7 @@ import qualified Data.Typeable as Typeable
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
 import qualified Monadoc.Extra.Either as Either
+import qualified Monadoc.Type.ComponentId as ComponentId
 import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Monadoc.Type.Hash as Hash
 import qualified Monadoc.Type.PackageName as PackageName
@@ -25,6 +26,7 @@ import qualified Witch
 
 data Route
   = AppleTouchIcon
+  | Component PackageName.PackageName Reversion.Reversion ComponentId.ComponentId
   | Favicon
   | HealthCheck
   | Home
@@ -47,6 +49,7 @@ parse path query = case path of
   ["health-check"] -> pure HealthCheck
   ["package", p] -> Package <$> tryFrom p
   ["package", p, "version", v] -> Version <$> tryFrom p <*> tryFrom v
+  ["package", p, "version", v, "component", c] -> Component <$> tryFrom p <*> tryFrom v <*> tryFrom c
   ["proxy", h, u] -> Proxy <$> tryFrom h <*> tryFrom u
   ["robots.txt"] -> pure Robots
   ["search"] -> Search <$> fromQuery query "query"
@@ -59,6 +62,7 @@ parse path query = case path of
 render :: Route -> ([Text.Text], Http.Query)
 render route = case route of
   AppleTouchIcon -> (["apple-touch-icon.png"], [])
+  Component p v c -> (["package", Witch.from p, "version", Witch.from v, "component", Witch.from c], [])
   Favicon -> (["favicon.ico"], [])
   HealthCheck -> (["health-check"], [])
   Home -> ([], [])

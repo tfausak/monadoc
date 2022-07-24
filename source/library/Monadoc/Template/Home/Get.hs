@@ -32,7 +32,7 @@ render context input =
         let (upload Sql.:. package Sql.:. version Sql.:. hackageUser) = row
             reversion =
               Reversion.Reversion
-                { Reversion.revision = Just . Upload.revision $ Model.value upload,
+                { Reversion.revision = Upload.revision $ Model.value upload,
                   Reversion.version = Version.number $ Model.value version
                 }
             packageName = Package.name $ Model.value package

@@ -36,7 +36,7 @@ render context breadcrumbs hackageUser rows packages = do
     Html.ul_ . Monad.forM_ rows $ \(upload Sql.:. version Sql.:. package) -> Html.li_ $ do
       let reversion =
             Reversion.Reversion
-              { Reversion.revision = Just . Upload.revision $ Model.value upload,
+              { Reversion.revision = Upload.revision $ Model.value upload,
                 Reversion.version = Version.number $ Model.value version
               }
       Html.a_ [Html.href_ . Common.route context $ Route.Version (Package.name $ Model.value package) reversion] $ do

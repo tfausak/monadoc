@@ -24,6 +24,7 @@ import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Template.Common as Common
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
+import qualified Monadoc.Type.ComponentId as ComponentId
 import qualified Monadoc.Type.ComponentType as ComponentType
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
@@ -48,7 +49,7 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
   let packageName = Package.name $ Model.value package
       versionNumber = Version.number $ Model.value version
       revision = Upload.revision $ Model.value upload
-      reversion = Reversion.Reversion {Reversion.revision = Just revision, Reversion.version = versionNumber}
+      reversion = Reversion.Reversion {Reversion.revision = revision, Reversion.version = versionNumber}
       route = Route.Version packageName reversion
       title =
         F.sformat
@@ -73,7 +74,7 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
         let rev =
               Reversion.Reversion
                 { Reversion.version = Version.number $ Model.value ver,
-                  Reversion.revision = Just . Upload.revision $ Model.value upl
+                  Reversion.revision = Upload.revision $ Model.value upl
                 }
         Html.a_
           [ Html.class_ "alert-link",
@@ -97,14 +98,8 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
       "."
     Html.h3_ "Package meta"
     Html.dl_ $ do
-      Html.dt_ "Author"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.author $ Model.value packageMeta
-      Html.dt_ "Bug reports"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.bugReports $ Model.value packageMeta
-      Html.dt_ "Category"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.category $ Model.value packageMeta
-      Html.dt_ "Copyright"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.copyright $ Model.value packageMeta
+      Html.dt_ "Synopsis"
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.synopsis $ Model.value packageMeta
       Html.dt_ "Description"
       Html.dd_
         . Html.toHtml
@@ -115,6 +110,14 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
         . maybe "" (Witch.into @String)
         . PackageMeta.description
         $ Model.value packageMeta
+      Html.dt_ "Author"
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.author $ Model.value packageMeta
+      Html.dt_ "Bug reports"
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.bugReports $ Model.value packageMeta
+      Html.dt_ "Category"
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.category $ Model.value packageMeta
+      Html.dt_ "Copyright"
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.copyright $ Model.value packageMeta
       Html.dt_ "Homepage"
       Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.homepage $ Model.value packageMeta
       Html.dt_ "Maintainer"
@@ -123,13 +126,15 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
       Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.pkgUrl $ Model.value packageMeta
       Html.dt_ "Stability"
       Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.stability $ Model.value packageMeta
-      Html.dt_ "Synopsis"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.synopsis $ Model.value packageMeta
     Html.h3_ "Components"
     Html.ul_ . Monad.forM_ (sortComponents packageName components) $ \component -> Html.li_ $ do
-      Html.toHtml . Component.type_ $ Model.value component
-      ":"
-      Html.toHtml . Component.name $ Model.value component
+      let componentId =
+            ComponentId.ComponentId
+              { ComponentId.type_ = Component.type_ $ Model.value component,
+                ComponentId.name = Component.name $ Model.value component
+              }
+      Html.a_ [Html.href_ . Common.route context $ Route.Component packageName reversion componentId] $
+        Html.toHtml componentId
 
 sortComponents :: PackageName.PackageName -> [Component.Model] -> [Component.Model]
 sortComponents packageName = List.sortOn $ \component ->

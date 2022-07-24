@@ -18,14 +18,15 @@ import qualified Witch
 
 data Reversion = Reversion
   { version :: VersionNumber.VersionNumber,
-    revision :: Maybe Revision.Revision
+    revision :: Revision.Revision
   }
   deriving (Eq, Show)
 
 instance Witch.From Reversion String where
   from reversion =
     Witch.into @String (version reversion)
-      <> maybe "" (mappend "+" . Witch.into @String) (revision reversion)
+      <> "+"
+      <> Witch.into @String (revision reversion)
 
 instance Witch.From Reversion Text.Text where
   from = Witch.via @String
@@ -43,7 +44,7 @@ instance Witch.TryFrom Text.Text Reversion where
 parseReversion :: Cabal.CabalParsing m => m Reversion
 parseReversion = do
   v <- parseVersion
-  r <- Cabal.optional parseRevision
+  r <- parseRevision
   Cabal.eof
   pure Reversion {revision = r, version = v}
 

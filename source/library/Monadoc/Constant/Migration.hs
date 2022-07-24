@@ -3,7 +3,6 @@ module Monadoc.Constant.Migration where
 import qualified Data.List as List
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.Component as Component
-import qualified Monadoc.Model.ComponentModule as ComponentModule
 import qualified Monadoc.Model.CronEntry as CronEntry
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Model.HackageUser as HackageUser
@@ -14,6 +13,7 @@ import qualified Monadoc.Model.Module as Module
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PackageMeta as PackageMeta
 import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
+import qualified Monadoc.Model.PackageMetaComponentModule as PackageMetaComponentModule
 import qualified Monadoc.Model.Preference as Preference
 import qualified Monadoc.Model.Range as Range
 import qualified Monadoc.Model.Upload as Upload
@@ -25,7 +25,6 @@ all =
     mconcat
       [ Blob.migrations,
         Component.migrations,
-        ComponentModule.migrations,
         CronEntry.migrations,
         HackageIndex.migrations,
         HackageUser.migrations,
@@ -36,6 +35,7 @@ all =
         Package.migrations,
         PackageMeta.migrations,
         PackageMetaComponent.migrations,
+        PackageMetaComponentModule.migrations,
         Preference.migrations,
         Range.migrations,
         Upload.migrations,

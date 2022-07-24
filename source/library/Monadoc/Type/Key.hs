@@ -43,6 +43,6 @@ zero = Witch.from @Int 0
 format :: forall a r. Typeable.Typeable a => F.Format r (Key a -> r)
 format = F.later $ \key ->
   F.bprint
-    (F.string F.% "-" F.% F.int)
+    (F.string F.% "#" F.% F.int)
     (Typeable.tyConName . Typeable.typeRepTyCon $ Typeable.typeRep (Typeable.Proxy @a))
     (Witch.into @Int.Int64 key)

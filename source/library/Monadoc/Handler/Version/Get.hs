@@ -8,17 +8,18 @@ import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.Maybe as Maybe
 import qualified Data.Text as Text
 import qualified Monadoc.Action.App.Sql as App.Sql
-import qualified Monadoc.Exception.Found as Found
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Handler.Common as Common
-import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Model.Upload as Upload
-import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Query.Component as Component
+import qualified Monadoc.Query.HackageUser as HackageUser
+import qualified Monadoc.Query.Package as Package
 import qualified Monadoc.Query.PackageMeta as PackageMeta
 import qualified Monadoc.Query.PackageMetaComponent as PackageMetaComponent
+import qualified Monadoc.Query.Upload as Upload
+import qualified Monadoc.Query.Version as Version
 import qualified Monadoc.Template.Version.Get as Template
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.Handler as Handler
@@ -36,38 +37,19 @@ handler ::
   Handler.Handler
 handler packageName reversion _ respond = do
   context <- Reader.ask
-  package <-
-    selectFirst $
-      App.Sql.query
-        "select * from package where name = ?"
-        [packageName]
-  version <-
-    selectFirst $
-      App.Sql.query
-        "select * from version where number = ?"
-        [Reversion.version reversion]
-  revision <- case Reversion.revision reversion of
-    Nothing -> do
-      upload <-
-        selectFirst $
-          App.Sql.query
-            "select * from upload where package = ? and version = ? order by revision desc limit 1"
-            (Model.key package, Model.key version)
-      let route =
-            Route.Version
-              (Package.name $ Model.value package)
-              Reversion.Reversion
-                { Reversion.revision = Just . Upload.revision $ Model.value upload,
-                  Reversion.version = Version.number $ Model.value version
-                }
-      Traced.throw $ Found.Found route
-    Just revision -> pure revision
-  upload <-
-    selectFirst $
-      App.Sql.query
-        "select * from upload where package = ? and version = ? and revision = ? limit 1"
-        (Model.key package, Model.key version, revision)
-  hackageUser <- selectFirst $ App.Sql.query "select * from hackageUser where key = ?" [Upload.uploadedBy $ Model.value upload]
+  package <- do
+    maybePackage <- Package.selectByName packageName
+    maybe (Traced.throw NotFound.NotFound) pure maybePackage
+  version <- do
+    maybeVersion <- Version.selectByNumber $ Reversion.version reversion
+    maybe (Traced.throw NotFound.NotFound) pure maybeVersion
+  let revision = Reversion.revision reversion
+  upload <- do
+    maybeUpload <- Upload.selectByPackageAndVersionAndRevision (Model.key package) (Model.key version) revision
+    maybe (Traced.throw NotFound.NotFound) pure maybeUpload
+  hackageUser <- do
+    maybeHackageUser <- HackageUser.selectByKey . Upload.uploadedBy $ Model.value upload
+    maybe (Traced.throw NotFound.NotFound) pure maybeHackageUser
   maybeLatest <-
     Maybe.listToMaybe
       <$> App.Sql.query

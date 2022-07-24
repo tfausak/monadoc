@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.7.23
+version: 0.2022.7.24
 
 build-type: Simple
 category: Documentation
@@ -112,10 +112,6 @@ library
     Monadoc.Action.Component.InsertSpec
     Monadoc.Action.Component.Upsert
     Monadoc.Action.Component.UpsertSpec
-    Monadoc.Action.ComponentModule.Insert
-    Monadoc.Action.ComponentModule.InsertSpec
-    Monadoc.Action.ComponentModule.Upsert
-    Monadoc.Action.ComponentModule.UpsertSpec
     Monadoc.Action.CronEntry.Delete
     Monadoc.Action.CronEntry.DeleteSpec
     Monadoc.Action.CronEntry.Enqueue
@@ -170,6 +166,10 @@ library
     Monadoc.Action.PackageMetaComponent.InsertSpec
     Monadoc.Action.PackageMetaComponent.Upsert
     Monadoc.Action.PackageMetaComponent.UpsertSpec
+    Monadoc.Action.PackageMetaComponentModule.Insert
+    Monadoc.Action.PackageMetaComponentModule.InsertSpec
+    Monadoc.Action.PackageMetaComponentModule.Upsert
+    Monadoc.Action.PackageMetaComponentModule.UpsertSpec
     Monadoc.Action.Preference.Upsert
     Monadoc.Action.Preference.UpsertSpec
     Monadoc.Action.Range.Insert
@@ -224,6 +224,7 @@ library
     Monadoc.Extra.TimeSpec
     Monadoc.Handler.AppleTouchIcon.Get
     Monadoc.Handler.Common
+    Monadoc.Handler.Component.Get
     Monadoc.Handler.Favicon.Get
     Monadoc.Handler.HealthCheck.Get
     Monadoc.Handler.Home.Get
@@ -246,8 +247,6 @@ library
     Monadoc.Model.Blob
     Monadoc.Model.BlobSpec
     Monadoc.Model.Component
-    Monadoc.Model.ComponentModule
-    Monadoc.Model.ComponentModuleSpec
     Monadoc.Model.ComponentSpec
     Monadoc.Model.CronEntry
     Monadoc.Model.CronEntrySpec
@@ -266,6 +265,8 @@ library
     Monadoc.Model.Package
     Monadoc.Model.PackageMeta
     Monadoc.Model.PackageMetaComponent
+    Monadoc.Model.PackageMetaComponentModule
+    Monadoc.Model.PackageMetaComponentModuleSpec
     Monadoc.Model.PackageMetaComponentSpec
     Monadoc.Model.PackageMetaSpec
     Monadoc.Model.PackageSpec
@@ -280,27 +281,36 @@ library
     Monadoc.Query.Blob
     Monadoc.Query.BlobSpec
     Monadoc.Query.Component
-    Monadoc.Query.ComponentModule
-    Monadoc.Query.ComponentModuleSpec
     Monadoc.Query.ComponentSpec
     Monadoc.Query.CronEntry
     Monadoc.Query.CronEntrySpec
+    Monadoc.Query.HackageUser
+    Monadoc.Query.HackageUserSpec
     Monadoc.Query.Job
     Monadoc.Query.License
     Monadoc.Query.LicenseSpec
     Monadoc.Query.Migration
     Monadoc.Query.Module
     Monadoc.Query.ModuleSpec
+    Monadoc.Query.Package
     Monadoc.Query.PackageMeta
     Monadoc.Query.PackageMetaComponent
+    Monadoc.Query.PackageMetaComponentModule
+    Monadoc.Query.PackageMetaComponentModuleSpec
     Monadoc.Query.PackageMetaComponentSpec
     Monadoc.Query.PackageMetaSpec
+    Monadoc.Query.PackageSpec
     Monadoc.Query.Range
     Monadoc.Query.RangeSpec
+    Monadoc.Query.Upload
+    Monadoc.Query.UploadSpec
+    Monadoc.Query.Version
+    Monadoc.Query.VersionSpec
     Monadoc.Server.Application
     Monadoc.Server.Main
     Monadoc.Server.Middleware
     Monadoc.Template.Common
+    Monadoc.Template.Component.Get
     Monadoc.Template.Home.Get
     Monadoc.Template.Package.Get
     Monadoc.Template.Search.Get
@@ -311,6 +321,8 @@ library
     Monadoc.Type.Breadcrumb
     Monadoc.Type.BuildType
     Monadoc.Type.BuildTypeSpec
+    Monadoc.Type.ComponentId
+    Monadoc.Type.ComponentIdSpec
     Monadoc.Type.ComponentName
     Monadoc.Type.ComponentNameSpec
     Monadoc.Type.ComponentType
