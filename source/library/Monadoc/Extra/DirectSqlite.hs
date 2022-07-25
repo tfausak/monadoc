@@ -1,6 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Extra.DirectSqlite where
 
 import qualified Control.Monad.Catch as Exception

@@ -1,7 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.Query where
 
 import qualified Data.String as String

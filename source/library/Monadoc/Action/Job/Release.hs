@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.Job.Release where
 
 import qualified Control.Monad.Catch as Exception

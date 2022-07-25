@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Handler.Robots.Get where
 
 import qualified Data.ByteString.Lazy as LazyByteString

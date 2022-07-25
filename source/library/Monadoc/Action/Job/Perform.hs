@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.Job.Perform where
 
 import qualified Control.Concurrent as Concurrent

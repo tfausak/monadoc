@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Type.ReversionSpec where
 
 import qualified Monadoc.Test as Test

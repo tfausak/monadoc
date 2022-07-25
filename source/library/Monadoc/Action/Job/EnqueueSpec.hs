@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Action.Job.EnqueueSpec where
 
 import qualified Control.Monad.IO.Class as IO

@@ -1,7 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.Hash where
 
 import qualified Control.Monad.Catch as Exception

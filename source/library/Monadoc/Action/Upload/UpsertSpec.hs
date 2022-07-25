@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Action.Upload.UpsertSpec where
 
 import qualified Control.Monad.IO.Class as IO

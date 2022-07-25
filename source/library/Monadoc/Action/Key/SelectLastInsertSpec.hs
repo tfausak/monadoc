@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Action.Key.SelectLastInsertSpec where
 
 import qualified Control.Monad.IO.Class as IO

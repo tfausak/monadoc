@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.ComponentIdSpec where
 
 import qualified Data.Text as Text

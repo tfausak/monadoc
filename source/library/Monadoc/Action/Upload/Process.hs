@@ -1,7 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TypeOperators #-}
-
 module Monadoc.Action.Upload.Process where
 
 import qualified Control.Monad as Monad
@@ -40,7 +36,6 @@ import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Model.PackageMetaComponentModule as PackageMetaComponentModule
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
-import qualified Monadoc.Query.PackageMeta as PackageMeta
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.ComponentType as ComponentType
 import qualified Monadoc.Type.Hash as Hash
@@ -64,9 +59,9 @@ handleRow ::
   (Upload.Model Sql.:. Blob.Model Sql.:. Package.Model Sql.:. Version.Model) ->
   App.App ()
 handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
-  maybePackageMeta <- PackageMeta.selectByUpload $ Model.key upload
+  packageMetas <- App.Sql.query "select * from packageMeta where upload = ? limit 1" [Model.key upload]
   let hash = hashBlob blob
-  Monad.when (fmap hashPackageMeta maybePackageMeta /= Just hash) $ do
+  Monad.when (fmap hashPackageMeta packageMetas /= [hash]) $ do
     let bs = Blob.contents $ Model.value blob
     gpd <- case Cabal.parseGenericPackageDescriptionMaybe bs of
       Nothing -> Traced.throw $ InvalidGenericPackageDescription.InvalidGenericPackageDescription bs
@@ -197,7 +192,7 @@ checkPackageVersion v pd = do
         }
 
 salt :: ByteString.ByteString
-salt = "2022-07-24"
+salt = "2022-07-25"
 
 hashBlob :: Blob.Model -> Hash.Hash
 hashBlob = Hash.new . mappend salt . Witch.from . Blob.hash . Model.value

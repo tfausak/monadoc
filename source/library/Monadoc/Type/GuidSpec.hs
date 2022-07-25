@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.GuidSpec where
 
 import qualified Data.ByteString.Lazy as LazyByteString

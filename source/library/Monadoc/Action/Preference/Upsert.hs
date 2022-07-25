@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.Preference.Upsert where
 
 import qualified Database.SQLite.Simple as Sql

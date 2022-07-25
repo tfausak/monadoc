@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Middleware.HandleExceptions where
 
 import qualified Control.Monad.Catch as Exception

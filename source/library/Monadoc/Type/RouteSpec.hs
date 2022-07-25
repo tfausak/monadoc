@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.RouteSpec where
 
 import qualified Data.ByteString as ByteString
@@ -9,6 +6,7 @@ import qualified Monadoc.Type.ComponentId as ComponentId
 import qualified Monadoc.Type.ComponentName as ComponentName
 import qualified Monadoc.Type.ComponentType as ComponentType
 import qualified Monadoc.Type.HackageUserName as HackageUserName
+import qualified Monadoc.Type.ModuleName as ModuleName
 import qualified Monadoc.Type.PackageName as PackageName
 import qualified Monadoc.Type.Reversion as Reversion
 import qualified Monadoc.Type.Revision as Revision
@@ -29,6 +27,7 @@ spec = Hspec.describe "Monadoc.Type.Route" $ do
       componentType = ComponentType.Executable
       componentName = Witch.unsafeFrom @String @ComponentName.ComponentName "bin"
       componentId = ComponentId.ComponentId {ComponentId.type_ = componentType, ComponentId.name = componentName}
+      moduleName = Witch.unsafeFrom @String @ModuleName.ModuleName "Ex.Mod"
   Hspec.it "can be parsed" $ do
     Route.parse [] [] `Hspec.shouldBe` Just Route.Home
     Route.parse ["apple-touch-icon.png"] [] `Hspec.shouldBe` Just Route.AppleTouchIcon
@@ -37,6 +36,7 @@ spec = Hspec.describe "Monadoc.Type.Route" $ do
     Route.parse ["package", "pkg"] [] `Hspec.shouldBe` Just (Route.Package packageName)
     Route.parse ["package", "pkg", "version", "1.2.3+4"] [] `Hspec.shouldBe` Just (Route.Version packageName reversion)
     Route.parse ["package", "pkg", "version", "1.2.3+4", "component", "exe:bin"] [] `Hspec.shouldBe` Just (Route.Component packageName reversion componentId)
+    Route.parse ["package", "pkg", "version", "1.2.3+4", "component", "exe:bin", "module", "Ex.Mod"] [] `Hspec.shouldBe` Just (Route.Module packageName reversion componentId moduleName)
     Route.parse ["robots.txt"] [] `Hspec.shouldBe` Just Route.Robots
     Route.parse ["search"] [("query", Just $ Witch.into @ByteString.ByteString query)] `Hspec.shouldBe` Just (Route.Search query)
     Route.parse ["static", "monadoc.css"] [] `Hspec.shouldBe` Just Route.Stylesheet
@@ -51,6 +51,7 @@ spec = Hspec.describe "Monadoc.Type.Route" $ do
     Route.render Route.Favicon `Hspec.shouldBe` (["favicon.ico"], [])
     Route.render Route.HealthCheck `Hspec.shouldBe` (["health-check"], [])
     Route.render Route.Manifest `Hspec.shouldBe` (["static", "monadoc.webmanifest"], [])
+    Route.render (Route.Module packageName reversion componentId moduleName) `Hspec.shouldBe` (["package", "pkg", "version", "1.2.3+4", "component", "exe:bin", "module", "Ex.Mod"], [])
     Route.render (Route.Package packageName) `Hspec.shouldBe` (["package", "pkg"], [])
     Route.render Route.Robots `Hspec.shouldBe` (["robots.txt"], [])
     Route.render Route.Script `Hspec.shouldBe` (["static", "monadoc.js"], [])

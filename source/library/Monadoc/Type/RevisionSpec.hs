@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.RevisionSpec where
 
 import qualified Database.SQLite.Simple as Sql

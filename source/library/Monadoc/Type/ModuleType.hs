@@ -1,7 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.ModuleType where
 
 import qualified Database.SQLite.Simple.FromField as Sql

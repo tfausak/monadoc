@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.ConfigSpec where
 
 import qualified Data.Bifunctor as Bifunctor

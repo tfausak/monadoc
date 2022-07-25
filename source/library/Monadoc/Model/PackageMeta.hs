@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Model.PackageMeta where
 
 import qualified Data.Text as Text

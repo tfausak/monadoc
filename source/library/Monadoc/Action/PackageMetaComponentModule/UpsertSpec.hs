@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Action.PackageMetaComponentModule.UpsertSpec where
 
 import qualified Control.Monad.IO.Class as IO

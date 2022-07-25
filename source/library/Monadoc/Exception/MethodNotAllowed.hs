@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Exception.MethodNotAllowed where
 
 import qualified Control.Monad.Catch as Exception

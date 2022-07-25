@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Middleware.LogResponses where
 
 import qualified Data.Text.Encoding as Text

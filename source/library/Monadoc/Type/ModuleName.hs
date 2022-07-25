@@ -1,10 +1,7 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.ModuleName where
 
 import qualified Data.List as List
+import qualified Data.Text as Text
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Distribution.ModuleName as Cabal
@@ -26,8 +23,14 @@ instance Witch.From ModuleName Cabal.ModuleName
 instance Witch.TryFrom String ModuleName where
   tryFrom = Witch.eitherTryFrom $ fmap (Witch.from @Cabal.ModuleName) . Cabal.tryParsec
 
+instance Witch.TryFrom Text.Text ModuleName where
+  tryFrom = Witch.eitherTryFrom $ Witch.tryFrom . Witch.into @String
+
 instance Witch.From ModuleName String where
   from = Cabal.prettyShow . Witch.into @Cabal.ModuleName
+
+instance Witch.From ModuleName Text.Text where
+  from = Witch.via @String
 
 instance Sql.FromField ModuleName where
   fromField field = do

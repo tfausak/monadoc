@@ -14,6 +14,7 @@ import qualified Monadoc.Handler.Favicon.Get as Favicon.Get
 import qualified Monadoc.Handler.HealthCheck.Get as HealthCheck.Get
 import qualified Monadoc.Handler.Home.Get as Home.Get
 import qualified Monadoc.Handler.Manifest.Get as Manifest.Get
+import qualified Monadoc.Handler.Module.Get as Module.Get
 import qualified Monadoc.Handler.Package.Get as Package.Get
 import qualified Monadoc.Handler.Proxy.Get as Proxy.Get
 import qualified Monadoc.Handler.Robots.Get as Robots.Get
@@ -56,6 +57,7 @@ getHandler context method route = case route of
   Route.HealthCheck -> resource method route $ Map.singleton Http.GET HealthCheck.Get.handler
   Route.Home -> resource method route $ Map.singleton Http.GET Home.Get.handler
   Route.Manifest -> resource method route $ Map.singleton Http.GET Manifest.Get.handler
+  Route.Module p v c m -> resource method route . Map.singleton Http.GET $ Module.Get.handler p v c m
   Route.Package p -> resource method route . Map.singleton Http.GET $ Package.Get.handler p
   Route.Proxy h u -> resource method route . Map.singleton Http.GET $ Proxy.Get.handler context h u
   Route.Robots -> resource method route $ Map.singleton Http.GET Robots.Get.handler

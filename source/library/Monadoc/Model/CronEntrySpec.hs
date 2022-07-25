@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Model.CronEntrySpec where
 
 import qualified Data.UUID as Uuid

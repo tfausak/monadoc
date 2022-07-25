@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.PortSpec where
 
 import qualified Monadoc.Test as Test

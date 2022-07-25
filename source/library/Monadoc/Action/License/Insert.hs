@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.License.Insert where
 
 import qualified Monadoc.Action.App.Sql as App.Sql

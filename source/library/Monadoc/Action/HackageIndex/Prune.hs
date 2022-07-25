@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.HackageIndex.Prune where
 
 import qualified Control.Monad as Monad

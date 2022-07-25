@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Action.Blob.UpsertSpec where
 
 import qualified Control.Monad.IO.Class as IO

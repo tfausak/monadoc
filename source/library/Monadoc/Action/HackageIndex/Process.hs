@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Action.HackageIndex.Process where
 
 import qualified Codec.Archive.Tar as Tar

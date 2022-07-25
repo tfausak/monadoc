@@ -1,6 +1,3 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.Search where
 
 import qualified Data.ByteString as ByteString

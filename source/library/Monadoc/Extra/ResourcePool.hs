@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-
 module Monadoc.Extra.ResourcePool where
 
 import qualified Control.Monad.Trans.Control as Control

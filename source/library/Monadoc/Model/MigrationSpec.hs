@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Model.MigrationSpec where
 
 import qualified Database.SQLite.Simple as Sql

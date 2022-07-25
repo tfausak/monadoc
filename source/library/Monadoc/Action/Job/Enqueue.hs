@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.Job.Enqueue where
 
 import qualified Monadoc.Action.App.Sql as App.Sql

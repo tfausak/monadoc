@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.Database.Initialize where
 
 import qualified Formatting as F

@@ -1,6 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Extra.Read where
 
 import qualified Monadoc.Extra.Maybe as Maybe

@@ -1,11 +1,9 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.CronEntry.UpdateSpec where
 
 import qualified Control.Monad.IO.Class as IO
+import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
 import qualified Monadoc.Action.CronEntry.Update as CronEntry.Update
-import qualified Monadoc.Query.CronEntry as CronEntry
 import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Model as Model
 import qualified Test.Hspec as Hspec
@@ -21,8 +19,8 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Update" $ do
       x <- Test.arbitrary
       CronEntry.Insert.run x
     CronEntry.Update.run cronEntry
-    result <- CronEntry.selectByKey $ Model.key cronEntry
-    IO.liftIO $ result `Hspec.shouldBe` Just cronEntry
+    result <- App.Sql.query "select * from cronEntry where key = ?" [Model.key cronEntry]
+    IO.liftIO $ result `Hspec.shouldBe` [cronEntry]
 
   Hspec.it "updates a cron entry" . Test.run $ do
     cronEntry1 <- do
@@ -30,5 +28,5 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Update" $ do
       CronEntry.Insert.run x
     cronEntry2 <- Test.arbitraryWith $ \x -> x {Model.key = Model.key cronEntry1}
     CronEntry.Update.run cronEntry2
-    result <- CronEntry.selectByKey $ Model.key cronEntry2
-    IO.liftIO $ result `Hspec.shouldBe` Just cronEntry2
+    result <- App.Sql.query "select * from cronEntry where key = ?" [Model.key cronEntry2]
+    IO.liftIO $ result `Hspec.shouldBe` [cronEntry2]

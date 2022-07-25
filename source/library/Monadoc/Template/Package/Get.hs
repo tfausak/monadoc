@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeOperators #-}
-
 module Monadoc.Template.Package.Get where
 
 import qualified Control.Monad as Monad

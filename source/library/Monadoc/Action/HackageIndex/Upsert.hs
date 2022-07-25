@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.HackageIndex.Upsert where
 
 import qualified Monadoc.Action.App.Log as App.Log

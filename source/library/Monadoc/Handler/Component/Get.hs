@@ -1,18 +1,11 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Handler.Component.Get where
 
 import qualified Control.Monad.Trans.Reader as Reader
+import qualified Data.Maybe as Maybe
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Handler.Common as Common
-import qualified Monadoc.Query.Component as Component
-import qualified Monadoc.Query.Package as Package
-import qualified Monadoc.Query.PackageMeta as PackageMeta
-import qualified Monadoc.Query.PackageMetaComponent as PackageMetaComponent
-import qualified Monadoc.Query.Upload as Upload
-import qualified Monadoc.Query.Version as Version
 import qualified Monadoc.Template.Component.Get as Template
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.ComponentId as ComponentId
@@ -31,33 +24,40 @@ handler ::
   Handler.Handler
 handler packageName reversion componentId _ respond = do
   package <- do
-    maybePackage <- Package.selectByName packageName
-    maybe (Traced.throw NotFound.NotFound) pure maybePackage
+    packages <- App.Sql.query "select * from package where name = ? limit 1" [packageName]
+    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe packages
   version <- do
-    maybeVersion <- Version.selectByNumber $ Reversion.version reversion
-    maybe (Traced.throw NotFound.NotFound) pure maybeVersion
+    versions <- App.Sql.query "select * from version where number = ? limit 1" [Reversion.version reversion]
+    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe versions
   upload <- do
-    maybeUpload <-
-      Upload.selectByPackageAndVersionAndRevision
-        (Model.key package)
-        (Model.key version)
-        (Reversion.revision reversion)
-    maybe (Traced.throw NotFound.NotFound) pure maybeUpload
+    uploads <-
+      App.Sql.query
+        "select * \
+        \ from upload \
+        \ where package = ? \
+        \ and version = ? \
+        \ and revision = ? \
+        \ limit 1"
+        (Model.key package, Model.key version, Reversion.revision reversion)
+    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe uploads
   packageMeta <- do
-    maybePackageMeta <- PackageMeta.selectByUpload $ Model.key upload
-    maybe (Traced.throw NotFound.NotFound) pure maybePackageMeta
+    packageMetas <- App.Sql.query "select * from packageMeta where upload = ? limit 1" [Model.key upload]
+    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe packageMetas
   component <- do
-    maybeComponent <-
-      Component.selectByTypeAndName
-        (ComponentId.type_ componentId)
-        (ComponentId.name componentId)
-    maybe (Traced.throw NotFound.NotFound) pure maybeComponent
+    components <- App.Sql.query "select * from component where type = ? and name = ?" (ComponentId.type_ componentId, ComponentId.name componentId)
+    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe components
   packageMetaComponent <- do
-    maybePackageMetaComponent <-
-      PackageMetaComponent.selectByPackageMetaAndComponent
-        (Model.key packageMeta)
-        (Model.key component)
-    maybe (Traced.throw NotFound.NotFound) pure maybePackageMetaComponent
+    packageMetaComponents <-
+      App.Sql.query
+        "select * \
+        \ from packageMetaComponent \
+        \ where packageMeta = ? \
+        \ and component = ? \
+        \ limit 1"
+        ( Model.key packageMeta,
+          Model.key component
+        )
+    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe packageMetaComponents
   packageMetaComponentModules <-
     App.Sql.query
       "select * \

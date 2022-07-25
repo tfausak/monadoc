@@ -1,6 +1,3 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.Schedule where
 
 import qualified Data.Bifunctor as Bifunctor

@@ -1,6 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-
 module Monadoc.Type.Severity where
 
 import qualified Witch

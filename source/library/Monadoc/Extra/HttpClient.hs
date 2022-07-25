@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Extra.HttpClient where
 
 import qualified Data.ByteString as ByteString

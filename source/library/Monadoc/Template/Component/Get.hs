@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeOperators #-}
-
 module Monadoc.Template.Component.Get where
 
 import qualified Control.Monad as Monad
@@ -59,5 +56,7 @@ render context breadcrumbs package version upload _ component _ modules = do
     Html.h2_ $ Html.toHtml componentId
     Html.h3_ "Modules"
     let moduleNames = fmap (\(_ Sql.:. m) -> Module.name $ Model.value m) modules
-    Html.ul_ . Monad.forM_ (List.sort moduleNames) $ \mn -> do
-      Html.li_ $ Html.toHtml mn
+    Html.ul_ . Monad.forM_ (List.sort moduleNames) $ \moduleName -> do
+      Html.li_
+        . Html.a_ [Html.href_ . Common.route context $ Route.Module packageName reversion componentId moduleName]
+        $ Html.toHtml moduleName

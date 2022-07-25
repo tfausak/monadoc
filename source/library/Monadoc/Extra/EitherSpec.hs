@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Extra.EitherSpec where
 
 import qualified Monadoc.Exception.Sick as Sick

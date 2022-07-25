@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.Migration.Migrate where
 
 import qualified Control.Monad as Monad
@@ -10,7 +8,6 @@ import qualified Monadoc.Action.Migration.Insert as Migration.Insert
 import qualified Monadoc.Exception.Mismatch as Mismatch
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Model.Migration as Migration
-import qualified Monadoc.Query.Migration as Migration
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Model as Model
 import qualified Witch
@@ -21,13 +18,13 @@ run ::
 run migration = do
   let createdAt = Migration.createdAt migration
       query = Migration.query migration
-  maybeModel <- Migration.selectByCreatedAt createdAt
-  case maybeModel of
-    Nothing -> do
+  models <- App.Sql.query "select * from migration where createdAt = ? limit 1" [createdAt]
+  case models of
+    [] -> do
       App.Log.debug $ F.sformat ("running migration: " F.% F.stext) (Witch.from createdAt)
       App.Sql.execute_ query
       Migration.Insert.run migration
-    Just model -> do
+    model : _ -> do
       let oldQuery = Migration.query $ Model.value model
       Monad.when (oldQuery /= query) $
         Traced.throw

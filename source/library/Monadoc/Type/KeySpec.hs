@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.KeySpec where
 
 import qualified Database.SQLite.Simple as Sql

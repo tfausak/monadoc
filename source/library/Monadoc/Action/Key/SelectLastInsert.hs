@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.Key.SelectLastInsert where
 
 import qualified Database.SQLite.Simple as Sql

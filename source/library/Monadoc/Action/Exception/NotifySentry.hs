@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Action.Exception.NotifySentry where
 
 import qualified Control.Monad as Monad

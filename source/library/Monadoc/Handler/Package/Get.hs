@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Handler.Package.Get where
 
 import qualified Control.Monad.Trans.Reader as Reader
@@ -11,7 +8,6 @@ import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Model.Upload as Upload
-import qualified Monadoc.Query.Package as Package
 import qualified Monadoc.Template.Package.Get as Template
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.Handler as Handler
@@ -26,10 +22,10 @@ handler :: PackageName.PackageName -> Handler.Handler
 handler packageName _ respond = do
   context <- Reader.ask
   package <- do
-    maybePackage <- Package.selectByName packageName
-    case maybePackage of
-      Nothing -> Traced.throw NotFound.NotFound
-      Just row -> pure row
+    packages <- App.Sql.query "select * from package where name = ? limit 1" [packageName]
+    case packages of
+      [] -> Traced.throw NotFound.NotFound
+      row : _ -> pure row
   rows <-
     App.Sql.query
       "select * \

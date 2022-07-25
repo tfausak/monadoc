@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.7.24
+version: 0.2022.7.25
 
 build-type: Simple
 category: Documentation
@@ -100,6 +100,13 @@ library
     , warp ^>= 3.3.21
     , witch ^>= 1.0.0
     , zlib ^>= 0.6.3
+  default-extensions:
+    FlexibleContexts
+    FlexibleInstances
+    MultiParamTypeClasses
+    OverloadedStrings
+    TypeApplications
+    TypeOperators
   exposed-modules:
     Monadoc
     Monadoc.Action.App.Log
@@ -229,6 +236,7 @@ library
     Monadoc.Handler.HealthCheck.Get
     Monadoc.Handler.Home.Get
     Monadoc.Handler.Manifest.Get
+    Monadoc.Handler.Module.Get
     Monadoc.Handler.Package.Get
     Monadoc.Handler.Proxy.Get
     Monadoc.Handler.Robots.Get
@@ -278,40 +286,13 @@ library
     Monadoc.Model.UploadSpec
     Monadoc.Model.Version
     Monadoc.Model.VersionSpec
-    Monadoc.Query.Blob
-    Monadoc.Query.BlobSpec
-    Monadoc.Query.Component
-    Monadoc.Query.ComponentSpec
-    Monadoc.Query.CronEntry
-    Monadoc.Query.CronEntrySpec
-    Monadoc.Query.HackageUser
-    Monadoc.Query.HackageUserSpec
-    Monadoc.Query.Job
-    Monadoc.Query.License
-    Monadoc.Query.LicenseSpec
-    Monadoc.Query.Migration
-    Monadoc.Query.Module
-    Monadoc.Query.ModuleSpec
-    Monadoc.Query.Package
-    Monadoc.Query.PackageMeta
-    Monadoc.Query.PackageMetaComponent
-    Monadoc.Query.PackageMetaComponentModule
-    Monadoc.Query.PackageMetaComponentModuleSpec
-    Monadoc.Query.PackageMetaComponentSpec
-    Monadoc.Query.PackageMetaSpec
-    Monadoc.Query.PackageSpec
-    Monadoc.Query.Range
-    Monadoc.Query.RangeSpec
-    Monadoc.Query.Upload
-    Monadoc.Query.UploadSpec
-    Monadoc.Query.Version
-    Monadoc.Query.VersionSpec
     Monadoc.Server.Application
     Monadoc.Server.Main
     Monadoc.Server.Middleware
     Monadoc.Template.Common
     Monadoc.Template.Component.Get
     Monadoc.Template.Home.Get
+    Monadoc.Template.Module.Get
     Monadoc.Template.Package.Get
     Monadoc.Template.Search.Get
     Monadoc.Template.User.Get

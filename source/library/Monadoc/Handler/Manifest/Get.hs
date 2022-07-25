@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Handler.Manifest.Get where
 
 import qualified Control.Monad.Trans.Reader as Reader

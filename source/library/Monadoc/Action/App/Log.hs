@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.App.Log where
 
 import qualified Control.Monad as Monad

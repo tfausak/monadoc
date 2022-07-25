@@ -55,19 +55,6 @@ import qualified Monadoc.Model.PreferenceSpec
 import qualified Monadoc.Model.RangeSpec
 import qualified Monadoc.Model.UploadSpec
 import qualified Monadoc.Model.VersionSpec
-import qualified Monadoc.Query.BlobSpec
-import qualified Monadoc.Query.ComponentSpec
-import qualified Monadoc.Query.CronEntrySpec
-import qualified Monadoc.Query.HackageUserSpec
-import qualified Monadoc.Query.LicenseSpec
-import qualified Monadoc.Query.ModuleSpec
-import qualified Monadoc.Query.PackageMetaComponentModuleSpec
-import qualified Monadoc.Query.PackageMetaComponentSpec
-import qualified Monadoc.Query.PackageMetaSpec
-import qualified Monadoc.Query.PackageSpec
-import qualified Monadoc.Query.RangeSpec
-import qualified Monadoc.Query.UploadSpec
-import qualified Monadoc.Query.VersionSpec
 import qualified Monadoc.Type.BuildTypeSpec
 import qualified Monadoc.Type.ComponentIdSpec
 import qualified Monadoc.Type.ComponentNameSpec
@@ -154,19 +141,6 @@ spec = do
   Monadoc.Model.RangeSpec.spec
   Monadoc.Model.UploadSpec.spec
   Monadoc.Model.VersionSpec.spec
-  Monadoc.Query.BlobSpec.spec
-  Monadoc.Query.ComponentSpec.spec
-  Monadoc.Query.CronEntrySpec.spec
-  Monadoc.Query.HackageUserSpec.spec
-  Monadoc.Query.LicenseSpec.spec
-  Monadoc.Query.ModuleSpec.spec
-  Monadoc.Query.PackageMetaComponentModuleSpec.spec
-  Monadoc.Query.PackageMetaComponentSpec.spec
-  Monadoc.Query.PackageMetaSpec.spec
-  Monadoc.Query.PackageSpec.spec
-  Monadoc.Query.RangeSpec.spec
-  Monadoc.Query.UploadSpec.spec
-  Monadoc.Query.VersionSpec.spec
   Monadoc.Type.BuildTypeSpec.spec
   Monadoc.Type.ComponentIdSpec.spec
   Monadoc.Type.ComponentNameSpec.spec

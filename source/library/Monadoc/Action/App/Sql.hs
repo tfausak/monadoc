@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-
 module Monadoc.Action.App.Sql where
 
 import qualified Control.Monad.IO.Class as IO
@@ -20,7 +18,7 @@ withConnection callback = do
   context <- Reader.ask
   Pool.withResourceLifted (Context.pool context) callback
 
-query :: (Sql.ToRow q, Sql.FromRow r) => Query.Query -> q -> App.App [r]
+query :: (Sql.FromRow r, Sql.ToRow q) => Query.Query -> q -> App.App [r]
 query q r = withConnection $ \c -> IO.liftIO $ Sql.query c (Witch.from q) r
 
 query_ :: Sql.FromRow r => Query.Query -> App.App [r]

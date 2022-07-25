@@ -1,7 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.Route where
 
 import qualified Control.Monad as Monad
@@ -16,6 +12,7 @@ import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Type.ComponentId as ComponentId
 import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Monadoc.Type.Hash as Hash
+import qualified Monadoc.Type.ModuleName as ModuleName
 import qualified Monadoc.Type.PackageName as PackageName
 import qualified Monadoc.Type.Reversion as Reversion
 import qualified Monadoc.Type.Search as Search
@@ -31,6 +28,7 @@ data Route
   | HealthCheck
   | Home
   | Manifest
+  | Module PackageName.PackageName Reversion.Reversion ComponentId.ComponentId ModuleName.ModuleName
   | Package PackageName.PackageName
   | Proxy Hash.Hash Url.Url
   | Robots
@@ -50,6 +48,7 @@ parse path query = case path of
   ["package", p] -> Package <$> tryFrom p
   ["package", p, "version", v] -> Version <$> tryFrom p <*> tryFrom v
   ["package", p, "version", v, "component", c] -> Component <$> tryFrom p <*> tryFrom v <*> tryFrom c
+  ["package", p, "version", v, "component", c, "module", m] -> Module <$> tryFrom p <*> tryFrom v <*> tryFrom c <*> tryFrom m
   ["proxy", h, u] -> Proxy <$> tryFrom h <*> tryFrom u
   ["robots.txt"] -> pure Robots
   ["search"] -> Search <$> fromQuery query "query"
@@ -67,6 +66,7 @@ render route = case route of
   HealthCheck -> (["health-check"], [])
   Home -> ([], [])
   Manifest -> (["static", "monadoc.webmanifest"], [])
+  Module p v c m -> (["package", Witch.from p, "version", Witch.from v, "component", Witch.from c, "module", Witch.from m], [])
   Package p -> (["package", Witch.from p], [])
   Proxy h u -> (["proxy", Witch.from h, Witch.over (Uri.escapeURIString Uri.isUnescapedInURIComponent) $ Witch.from u], [])
   Robots -> (["robots.txt"], [])

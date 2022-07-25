@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Type.FlagSpec where
 
 import qualified Monadoc.Exception.InvalidOption as InvalidOption

@@ -1,7 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TypeOperators #-}
-
 module Monadoc.Template.Version.Get where
 
 import qualified Control.Monad as Monad
@@ -20,6 +16,7 @@ import qualified Monadoc.Model.Component as Component
 import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PackageMeta as PackageMeta
+import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Template.Common as Common
@@ -43,7 +40,7 @@ render ::
   HackageUser.Model ->
   Maybe (Upload.Model Sql.:. Version.Model) ->
   PackageMeta.Model ->
-  [Component.Model] ->
+  [PackageMetaComponent.Model Sql.:. Component.Model] ->
   Html.Html ()
 render context breadcrumbs package version upload hackageUser maybeLatest packageMeta components = do
   let packageName = Package.name $ Model.value package
@@ -127,7 +124,7 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
       Html.dt_ "Stability"
       Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.stability $ Model.value packageMeta
     Html.h3_ "Components"
-    Html.ul_ . Monad.forM_ (sortComponents packageName components) $ \component -> Html.li_ $ do
+    Html.ul_ . Monad.forM_ (sortComponents packageName $ fmap (\(_ Sql.:. c) -> c) components) $ \component -> Html.li_ $ do
       let componentId =
             ComponentId.ComponentId
               { ComponentId.type_ = Component.type_ $ Model.value component,

@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Action.HackageUser.Upsert where
 
 import qualified Monadoc.Action.App.Sql as App.Sql

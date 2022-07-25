@@ -1,6 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Monadoc.Extra.Cabal where
 
 import qualified Control.Monad.Catch as Exception

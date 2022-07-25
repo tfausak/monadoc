@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Monadoc.Model.Migration where
 
 import qualified Data.Fixed as Fixed
