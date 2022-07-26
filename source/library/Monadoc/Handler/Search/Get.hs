@@ -37,6 +37,32 @@ handler query _ respond = do
           \ order by name collate nocase asc \
           \ limit 64"
           [like query]
+  modules <-
+    if Search.isBlank query
+      then pure []
+      else
+        App.Sql.query
+          "select package.*, version.*, upload.*, component.*, module.* \
+          \ from module \
+          \ inner join packageMetaComponentModule \
+          \ on packageMetaComponentModule.module = module.key \
+          \ inner join packageMetaComponent \
+          \ on packageMetaComponent.key = packageMetaComponentModule.packageMetaComponent \
+          \ inner join packageMeta \
+          \ on packageMeta.key = packageMetaComponent.packageMeta \
+          \ inner join component \
+          \ on component.key = packageMetaComponent.component \
+          \ inner join upload \
+          \ on upload.key = packageMeta.upload \
+          \ inner join package \
+          \ on package.key = upload.package \
+          \ inner join version \
+          \ on version.key = upload.version \
+          \ where module.name like ? escape '\\' \
+          \ and upload.isLatest = true \
+          \ order by module.name collate nocase asc \
+          \ limit 64"
+          [like query]
   let breadcrumbs =
         Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home}
           : if Search.isBlank query
@@ -45,7 +71,7 @@ handler query _ respond = do
               [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Search", Breadcrumb.route = Just $ Route.Search Search.empty},
                 Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text query, Breadcrumb.route = Nothing}
               ]
-  respond . Common.htmlResponse Http.ok200 [] $ Template.render context breadcrumbs query packages hackageUsers
+  respond . Common.htmlResponse Http.ok200 [] $ Template.render context breadcrumbs query packages hackageUsers modules
 
 like :: Search.Search -> Text.Text
 like = Text.cons '%' . flip Text.snoc '%' . escape . Witch.into @Text.Text

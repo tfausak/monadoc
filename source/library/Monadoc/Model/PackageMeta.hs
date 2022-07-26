@@ -38,8 +38,8 @@ data PackageMeta = PackageMeta
     -- | The bug reports field is most often empty. It is completely free form.
     -- However when it's not empty, it's usually one of these forms:
     --
-    -- - URL: @"https://github.com/hawkins/lab/issues"@. This is often GitHub,
-    --   but not exclusively.
+    -- - URL: @"https://github.example/hawkins/lab/issues"@. This is often
+    --   GitHub, but not exclusively.
     -- - Email: @"mailto:brenner@example"@. May or may not include the
     --   @mailto:@ prefix.
     bugReports :: Maybe Text.Text,

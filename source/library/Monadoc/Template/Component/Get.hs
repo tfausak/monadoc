@@ -46,17 +46,13 @@ render context breadcrumbs package version upload _ component _ modules = do
             ComponentId.name = Component.name $ Model.value component
           }
       route = Route.Component packageName reversion componentId
-      title =
-        F.sformat
-          ("Package " F.% F.stext F.% " version " F.% F.stext F.% " component " F.% F.stext F.% " :: Monadoc")
-          (Witch.from packageName)
-          (Witch.from reversion)
-          (Witch.from componentId)
+      title = F.sformat ("Component " F.% F.stext F.% " :: Monadoc") (Witch.from componentId)
   Common.base context route breadcrumbs title $ do
     Html.h2_ $ Html.toHtml componentId
-    Html.h3_ "Modules"
     let moduleNames = fmap (\(_ Sql.:. m) -> Module.name $ Model.value m) modules
-    Html.ul_ . Monad.forM_ (List.sort moduleNames) $ \moduleName -> do
-      Html.li_
-        . Html.a_ [Html.href_ . Common.route context $ Route.Module packageName reversion componentId moduleName]
-        $ Html.toHtml moduleName
+    Monad.when (not $ null moduleNames) $ do
+      Html.h3_ "Modules"
+      Html.ul_ . Monad.forM_ (List.sort moduleNames) $ \moduleName -> do
+        Html.li_
+          . Html.a_ [Html.href_ . Common.route context $ Route.Module packageName reversion componentId moduleName]
+          $ Html.toHtml moduleName
