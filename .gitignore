@@ -3,6 +3,3 @@
 /cabal.project.local*
 /dist-newstyle/
 /monadoc.sqlite*
-
-/docker/*
-!/docker/Dockerfile

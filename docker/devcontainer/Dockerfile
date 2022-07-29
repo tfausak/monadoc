@@ -10,4 +10,5 @@ RUN \
   echo "$USER_NAME ALL=(ALL) NOPASSWD: ALL" > "/etc/sudoers.d/$USER_NAME"
 USER "$USER_NAME"
 WORKDIR "/home/$USER_NAME"
+RUN mkdir --parents ~/.cabal/bin
 ENV PATH="/home/$USER_NAME/.cabal/bin:$PATH"

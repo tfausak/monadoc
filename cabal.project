@@ -4,6 +4,10 @@ allow-newer:
   -- https://github.com/MichaelXavier/cron/pull/45
   , cron:text
 
+package text
+  -- https://github.com/haskell/text/issues/461
+  flags: -simdutf
+
 -- https://github.com/haskell/attoparsec/pull/210
 source-repository-package
   location: https://github.com/tfausak/attoparsec

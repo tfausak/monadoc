@@ -1,9 +1,0 @@
-version: '3.7'
-services:
-  monadoc:
-    build: .
-    command: sh -c 'while sleep 1; do :; done'
-    init: true
-    volumes:
-      - ..:/workspaces/monadoc
-    working_dir: /workspaces/monadoc

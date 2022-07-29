@@ -118,11 +118,11 @@ jobs:
           name: monadoc-${{ github.sha }}
           path: artifact
 
-      - run: mv artifact/data docker
+      - run: mv artifact/data docker/monadoc
 
       - run: chmod +x artifact/ubuntu/monadoc
 
-      - run: mv artifact/ubuntu/monadoc docker
+      - run: mv artifact/ubuntu/monadoc docker/monadoc
 
       - id: meta
         uses: docker/metadata-action@v4
@@ -142,7 +142,7 @@ jobs:
       - uses: docker/build-push-action@v3
         with:
           build-args: MONADOC_SHA=${{ github.sha }}
-          context: docker
+          context: docker/monadoc
           labels: ${{ steps.meta.outputs.labels }}
           push: ${{ github.event_name != 'schedule' }}
           tags: ${{ steps.meta.outputs.tags }}
