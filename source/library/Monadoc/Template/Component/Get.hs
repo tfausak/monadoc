@@ -6,18 +6,22 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Formatting as F
 import qualified Lucid as Html
 import qualified Monadoc.Model.Component as Component
+import qualified Monadoc.Model.Dependency as Dependency
 import qualified Monadoc.Model.Module as Module
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PackageMeta as PackageMeta
 import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Model.PackageMetaComponentModule as PackageMetaComponentModule
+import qualified Monadoc.Model.Range as Range
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Template.Common as Common
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.ComponentId as ComponentId
+import qualified Monadoc.Type.ComponentName as ComponentName
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
+import qualified Monadoc.Type.PackageName as PackageName
 import qualified Monadoc.Type.Reversion as Reversion
 import qualified Monadoc.Type.Route as Route
 import qualified Witch
@@ -32,8 +36,9 @@ render ::
   Component.Model ->
   PackageMetaComponent.Model ->
   [PackageMetaComponentModule.Model Sql.:. Module.Model] ->
+  [Dependency.Model Sql.:. Package.Model Sql.:. Component.Model Sql.:. Range.Model] ->
   Html.Html ()
-render context breadcrumbs package version upload _ component _ modules = do
+render context breadcrumbs package version upload _ component _ modules dependencies = do
   let packageName = Package.name $ Model.value package
       reversion =
         Reversion.Reversion
@@ -56,3 +61,28 @@ render context breadcrumbs package version upload _ component _ modules = do
         Html.li_
           . Html.a_ [Html.href_ . Common.route context $ Route.Module packageName reversion componentId moduleName]
           $ Html.toHtml moduleName
+    Html.h3_ "Dependencies"
+    if null dependencies
+      then Html.p_ "None."
+      else Html.ul_ . Monad.forM_ (List.sortOn packageAndComponent dependencies) $ \(_ Sql.:. p Sql.:. c Sql.:. r) -> Html.li_ $ do
+        let pn = Package.name $ Model.value p
+        Html.a_
+          [Html.href_ . Common.route context $ Route.Package pn]
+          $ Html.toHtml pn
+        " "
+        let ci =
+              ComponentId.ComponentId
+                { ComponentId.type_ = Component.type_ $ Model.value c,
+                  ComponentId.name = Component.name $ Model.value c
+                }
+        Html.toHtml ci
+        " "
+        Html.toHtml . Range.constraint $ Model.value r
+
+packageAndComponent ::
+  Dependency.Model Sql.:. Package.Model Sql.:. Component.Model Sql.:. Range.Model ->
+  (PackageName.PackageName, ComponentName.ComponentName)
+packageAndComponent (_ Sql.:. package Sql.:. component Sql.:. _) =
+  ( Package.name $ Model.value package,
+    Component.name $ Model.value component
+  )

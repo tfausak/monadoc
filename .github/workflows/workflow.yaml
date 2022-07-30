@@ -8,7 +8,7 @@ on:
 jobs:
 
   cabal:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     name: Cabal
     steps:
       - uses: actions/checkout@v3
@@ -16,18 +16,19 @@ jobs:
       - run: cabal check
 
   hlint:
-    # This uses ubuntu-20.04 rather than ubuntu-22.04 because libtinfo.so.5 is
-    # missing on ubuntu-22.04.
-    # https://github.com/tfausak/monadoc/runs/6435591724?check_suite_focus=true#step:3:9
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: HLint
     steps:
       - uses: actions/checkout@v3
 
-      - uses: tfausak/hlint-action@v2
+      - uses: haskell/actions/hlint-setup@v2
+
+      - uses: haskell/actions/hlint-run@v2
+        with:
+          fail-on: status
 
   ormolu:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     name: Ormolu
     steps:
       - uses: actions/checkout@v3
@@ -39,13 +40,10 @@ jobs:
       matrix:
         include:
           - platform: macos
-            version: 12
           - platform: ubuntu
-            version: 22.04
           - platform: windows
-            version: 2022
             extension: .exe
-    runs-on: ${{ matrix.platform }}-${{ matrix.version }}
+    runs-on: ${{ matrix.platform }}-latest
     name: Build on ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v3
@@ -104,11 +102,7 @@ jobs:
 
   docker:
     needs: build
-    # This uses ubuntu-20.04 rather than ubuntu-22.04 because the Docker daemon
-    # does not seem to be running on ubuntu-22.04.
-    # https://github.com/tfausak/monadoc/runs/6435666240?check_suite_focus=true#step:9:29
-    # https://github.com/actions/virtual-environments/issues/5490#issuecomment-1118319996
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Docker
     steps:
       - uses: actions/checkout@v3
@@ -118,11 +112,9 @@ jobs:
           name: monadoc-${{ github.sha }}
           path: artifact
 
-      - run: mv artifact/data docker/monadoc
+      - run: mv artifact/data artifact/ubuntu/monadoc docker
 
-      - run: chmod +x artifact/ubuntu/monadoc
-
-      - run: mv artifact/ubuntu/monadoc docker/monadoc
+      - run: chmod +x docker/monadoc
 
       - id: meta
         uses: docker/metadata-action@v4
@@ -142,14 +134,14 @@ jobs:
       - uses: docker/build-push-action@v3
         with:
           build-args: MONADOC_SHA=${{ github.sha }}
-          context: docker/monadoc
+          context: docker
           labels: ${{ steps.meta.outputs.labels }}
           push: ${{ github.event_name != 'schedule' }}
           tags: ${{ steps.meta.outputs.tags }}
 
   deploy:
     needs: docker
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     name: Deploy
     if: github.event_name != 'schedule' && github.ref == 'refs/heads/main'
     steps:

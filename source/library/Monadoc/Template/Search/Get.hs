@@ -77,8 +77,8 @@ render context breadcrumbs query packages hackageUsers modules = do
               moduleName = Module.name $ Model.value module_
           Html.li_ $ do
             Html.a_ [Html.href_ . Common.route context $ Route.Module packageName reversion componentId moduleName] $ Html.toHtml moduleName
-            " from "
-            Html.toHtml packageName
+            " in "
+            Html.toHtml componentId
       Html.h3_ "Users"
       if null hackageUsers
         then Html.p_ "None found."

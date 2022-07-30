@@ -11,9 +11,9 @@
     "editor.rulers": [
       80
     ],
-    "purple-yolk.brittany.command": "docker/devcontainer/hackage.sh ormolu --mode inplace",
+    "purple-yolk.brittany.command": ".devcontainer/hackage.sh ormolu --mode inplace",
     "purple-yolk.ghci.command": "cabal repl --repl-options -ddump-json",
-    "purple-yolk.hlint.command": "docker/devcontainer/hackage.sh hlint --json --no-exit-code",
+    "purple-yolk.hlint.command": ".devcontainer/hackage.sh hlint --json --no-exit-code",
     "purple-yolk.hlint.onSave": true
   },
   "workspaceFolder": "/workspaces/monadoc"

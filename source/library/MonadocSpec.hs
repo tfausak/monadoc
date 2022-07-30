@@ -12,6 +12,7 @@ import qualified Monadoc.Action.CronEntry.UpdateSpec
 import qualified Monadoc.Action.CronEntry.UpsertSpec
 import qualified Monadoc.Action.Database.InitializeSpec
 import qualified Monadoc.Action.Database.VacuumSpec
+import qualified Monadoc.Action.Dependency.UpsertSpec
 import qualified Monadoc.Action.HackageUser.UpsertSpec
 import qualified Monadoc.Action.Job.EnqueueSpec
 import qualified Monadoc.Action.Key.SelectLastInsertSpec
@@ -41,6 +42,7 @@ import qualified Monadoc.Extra.TimeSpec
 import qualified Monadoc.Model.BlobSpec
 import qualified Monadoc.Model.ComponentSpec
 import qualified Monadoc.Model.CronEntrySpec
+import qualified Monadoc.Model.DependencySpec
 import qualified Monadoc.Model.HackageIndexSpec
 import qualified Monadoc.Model.HackageUserSpec
 import qualified Monadoc.Model.JobSpec
@@ -98,6 +100,7 @@ spec = do
   Monadoc.Action.CronEntry.UpsertSpec.spec
   Monadoc.Action.Database.InitializeSpec.spec
   Monadoc.Action.Database.VacuumSpec.spec
+  Monadoc.Action.Dependency.UpsertSpec.spec
   Monadoc.Action.HackageUser.UpsertSpec.spec
   Monadoc.Action.Job.EnqueueSpec.spec
   Monadoc.Action.Key.SelectLastInsertSpec.spec
@@ -127,6 +130,7 @@ spec = do
   Monadoc.Model.BlobSpec.spec
   Monadoc.Model.ComponentSpec.spec
   Monadoc.Model.CronEntrySpec.spec
+  Monadoc.Model.DependencySpec.spec
   Monadoc.Model.HackageIndexSpec.spec
   Monadoc.Model.HackageUserSpec.spec
   Monadoc.Model.JobSpec.spec

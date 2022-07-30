@@ -14,13 +14,17 @@ import qualified Distribution.PackageDescription.Parsec as Cabal
 import qualified Distribution.Types.Component as Cabal
 import qualified Distribution.Types.Version as Cabal
 import qualified Distribution.Utils.ShortText as Cabal
+import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Action.Component.Upsert as Component.Upsert
+import qualified Monadoc.Action.Dependency.Upsert as Dependency.Upsert
 import qualified Monadoc.Action.License.Upsert as License.Upsert
 import qualified Monadoc.Action.Module.Upsert as Module.Upsert
+import qualified Monadoc.Action.Package.Upsert as Package.Upsert
 import qualified Monadoc.Action.PackageMeta.Upsert as PackageMeta.Upsert
 import qualified Monadoc.Action.PackageMetaComponent.Upsert as PackageMetaComponent.Upsert
 import qualified Monadoc.Action.PackageMetaComponentModule.Upsert as PackageMetaComponentModule.Upsert
+import qualified Monadoc.Action.Range.Upsert as Range.Upsert
 import qualified Monadoc.Action.Version.Upsert as Version.Upsert
 import qualified Monadoc.Exception.InvalidGenericPackageDescription as InvalidGenericPackageDescription
 import qualified Monadoc.Exception.Mismatch as Mismatch
@@ -28,12 +32,14 @@ import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Extra.SqliteSimple as Sql
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.Component as Component
+import qualified Monadoc.Model.Dependency as Dependency
 import qualified Monadoc.Model.License as License
 import qualified Monadoc.Model.Module as Module
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PackageMeta as PackageMeta
 import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Model.PackageMetaComponentModule as PackageMetaComponentModule
+import qualified Monadoc.Model.Range as Range
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.App as App
@@ -41,6 +47,7 @@ import qualified Monadoc.Type.ComponentType as ComponentType
 import qualified Monadoc.Type.Hash as Hash
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.ModuleType as ModuleType
+import qualified Monadoc.Type.PackageName as PackageName
 import qualified Witch
 
 run :: App.App ()
@@ -62,6 +69,7 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
   packageMetas <- App.Sql.query "select * from packageMeta where upload = ? limit 1" [Model.key upload]
   let hash = hashBlob blob
   Monad.when (fmap hashPackageMeta packageMetas /= [hash]) $ do
+    App.Log.debug . Witch.from . Package.name $ Model.value package
     let bs = Blob.contents $ Model.value blob
     gpd <- case Cabal.parseGenericPackageDescriptionMaybe bs of
       Nothing -> Traced.throw $ InvalidGenericPackageDescription.InvalidGenericPackageDescription bs
@@ -99,7 +107,7 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
             PackageMeta.synopsis = shortTextToMaybeText $ Cabal.synopsis pd
           }
 
-    Monad.forM_ (toComponents gpd) $ \(ucn, (c, _ds)) -> do
+    Monad.forM_ (toComponents gpd) $ \(ucn, (c, ds)) -> do
       component <- Component.Upsert.run $ case c of
         Cabal.CBench _ -> Component.Component ComponentType.Benchmark $ Witch.from ucn
         Cabal.CExe _ -> Component.Component ComponentType.Executable $ Witch.from ucn
@@ -114,7 +122,35 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
               PackageMetaComponent.component = Model.key component
             }
 
-      -- TODO: Store dependencies.
+      Monad.forM_ ds $ \dep -> do
+        pkg <-
+          Package.Upsert.run
+            Package.Package
+              { Package.name = Witch.from $ Cabal.depPkgName dep
+              }
+        -- TODO: Merge ranges for the same package.
+        rng <-
+          Range.Upsert.run
+            Range.Range
+              { Range.constraint = Witch.from $ Cabal.depVerRange dep
+              }
+        Monad.forM_ (Cabal.depLibraries dep) $ \lib -> do
+          cmp <-
+            Component.Upsert.run
+              Component.Component
+                { Component.type_ = ComponentType.Library,
+                  Component.name = case lib of
+                    Cabal.LMainLibName -> Witch.via @PackageName.PackageName $ Cabal.depPkgName dep
+                    Cabal.LSubLibName sub -> Witch.from sub
+                }
+          Monad.void $
+            Dependency.Upsert.run
+              Dependency.Dependency
+                { Dependency.packageMetaComponent = Model.key packageMetaComponent,
+                  Dependency.package = Model.key pkg,
+                  Dependency.component = Model.key cmp,
+                  Dependency.range = Model.key rng
+                }
 
       Monad.forM_ (componentModules c) $ \(mt, mn) -> do
         module_ <- Module.Upsert.run Module.Module {Module.name = Witch.from mn}
@@ -192,7 +228,7 @@ checkPackageVersion v pd = do
         }
 
 salt :: ByteString.ByteString
-salt = "2022-07-25"
+salt = "2022-07-30a"
 
 hashBlob :: Blob.Model -> Hash.Hash
 hashBlob = Hash.new . mappend salt . Witch.from . Blob.hash . Model.value

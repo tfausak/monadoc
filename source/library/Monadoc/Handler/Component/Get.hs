@@ -66,6 +66,18 @@ handler packageName reversion componentId _ respond = do
       \ on module.key = packageMetaComponentModule.module \
       \ where packageMetaComponentModule.packageMetaComponent = ?"
       [Model.key packageMetaComponent]
+  dependencies <-
+    App.Sql.query
+      "select * \
+      \ from dependency \
+      \ inner join package \
+      \ on package.key = dependency.package \
+      \ inner join component \
+      \ on component.key = dependency.component \
+      \ inner join range \
+      \ on range.key = dependency.range \
+      \ where dependency.packageMetaComponent = ?"
+      [Model.key packageMetaComponent]
   context <- Reader.ask
   let breadcrumbs =
         [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home},
@@ -75,4 +87,4 @@ handler packageName reversion componentId _ respond = do
         ]
   respond
     . Common.htmlResponse Http.ok200 []
-    $ Template.render context breadcrumbs package version upload packageMeta component packageMetaComponent packageMetaComponentModules
+    $ Template.render context breadcrumbs package version upload packageMeta component packageMetaComponent packageMetaComponentModules dependencies

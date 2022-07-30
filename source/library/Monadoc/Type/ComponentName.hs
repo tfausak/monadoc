@@ -11,7 +11,7 @@ import qualified Witch
 
 newtype ComponentName
   = ComponentName Cabal.UnqualComponentName
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
 
 instance Witch.From Cabal.UnqualComponentName ComponentName
 

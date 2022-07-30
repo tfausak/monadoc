@@ -58,7 +58,7 @@ handler packageName reversion componentId moduleName _ respond = do
         ]
   respond
     . Common.htmlResponse Http.ok200 []
-    $ Template.render context route breadcrumbs module_
+    $ Template.render context route breadcrumbs package version module_
 
 getComponent :: ComponentType.ComponentType -> ComponentName.ComponentName -> App.App Component.Model
 getComponent componentType componentName = do
