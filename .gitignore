@@ -1,3 +1,4 @@
+/.cabal/
 /.vscode/
 /cabal.project.freeze
 /cabal.project.local*

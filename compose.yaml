@@ -1,11 +1,8 @@
 services:
   devcontainer:
-    build: .
+    build: docker/devcontainer
     command: sh -c 'while sleep 1; do :; done'
-    init: true
     volumes:
-      - ..:/workspaces/monadoc
-      - cabal:/home/haskell/.cabal
+      - .:/workspaces/monadoc
+      - ./.cabal:/root/.cabal
     working_dir: /workspaces/monadoc
-volumes:
-  cabal: null

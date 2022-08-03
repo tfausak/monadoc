@@ -67,6 +67,10 @@ jobs:
 
       - run: cabal configure --enable-optimization=2 --enable-tests --flags pedantic --jobs
 
+      - run: cat cabal.project.local
+
+      - run: cp cabal.project.local ${{ steps.artifact.outputs.directory }}
+
       - run: cabal freeze
 
       - run: cat cabal.project.freeze
@@ -80,6 +84,8 @@ jobs:
           path: ${{ steps.setup-haskell.outputs.cabal-store }}
           key: ${{ matrix.platform }}/${{ hashFiles('cabal.project.freeze') }}
           restore-keys: ${{ matrix.platform }}/
+
+      - run: cabal build --only-download
 
       - run: cabal build --only-dependencies
 
@@ -112,9 +118,9 @@ jobs:
           name: monadoc-${{ github.sha }}
           path: artifact
 
-      - run: mv artifact/data artifact/ubuntu/monadoc docker
+      - run: mv artifact/data artifact/ubuntu/monadoc docker/ghcr
 
-      - run: chmod +x docker/monadoc
+      - run: chmod +x docker/ghcr/monadoc
 
       - id: meta
         uses: docker/metadata-action@v4
@@ -134,7 +140,7 @@ jobs:
       - uses: docker/build-push-action@v3
         with:
           build-args: MONADOC_SHA=${{ github.sha }}
-          context: docker
+          context: docker/ghcr
           labels: ${{ steps.meta.outputs.labels }}
           push: ${{ github.event_name != 'schedule' }}
           tags: ${{ steps.meta.outputs.tags }}
