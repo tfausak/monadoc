@@ -53,7 +53,9 @@ run f exception = Monad.when (shouldNotify exception) $ do
                             { Patrol.Exception.stackTrace = Patrol.StackTrace.fromCallStack s
                             }
                     ],
-                Patrol.Event.release = Text.pack <$> Context.sha context,
+                Patrol.Event.release =
+                  let sha = Config.sha $ Context.config context
+                   in if Text.null sha then Nothing else Just sha,
                 Patrol.Event.request =
                   Just
                     emptyRequest

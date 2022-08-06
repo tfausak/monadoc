@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.8.4
+version: 0.2022.8.6
 
 build-type: Simple
 category: Documentation
@@ -21,6 +21,11 @@ synopsis: Worse Haskell documentation.
 source-repository head
   location: https://github.com/tfausak/monadoc
   type: git
+
+flag parallel
+  default: False
+  description: Compiles modules in parallel.
+  manual: True
 
 flag pedantic
   default: False
@@ -43,6 +48,9 @@ common library
     -Wno-prepositive-qualified-module
     -Wno-safe
     -Wno-unsafe
+
+  if flag(parallel)
+    ghc-options: -j
 
   if flag(pedantic)
     ghc-options: -Werror
@@ -113,7 +121,6 @@ library
     Monadoc.Action.App.Sql
     Monadoc.Action.Blob.Insert
     Monadoc.Action.Blob.Upsert
-    Monadoc.Action.Component.Insert
     Monadoc.Action.Component.Upsert
     Monadoc.Action.CronEntry.Delete
     Monadoc.Action.CronEntry.Enqueue
@@ -136,23 +143,15 @@ library
     Monadoc.Action.Job.Enqueue
     Monadoc.Action.Job.Perform
     Monadoc.Action.Job.Release
-    Monadoc.Action.Key.SelectLastInsert
-    Monadoc.Action.License.Insert
     Monadoc.Action.License.Upsert
     Monadoc.Action.Migration.Insert
     Monadoc.Action.Migration.Migrate
-    Monadoc.Action.Module.Insert
     Monadoc.Action.Module.Upsert
     Monadoc.Action.Package.Upsert
-    Monadoc.Action.PackageMeta.Insert
-    Monadoc.Action.PackageMeta.Update
     Monadoc.Action.PackageMeta.Upsert
-    Monadoc.Action.PackageMetaComponent.Insert
     Monadoc.Action.PackageMetaComponent.Upsert
-    Monadoc.Action.PackageMetaComponentModule.Insert
     Monadoc.Action.PackageMetaComponentModule.Upsert
     Monadoc.Action.Preference.Upsert
-    Monadoc.Action.Range.Insert
     Monadoc.Action.Range.Upsert
     Monadoc.Action.Task.Perform
     Monadoc.Action.Upload.Process
@@ -169,7 +168,7 @@ library
     Monadoc.Exception.MethodNotAllowed
     Monadoc.Exception.Mismatch
     Monadoc.Exception.MissingHeader
-    Monadoc.Exception.MissingRowid
+    Monadoc.Exception.MissingKey
     Monadoc.Exception.MissingSize
     Monadoc.Exception.NoNextMatch
     Monadoc.Exception.NotFound
@@ -286,7 +285,6 @@ library
   other-modules:
     Monadoc.Action.Blob.InsertSpec
     Monadoc.Action.Blob.UpsertSpec
-    Monadoc.Action.Component.InsertSpec
     Monadoc.Action.Component.UpsertSpec
     Monadoc.Action.CronEntry.DeleteSpec
     Monadoc.Action.CronEntry.EnqueueSpec
@@ -299,21 +297,13 @@ library
     Monadoc.Action.Dependency.UpsertSpec
     Monadoc.Action.HackageUser.UpsertSpec
     Monadoc.Action.Job.EnqueueSpec
-    Monadoc.Action.Key.SelectLastInsertSpec
-    Monadoc.Action.License.InsertSpec
     Monadoc.Action.License.UpsertSpec
-    Monadoc.Action.Module.InsertSpec
     Monadoc.Action.Module.UpsertSpec
     Monadoc.Action.Package.UpsertSpec
-    Monadoc.Action.PackageMeta.InsertSpec
-    Monadoc.Action.PackageMeta.UpdateSpec
     Monadoc.Action.PackageMeta.UpsertSpec
-    Monadoc.Action.PackageMetaComponent.InsertSpec
     Monadoc.Action.PackageMetaComponent.UpsertSpec
-    Monadoc.Action.PackageMetaComponentModule.InsertSpec
     Monadoc.Action.PackageMetaComponentModule.UpsertSpec
     Monadoc.Action.Preference.UpsertSpec
-    Monadoc.Action.Range.InsertSpec
     Monadoc.Action.Range.UpsertSpec
     Monadoc.Action.Upload.UpsertSpec
     Monadoc.Action.Version.UpsertSpec

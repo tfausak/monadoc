@@ -30,6 +30,7 @@ ENV MONADOC_SHA="$MONADOC_SHA"
 
 CMD [ "sh", "-c", "exec /usr/local/bin/monadoc \
   --base-url=$MONADOC_BASE_URL \
+  --commit-sha=$MONADOC_SHA \
   --data-directory=$MONADOC_DATA_DIRECTORY \
   --database-file=$MONADOC_DATABASE_FILE \
   --hackage-url=$MONADOC_HACKAGE_URL \

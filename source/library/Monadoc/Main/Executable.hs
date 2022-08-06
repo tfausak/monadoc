@@ -7,6 +7,7 @@ import qualified Control.Monad.Trans.Control as Control
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.Pool as Pool
 import qualified GHC.Conc as Conc
+import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Action.Database.Initialize as Database.Initialize
 import qualified Monadoc.Action.Exception.Log as Exception.Log
 import qualified Monadoc.Server.Main as Server
@@ -40,6 +41,7 @@ mainWith name arguments = do
 
 start :: App.App ()
 start = do
+  App.Log.info "starting up"
   Database.Initialize.run
   Control.control $ \runInBase ->
     Async.race_
@@ -48,5 +50,6 @@ start = do
 
 stop :: App.App ()
 stop = do
+  App.Log.info "shutting down"
   context <- Reader.ask
   IO.liftIO . Pool.destroyAllResources $ Context.pool context

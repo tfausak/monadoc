@@ -5,6 +5,7 @@ import qualified Control.Concurrent.Async as Async
 import qualified Control.Monad.IO.Class as IO
 import qualified Control.Monad.Trans.Control as Control
 import qualified Formatting as F
+import qualified GHC.Clock as Clock
 import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Action.Task.Perform as Task.Perform
 import qualified Monadoc.Model.Job as Job
@@ -22,10 +23,13 @@ run maybeJob = case maybeJob of
         ("starting " F.% Key.format F.% ": " F.% F.shown)
         (Model.key job)
         task
+    before <- IO.liftIO Clock.getMonotonicTime
     () <- Control.control $ \runInBase ->
       Async.withAsync (runInBase . Task.Perform.run . Job.task $ Model.value job) Async.wait
+    after <- IO.liftIO Clock.getMonotonicTime
     App.Log.info $
       F.sformat
-        ("finished " F.% Key.format F.% ": " F.% F.shown)
+        ("finished " F.% Key.format F.% ": " F.% F.shown F.% " in " F.% F.fixed 3)
         (Model.key job)
         task
+        (after - before)

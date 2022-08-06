@@ -2,7 +2,6 @@ module MonadocSpec where
 
 import qualified Monadoc.Action.Blob.InsertSpec
 import qualified Monadoc.Action.Blob.UpsertSpec
-import qualified Monadoc.Action.Component.InsertSpec
 import qualified Monadoc.Action.Component.UpsertSpec
 import qualified Monadoc.Action.CronEntry.DeleteSpec
 import qualified Monadoc.Action.CronEntry.EnqueueSpec
@@ -15,21 +14,13 @@ import qualified Monadoc.Action.Database.VacuumSpec
 import qualified Monadoc.Action.Dependency.UpsertSpec
 import qualified Monadoc.Action.HackageUser.UpsertSpec
 import qualified Monadoc.Action.Job.EnqueueSpec
-import qualified Monadoc.Action.Key.SelectLastInsertSpec
-import qualified Monadoc.Action.License.InsertSpec
 import qualified Monadoc.Action.License.UpsertSpec
-import qualified Monadoc.Action.Module.InsertSpec
 import qualified Monadoc.Action.Module.UpsertSpec
 import qualified Monadoc.Action.Package.UpsertSpec
-import qualified Monadoc.Action.PackageMeta.InsertSpec
-import qualified Monadoc.Action.PackageMeta.UpdateSpec
 import qualified Monadoc.Action.PackageMeta.UpsertSpec
-import qualified Monadoc.Action.PackageMetaComponent.InsertSpec
 import qualified Monadoc.Action.PackageMetaComponent.UpsertSpec
-import qualified Monadoc.Action.PackageMetaComponentModule.InsertSpec
 import qualified Monadoc.Action.PackageMetaComponentModule.UpsertSpec
 import qualified Monadoc.Action.Preference.UpsertSpec
-import qualified Monadoc.Action.Range.InsertSpec
 import qualified Monadoc.Action.Range.UpsertSpec
 import qualified Monadoc.Action.Upload.UpsertSpec
 import qualified Monadoc.Action.Version.UpsertSpec
@@ -90,7 +81,6 @@ spec :: Hspec.Spec
 spec = do
   Monadoc.Action.Blob.InsertSpec.spec
   Monadoc.Action.Blob.UpsertSpec.spec
-  Monadoc.Action.Component.InsertSpec.spec
   Monadoc.Action.Component.UpsertSpec.spec
   Monadoc.Action.CronEntry.DeleteSpec.spec
   Monadoc.Action.CronEntry.EnqueueSpec.spec
@@ -103,21 +93,13 @@ spec = do
   Monadoc.Action.Dependency.UpsertSpec.spec
   Monadoc.Action.HackageUser.UpsertSpec.spec
   Monadoc.Action.Job.EnqueueSpec.spec
-  Monadoc.Action.Key.SelectLastInsertSpec.spec
-  Monadoc.Action.License.InsertSpec.spec
   Monadoc.Action.License.UpsertSpec.spec
-  Monadoc.Action.Module.InsertSpec.spec
   Monadoc.Action.Module.UpsertSpec.spec
   Monadoc.Action.Package.UpsertSpec.spec
-  Monadoc.Action.PackageMeta.InsertSpec.spec
-  Monadoc.Action.PackageMeta.UpdateSpec.spec
   Monadoc.Action.PackageMeta.UpsertSpec.spec
-  Monadoc.Action.PackageMetaComponent.InsertSpec.spec
   Monadoc.Action.PackageMetaComponent.UpsertSpec.spec
-  Monadoc.Action.PackageMetaComponentModule.InsertSpec.spec
   Monadoc.Action.PackageMetaComponentModule.UpsertSpec.spec
   Monadoc.Action.Preference.UpsertSpec.spec
-  Monadoc.Action.Range.InsertSpec.spec
   Monadoc.Action.Range.UpsertSpec.spec
   Monadoc.Action.Upload.UpsertSpec.spec
   Monadoc.Action.Version.UpsertSpec.spec

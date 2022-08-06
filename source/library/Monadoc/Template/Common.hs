@@ -96,14 +96,15 @@ base ctx rt breadcrumbs title html = do
           Html.a_ [Html.href_ github] "Monadoc"
           " version "
           Html.toHtml $ Witch.into @VersionNumber.VersionNumber Monadoc.version
-          case Context.sha ctx of
-            Nothing -> ""
-            Just sha -> do
+          let sha = Config.sha $ Context.config ctx
+          if Text.null sha
+            then ""
+            else do
               " commit "
               Html.code_
                 . Html.a_ [Html.href_ $ github <> "/commit/" <> Witch.into @Text.Text sha]
                 . Html.toHtml
-                $ take 7 sha
+                $ Text.take 7 sha
           ". \x1f516"
 
 og :: Text.Text -> Text.Text -> Html.Html ()

@@ -1,9 +1,8 @@
 module Monadoc.Action.PackageMetaComponent.UpsertSpec where
 
 import qualified Control.Monad.IO.Class as IO
-import qualified Monadoc.Action.Component.Insert as Component.Insert
-import qualified Monadoc.Action.PackageMeta.InsertSpec as PackageMeta.InsertSpec
 import qualified Monadoc.Action.PackageMetaComponent.Upsert as PackageMetaComponent.Upsert
+import qualified Monadoc.Factory as Factory
 import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Model as Model
@@ -13,10 +12,8 @@ import qualified Witch
 spec :: Hspec.Spec
 spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Upsert" $ do
   Hspec.it "inserts a new component" . Test.run $ do
-    packageMeta <- PackageMeta.InsertSpec.insertPackageMeta
-    component <- do
-      x <- Test.arbitrary
-      Component.Insert.run x
+    packageMeta <- Factory.newPackageMeta
+    component <- Factory.newComponent
     packageMetaComponent <- Test.arbitraryWith $ \x ->
       x
         { PackageMetaComponent.packageMeta = Model.key packageMeta,
@@ -31,10 +28,8 @@ spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Upsert" $ do
           }
 
   Hspec.it "updates an existing component" . Test.run $ do
-    packageMeta <- PackageMeta.InsertSpec.insertPackageMeta
-    component <- do
-      x <- Test.arbitrary
-      Component.Insert.run x
+    packageMeta <- Factory.newPackageMeta
+    component <- Factory.newComponent
     packageMetaComponent <- Test.arbitraryWith $ \x ->
       x
         { PackageMetaComponent.packageMeta = Model.key packageMeta,
@@ -45,19 +40,15 @@ spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Upsert" $ do
     IO.liftIO $ new `Hspec.shouldBe` old
 
   Hspec.it "inserts two components" . Test.run $ do
-    packageMeta <- PackageMeta.InsertSpec.insertPackageMeta
-    component1 <- do
-      x <- Test.arbitrary
-      Component.Insert.run x
+    packageMeta <- Factory.newPackageMeta
+    component1 <- Factory.newComponent
     packageMetaComponent1 <- Test.arbitraryWith $ \x ->
       x
         { PackageMetaComponent.packageMeta = Model.key packageMeta,
           PackageMetaComponent.component = Model.key component1
         }
     model1 <- PackageMetaComponent.Upsert.run packageMetaComponent1
-    component2 <- do
-      x <- Test.arbitrary
-      Component.Insert.run x
+    component2 <- Factory.newComponent
     packageMetaComponent2 <- Test.arbitraryWith $ \x ->
       x
         { PackageMetaComponent.packageMeta = Model.key packageMeta,

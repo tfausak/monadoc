@@ -14,7 +14,6 @@ import qualified Distribution.PackageDescription.Parsec as Cabal
 import qualified Distribution.Types.Component as Cabal
 import qualified Distribution.Types.Version as Cabal
 import qualified Distribution.Utils.ShortText as Cabal
-import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Action.Component.Upsert as Component.Upsert
 import qualified Monadoc.Action.Dependency.Upsert as Dependency.Upsert
@@ -69,7 +68,6 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
   packageMetas <- App.Sql.query "select * from packageMeta where upload = ? limit 1" [Model.key upload]
   let hash = hashBlob blob
   Monad.when (fmap hashPackageMeta packageMetas /= [hash]) $ do
-    App.Log.debug . Witch.from . Package.name $ Model.value package
     let bs = Blob.contents $ Model.value blob
     gpd <- case Cabal.parseGenericPackageDescriptionMaybe bs of
       Nothing -> Traced.throw $ InvalidGenericPackageDescription.InvalidGenericPackageDescription bs
@@ -228,7 +226,7 @@ checkPackageVersion v pd = do
         }
 
 salt :: ByteString.ByteString
-salt = "2022-07-30a"
+salt = "2022-08-06"
 
 hashBlob :: Blob.Model -> Hash.Hash
 hashBlob = Hash.new . mappend salt . Witch.from . Blob.hash . Model.value

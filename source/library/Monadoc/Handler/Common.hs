@@ -9,6 +9,7 @@ import qualified Formatting as F
 import qualified Lucid as Html
 import qualified Monadoc.Constant.ContentType as ContentType
 import qualified Monadoc.Type.App as App
+import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Network.HTTP.Types as Http
@@ -25,7 +26,7 @@ fileResponse ::
   App.App Wai.Response
 fileResponse status headers file = do
   context <- Reader.ask
-  let path = FilePath.combine (Context.data_ context) file
+  let path = FilePath.combine (Config.data_ $ Context.config context) file
   modificationTime <- IO.liftIO $ Directory.getModificationTime path
   let eTag = makeETag $ Witch.into @Timestamp.Timestamp modificationTime
       cacheControl = "max-age=604800, stale-while-revalidate=86400" :: ByteString.ByteString

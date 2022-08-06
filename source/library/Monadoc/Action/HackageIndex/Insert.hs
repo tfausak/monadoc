@@ -14,7 +14,7 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite3 as Sqlite
 import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Action.App.Sql as App.Sql
-import qualified Monadoc.Action.Key.SelectLastInsert as Key.SelectLastInsert
+import qualified Monadoc.Exception.MissingKey as MissingKey
 import qualified Monadoc.Exception.MissingSize as MissingSize
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Exception.TrailingBytes as TrailingBytes
@@ -80,23 +80,24 @@ insertHackageIndex blob = do
             HackageIndex.createdAt = now,
             HackageIndex.processedAt = Nothing
           }
-  App.Sql.execute
-    "insert into hackageIndex (blob, createdAt, processedAt) values (?, ?, null)"
-    (HackageIndex.blob hackageIndex, HackageIndex.createdAt hackageIndex)
-  key <- Key.SelectLastInsert.run
-  pure
-    Model.Model
-      { Model.key = key,
-        Model.value = hackageIndex
-      }
+  rows <-
+    App.Sql.query
+      "insert into hackageIndex (blob, createdAt, processedAt) values (?, ?, null) returning key"
+      (HackageIndex.blob hackageIndex, HackageIndex.createdAt hackageIndex)
+  case rows of
+    [] -> Traced.throw MissingKey.MissingKey
+    Sql.Only key : _ -> pure Model.Model {Model.key = key, Model.value = hackageIndex}
 
 insertBlob :: Int -> App.App Blob.Key
 insertBlob size = do
   now <- IO.liftIO Time.getCurrentTime
-  App.Sql.execute
-    "insert into blob (size, hash, contents) values (?, ?, zeroblob(?))"
-    (size, Hash.new . Witch.into @ByteString.ByteString $ show now, size)
-  Key.SelectLastInsert.run
+  rows <-
+    App.Sql.query
+      "insert into blob (size, hash, contents) values (?, ?, zeroblob(?)) returning key"
+      (size, Hash.new . Witch.into @ByteString.ByteString $ show now, size)
+  case rows of
+    [] -> Traced.throw MissingKey.MissingKey
+    Sql.Only key : _ -> pure key
 
 getSize :: App.App Int
 getSize = do

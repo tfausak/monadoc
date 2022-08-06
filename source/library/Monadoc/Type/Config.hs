@@ -18,7 +18,7 @@ import qualified Witch
 
 data Config = Config
   { base :: String,
-    data_ :: Maybe FilePath,
+    data_ :: FilePath,
     dsn :: Maybe Patrol.Dsn,
     hackage :: String,
     help :: Bool,
@@ -26,6 +26,7 @@ data Config = Config
     port :: Port.Port,
     salt :: Text.Text,
     severity :: Severity.Severity,
+    sha :: Text.Text,
     sql :: FilePath,
     version :: Bool
   }
@@ -37,20 +38,21 @@ initial =
     { base = "/",
       hackage = "https://hackage.haskell.org/",
       sql = "monadoc.sqlite",
-      data_ = Nothing,
+      data_ = "data",
       dsn = Nothing,
       help = False,
       host = String.fromString "127.0.0.1",
       port = Witch.from @Int 3000,
       salt = Text.empty,
       severity = Severity.Debug,
+      sha = Text.empty,
       version = False
     }
 
 applyFlag :: Exception.MonadThrow m => Config -> Flag.Flag -> m Config
 applyFlag config flag = case flag of
   Flag.Base str -> pure config {base = List.ensureSuffix '/' str}
-  Flag.Data str -> pure config {data_ = Just str}
+  Flag.Data str -> pure config {data_ = str}
   Flag.Dsn str ->
     if null str
       then pure config {dsn = Nothing}
@@ -67,6 +69,7 @@ applyFlag config flag = case flag of
   Flag.Severity svr -> do
     x <- Either.throw $ Witch.tryInto @Severity.Severity svr
     pure config {severity = x}
+  Flag.Sha str -> pure config {sha = Witch.from str}
   Flag.Sql str -> pure config {sql = str}
   Flag.Version -> pure config {version = True}
 

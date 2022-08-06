@@ -1,7 +1,9 @@
 module Monadoc.Action.Job.Enqueue where
 
+import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Action.App.Sql as App.Sql
-import qualified Monadoc.Action.Key.SelectLastInsert as Key.SelectLastInsert
+import qualified Monadoc.Exception.MissingKey as MissingKey
+import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Model.Job as Job
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Model as Model
@@ -21,6 +23,7 @@ run task = do
             Job.status = Status.Queued,
             Job.task = task
           }
-  App.Sql.execute "insert into job (createdAt, finishedAt, startedAt, status, task) values (?, ?, ?, ?, ?)" job
-  key <- Key.SelectLastInsert.run
-  pure Model.Model {Model.key = key, Model.value = job}
+  rows <- App.Sql.query "insert into job (createdAt, finishedAt, startedAt, status, task) values (?, ?, ?, ?, ?) returning key" job
+  case rows of
+    [] -> Traced.throw MissingKey.MissingKey
+    Sql.Only key : _ -> pure Model.Model {Model.key = key, Model.value = job}

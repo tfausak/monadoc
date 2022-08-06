@@ -15,15 +15,12 @@ import qualified Paths_monadoc as Monadoc
 import qualified Say
 import qualified System.Console.GetOpt as Console
 import qualified System.Directory as Directory
-import qualified System.Environment as Environment
 import qualified System.Exit as Exit
 
 data Context = Context
   { config :: Config.Config,
-    data_ :: FilePath,
     manager :: Client.Manager,
     pool :: Pool.Pool Sql.Connection,
-    sha :: Maybe String,
     temporaryDirectory :: FilePath
   }
 
@@ -40,14 +37,12 @@ fromConfig name cfg = do
     Say.sayString version
     Exception.throwM Exit.ExitSuccess
   Context cfg
-    <$> maybe Monadoc.getDataDir pure (Config.data_ cfg)
-    <*> Tls.newTlsManager
+    <$> Tls.newTlsManager
     <*> Pool.newPool
       Pool.PoolConfig
         { Pool.createResource = Sql.open $ Config.sql cfg,
           Pool.freeResource = Sql.close,
           Pool.poolCacheTTL = 60,
-          Pool.poolMaxResources = 8
+          Pool.poolMaxResources = if Config.sql cfg == ":memory:" then 1 else 8
         }
-    <*> Environment.lookupEnv "MONADOC_SHA"
     <*> Directory.getTemporaryDirectory
