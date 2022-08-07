@@ -12,7 +12,6 @@ import qualified Data.List as List
 import qualified Data.Map.Strict as Map
 import qualified Data.Maybe as Maybe
 import qualified Data.Ord as Ord
-import qualified Data.Time.Clock.POSIX as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Distribution.Package as Cabal
 import qualified Distribution.Types.PackageVersionConstraint as Cabal
@@ -172,20 +171,12 @@ handleCabal revisions entry pkg ver = do
         { Upload.blob = Model.key blob,
           Upload.package = Model.key package,
           Upload.revision = revision,
-          Upload.uploadedAt =
-            Witch.from
-              . Time.posixSecondsToUTCTime
-              . epochTimeToPosixTime
-              $ Tar.entryTime entry,
+          Upload.uploadedAt = Witch.from $ Tar.entryTime entry,
           Upload.uploadedBy = Model.key hackageUser,
           Upload.version = Model.key version,
           Upload.isPreferred = True,
           Upload.isLatest = False
         }
-
-{- hlint ignore epochTimeToPosixTime "Use from" -}
-epochTimeToPosixTime :: Tar.EpochTime -> Time.POSIXTime
-epochTimeToPosixTime = fromIntegral
 
 upsertPreferences ::
   Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->

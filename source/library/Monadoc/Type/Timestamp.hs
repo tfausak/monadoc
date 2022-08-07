@@ -1,10 +1,12 @@
 module Monadoc.Type.Timestamp where
 
+import qualified Codec.Archive.Tar.Entry as Tar
 import qualified Control.Monad.IO.Class as IO
 import qualified Data.Fixed as Fixed
 import qualified Data.Hashable as Hashable
 import qualified Data.Text as Text
 import qualified Data.Time as Time
+import qualified Data.Time.Clock.POSIX as Time
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Lucid as Html
@@ -46,6 +48,16 @@ instance Hashable.Hashable Timestamp where
       . Witch.into @Fixed.Pico
       . Witch.into @Time.NominalDiffTime
       . Witch.into @Time.UTCTime
+
+instance Witch.From Tar.EpochTime Timestamp where
+  from =
+    let pico = 1000000000000 :: Integer
+     in Witch.from
+          . Time.posixSecondsToUTCTime
+          . Time.secondsToNominalDiffTime
+          . Witch.from
+          . (*) pico
+          . Witch.from
 
 getCurrentTime :: IO.MonadIO m => m Timestamp
 getCurrentTime = Witch.into @Timestamp <$> IO.liftIO Time.getCurrentTime

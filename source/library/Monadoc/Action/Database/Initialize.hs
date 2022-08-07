@@ -31,7 +31,8 @@ pragmas :: [Query.Query]
 pragmas =
   [ "pragma auto_vacuum = 'incremental'",
     "pragma foreign_keys = true",
-    "pragma journal_mode = 'wal'"
+    "pragma journal_mode = 'wal'",
+    "pragma synchronous = 'normal'"
   ]
 
 runMigrations :: App.App ()

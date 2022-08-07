@@ -12,6 +12,7 @@ import qualified Distribution.ModuleName as Cabal
 import qualified Distribution.PackageDescription as Cabal
 import qualified Distribution.PackageDescription.Parsec as Cabal
 import qualified Distribution.Types.Component as Cabal
+import qualified Distribution.Types.DependencyMap as Cabal
 import qualified Distribution.Types.Version as Cabal
 import qualified Distribution.Utils.ShortText as Cabal
 import qualified Monadoc.Action.App.Sql as App.Sql
@@ -120,13 +121,12 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
               PackageMetaComponent.component = Model.key component
             }
 
-      Monad.forM_ ds $ \dep -> do
+      Monad.forM_ (Cabal.fromDepMap $ Cabal.toDepMap ds) $ \dep -> do
         pkg <-
           Package.Upsert.run
             Package.Package
               { Package.name = Witch.from $ Cabal.depPkgName dep
               }
-        -- TODO: Merge ranges for the same package.
         rng <-
           Range.Upsert.run
             Range.Range
@@ -226,7 +226,7 @@ checkPackageVersion v pd = do
         }
 
 salt :: ByteString.ByteString
-salt = "2022-08-06"
+salt = "2022-08-08"
 
 hashBlob :: Blob.Model -> Hash.Hash
 hashBlob = Hash.new . mappend salt . Witch.from . Blob.hash . Model.value

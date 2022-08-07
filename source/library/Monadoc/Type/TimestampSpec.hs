@@ -1,5 +1,6 @@
 module Monadoc.Type.TimestampSpec where
 
+import qualified Codec.Archive.Tar.Entry as Tar
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Extra.Time as Time
 import qualified Monadoc.Test as Test
@@ -23,3 +24,8 @@ spec = Hspec.describe "Monadoc.Type.Timestamp" $ do
   Hspec.it "can be rendered as HTML" $ do
     Test.expectHtml timestamp "2001-02-03T04:05:06.007Z"
     Test.expectHtmlRaw timestamp "2001-02-03T04:05:06.007Z"
+
+  Hspec.it "can be converted from epoch time" $ do
+    Test.expectFrom
+      (2 :: Tar.EpochTime)
+      (Witch.into @Timestamp.Timestamp $ Time.makeUtcTime 1970 1 1 0 0 2)

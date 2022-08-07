@@ -4,7 +4,6 @@
     "EditorConfig.EditorConfig",
     "taylorfausak.purple-yolk"
   ],
-  "initializeCommand": "docker/devcontainer/initialize.sh",
   "onCreateCommand": "docker/devcontainer/on-create.sh",
   "overrideCommand": true,
   "service": "devcontainer",
