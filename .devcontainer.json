@@ -5,16 +5,16 @@
     "taylorfausak.purple-yolk"
   ],
   "onCreateCommand": "docker/devcontainer/on-create.sh",
-  "overrideCommand": true,
   "service": "devcontainer",
   "settings": {
+    "editor.formatOnSave": false,
     "editor.rulers": [
       80
     ],
-    "purple-yolk.haskell.formatter.command": "docker/devcontainer/cabal-shim.sh ormolu --no-cabal",
+    "purple-yolk.haskell.formatter.command": "false",
     "purple-yolk.haskell.interpreter.command": "cabal repl --repl-options -ddump-json",
-    "purple-yolk.haskell.linter.command": "docker/devcontainer/cabal-shim.sh hlint --json --no-exit-code -",
-    "purple-yolk.haskell.linter.onSave": true
+    "purple-yolk.haskell.linter.command": "false",
+    "purple-yolk.haskell.linter.onSave": false
   },
   "workspaceFolder": "/workspaces/monadoc"
 }

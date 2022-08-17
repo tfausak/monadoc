@@ -1,15 +1,37 @@
 packages: .
 
 allow-newer:
-  -- https://github.com/MichaelXavier/cron/pull/45
-  , cron:text
+  , lucid2:base
+  , patrol:base
+  , patrol:time
+  , witch:base
+  , witch:template-haskell
+
+  -- https://github.com/haskell/haddock/issues/1507
+  , haddock-library:base
+
+  -- https://github.com/haskell-hvr/uuid/pull/70
+  , uuid:time
 
 -- https://github.com/haskell/text/issues/461
 package text
   flags: -simdutf
 
--- https://github.com/haskell/attoparsec/pull/210
+-- https://github.com/haskell/double-conversion/pull/32
 source-repository-package
-  location: https://github.com/tfausak/attoparsec
-  tag: 727c81efdc779a0bd400d77a4452e5b5b0f3d82d
+  location: https://github.com/haskell/double-conversion
+  tag: 8259f568651c6f543ee928f2e4433b1dc246c8cd
+  type: git
+
+-- https://github.com/haskell-foundation/foundation/pull/564
+source-repository-package
+  location: https://github.com/parsonsmatt/foundation
+  subdir: basement
+  tag: 8166c31a115521f2ce5fabfba8247982979eeebf
+  type: git
+
+-- https://github.com/vincenthz/hs-memory/pull/93
+source-repository-package
+  location: https://github.com/parsonsmatt/hs-memory
+  tag: 0f760c8ba0b7d5aacf04a7294e87e5e4fff53f40
   type: git
