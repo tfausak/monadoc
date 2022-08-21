@@ -20,7 +20,7 @@ package text
 -- https://github.com/haskell/double-conversion/pull/32
 source-repository-package
   location: https://github.com/haskell/double-conversion
-  tag: 8259f568651c6f543ee928f2e4433b1dc246c8cd
+  tag: 5d092e0664442eaac8ae1d101dba57ce9b1c9b03
   type: git
 
 -- https://github.com/haskell-foundation/foundation/pull/564
