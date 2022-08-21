@@ -13,10 +13,6 @@ allow-newer:
   -- https://github.com/haskell-hvr/uuid/pull/70
   , uuid:time
 
--- https://github.com/haskell/text/issues/461
-package text
-  flags: -simdutf
-
 -- https://github.com/haskell/double-conversion/pull/32
 source-repository-package
   location: https://github.com/haskell/double-conversion
