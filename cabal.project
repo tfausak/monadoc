@@ -19,13 +19,6 @@ source-repository-package
   tag: 5d092e0664442eaac8ae1d101dba57ce9b1c9b03
   type: git
 
--- https://github.com/haskell-foundation/foundation/pull/564
-source-repository-package
-  location: https://github.com/parsonsmatt/foundation
-  subdir: basement
-  tag: 8166c31a115521f2ce5fabfba8247982979eeebf
-  type: git
-
 -- https://github.com/vincenthz/hs-memory/pull/93
 source-repository-package
   location: https://github.com/parsonsmatt/hs-memory
