@@ -24,3 +24,9 @@ source-repository-package
   location: https://github.com/parsonsmatt/hs-memory
   tag: 0f760c8ba0b7d5aacf04a7294e87e5e4fff53f40
   type: git
+
+-- https://github.com/TomMD/entropy/pull/76
+source-repository-package
+  location: https://github.com/daleiz/entropy
+  tag: 10452215eb4aa57bbe47f483f4a574dfa1ef3b05
+  type: git
