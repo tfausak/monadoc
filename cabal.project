@@ -13,3 +13,9 @@ source-repository-package
   location: https://github.com/tfausak/attoparsec
   tag: 727c81efdc779a0bd400d77a4452e5b5b0f3d82d
   type: git
+
+-- https://github.com/TomMD/entropy/pull/76
+source-repository-package
+  location: https://github.com/daleiz/entropy
+  tag: 10452215eb4aa57bbe47f483f4a574dfa1ef3b05
+  type: git
