@@ -4,7 +4,7 @@
     "EditorConfig.EditorConfig",
     "taylorfausak.purple-yolk"
   ],
-  "onCreateCommand": "docker/devcontainer/on-create.sh",
+  "onCreateCommand": ".devcontainer/on-create.sh",
   "service": "devcontainer",
   "settings": {
     "editor.formatOnSave": false,

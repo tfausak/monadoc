@@ -1,5 +1,4 @@
 {
-  "//": "https://github.com/actions/toolkit/blob/7654d97/docs/problem-matchers.md",
   "problemMatcher": [
     {
       "owner": "hspec",
