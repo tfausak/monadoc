@@ -1,8 +1,7 @@
 services:
   devcontainer:
-    build: docker/devcontainer
     command: sh -c 'while sleep 1; do :; done'
+    image: ghcr.io/acilearning/docker-haskell:9.2.4
     volumes:
       - .:/workspaces/monadoc
-      - ./.cabal:/root/.cabal
     working_dir: /workspaces/monadoc

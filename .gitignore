@@ -1,6 +1,4 @@
-/.cabal/
 /.vscode/
-/cabal.project.freeze
-/cabal.project.local*
+/cabal.project.*
 /dist-newstyle/
 /monadoc.sqlite*

@@ -1,7 +1,7 @@
 # https://editorconfig.org
 root = true
 
-[*.{cabal,css,hs,js,json,markdown,project,sh,svg,toml,txt,yaml}]
+[*]
 charset = utf-8
 end_of_line = lf
 indent_size = 2
