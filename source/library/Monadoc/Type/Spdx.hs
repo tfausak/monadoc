@@ -88,7 +88,7 @@ genLicenseId :: QuickCheck.Gen Cabal.LicenseId
 genLicenseId = QuickCheck.elements $ Cabal.licenseIdList licenseListVersion
 
 licenseListVersion :: Cabal.LicenseListVersion
-licenseListVersion = Cabal.LicenseListVersion_3_10
+licenseListVersion = Cabal.LicenseListVersion_3_16
 
 genLicenseRef :: QuickCheck.Gen Cabal.LicenseRef
 genLicenseRef =
