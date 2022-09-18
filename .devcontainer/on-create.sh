@@ -4,13 +4,14 @@ set -o errexit -o xtrace
 ghc --version
 cabal --version
 
-test -d ~/.cabal/packages ||
+if ! test -d ~/.cabal/packages
+then
   cabal --ignore-project update
+fi
 
-.devcontainer/cabal-shim.sh hlint --version
-.devcontainer/cabal-shim.sh ormolu --version
-
-test -f cabal.project.local ||
-  cabal configure --enable-tests --flags parallel --jobs --test-show-details direct
+if ! test -f cabal.project.local
+then
+  cabal configure --disable-optimization --enable-tests --flags parallel --jobs --test-show-details direct
+fi
 
 cabal update

@@ -2,15 +2,16 @@ module Monadoc.Type.Config where
 
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
-import qualified Data.Bifunctor as Bifunctor
 import qualified Data.String as String
 import qualified Data.Text as Text
 import qualified Monadoc.Exception.InvalidDsn as InvalidDsn
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Extra.List as List
+import qualified Monadoc.Extra.Maybe as Maybe
 import qualified Monadoc.Type.Flag as Flag
 import qualified Monadoc.Type.Port as Port
 import qualified Monadoc.Type.Severity as Severity
+import qualified Network.URI as Uri
 import qualified Network.Wai.Handler.Warp as Warp
 import qualified Patrol
 import qualified Patrol.Type.Dsn as Patrol.Dsn
@@ -57,7 +58,8 @@ applyFlag config flag = case flag of
     if null str
       then pure config {dsn = Nothing}
       else do
-        x <- Either.throw . Bifunctor.first InvalidDsn.InvalidDsn $ Patrol.Dsn.fromString str
+        uri <- Either.throw . Maybe.note (InvalidDsn.InvalidDsn str) $ Uri.parseURI str
+        x <- Patrol.Dsn.fromUri uri
         pure config {dsn = Just x}
   Flag.Hackage str -> pure config {hackage = List.ensureSuffix '/' str}
   Flag.Help -> pure config {help = True}

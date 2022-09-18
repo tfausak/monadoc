@@ -4,6 +4,7 @@ import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.IO.Class as IO
 import qualified Control.Monad.Trans.Reader as Reader
+import qualified Data.Aeson as Aeson
 import qualified Data.Bifunctor as Bifunctor
 import qualified Data.Map as Map
 import qualified Data.Text as Text
@@ -21,8 +22,9 @@ import qualified Patrol
 import qualified Patrol.Client as Patrol
 import qualified Patrol.Type.Event as Patrol.Event
 import qualified Patrol.Type.Exception as Patrol.Exception
+import qualified Patrol.Type.Exceptions as Patrol.Exceptions
 import qualified Patrol.Type.Request as Patrol.Request
-import qualified Patrol.Type.StackTrace as Patrol.StackTrace
+import qualified Patrol.Type.Stacktrace as Patrol.Stacktrace
 import qualified System.Environment as Environment
 
 run ::
@@ -46,38 +48,26 @@ run f exception = Monad.when (shouldNotify exception) $ do
             event
               { Patrol.Event.exception =
                   Just
-                    [ case Exception.fromException exception of
-                        Nothing -> Patrol.Exception.fromSomeException exception
-                        Just (Traced.Traced e s) ->
-                          (Patrol.Exception.fromSomeException e)
-                            { Patrol.Exception.stackTrace = Patrol.StackTrace.fromCallStack s
-                            }
-                    ],
-                Patrol.Event.release =
-                  let sha = Config.sha $ Context.config context
-                   in if Text.null sha then Nothing else Just sha,
+                    Patrol.Exceptions.empty
+                      { Patrol.Exceptions.values =
+                          [ case Exception.fromException exception of
+                              Nothing -> Patrol.Exception.fromSomeException exception
+                              Just (Traced.Traced e s) ->
+                                (Patrol.Exception.fromSomeException e)
+                                  { Patrol.Exception.stacktrace = Just $ Patrol.Stacktrace.fromCallStack s
+                                  }
+                          ]
+                      },
+                Patrol.Event.release = Config.sha $ Context.config context,
                 Patrol.Event.request =
                   Just
-                    emptyRequest
+                    Patrol.Request.empty
                       { Patrol.Request.env =
-                          Just
-                            . Map.fromList
-                            $ fmap (Bifunctor.bimap Text.pack Text.pack) environment
+                          Map.fromList $
+                            fmap (Bifunctor.bimap Text.pack Aeson.toJSON) environment
                       }
               }
       App.Log.warn . Text.pack $ show eventId
-
-emptyRequest :: Patrol.Request.Request
-emptyRequest =
-  Patrol.Request.Request
-    { Patrol.Request.cookies = Nothing,
-      Patrol.Request.data_ = Nothing,
-      Patrol.Request.env = Nothing,
-      Patrol.Request.headers = Nothing,
-      Patrol.Request.method = Nothing,
-      Patrol.Request.queryString = Nothing,
-      Patrol.Request.url = Nothing
-    }
 
 shouldNotify :: Exception.SomeException -> Bool
 shouldNotify e =

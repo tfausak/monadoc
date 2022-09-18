@@ -94,8 +94,6 @@ jobs:
 
       - run: echo '::add-matcher::.github/hspec-problem-matcher.json'
 
-      - run: cabal run -- monadoc-test-suite --fail-on-focused --randomize
-
       - run: cp "$( cabal list-bin monadoc )" ${{ steps.artifact.outputs.directory }}
 
       - uses: svenstaro/upx-action@v2
@@ -106,6 +104,8 @@ jobs:
         with:
           name: monadoc-${{ github.sha }}
           path: artifact
+
+      - run: cabal run -- monadoc-test-suite --randomize --strict
 
   docker:
     needs: build

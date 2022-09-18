@@ -180,7 +180,7 @@ markup context =
           . Maybe.fromMaybe (Html.toHtml $ Haddock.modLinkName x)
           $ Haddock.modLinkLabel x,
       Haddock.markupMonospaced = Html.code_,
-      Haddock.markupOrderedList = Html.ol_ . mapM_ Html.li_,
+      Haddock.markupOrderedList = Html.ol_ . mapM_ (\(i, x) -> Html.li_ [Html.value_ . Witch.from $ show i] x),
       Haddock.markupParagraph = Html.p_,
       Haddock.markupPic = \x ->
         Html.img_

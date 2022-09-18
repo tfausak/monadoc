@@ -56,25 +56,22 @@ onException context maybeRequest exception = App.run context $ do
 
 withRequest :: Context.Context -> Wai.Request -> Patrol.Event -> Patrol.Event
 withRequest context request event =
-  let oldRequest = Maybe.fromMaybe Exception.NotifySentry.emptyRequest $ Patrol.Event.request event
+  let oldRequest = Maybe.fromMaybe Patrol.Request.empty $ Patrol.Event.request event
       newRequest =
         oldRequest
           { Patrol.Request.headers =
-              Just
-                . Map.fromList
+              Map.fromList
                 . fmap (Bifunctor.bimap (fromUtf8 . CI.foldedCase) fromUtf8)
                 $ Wai.requestHeaders request,
-            Patrol.Request.method = Just . fromUtf8 $ Wai.requestMethod request,
+            Patrol.Request.method = fromUtf8 $ Wai.requestMethod request,
             Patrol.Request.queryString =
-              Just
-                . fmap (Maybe.fromMaybe Text.empty)
+              fmap (Maybe.fromMaybe Text.empty)
                 . Map.fromList
                 . Http.parseQueryText
                 $ Wai.rawQueryString request,
             Patrol.Request.url =
-              Just $
-                (Text.pack . Config.base $ Context.config context)
-                  <> (Text.drop 1 . fromUtf8 $ Wai.rawPathInfo request)
+              (Text.pack . Config.base $ Context.config context)
+                <> (Text.drop 1 . fromUtf8 $ Wai.rawPathInfo request)
           }
    in event {Patrol.Event.request = Just newRequest}
 
