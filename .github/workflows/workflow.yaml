@@ -116,7 +116,9 @@ jobs:
           name: monadoc-${{ github.sha }}
           path: artifact
 
-      - run: mv artifact/data artifact/ubuntu/monadoc docker
+      - run: cd artifact/ubuntu && tar xf monadoc-*.tar.gz
+
+      - run: mv artifact/ubuntu/monadoc-*/data artifact/ubuntu/monadoc docker
 
       - run: chmod +x docker/monadoc
 

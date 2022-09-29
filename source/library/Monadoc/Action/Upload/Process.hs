@@ -15,6 +15,8 @@ import qualified Distribution.Types.Component as Cabal
 import qualified Distribution.Types.DependencyMap as Cabal
 import qualified Distribution.Types.Version as Cabal
 import qualified Distribution.Utils.ShortText as Cabal
+import qualified Formatting as F
+import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Action.Component.Upsert as Component.Upsert
 import qualified Monadoc.Action.Dependency.Upsert as Dependency.Upsert
@@ -29,7 +31,6 @@ import qualified Monadoc.Action.Version.Upsert as Version.Upsert
 import qualified Monadoc.Exception.InvalidGenericPackageDescription as InvalidGenericPackageDescription
 import qualified Monadoc.Exception.Mismatch as Mismatch
 import qualified Monadoc.Exception.Traced as Traced
-import qualified Monadoc.Extra.SqliteSimple as Sql
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.Component as Component
 import qualified Monadoc.Model.Dependency as Dependency
@@ -45,22 +46,27 @@ import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.ComponentType as ComponentType
 import qualified Monadoc.Type.Hash as Hash
+import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.ModuleType as ModuleType
 import qualified Monadoc.Type.PackageName as PackageName
 import qualified Witch
 
 run :: App.App ()
-run =
-  App.Sql.withConnection $ \connection ->
-    Sql.streamLifted
-      connection
-      "select * from upload \
-      \ inner join blob on blob.key = upload.blob \
-      \ inner join package on package.key = upload.package \
-      \ inner join version on version.key = upload.version"
-      ()
-      handleRow
+run = do
+  keys <- App.Sql.query_ "select key from upload order by key desc"
+  Monad.forM_ keys $ \(Sql.Only key) -> do
+    App.Log.debug $ F.sformat Key.format key
+    rows <-
+      App.Sql.query
+        "select * from upload \
+        \ inner join blob on blob.key = upload.blob \
+        \ inner join package on package.key = upload.package \
+        \ inner join version on version.key = upload.version \
+        \ where upload.key = ? \
+        \ limit 1"
+        [key :: Upload.Key]
+    mapM_ handleRow rows
 
 handleRow ::
   (Upload.Model Sql.:. Blob.Model Sql.:. Package.Model Sql.:. Version.Model) ->

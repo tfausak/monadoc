@@ -48,6 +48,8 @@ import qualified Monadoc.Type.Revision as Revision
 import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified System.FilePath as FilePath
+import qualified System.IO as IO
+import qualified System.IO.Temp as Temp
 import qualified Witch
 
 run :: App.App ()
@@ -64,13 +66,16 @@ run = do
         case xs of
           [] -> Traced.throw NotFound.NotFound
           Sql.Only x : _ -> pure x
-      App.Sql.withConnection $ \connection ->
-        Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 blobKey) False $ \blob -> do
-          contents <- IO.liftIO $ Sqlite.unsafeBlobRead blob size 0
-          mapM_ (handleItem constraints revisions)
-            . Tar.foldEntries ((:) . Right) [] (pure . Left)
-            . Tar.read
-            $ LazyByteString.fromChunks contents
+      Temp.withSystemTempFile "monadoc" $ \f h -> do
+        App.Sql.withConnection $ \connection ->
+          Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 blobKey) False $ \blob -> IO.liftIO $ do
+            chunks <- Sqlite.unsafeBlobRead blob size 0
+            LazyByteString.hPut h $ LazyByteString.fromChunks chunks
+            IO.hClose h
+        contents <- IO.liftIO $ LazyByteString.readFile f
+        mapM_ (handleItem constraints revisions)
+          . Tar.foldEntries ((:) . Right) [] (pure . Left)
+          $ Tar.read contents
       upsertPreferences constraints
       updateLatest
       now <- Timestamp.getCurrentTime

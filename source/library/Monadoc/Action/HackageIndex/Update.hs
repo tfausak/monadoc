@@ -2,6 +2,7 @@ module Monadoc.Action.HackageIndex.Update where
 
 import qualified Control.Monad as Monad
 import qualified Control.Monad.IO.Class as IO
+import qualified Control.Monad.Loops as Loops
 import qualified Control.Monad.Trans.Control as Control
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.ByteString as ByteString
@@ -11,6 +12,7 @@ import qualified Database.SQLite3 as Sqlite
 import qualified Formatting as F
 import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Action.App.Sql as App.Sql
+import qualified Monadoc.Action.Blob.Upsert as Blob.Upsert
 import qualified Monadoc.Action.HackageIndex.Insert as HackageIndex.Insert
 import qualified Monadoc.Constant.Header as Header
 import qualified Monadoc.Exception.Mismatch as Mismatch
@@ -21,15 +23,17 @@ import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Extra.HttpClient as Client
 import qualified Monadoc.Extra.Read as Read
+import qualified Monadoc.Handler.Proxy.Get as Proxy.Get
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
-import qualified Monadoc.Type.Hash as Hash
 import qualified Monadoc.Type.Model as Model
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Types as Http
+import qualified System.IO as IO
+import qualified System.IO.Temp as Temp
 import qualified Witch
 
 run :: HackageIndex.Model -> App.App ()
@@ -71,26 +75,20 @@ run hackageIndex = do
             { Mismatch.expected = newSize,
               Mismatch.actual = actualSize
             }
-        newKey <- HackageIndex.Insert.insertBlob newSize
-        App.Sql.withConnection $ \connection -> do
-          Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 newKey) True $ \newBlob -> do
-            Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 oldKey) False $ \oldBlob -> do
-              App.Log.debug "copying old blob"
-              contents <- IO.liftIO $ Sqlite.blobRead oldBlob oldSize 0
-              IO.liftIO $ Sqlite.blobWrite newBlob contents 0
-              let loop offset = do
-                    chunk <- Client.brRead $ Client.responseBody response
-                    let size = ByteString.length chunk
-                    Monad.when (not $ ByteString.null chunk) $ do
-                      Sqlite.blobWrite newBlob chunk offset
-                      loop $ offset + size
-              App.Log.debug "appending new blob"
-              IO.liftIO $ loop start
-          App.Log.debug "updating new hash"
-          Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 newKey) False $ \blob -> do
-            contents <- IO.liftIO $ Sqlite.blobRead blob newSize 0
-            App.Sql.execute "update blob set hash = ? where key = ?" (Hash.new contents, newKey)
-        Monad.void $ HackageIndex.Insert.insertHackageIndex newKey
+        Temp.withSystemTempFile "monadoc" $ \f h -> do
+          App.Log.debug "copying old blob"
+          App.Sql.withConnection $ \connection ->
+            Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 oldKey) False $ \oldBlob -> IO.liftIO $ do
+              contents <- Sqlite.blobRead oldBlob oldSize 0
+              ByteString.hPut h contents
+          App.Log.debug "appending new blob"
+          contents <- IO.liftIO $ do
+            Loops.whileJust_ (Proxy.Get.readChunk response) $ ByteString.hPut h
+            IO.hClose h
+            ByteString.readFile f
+          App.Log.debug "inserting new blob"
+          blob <- Blob.Upsert.run $ Blob.new contents
+          Monad.void . HackageIndex.Insert.insertHackageIndex $ Model.key blob
 
 getActualSize :: Client.Response a -> App.App Int
 getActualSize response = do

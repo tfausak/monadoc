@@ -43,12 +43,12 @@ run = do
   context <- Reader.ask
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"
   Control.control $ \runInBase -> Client.withResponse (Client.ensureUserAgent request) (Context.manager context) $ \response -> runInBase $ do
-    App.Sql.withConnection $ \connection -> do
-      hashVar <- IO.liftIO . Stm.newTVarIO $ Crypto.hashInitWith Crypto.SHA256
-      Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 key) True $ \blob -> do
-        offsetRef <- IO.liftIO $ Stm.newTVarIO 0
-        IO.liftIO $
-          Zlib.foldDecompressStream
+    hashVar <- IO.liftIO . Stm.newTVarIO $ Crypto.hashInitWith Crypto.SHA256
+    offsetRef <- IO.liftIO $ Stm.newTVarIO 0
+    App.Sql.withConnection $ \connection ->
+      Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 key) True $ \blob ->
+        IO.liftIO
+          . Zlib.foldDecompressStream
             ( \f -> do
                 chunk <- Client.brRead $ Client.responseBody response
                 f chunk
@@ -65,11 +65,11 @@ run = do
                   $ TrailingBytes.TrailingBytes leftovers
             )
             Traced.throw
-            (Zlib.decompressIO Zlib.gzipFormat Zlib.defaultDecompressParams)
-      hash <- IO.liftIO $ Stm.readTVarIO hashVar
-      App.Sql.execute
-        "update blob set hash = ? where key = ?"
-        (Witch.into @Hash.Hash $ Crypto.hashFinalize hash, key)
+          $ Zlib.decompressIO Zlib.gzipFormat Zlib.defaultDecompressParams
+    hash <- IO.liftIO $ Stm.readTVarIO hashVar
+    App.Sql.execute
+      "update blob set hash = ? where key = ?"
+      (Witch.into @Hash.Hash $ Crypto.hashFinalize hash, key)
     Monad.void $ insertHackageIndex key
 
 insertHackageIndex :: Blob.Key -> App.App HackageIndex.Model
