@@ -21,6 +21,7 @@ import qualified Monadoc.Exception.TrailingBytes as TrailingBytes
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Extra.HttpClient as Client
+import qualified Monadoc.Extra.Maybe as Maybe
 import qualified Monadoc.Extra.Read as Read
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
@@ -111,7 +112,8 @@ getSize = do
       . Client.httpNoBody (Client.ensureUserAgent request) {Client.method = Http.methodHead}
       $ Context.manager context
   byteString <-
-    maybe (Traced.throw $ MissingSize.MissingSize response) pure
+    Either.throw
+      . Maybe.note (MissingSize.MissingSize response)
       . lookup Http.hContentLength
       $ Client.responseHeaders response
   string <- Either.throw $ Witch.tryInto @String byteString

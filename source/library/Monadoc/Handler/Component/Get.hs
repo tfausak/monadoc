@@ -4,7 +4,8 @@ import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.Maybe as Maybe
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.NotFound as NotFound
-import qualified Monadoc.Exception.Traced as Traced
+import qualified Monadoc.Extra.Either as Either
+import qualified Monadoc.Extra.Maybe as Maybe
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Template.Component.Get as Template
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
@@ -25,10 +26,10 @@ handler ::
 handler packageName reversion componentId _ respond = do
   package <- do
     packages <- App.Sql.query "select * from package where name = ? limit 1" [packageName]
-    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe packages
+    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packages
   version <- do
     versions <- App.Sql.query "select * from version where number = ? limit 1" [Reversion.version reversion]
-    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe versions
+    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe versions
   upload <- do
     uploads <-
       App.Sql.query
@@ -39,13 +40,13 @@ handler packageName reversion componentId _ respond = do
         \ and revision = ? \
         \ limit 1"
         (Model.key package, Model.key version, Reversion.revision reversion)
-    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe uploads
+    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe uploads
   packageMeta <- do
     packageMetas <- App.Sql.query "select * from packageMeta where upload = ? limit 1" [Model.key upload]
-    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe packageMetas
+    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packageMetas
   component <- do
     components <- App.Sql.query "select * from component where type = ? and name = ?" (ComponentId.type_ componentId, ComponentId.name componentId)
-    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe components
+    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe components
   packageMetaComponent <- do
     packageMetaComponents <-
       App.Sql.query
@@ -57,7 +58,7 @@ handler packageName reversion componentId _ respond = do
         ( Model.key packageMeta,
           Model.key component
         )
-    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe packageMetaComponents
+    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packageMetaComponents
   packageMetaComponentModules <-
     App.Sql.query
       "select * \

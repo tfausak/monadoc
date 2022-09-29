@@ -50,11 +50,6 @@ jobs:
 
       - run: mkdir artifact
 
-      - if: matrix.platform == 'ubuntu'
-        run: |
-          cp -R data LICENSE.txt README.markdown artifact
-          cabal sdist --output-dir artifact
-
       - id: artifact
         run: echo '::set-output name=directory::artifact/${{ matrix.platform }}'
 
@@ -65,6 +60,8 @@ jobs:
         with:
           ghc-version: 9.2.4
           cabal-version: 3.8.1.0
+
+      - run: cabal sdist --output-dir ${{ steps.artifact.outputs.directory }}
 
       - run: cabal configure --enable-optimization=2 --enable-tests --flags pedantic --jobs
 
@@ -92,8 +89,6 @@ jobs:
 
       - run: cabal build
 
-      - run: echo '::add-matcher::.github/hspec-problem-matcher.json'
-
       - run: cp "$( cabal list-bin monadoc )" ${{ steps.artifact.outputs.directory }}
 
       - uses: svenstaro/upx-action@v2
@@ -104,6 +99,8 @@ jobs:
         with:
           name: monadoc-${{ github.sha }}
           path: artifact
+
+      - run: echo '::add-matcher::.github/hspec-problem-matcher.json'
 
       - run: cabal run -- monadoc-test-suite --randomize --strict
 

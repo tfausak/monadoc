@@ -7,6 +7,8 @@ import qualified Data.Text as Text
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Exception.Traced as Traced
+import qualified Monadoc.Extra.Either as Either
+import qualified Monadoc.Extra.Maybe as Maybe
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Template.Version.Get as Template
@@ -28,10 +30,10 @@ handler packageName reversion _ respond = do
   context <- Reader.ask
   package <- do
     packages <- App.Sql.query "select * from package where name = ? limit 1" [packageName]
-    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe packages
+    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packages
   version <- do
     versions <- App.Sql.query "select * from version where number = ? limit 1" [Reversion.version reversion]
-    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe versions
+    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe versions
   let revision = Reversion.revision reversion
   upload <- do
     uploads <-
@@ -43,10 +45,10 @@ handler packageName reversion _ respond = do
         \ and revision = ? \
         \ limit 1"
         (Model.key package, Model.key version, revision)
-    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe uploads
+    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe uploads
   hackageUser <- do
     hackageUsers <- App.Sql.query "select * from hackageUser where key = ?" [Upload.uploadedBy $ Model.value upload]
-    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe hackageUsers
+    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe hackageUsers
   maybeLatest <-
     Maybe.listToMaybe
       <$> App.Sql.query
@@ -61,7 +63,7 @@ handler packageName reversion _ respond = do
         (Model.key package, Model.key upload)
   packageMeta <- do
     packageMetas <- App.Sql.query "select * from packageMeta where upload = ? limit 1" [Model.key upload]
-    maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe packageMetas
+    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packageMetas
   components <- App.Sql.query "select * from packageMetaComponent inner join component on component.key = packageMetaComponent.component where packageMetaComponent.packageMeta = ?" [Model.key packageMeta]
   let eTag = Common.makeETag . Upload.uploadedAt $ Model.value upload
       breadcrumbs =

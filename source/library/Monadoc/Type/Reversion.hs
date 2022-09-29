@@ -21,7 +21,7 @@ data Reversion = Reversion
 instance Witch.From Reversion String where
   from reversion =
     Witch.into @String (version reversion)
-      <> "+"
+      <> "-"
       <> Witch.into @String (revision reversion)
 
 instance Witch.From Reversion Text.Text where
@@ -55,5 +55,5 @@ parseVersion = do
 
 parseRevision :: Cabal.CabalParsing m => m Revision.Revision
 parseRevision = do
-  Monad.void $ Cabal.char '+'
+  Monad.void $ Cabal.char '-'
   Witch.from @Word <$> Cabal.integral

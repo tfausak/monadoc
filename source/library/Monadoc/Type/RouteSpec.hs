@@ -34,9 +34,9 @@ spec = Hspec.describe "Monadoc.Type.Route" $ do
     Route.parse ["favicon.ico"] [] `Hspec.shouldBe` Just Route.Favicon
     Route.parse ["health-check"] [] `Hspec.shouldBe` Just Route.HealthCheck
     Route.parse ["package", "pkg"] [] `Hspec.shouldBe` Just (Route.Package packageName)
-    Route.parse ["package", "pkg", "version", "1.2.3+4"] [] `Hspec.shouldBe` Just (Route.Version packageName reversion)
-    Route.parse ["package", "pkg", "version", "1.2.3+4", "component", "exe:bin"] [] `Hspec.shouldBe` Just (Route.Component packageName reversion componentId)
-    Route.parse ["package", "pkg", "version", "1.2.3+4", "component", "exe:bin", "module", "Ex.Mod"] [] `Hspec.shouldBe` Just (Route.Module packageName reversion componentId moduleName)
+    Route.parse ["package", "pkg", "version", "1.2.3-4"] [] `Hspec.shouldBe` Just (Route.Version packageName reversion)
+    Route.parse ["package", "pkg", "version", "1.2.3-4", "component", "exe:bin"] [] `Hspec.shouldBe` Just (Route.Component packageName reversion componentId)
+    Route.parse ["package", "pkg", "version", "1.2.3-4", "component", "exe:bin", "module", "Ex.Mod"] [] `Hspec.shouldBe` Just (Route.Module packageName reversion componentId moduleName)
     Route.parse ["robots.txt"] [] `Hspec.shouldBe` Just Route.Robots
     Route.parse ["search"] [("query", Just $ Witch.into @ByteString.ByteString query)] `Hspec.shouldBe` Just (Route.Search query)
     Route.parse ["static", "monadoc.css"] [] `Hspec.shouldBe` Just Route.Stylesheet
@@ -47,15 +47,15 @@ spec = Hspec.describe "Monadoc.Type.Route" $ do
   Hspec.it "can be rendered" $ do
     Route.render Route.Home `Hspec.shouldBe` ([], [])
     Route.render Route.AppleTouchIcon `Hspec.shouldBe` (["apple-touch-icon.png"], [])
-    Route.render (Route.Component packageName reversion componentId) `Hspec.shouldBe` (["package", "pkg", "version", "1.2.3+4", "component", "exe:bin"], [])
+    Route.render (Route.Component packageName reversion componentId) `Hspec.shouldBe` (["package", "pkg", "version", "1.2.3-4", "component", "exe:bin"], [])
     Route.render Route.Favicon `Hspec.shouldBe` (["favicon.ico"], [])
     Route.render Route.HealthCheck `Hspec.shouldBe` (["health-check"], [])
     Route.render Route.Manifest `Hspec.shouldBe` (["static", "monadoc.webmanifest"], [])
-    Route.render (Route.Module packageName reversion componentId moduleName) `Hspec.shouldBe` (["package", "pkg", "version", "1.2.3+4", "component", "exe:bin", "module", "Ex.Mod"], [])
+    Route.render (Route.Module packageName reversion componentId moduleName) `Hspec.shouldBe` (["package", "pkg", "version", "1.2.3-4", "component", "exe:bin", "module", "Ex.Mod"], [])
     Route.render (Route.Package packageName) `Hspec.shouldBe` (["package", "pkg"], [])
     Route.render Route.Robots `Hspec.shouldBe` (["robots.txt"], [])
     Route.render Route.Script `Hspec.shouldBe` (["static", "monadoc.js"], [])
     Route.render (Route.Search query) `Hspec.shouldBe` (["search"], [("query", Just $ Witch.into @ByteString.ByteString query)])
     Route.render Route.Stylesheet `Hspec.shouldBe` (["static", "monadoc.css"], [])
     Route.render (Route.User hackageUserName) `Hspec.shouldBe` (["user", "usr"], [])
-    Route.render (Route.Version packageName reversion) `Hspec.shouldBe` (["package", "pkg", "version", "1.2.3+4"], [])
+    Route.render (Route.Version packageName reversion) `Hspec.shouldBe` (["package", "pkg", "version", "1.2.3-4"], [])

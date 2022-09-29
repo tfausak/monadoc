@@ -5,7 +5,8 @@ import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.Maybe as Maybe
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.NotFound as NotFound
-import qualified Monadoc.Exception.Traced as Traced
+import qualified Monadoc.Extra.Either as Either
+import qualified Monadoc.Extra.Maybe as Maybe
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Model.Component as Component
 import qualified Monadoc.Model.Module as Module
@@ -66,7 +67,7 @@ getComponent componentType componentName = do
     App.Sql.query
       "select * from component where type = ? and name = ? limit 1"
       (componentType, componentName)
-  maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe components
+  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe components
 
 getModule :: ModuleName.ModuleName -> App.App Module.Model
 getModule moduleName = do
@@ -74,7 +75,7 @@ getModule moduleName = do
     App.Sql.query
       "select * from module where name = ? limit 1"
       [moduleName]
-  maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe modules
+  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe modules
 
 getPackage :: PackageName.PackageName -> App.App Package.Model
 getPackage packageName = do
@@ -82,7 +83,7 @@ getPackage packageName = do
     App.Sql.query
       "select * from package where name = ? limit 1"
       [packageName]
-  maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe packages
+  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packages
 
 getPackageMeta :: Upload.Key -> App.App PackageMeta.Model
 getPackageMeta upload = do
@@ -90,7 +91,7 @@ getPackageMeta upload = do
     App.Sql.query
       "select * from packageMeta where upload = ? limit 1"
       [upload]
-  maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe packageMetas
+  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packageMetas
 
 getPackageMetaComponent :: PackageMeta.Key -> Component.Key -> App.App PackageMetaComponent.Model
 getPackageMetaComponent packageMeta component = do
@@ -98,7 +99,7 @@ getPackageMetaComponent packageMeta component = do
     App.Sql.query
       "select * from packageMetaComponent where packageMeta = ? and component = ? limit 1"
       (packageMeta, component)
-  maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe packageMetaComponents
+  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packageMetaComponents
 
 getPackageMetaComponentModule :: PackageMetaComponent.Key -> Module.Key -> App.App PackageMetaComponentModule.Model
 getPackageMetaComponentModule packageMetaComponent module_ = do
@@ -106,7 +107,7 @@ getPackageMetaComponentModule packageMetaComponent module_ = do
     App.Sql.query
       "select * from packageMetaComponentModule where packageMetaComponent = ? and module = ? limit 1"
       (packageMetaComponent, module_)
-  maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe packageMetaComponentModules
+  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packageMetaComponentModules
 
 getUpload :: Package.Key -> Version.Key -> Revision.Revision -> App.App Upload.Model
 getUpload package version revision = do
@@ -114,7 +115,7 @@ getUpload package version revision = do
     App.Sql.query
       "select * from upload where package = ? and version = ? and revision = ? limit 1"
       (package, version, revision)
-  maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe uploads
+  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe uploads
 
 getVersion :: VersionNumber.VersionNumber -> App.App Version.Model
 getVersion versionNumber = do
@@ -122,4 +123,4 @@ getVersion versionNumber = do
     App.Sql.query
       "select * from version where number = ? limit 1"
       [versionNumber]
-  maybe (Traced.throw NotFound.NotFound) pure $ Maybe.listToMaybe versions
+  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe versions

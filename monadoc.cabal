@@ -1,15 +1,15 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2022.9.18
+version: 0.2022.9.28
 
 build-type: Simple
 category: Documentation
 data-dir: data
 data-files:
   apple-touch-icon.png
-  favicon.ico
   bootstrap.min.css
+  favicon.ico
   monadoc.js
 description: Monadoc provides worse Haskell documentation.
 extra-source-files: README.markdown
