@@ -58,7 +58,7 @@ jobs:
       - id: setup-haskell
         uses: haskell/actions/setup@v2
         with:
-          ghc-version: 9.2.4
+          ghc-version: 9.4.2
           cabal-version: 3.8.1.0
 
       - run: cabal sdist --output-dir ${{ steps.artifact.outputs.directory }}

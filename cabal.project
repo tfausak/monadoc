@@ -5,3 +5,9 @@ source-repository-package
   location: https://github.com/haskell/double-conversion
   tag: 5d092e0664442eaac8ae1d101dba57ce9b1c9b03
   type: git
+
+-- https://github.com/tweag/ormolu/pull/885
+source-repository-package
+  location: https://github.com/tweag/ormolu
+  tag: 0a3da23e9b31e2d45b06d3d2d09a3254acad637e
+  type: git
