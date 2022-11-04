@@ -9,5 +9,5 @@ source-repository-package
 -- https://github.com/tweag/ormolu/pull/885
 source-repository-package
   location: https://github.com/tweag/ormolu
-  tag: 0a3da23e9b31e2d45b06d3d2d09a3254acad637e
+  tag: 4863f5f3b54b154030727f0ca25cfb5fc56f3a8c
   type: git
