@@ -19,6 +19,7 @@
     }
   },
   "dockerComposeFile": "../compose.yaml",
+  "initializeCommand": ".devcontainer/initialize.sh",
   "onCreateCommand": ".devcontainer/on-create.sh",
   "service": "devcontainer",
   "workspaceFolder": "/workspaces/monadoc"

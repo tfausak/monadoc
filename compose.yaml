@@ -4,4 +4,10 @@ services:
     image: public.ecr.aws/acilearning/haskell:9.4.4
     volumes:
       - .:/workspaces/monadoc
+      - cabal:/home/haskell/.cabal
+      - cabal-store:/cabal-store
     working_dir: /workspaces/monadoc
+volumes:
+  cabal: null
+  cabal-store:
+    external: true
