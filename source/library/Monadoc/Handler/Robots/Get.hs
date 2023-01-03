@@ -8,10 +8,11 @@ import qualified Network.HTTP.Types as Http
 import qualified Network.HTTP.Types.Header as Http
 import qualified Network.Wai as Wai
 import qualified Witch
+import qualified Witch.Encoding as Witch
 
 handler :: Handler.Handler
 handler _ respond = do
-  let body = Witch.into @LazyByteString.ByteString $ unlines ["User-Agent: *", "Allow: /"]
+  let body = Witch.into @LazyByteString.ByteString . Witch.into @(Witch.UTF_8 LazyByteString.ByteString) $ unlines ["User-Agent: *", "Allow: /"]
       eTag = Common.makeETag body
   respond $
     Wai.responseLBS

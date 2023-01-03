@@ -12,6 +12,7 @@ import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Monadoc.Extra.Either as Either
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
+import qualified Witch.Encoding as Witch
 import qualified Witch.Utility as Witch
 
 newtype Hash
@@ -47,7 +48,7 @@ instance QuickCheck.Arbitrary Hash where
         . ByteString.pack
 
 instance Witch.TryFrom Text.Text Hash where
-  tryFrom text = case Encoding.convertFromBase Encoding.Base16 $ Witch.into @ByteString.ByteString text of
+  tryFrom text = case Encoding.convertFromBase Encoding.Base16 . Witch.into @ByteString.ByteString $ Witch.into @(Witch.UTF_8 ByteString.ByteString) text of
     Left string -> Left . Witch.TryFromException text . Just . Exception.toException $ userError string
     Right byteString -> case Witch.tryFrom @ByteString.ByteString byteString of
       Left tryFromException -> Left $ Witch.withSource text tryFromException
@@ -55,7 +56,8 @@ instance Witch.TryFrom Text.Text Hash where
 
 instance Witch.From Hash Text.Text where
   from =
-    Witch.unsafeFrom @ByteString.ByteString
+    Witch.unsafeFrom @(Witch.UTF_8 ByteString.ByteString)
+      . Witch.from @ByteString.ByteString
       . Encoding.convertToBase Encoding.Base16
       . Witch.into @ByteString.ByteString
 

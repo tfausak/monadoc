@@ -51,6 +51,7 @@ import qualified System.FilePath as FilePath
 import qualified System.IO as IO
 import qualified System.IO.Temp as Temp
 import qualified Witch
+import qualified Witch.Encoding as Witch
 
 run :: App.App ()
 run = do
@@ -116,7 +117,7 @@ handlePreference constraints entry pkg = do
   lazyByteString <- case Tar.entryContent entry of
     Tar.NormalFile lazyByteString _ -> pure lazyByteString
     _ -> Traced.throw $ UnexpectedEntry.UnexpectedEntry entry
-  string <- Either.throw $ Witch.tryInto @String lazyByteString
+  string <- Either.throw . Witch.tryInto @String $ Witch.into @(Witch.UTF_8 LazyByteString.ByteString) lazyByteString
   versionRange <-
     if null string
       then pure Cabal.anyVersion

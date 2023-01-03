@@ -28,6 +28,7 @@ import qualified Patrol
 import qualified Patrol.Type.Event as Patrol.Event
 import qualified Patrol.Type.Request as Patrol.Request
 import qualified Witch
+import qualified Witch.Encoding as Witch
 
 middleware :: Context.Context -> Wai.Middleware
 middleware context handle request respond =
@@ -82,7 +83,7 @@ onExceptionResponse :: Context.Context -> Exception.SomeException -> Wai.Respons
 onExceptionResponse context e
   | Just (Traced.Traced e2 _) <- Exception.fromException e = onExceptionResponse context e2
   | Just (Found.Found route) <- Exception.fromException e =
-      Handler.statusResponse Http.found302 [(Http.hLocation, Witch.into @ByteString.ByteString $ Template.route context route)]
+      Handler.statusResponse Http.found302 [(Http.hLocation, Witch.via @(Witch.UTF_8 ByteString.ByteString) $ Template.route context route)]
   | Just (MethodNotAllowed.MethodNotAllowed _ _ ms) <- Exception.fromException e =
       Handler.statusResponse Http.methodNotAllowed405 [MethodNotAllowed.toAllowHeader ms]
   | Exception.isType @NotFound.NotFound e =

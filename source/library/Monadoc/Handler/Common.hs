@@ -3,6 +3,7 @@ module Monadoc.Handler.Common where
 import qualified Control.Monad.IO.Class as IO
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.ByteString as ByteString
+import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Hashable as Hashable
 import qualified Data.Text.Lazy as LazyText
 import qualified Formatting as F
@@ -18,6 +19,7 @@ import qualified Network.Wai as Wai
 import qualified System.Directory as Directory
 import qualified System.FilePath as FilePath
 import qualified Witch
+import qualified Witch.Encoding as Witch
 
 fileResponse ::
   Http.Status ->
@@ -47,13 +49,13 @@ htmlResponse status headers =
     . Html.renderBS
 
 makeETag :: Hashable.Hashable a => a -> ByteString.ByteString
-makeETag = Witch.from . F.format ("\"" F.% F.int F.% "\"") . Hashable.hashWithSalt 0
+makeETag = Witch.via @(Witch.UTF_8 ByteString.ByteString) . F.format ("\"" F.% F.int F.% "\"") . Hashable.hashWithSalt 0
 
 statusResponse :: Http.Status -> Http.ResponseHeaders -> Wai.Response
 statusResponse status headers =
   Wai.responseLBS status ((Http.hContentType, ContentType.text) : headers)
-    . Witch.from
+    . Witch.via @(Witch.UTF_8 LazyByteString.ByteString)
     $ F.format
       (F.int F.% " " F.% F.text)
       (Http.statusCode status)
-      (Witch.unsafeInto @LazyText.Text $ Http.statusMessage status)
+      (Witch.unsafeInto @LazyText.Text . Witch.into @(Witch.UTF_8 ByteString.ByteString) $ Http.statusMessage status)

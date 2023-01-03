@@ -7,6 +7,7 @@ import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Types as Http
 import qualified Paths_monadoc as Monadoc
 import qualified Witch
+import qualified Witch.Encoding as Witch
 
 ensureUserAgent :: Client.Request -> Client.Request
 ensureUserAgent request =
@@ -17,5 +18,5 @@ ensureUserAgent request =
 userAgent :: ByteString.ByteString
 userAgent =
   "Monadoc/"
-    <> Witch.from (Version.showVersion Monadoc.version)
+    <> Witch.via @(Witch.UTF_8 ByteString.ByteString) (Version.showVersion Monadoc.version)
     <> " (https://github.com/tfausak/monadoc)"

@@ -6,6 +6,7 @@ import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
 import qualified Lucid as Html
 import qualified Witch
+import qualified Witch.Encoding as Witch
 
 newtype Search
   = Search Text.Text
@@ -16,7 +17,7 @@ instance Witch.From Text.Text Search
 instance Witch.From Search Text.Text
 
 instance Witch.From Search ByteString.ByteString where
-  from = Witch.via @Text.Text
+  from = Witch.via @(Witch.UTF_8 ByteString.ByteString) . Witch.into @Text.Text
 
 instance Witch.TryFrom ByteString.ByteString Search where
   tryFrom = Witch.eitherTryFrom $ fmap (Witch.from @Text.Text) . Text.decodeUtf8'

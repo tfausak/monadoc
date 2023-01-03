@@ -34,6 +34,7 @@ import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Types as Http
 import qualified Witch
+import qualified Witch.Encoding as Witch
 
 run :: App.App ()
 run = do
@@ -95,7 +96,7 @@ insertBlob size = do
   rows <-
     App.Sql.query
       "insert into blob (size, hash, contents) values (?, ?, zeroblob(?)) returning key"
-      (size, Hash.new . Witch.into @ByteString.ByteString $ show now, size)
+      (size, Hash.new . Witch.via @(Witch.UTF_8 ByteString.ByteString) $ show now, size)
   case rows of
     [] -> Traced.throw MissingKey.MissingKey
     Sql.Only key : _ -> pure key
@@ -116,5 +117,5 @@ getSize = do
       . Maybe.note (MissingSize.MissingSize response)
       . lookup Http.hContentLength
       $ Client.responseHeaders response
-  string <- Either.throw $ Witch.tryInto @String byteString
+  string <- Either.throw . Witch.tryInto @String $ Witch.into @(Witch.UTF_8 ByteString.ByteString) byteString
   Either.throw $ Read.tryRead string

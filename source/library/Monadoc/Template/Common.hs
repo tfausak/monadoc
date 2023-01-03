@@ -1,6 +1,7 @@
 module Monadoc.Template.Common where
 
 import qualified Control.Monad as Monad
+import qualified Data.ByteString as ByteString
 import qualified Data.Text as Text
 import qualified Lucid as Html
 import qualified Lucid.Base as Html
@@ -14,6 +15,7 @@ import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Network.HTTP.Types as Http
 import qualified Paths_monadoc as Monadoc
 import qualified Witch
+import qualified Witch.Encoding as Witch
 
 base ::
   Context.Context ->
@@ -122,7 +124,7 @@ route c r =
           Text.intercalate "/" p,
           if null q
             then Text.empty
-            else Witch.unsafeInto @Text.Text $ Http.renderQuery True q
+            else Witch.unsafeInto @Text.Text . Witch.into @(Witch.UTF_8 ByteString.ByteString) $ Http.renderQuery True q
         ]
 
 timestamp :: Timestamp.Timestamp -> Html.Html ()

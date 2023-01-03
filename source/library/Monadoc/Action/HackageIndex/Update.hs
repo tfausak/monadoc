@@ -35,6 +35,7 @@ import qualified Network.HTTP.Types as Http
 import qualified System.IO as IO
 import qualified System.IO.Temp as Temp
 import qualified Witch
+import qualified Witch.Encoding as Witch
 
 run :: HackageIndex.Model -> App.App ()
 run hackageIndex = do
@@ -54,7 +55,7 @@ run hackageIndex = do
   newSize <- HackageIndex.Insert.getSize
   let start = oldSize - 1024
       end = newSize - 1
-      range = Witch.into @ByteString.ByteString $ "bytes=" <> show start <> "-" <> show end
+      range = Witch.into @ByteString.ByteString . Witch.into @(Witch.UTF_8 ByteString.ByteString) $ "bytes=" <> show start <> "-" <> show end
   case compare oldSize newSize of
     GT ->
       Traced.throw
@@ -95,5 +96,5 @@ getActualSize response = do
   a <- case lookup Header.contentRange $ Client.responseHeaders response of
     Nothing -> Traced.throw $ MissingHeader.MissingHeader Header.contentRange
     Just c -> pure c
-  b <- Either.throw . Witch.tryInto @String . ByteString.drop 1 . snd $ ByteString.break (== 0x2f) a
+  b <- Either.throw . Witch.tryInto @String . Witch.into @(Witch.UTF_8 ByteString.ByteString) . ByteString.drop 1 . snd $ ByteString.break (== 0x2f) a
   Either.throw $ Read.tryRead b

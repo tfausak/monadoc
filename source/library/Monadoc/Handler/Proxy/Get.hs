@@ -17,6 +17,7 @@ import qualified Monadoc.Type.Url as Url
 import qualified Network.HTTP.Client as Client
 import qualified Network.Wai as Wai
 import qualified Witch
+import qualified Witch.Encoding as Witch
 
 handler ::
   Context.Context ->
@@ -49,6 +50,6 @@ makeRoute context url = Route.Proxy (makeHash context url) url
 makeHash :: Context.Context -> Url.Url -> Hash.Hash
 makeHash context =
   Hash.new
-    . Witch.from
+    . Witch.via @(Witch.UTF_8 ByteString.ByteString)
     . mappend (Config.salt $ Context.config context)
     . Witch.from
