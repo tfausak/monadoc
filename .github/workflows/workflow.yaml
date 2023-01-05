@@ -56,7 +56,7 @@ jobs:
       - run: mkdir artifact
 
       - id: artifact
-        run: echo 'directory=artifact/${{ matrix.platform }}' > $GITHUB_OUTPUT
+        run: echo 'directory=artifact/${{ matrix.platform }}' >> $GITHUB_OUTPUT
 
       - run: mkdir ${{ steps.artifact.outputs.directory }}
 
