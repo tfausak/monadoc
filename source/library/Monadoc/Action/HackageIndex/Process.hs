@@ -51,7 +51,6 @@ import qualified System.FilePath as FilePath
 import qualified System.IO as IO
 import qualified System.IO.Temp as Temp
 import qualified Witch
-import qualified Witch.Encoding as Witch
 
 run :: App.App ()
 run = do

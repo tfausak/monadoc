@@ -28,7 +28,6 @@ import qualified Patrol
 import qualified Patrol.Type.Event as Patrol.Event
 import qualified Patrol.Type.Request as Patrol.Request
 import qualified Witch
-import qualified Witch.Encoding as Witch
 
 middleware :: Context.Context -> Wai.Middleware
 middleware context handle request respond =

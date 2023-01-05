@@ -16,12 +16,6 @@ all =
         CronEntry.task = Task.Vacuum
       },
     CronEntry.CronEntry
-      { CronEntry.guid = Just . Witch.from $ Uuid.fromWords64 0x0baa03dc275b4cfe 0x8675199ac671132f,
-        CronEntry.runAt = Witch.from Time.epoch,
-        CronEntry.schedule = Witch.from Cron.everyMinute,
-        CronEntry.task = Task.ProcessHackageIndex
-      },
-    CronEntry.CronEntry
       { CronEntry.guid = Just . Witch.from $ Uuid.fromWords64 0xae002a3a3c4f47b7 0xbd4109231f655721,
         CronEntry.runAt = Witch.from Time.epoch,
         CronEntry.schedule = Witch.from Cron.everyMinute,
@@ -42,5 +36,12 @@ CronEntry.CronEntry
     CronEntry.runAt = Witch.from Time.epoch,
     CronEntry.schedule = Witch.from Cron.everyMinute,
     CronEntry.task = Task.ProcessUploads
+  }
+
+CronEntry.CronEntry
+  { CronEntry.guid = Just . Witch.from $ Uuid.fromWords64 0x0baa03dc275b4cfe 0x8675199ac671132f,
+    CronEntry.runAt = Witch.from Time.epoch,
+    CronEntry.schedule = Witch.from Cron.everyMinute,
+    CronEntry.task = Task.ProcessHackageIndex
   }
 -}

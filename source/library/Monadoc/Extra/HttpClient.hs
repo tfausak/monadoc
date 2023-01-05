@@ -7,7 +7,6 @@ import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Types as Http
 import qualified Paths_monadoc as Monadoc
 import qualified Witch
-import qualified Witch.Encoding as Witch
 
 ensureUserAgent :: Client.Request -> Client.Request
 ensureUserAgent request =

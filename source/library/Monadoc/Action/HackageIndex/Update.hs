@@ -35,7 +35,6 @@ import qualified Network.HTTP.Types as Http
 import qualified System.IO as IO
 import qualified System.IO.Temp as Temp
 import qualified Witch
-import qualified Witch.Encoding as Witch
 
 run :: HackageIndex.Model -> App.App ()
 run hackageIndex = do

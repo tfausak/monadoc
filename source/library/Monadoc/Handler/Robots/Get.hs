@@ -8,7 +8,6 @@ import qualified Network.HTTP.Types as Http
 import qualified Network.HTTP.Types.Header as Http
 import qualified Network.Wai as Wai
 import qualified Witch
-import qualified Witch.Encoding as Witch
 
 handler :: Handler.Handler
 handler _ respond = do

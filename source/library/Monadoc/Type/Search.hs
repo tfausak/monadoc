@@ -6,7 +6,6 @@ import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
 import qualified Lucid as Html
 import qualified Witch
-import qualified Witch.Encoding as Witch
 
 newtype Search
   = Search Text.Text

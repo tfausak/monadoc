@@ -34,7 +34,6 @@ import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Types as Http
 import qualified Witch
-import qualified Witch.Encoding as Witch
 
 run :: App.App ()
 run = do

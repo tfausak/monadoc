@@ -12,7 +12,6 @@ import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Monadoc.Extra.Either as Either
 import qualified Test.QuickCheck as QuickCheck
 import qualified Witch
-import qualified Witch.Encoding as Witch
 import qualified Witch.Utility as Witch
 
 newtype Hash

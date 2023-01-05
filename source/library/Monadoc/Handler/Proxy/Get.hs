@@ -17,7 +17,6 @@ import qualified Monadoc.Type.Url as Url
 import qualified Network.HTTP.Client as Client
 import qualified Network.Wai as Wai
 import qualified Witch
-import qualified Witch.Encoding as Witch
 
 handler ::
   Context.Context ->

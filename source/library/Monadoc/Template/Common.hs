@@ -15,7 +15,6 @@ import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Network.HTTP.Types as Http
 import qualified Paths_monadoc as Monadoc
 import qualified Witch
-import qualified Witch.Encoding as Witch
 
 base ::
   Context.Context ->

@@ -19,7 +19,6 @@ import qualified Network.Wai as Wai
 import qualified System.Directory as Directory
 import qualified System.FilePath as FilePath
 import qualified Witch
-import qualified Witch.Encoding as Witch
 
 fileResponse ::
   Http.Status ->
