@@ -8,7 +8,7 @@ on:
 jobs:
 
   cabal:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Cabal
     steps:
       - uses: actions/checkout@v3
@@ -30,7 +30,7 @@ jobs:
           fail-on: status
 
   ormolu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Ormolu
     steps:
       - uses: actions/checkout@v3
@@ -42,10 +42,13 @@ jobs:
       matrix:
         include:
           - platform: macos
+            version: 12
           - platform: ubuntu
+            version: 22.04
           - platform: windows
+            version: 2022
             extension: .exe
-    runs-on: ${{ matrix.platform }}-latest
+    runs-on: ${{ matrix.platform }}-${{ matrix.version }}
     name: Build on ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v3
@@ -53,7 +56,7 @@ jobs:
       - run: mkdir artifact
 
       - id: artifact
-        run: echo '::set-output name=directory::artifact/${{ matrix.platform }}'
+        run: echo 'directory=artifact/${{ matrix.platform }}' > "$GITHUB_OUTPUT"
 
       - run: mkdir ${{ steps.artifact.outputs.directory }}
 
@@ -108,7 +111,7 @@ jobs:
 
   docker:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Docker
     steps:
       - uses: actions/checkout@v3
@@ -149,7 +152,7 @@ jobs:
 
   deploy:
     needs: docker
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Deploy
     if: github.event_name != 'schedule' && github.ref == 'refs/heads/main'
     steps:
