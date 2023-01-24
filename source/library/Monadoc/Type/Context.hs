@@ -36,13 +36,13 @@ fromConfig name cfg = do
   Monad.when (Config.version cfg) $ do
     Say.sayString version
     Exception.throwM Exit.ExitSuccess
+  let poolConfig =
+        Pool.defaultPoolConfig
+          (Sql.open $ Config.sql cfg)
+          Sql.close
+          60
+          (if Config.sql cfg == ":memory:" then 1 else 8)
   Context cfg
     <$> Tls.newTlsManager
-    <*> Pool.newPool
-      Pool.PoolConfig
-        { Pool.createResource = Sql.open $ Config.sql cfg,
-          Pool.freeResource = Sql.close,
-          Pool.poolCacheTTL = 60,
-          Pool.poolMaxResources = if Config.sql cfg == ":memory:" then 1 else 8
-        }
+    <*> Pool.newPool poolConfig
     <*> Directory.getTemporaryDirectory

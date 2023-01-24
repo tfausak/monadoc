@@ -1,7 +1,1 @@
 packages: .
-
--- https://github.com/haskell/double-conversion/issues/33
-source-repository-package
-  location: https://github.com/haskell/double-conversion
-  tag: 5d092e0664442eaac8ae1d101dba57ce9b1c9b03
-  type: git

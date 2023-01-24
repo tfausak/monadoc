@@ -99,7 +99,7 @@ jobs:
 
       - uses: svenstaro/upx-action@v2
         with:
-          file: ${{ steps.artifact.outputs.directory }}/monadoc${{ matrix.extension }}
+          files: ${{ steps.artifact.outputs.directory }}/monadoc${{ matrix.extension }}
 
       - uses: actions/upload-artifact@v3
         with:

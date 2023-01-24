@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: monadoc
-version: 0.2023.1.4
+version: 0.2023.1.23
 
 build-type: Simple
 category: Documentation
@@ -94,7 +94,7 @@ library
     , network-uri ^>= 2.6.4
     , patrol ^>= 0.1.0
     , QuickCheck ^>= 2.14.2
-    , resource-pool ^>= 0.3.1
+    , resource-pool ^>= 0.4
     , say ^>= 0.1.0
     , sqlite-simple ^>= 0.4.18
     , stm ^>= 2.5.1

@@ -8,6 +8,8 @@ import qualified Data.Aeson as Aeson
 import qualified Data.Bifunctor as Bifunctor
 import qualified Data.Map as Map
 import qualified Data.Text as Text
+import qualified Data.Version as Version
+import qualified GHC.Stack as Stack
 import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Exception.Found as Found
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
@@ -18,11 +20,13 @@ import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Network.Wai.Handler.Warp as Warp
+import qualified Paths_monadoc as Monadoc
 import qualified Patrol
 import qualified Patrol.Client as Patrol
 import qualified Patrol.Type.Event as Patrol.Event
 import qualified Patrol.Type.Exception as Patrol.Exception
 import qualified Patrol.Type.Exceptions as Patrol.Exceptions
+import qualified Patrol.Type.Frame as Patrol.Frame
 import qualified Patrol.Type.Request as Patrol.Request
 import qualified Patrol.Type.Stacktrace as Patrol.Stacktrace
 import qualified System.Environment as Environment
@@ -54,7 +58,7 @@ run f exception = Monad.when (shouldNotify exception) $ do
                               Nothing -> Patrol.Exception.fromSomeException exception
                               Just (Traced.Traced e s) ->
                                 (Patrol.Exception.fromSomeException e)
-                                  { Patrol.Exception.stacktrace = Just $ Patrol.Stacktrace.fromCallStack s
+                                  { Patrol.Exception.stacktrace = Just $ makeStacktrace s
                                   }
                           ]
                       },
@@ -76,3 +80,13 @@ shouldNotify e =
     && Exception.isNotType @UnknownRoute.UnknownRoute e
     && Exception.isNotType @MethodNotAllowed.MethodNotAllowed e
     && Exception.isNotType @Found.Found e
+
+makeStacktrace :: Stack.CallStack -> Patrol.Stacktrace.Stacktrace
+makeStacktrace callStack =
+  let stacktrace = Patrol.Stacktrace.fromCallStack callStack
+      f x =
+        x
+          { Patrol.Frame.contextLine = Text.pack "... " <> Patrol.Frame.function x <> Text.pack " ...",
+            Patrol.Frame.inApp = Just $ Patrol.Frame.package x == Text.pack ("monadoc-" <> Version.showVersion Monadoc.version <> "-inplace")
+          }
+   in stacktrace {Patrol.Stacktrace.frames = f <$> Patrol.Stacktrace.frames stacktrace}
