@@ -4,14 +4,14 @@
       "owner": "hspec",
       "pattern": [
         {
-          "regexp": "^[^ ]* *(.+?):(\\d+):(\\d+): ",
+          "column": 3,
           "file": 1,
           "line": 2,
-          "column": 3
+          "regexp": "^[^ ]* *(.+?):(\\d+):(\\d+): "
         },
         {
-          "regexp": "^  \\d+\\) (.+)",
-          "message": 1
+          "message": 1,
+          "regexp": "^  \\d+\\) (.+)"
         }
       ]
     }

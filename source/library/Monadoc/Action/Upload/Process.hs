@@ -15,8 +15,6 @@ import qualified Distribution.Types.Component as Cabal
 import qualified Distribution.Types.DependencyMap as Cabal
 import qualified Distribution.Types.Version as Cabal
 import qualified Distribution.Utils.ShortText as Cabal
-import qualified Formatting as F
-import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Action.Component.Upsert as Component.Upsert
 import qualified Monadoc.Action.Dependency.Upsert as Dependency.Upsert
@@ -46,7 +44,6 @@ import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.ComponentType as ComponentType
 import qualified Monadoc.Type.Hash as Hash
-import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.ModuleType as ModuleType
 import qualified Monadoc.Type.PackageName as PackageName
@@ -56,7 +53,6 @@ run :: App.App ()
 run = do
   keys <- App.Sql.query_ "select key from upload order by key desc"
   Monad.forM_ keys $ \(Sql.Only key) -> do
-    App.Log.debug $ F.sformat Key.format key
     rows <-
       App.Sql.query
         "select * from upload \

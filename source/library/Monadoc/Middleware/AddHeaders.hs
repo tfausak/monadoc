@@ -1,22 +1,20 @@
 module Monadoc.Middleware.AddHeaders where
 
 import qualified Data.Function as Function
-import qualified Data.List as List
-import qualified Data.Maybe as Maybe
 import qualified Monadoc.Constant.Header as Header
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
 
-middleware :: String -> Wai.Middleware
-middleware base =
-  Wai.modifyResponse . Wai.mapResponseHeaders . addHeaders $
-    Maybe.catMaybes
-      [ Just contentSecurityPolicy,
-        Just (Header.referrerPolicy, "no-referrer"),
-        Just (Header.contentTypeOptions, "nosniff"),
-        Just (Header.frameOptions, "DENY"),
-        Just (Header.xssProtection, "1; mode=block"),
-        if List.isPrefixOf "https:" base then Just strictTransportSecurity else Nothing
+middleware :: Wai.Middleware
+middleware =
+  Wai.modifyResponse . Wai.mapResponseHeaders $
+    addHeaders
+      [ contentSecurityPolicy,
+        (Header.referrerPolicy, "no-referrer"),
+        (Header.contentTypeOptions, "nosniff"),
+        (Header.frameOptions, "DENY"),
+        (Header.xssProtection, "1; mode=block"),
+        strictTransportSecurity
       ]
 
 contentSecurityPolicy :: Http.Header

@@ -18,4 +18,4 @@ userAgent :: ByteString.ByteString
 userAgent =
   "Monadoc/"
     <> Witch.via @(Witch.UTF_8 ByteString.ByteString) (Version.showVersion Monadoc.version)
-    <> " (https://github.com/tfausak/monadoc)"
+    <> " (+https://github.com/tfausak/monadoc)"

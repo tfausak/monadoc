@@ -1,8 +1,3 @@
-app = "green-hill-3802"
-
-[build]
-image = "ghcr.io/tfausak/monadoc:latest"
-
 [env]
 MONADOC_BASE_URL = "https://monadoc.com"
 

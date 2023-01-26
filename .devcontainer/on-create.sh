@@ -10,5 +10,5 @@ fi
 
 for tool in cabal-fmt hlint ormolu
 do
-  tools/cabal-shim.sh "$tool" --version
+  .devcontainer/cabal-shim.sh "$tool" --version
 done
