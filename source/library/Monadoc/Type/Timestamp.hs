@@ -59,7 +59,7 @@ instance Witch.From Tar.EpochTime Timestamp where
           . (*) pico
           . Witch.from
 
-getCurrentTime :: IO.MonadIO m => m Timestamp
+getCurrentTime :: (IO.MonadIO m) => m Timestamp
 getCurrentTime = Witch.into @Timestamp <$> IO.liftIO Time.getCurrentTime
 
 genUtcTime :: QuickCheck.Gen Time.UTCTime

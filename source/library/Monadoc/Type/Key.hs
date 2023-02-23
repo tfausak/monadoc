@@ -37,7 +37,7 @@ instance Witch.From (Key a) Text.Text where
 zero :: Key a
 zero = Witch.from @Int 0
 
-format :: forall a r. Typeable.Typeable a => F.Format r (Key a -> r)
+format :: forall a r. (Typeable.Typeable a) => F.Format r (Key a -> r)
 format = F.later $ \key ->
   F.bprint
     (F.string F.% "#" F.% F.int)

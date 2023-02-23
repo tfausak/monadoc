@@ -22,7 +22,7 @@ data Flag
   | Version
   deriving (Eq, Show)
 
-fromArguments :: Exception.MonadThrow m => [String] -> m [Flag]
+fromArguments :: (Exception.MonadThrow m) => [String] -> m [Flag]
 fromArguments arguments = do
   let (flags, args, opts, errs) =
         Console.getOpt' Console.Permute options arguments

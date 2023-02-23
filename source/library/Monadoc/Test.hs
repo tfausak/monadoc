@@ -35,7 +35,7 @@ arbitrary = arbitraryWith id
 arbitraryWith :: (QuickCheck.Arbitrary a, IO.MonadIO m) => (a -> a) -> m a
 arbitraryWith f = fmap f . IO.liftIO $ QuickCheck.generate QuickCheck.arbitrary
 
-exceptionSelector :: forall e. Exception.Exception e => Hspec.Selector Exception.SomeException
+exceptionSelector :: forall e. (Exception.Exception e) => Hspec.Selector Exception.SomeException
 exceptionSelector x
   | Just (Traced.Traced y _) <- Exception.fromException x = exceptionSelector @e y
   | Just _ <- Exception.fromException @e x = True
@@ -88,10 +88,10 @@ expectTryFrom s expected = case Witch.tryFrom s of
   Left e -> Hspec.expectationFailure $ Exception.displayException e
   Right actual -> expected `Hspec.shouldBe` actual
 
-fromField :: Sql.FromField b => Sql.SQLData -> Sql.Ok b
+fromField :: (Sql.FromField b) => Sql.SQLData -> Sql.Ok b
 fromField = Sql.fromField . flip Sql.Field 0
 
-fromRow :: Sql.FromRow b => [Sql.SQLData] -> Sql.Ok b
+fromRow :: (Sql.FromRow b) => [Sql.SQLData] -> Sql.Ok b
 fromRow xs = State.evalStateT (Reader.runReaderT (Sql.unRP Sql.fromRow) . Sql.RowParseRO $ length xs) (0, xs)
 
 propertyJson :: (Eq a, Aeson.FromJSON a, Show a, Aeson.ToJSON a) => a -> QuickCheck.Property

@@ -14,13 +14,13 @@ isAsync e =
     || isType @Exception.AsyncException e
     || isType @Exception.SomeAsyncException e
 
-isNotType :: forall e. Exception.Exception e => Exception.SomeException -> Bool
+isNotType :: forall e. (Exception.Exception e) => Exception.SomeException -> Bool
 isNotType = not . isType @e
 
 isSync :: Exception.SomeException -> Bool
 isSync = not . isAsync
 
-isType :: forall e. Exception.Exception e => Exception.SomeException -> Bool
+isType :: forall e. (Exception.Exception e) => Exception.SomeException -> Bool
 isType x
   | Just (Traced.Traced y _) <- Exception.fromException x = isType @e y
   | Just _ <- Exception.fromException @e x = True

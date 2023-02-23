@@ -45,7 +45,7 @@ parseMethod :: Http.Method -> Either (Witch.TryFromException Http.Method Http.St
 parseMethod m = Bifunctor.first (const $ Witch.TryFromException m Nothing) $ Http.parseMethod m
 
 getHandler ::
-  Exception.MonadThrow m =>
+  (Exception.MonadThrow m) =>
   Context.Context ->
   Http.StdMethod ->
   Route.Route ->
@@ -68,7 +68,7 @@ getHandler context method route = case route of
   Route.Version p v -> resource method route . Map.singleton Http.GET $ Version.Get.handler p v
 
 resource ::
-  Exception.MonadThrow m =>
+  (Exception.MonadThrow m) =>
   Http.StdMethod ->
   Route.Route ->
   Map.Map Http.StdMethod Handler.Handler ->

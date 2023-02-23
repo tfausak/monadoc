@@ -39,7 +39,7 @@ withBlob database symbolic table column key write =
     Sqlite.blobClose
 
 withBlobLifted ::
-  Control.MonadBaseControl IO m =>
+  (Control.MonadBaseControl IO m) =>
   Sqlite.Database ->
   Text.Text ->
   Text.Text ->

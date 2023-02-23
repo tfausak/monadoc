@@ -132,7 +132,7 @@ handlePreference constraints entry pkg = do
     . Map.insert packageName
     $ Witch.into @Constraint.Constraint versionRange
 
-handlePackageJson :: Applicative m => Tar.Entry -> m ()
+handlePackageJson :: (Applicative m) => Tar.Entry -> m ()
 handlePackageJson _ = pure ()
 
 handleCabal ::
