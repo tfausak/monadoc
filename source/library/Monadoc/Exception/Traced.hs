@@ -14,10 +14,10 @@ instance Exception.Exception Traced where
       <> Stack.prettyCallStack s
 
 throw :: (Stack.HasCallStack, Exception.Exception e, Exception.MonadThrow m) => e -> m a
-throw = Exception.throwM . traced . Exception.toException
+throw = Exception.throwM . traced
 
-traced :: (Stack.HasCallStack) => Exception.SomeException -> Traced
-traced = flip Traced Stack.callStack
+traced :: (Stack.HasCallStack, Exception.Exception e) => e -> Traced
+traced = flip Traced Stack.callStack . Exception.toException
 
 wrap :: (Stack.HasCallStack, Exception.MonadCatch m) => m a -> m a
 wrap = Exception.handleAll throw
