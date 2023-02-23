@@ -11,13 +11,13 @@ data Model a = Model
   }
   deriving (Eq, Show)
 
-instance Sql.FromRow a => Sql.FromRow (Model a) where
+instance (Sql.FromRow a) => Sql.FromRow (Model a) where
   fromRow = Model <$> Sql.field <*> Sql.fromRow
 
-instance Sql.ToRow a => Sql.ToRow (Model a) where
+instance (Sql.ToRow a) => Sql.ToRow (Model a) where
   toRow model = Sql.toField (key model) : Sql.toRow (value model)
 
-instance QuickCheck.Arbitrary a => QuickCheck.Arbitrary (Model a) where
+instance (QuickCheck.Arbitrary a) => QuickCheck.Arbitrary (Model a) where
   arbitrary =
     Model
       <$> QuickCheck.arbitrary

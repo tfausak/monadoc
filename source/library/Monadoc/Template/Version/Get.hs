@@ -222,5 +222,5 @@ markup context =
       Haddock.markupWarning = Html.div_ [Html.class_ "alert alert-warning"]
     }
 
-clamp :: Ord a => a -> a -> a -> a
+clamp :: (Ord a) => a -> a -> a -> a
 clamp lo hi = max lo . min hi

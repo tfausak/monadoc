@@ -11,7 +11,7 @@ import qualified Monadoc.Type.Query as Query
 import qualified Witch
 
 withConnection ::
-  Control.MonadBaseControl IO m =>
+  (Control.MonadBaseControl IO m) =>
   (Sql.Connection -> App.AppT m a) ->
   App.AppT m a
 withConnection callback = do
@@ -21,10 +21,10 @@ withConnection callback = do
 query :: (Sql.FromRow r, Sql.ToRow q) => Query.Query -> q -> App.App [r]
 query q r = withConnection $ \c -> IO.liftIO $ Sql.query c (Witch.from q) r
 
-query_ :: Sql.FromRow r => Query.Query -> App.App [r]
+query_ :: (Sql.FromRow r) => Query.Query -> App.App [r]
 query_ q = withConnection $ \c -> IO.liftIO . Sql.query_ c $ Witch.from q
 
-execute :: Sql.ToRow q => Query.Query -> q -> App.App ()
+execute :: (Sql.ToRow q) => Query.Query -> q -> App.App ()
 execute q r = withConnection $ \c -> IO.liftIO $ Sql.execute c (Witch.from q) r
 
 execute_ :: Query.Query -> App.App ()

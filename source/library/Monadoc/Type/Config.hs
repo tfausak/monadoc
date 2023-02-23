@@ -50,7 +50,7 @@ initial =
       version = False
     }
 
-applyFlag :: Exception.MonadThrow m => Config -> Flag.Flag -> m Config
+applyFlag :: (Exception.MonadThrow m) => Config -> Flag.Flag -> m Config
 applyFlag config flag = case flag of
   Flag.Base str -> pure config {base = List.ensureSuffix '/' str}
   Flag.Data str -> pure config {data_ = str}
@@ -75,5 +75,5 @@ applyFlag config flag = case flag of
   Flag.Sql str -> pure config {sql = str}
   Flag.Version -> pure config {version = True}
 
-fromFlags :: Exception.MonadThrow m => [Flag.Flag] -> m Config
+fromFlags :: (Exception.MonadThrow m) => [Flag.Flag] -> m Config
 fromFlags = Monad.foldM applyFlag initial

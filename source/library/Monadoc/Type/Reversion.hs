@@ -37,14 +37,14 @@ instance Witch.TryFrom String Reversion where
 instance Witch.TryFrom Text.Text Reversion where
   tryFrom = Witch.eitherTryFrom $ Witch.tryFrom . Witch.into @String
 
-parseReversion :: Cabal.CabalParsing m => m Reversion
+parseReversion :: (Cabal.CabalParsing m) => m Reversion
 parseReversion = do
   v <- parseVersion
   r <- parseRevision
   Cabal.eof
   pure Reversion {revision = r, version = v}
 
-parseVersion :: Cabal.CabalParsing m => m VersionNumber.VersionNumber
+parseVersion :: (Cabal.CabalParsing m) => m VersionNumber.VersionNumber
 parseVersion = do
   -- This can't use 'Cabal.parsec' because the instance for 'Cabal.Version'
   -- parses and discards tags. That means @"1-2"@ would successfully parse when
@@ -53,7 +53,7 @@ parseVersion = do
     . Cabal.sepByNonEmpty Cabal.versionDigitParser
     $ Cabal.char '.'
 
-parseRevision :: Cabal.CabalParsing m => m Revision.Revision
+parseRevision :: (Cabal.CabalParsing m) => m Revision.Revision
 parseRevision = do
   Monad.void $ Cabal.oneOf "-+"
   Witch.from @Word <$> Cabal.integral

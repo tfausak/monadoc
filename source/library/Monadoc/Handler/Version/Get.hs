@@ -75,7 +75,7 @@ handler packageName reversion _ respond = do
     . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)]
     $ Template.render context breadcrumbs package version upload hackageUser maybeLatest packageMeta components
 
-selectFirst :: Exception.MonadThrow m => m [a] -> m a
+selectFirst :: (Exception.MonadThrow m) => m [a] -> m a
 selectFirst query = do
   rows <- query
   case rows of

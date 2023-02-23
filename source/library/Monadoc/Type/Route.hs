@@ -39,7 +39,7 @@ data Route
   | Version PackageName.PackageName Reversion.Reversion
   deriving (Eq, Show)
 
-parse :: Exception.MonadThrow m => [Text.Text] -> Http.Query -> m Route
+parse :: (Exception.MonadThrow m) => [Text.Text] -> Http.Query -> m Route
 parse path query = case path of
   [] -> pure Home
   ["apple-touch-icon.png"] -> pure AppleTouchIcon
@@ -102,7 +102,7 @@ fromQuery query =
     . flip lookup query
 
 toQuery ::
-  Witch.From a ByteString.ByteString =>
+  (Witch.From a ByteString.ByteString) =>
   ByteString.ByteString ->
   a ->
   Http.QueryItem

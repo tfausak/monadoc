@@ -32,7 +32,7 @@ strictTransportSecurity =
 addHeaders :: [Http.Header] -> Http.ResponseHeaders -> Http.ResponseHeaders
 addHeaders = foldr addIfMissing
 
-addIfMissing :: Eq a => (a, b) -> [(a, b)] -> [(a, b)]
+addIfMissing :: (Eq a) => (a, b) -> [(a, b)] -> [(a, b)]
 addIfMissing = addIfMissingBy $ Function.on (==) fst
 
 addIfMissingBy :: (a -> a -> Bool) -> a -> [a] -> [a]

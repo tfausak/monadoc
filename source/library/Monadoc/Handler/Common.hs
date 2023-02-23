@@ -47,7 +47,7 @@ htmlResponse status headers =
   Wai.responseLBS status ((Http.hContentType, ContentType.html) : headers)
     . Html.renderBS
 
-makeETag :: Hashable.Hashable a => a -> ByteString.ByteString
+makeETag :: (Hashable.Hashable a) => a -> ByteString.ByteString
 makeETag = Witch.via @(Witch.UTF_8 ByteString.ByteString) . F.format ("\"" F.% F.int F.% "\"") . Hashable.hashWithSalt 0
 
 statusResponse :: Http.Status -> Http.ResponseHeaders -> Wai.Response
