@@ -34,4 +34,4 @@ zero :: Revision
 zero = Witch.from @Word 0
 
 increment :: Revision -> Revision
-increment = Witch.into @Revision . succ . Witch.into @Word
+increment = Witch.into @Revision . (+ 1) . Witch.into @Word

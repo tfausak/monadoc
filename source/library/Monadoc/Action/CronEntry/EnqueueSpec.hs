@@ -46,13 +46,16 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Enqueue" $ do
 
 nextMinute :: Timestamp.Timestamp -> Timestamp.Timestamp
 nextMinute =
-  let f t = Time.addUTCTime 60 t
-        { Time.utctDayTime =
-            let scale = 60_000_000_000_000 :: Integer
-            in Time.picosecondsToDiffTime
-                  . (*) scale
-                  . flip div scale
-                  . Time.diffTimeToPicoseconds
-                  $ Time.utctDayTime t
-        }
-  in Witch.into @Timestamp.Timestamp . f . Witch.into @Time.UTCTime
+  let f t =
+        Time.addUTCTime
+          60
+          t
+            { Time.utctDayTime =
+                let scale = 60_000_000_000_000 :: Integer
+                 in Time.picosecondsToDiffTime
+                      . (*) scale
+                      . flip div scale
+                      . Time.diffTimeToPicoseconds
+                      $ Time.utctDayTime t
+            }
+   in Witch.into @Timestamp.Timestamp . f . Witch.into @Time.UTCTime
