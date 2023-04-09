@@ -6,21 +6,12 @@
         "taylorfausak.purple-yolk"
       ],
       "settings": {
-        "editor.formatOnSave": true,
-        "editor.rulers": [
-          80
-        ],
-        "purple-yolk.cabal.formatter.command": ".devcontainer/cabal-shim.sh cabal-fmt --no-cabal-file --no-tabular",
-        "purple-yolk.haskell.formatter.command": ".devcontainer/cabal-shim.sh ormolu --no-cabal",
-        "purple-yolk.haskell.interpreter.command": "cabal repl --repl-options -ddump-json",
-        "purple-yolk.haskell.linter.command": ".devcontainer/cabal-shim.sh hlint --json --no-exit-code -",
-        "purple-yolk.haskell.linter.onSave": true
+        "editor.formatOnSave": false,
+        "purple-yolk.haskell.linter.onSave": false
       }
     }
   },
   "dockerComposeFile": "../compose.yaml",
-  "initializeCommand": ".devcontainer/initialize.sh",
-  "onCreateCommand": ".devcontainer/on-create.sh",
   "service": "devcontainer",
   "workspaceFolder": "/workspaces/monadoc"
 }

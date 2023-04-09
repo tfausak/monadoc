@@ -15,7 +15,7 @@ import qualified Monadoc.Type.Model as Model
 
 run :: Maybe Job.Model -> App.App ()
 run maybeJob = case maybeJob of
-  Nothing -> IO.liftIO $ Concurrent.threadDelay 1000000
+  Nothing -> IO.liftIO $ Concurrent.threadDelay 1_000_000
   Just job -> do
     let task = Job.task $ Model.value job
     App.Log.info $

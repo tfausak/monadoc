@@ -52,7 +52,7 @@ run hackageIndex = do
       [] -> Traced.throw NotFound.NotFound
       (key, size) : _ -> pure (key :: Blob.Key, size)
   newSize <- HackageIndex.Insert.getSize
-  let start = oldSize - 1024
+  let start = oldSize - 1_024
       end = newSize - 1
       range = Witch.into @ByteString.ByteString . Witch.into @(Witch.UTF_8 ByteString.ByteString) $ "bytes=" <> show start <> "-" <> show end
   case compare oldSize newSize of

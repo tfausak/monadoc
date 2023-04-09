@@ -1,5 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-
 module Monadoc.Type.Key where
 
 import qualified Data.Int as Int

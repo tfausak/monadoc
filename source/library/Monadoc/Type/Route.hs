@@ -68,7 +68,7 @@ render route = case route of
   Manifest -> (["static", "monadoc.webmanifest"], [])
   Module p v c m -> (["package", Witch.from p, "version", Witch.from v, "component", Witch.from c, "module", Witch.from m], [])
   Package p -> (["package", Witch.from p], [])
-  Proxy h u -> (["proxy", Witch.from h, Witch.over (Uri.escapeURIString Uri.isUnescapedInURIComponent) $ Witch.from u], [])
+  Proxy h u -> (["proxy", Witch.from h, Witch.from . Uri.escapeURIString Uri.isUnescapedInURIComponent $ Witch.from u], [])
   Robots -> (["robots.txt"], [])
   Script -> (["static", "monadoc.js"], [])
   Search q -> (["search"], if Search.isBlank q then [] else [toQuery "query" q])

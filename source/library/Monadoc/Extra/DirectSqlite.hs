@@ -10,7 +10,7 @@ import qualified System.IO.Unsafe as Unsafe
 
 unsafeBlobRead :: Sqlite.Blob -> Int -> Int -> IO [ByteString.ByteString]
 unsafeBlobRead blob total offset = do
-  let size = min 8192 (total - offset)
+  let size = min 8_192 (total - offset)
   if size > 0
     then Unsafe.unsafeInterleaveIO $ do
       chunk <- Sqlite.blobRead blob size offset

@@ -51,7 +51,7 @@ instance Hashable.Hashable Timestamp where
 
 instance Witch.From Tar.EpochTime Timestamp where
   from =
-    let pico = 1000000000000 :: Integer
+    let pico = 1_000_000_000_000 :: Integer
      in Witch.from
           . Time.posixSecondsToUTCTime
           . Time.secondsToNominalDiffTime
@@ -68,7 +68,7 @@ genUtcTime = Time.UTCTime <$> genDay <*> genDiffTime
 -- The Julian Day Number (JDN) @-678941@ is @0001-01-01@. The JDN @2973483@ is
 -- @9999-12-31@. This function generates a day between those two, inclusive.
 genDay :: QuickCheck.Gen Time.Day
-genDay = Time.ModifiedJulianDay <$> QuickCheck.chooseInteger (-678941, 2973483)
+genDay = Time.ModifiedJulianDay <$> QuickCheck.chooseInteger (-678_941, 2_973_483)
 
 genDiffTime :: QuickCheck.Gen Time.DiffTime
-genDiffTime = Time.picosecondsToDiffTime <$> QuickCheck.chooseInteger (0, 24 * 60 * 60 * 1000000000000)
+genDiffTime = Time.picosecondsToDiffTime <$> QuickCheck.chooseInteger (0, 24 * 60 * 60 * 1_000_000_000_000)

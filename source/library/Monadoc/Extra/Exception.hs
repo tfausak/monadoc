@@ -1,6 +1,3 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-
 module Monadoc.Extra.Exception where
 
 import qualified Control.Concurrent.Async as Async

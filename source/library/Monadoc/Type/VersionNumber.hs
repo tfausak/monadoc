@@ -60,7 +60,7 @@ instance Witch.From VersionNumber Text.Text where
   from = Witch.via @String
 
 genVersion :: QuickCheck.Gen Cabal.Version
-genVersion = Cabal.mkVersion <$> QuickCheck.listOf1 (QuickCheck.chooseInt (0, 999999999))
+genVersion = Cabal.mkVersion <$> QuickCheck.listOf1 (QuickCheck.chooseInt (0, 999_999_999))
 
 zero :: VersionNumber
 zero = Witch.from Cabal.version0

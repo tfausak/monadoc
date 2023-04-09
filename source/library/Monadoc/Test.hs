@@ -1,6 +1,3 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-
 module Monadoc.Test where
 
 import qualified Control.Monad.Catch as Exception

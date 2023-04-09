@@ -45,15 +45,14 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Enqueue" $ do
     IO.liftIO $ result `Hspec.shouldNotBe` []
 
 nextMinute :: Timestamp.Timestamp -> Timestamp.Timestamp
-nextMinute = Witch.over @Time.UTCTime $ \t ->
-  Time.addUTCTime
-    60
-    t
-      { Time.utctDayTime =
-          let scale = 60000000000000 :: Integer
-           in Time.picosecondsToDiffTime
-                . (*) scale
-                . flip div scale
-                . Time.diffTimeToPicoseconds
-                $ Time.utctDayTime t
-      }
+nextMinute =
+  let f t = Time.addUTCTime 60 t
+        { Time.utctDayTime =
+            let scale = 60_000_000_000_000 :: Integer
+            in Time.picosecondsToDiffTime
+                  . (*) scale
+                  . flip div scale
+                  . Time.diffTimeToPicoseconds
+                  $ Time.utctDayTime t
+        }
+  in Witch.into @Timestamp.Timestamp . f . Witch.into @Time.UTCTime
