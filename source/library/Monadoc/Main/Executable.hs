@@ -23,13 +23,17 @@ executable :: IO ()
 executable = do
   name <- Environment.getProgName
   arguments <- Environment.getArgs
-  mainWith name arguments
+  environment <- Environment.getEnvironment
+  mainWith name arguments environment
 
-mainWith :: String -> [String] -> IO ()
-mainWith name arguments = do
+mainWith :: String -> [String] -> [(String, String)] -> IO ()
+mainWith name arguments environment = do
   mapM_ (flip IO.hSetBuffering IO.LineBuffering) [IO.stdout, IO.stderr]
 
-  flags <- Flag.fromArguments arguments
+  flags <-
+    (<>)
+      <$> Flag.fromEnvironment environment
+      <*> Flag.fromArguments arguments
   config <- Config.fromFlags flags
   context <- Context.fromConfig name config
 

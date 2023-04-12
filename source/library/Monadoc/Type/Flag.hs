@@ -1,6 +1,9 @@
 module Monadoc.Type.Flag where
 
 import qualified Control.Monad.Catch as Exception
+import qualified Data.Char as Char
+import qualified Data.List as List
+import qualified Data.Maybe as Maybe
 import qualified Monadoc.Exception.InvalidOption as InvalidOption
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Exception.UnexpectedArgument as UnexpectedArgument
@@ -30,6 +33,26 @@ fromArguments arguments = do
   mapM_ (Traced.throw . UnknownOption.UnknownOption) opts
   mapM_ (Traced.throw . UnexpectedArgument.UnexpectedArgument) args
   pure flags
+
+fromEnvironment :: (Exception.MonadThrow m) => [(String, String)] -> m [Flag]
+fromEnvironment =
+  fromArguments
+    . concat
+    . Maybe.mapMaybe
+      ( \(prefixed, value) -> do
+          stripped <- List.stripPrefix "MONADOC_" prefixed
+          pure
+            [ '-'
+                : '-'
+                : fmap
+                  ( \c -> case c of
+                      '_' -> '-'
+                      _ -> Char.toLower c
+                  )
+                  stripped,
+              value
+            ]
+      )
 
 options :: [Console.OptDescr Flag]
 options =

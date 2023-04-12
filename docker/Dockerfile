@@ -28,15 +28,4 @@ ENV MONADOC_SENTRY_DSN=
 ARG MONADOC_SHA
 ENV MONADOC_SHA="$MONADOC_SHA"
 
-CMD [ "sh", "-c", "exec /usr/local/bin/monadoc \
-  --base-url=$MONADOC_BASE_URL \
-  --commit-sha=$MONADOC_SHA \
-  --data-directory=$MONADOC_DATA_DIRECTORY \
-  --database-file=$MONADOC_DATABASE_FILE \
-  --hackage-url=$MONADOC_HACKAGE_URL \
-  --host-preference=$MONADOC_HOST_PREFERENCE \
-  --log-severity=$MONADOC_LOG_SEVERITY \
-  --port-number=$MONADOC_PORT_NUMBER \
-  --proxy-salt=$MONADOC_PROXY_SALT \
-  --sentry-dsn=$MONADOC_SENTRY_DSN" \
-  ]
+CMD /usr/local/bin/monadoc
