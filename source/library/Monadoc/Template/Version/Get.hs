@@ -48,7 +48,7 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
       revision = Upload.revision $ Model.value upload
       reversion = Reversion.Reversion {Reversion.revision = revision, Reversion.version = versionNumber}
       route = Route.Version packageName reversion
-      title = F.sformat ("Version " F.% F.stext F.% " :: Monadoc") (Witch.from reversion)
+      title = F.sformat ("Version" F.%+ F.stext F.%+ ":: Monadoc") (Witch.from reversion)
   Common.base context route breadcrumbs title $ do
     Monad.when (not . Upload.isPreferred $ Model.value upload)
       . Html.div_ [Html.class_ "alert alert-warning"]

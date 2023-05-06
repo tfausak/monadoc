@@ -20,7 +20,7 @@ run maybeJob = case maybeJob of
     let task = Job.task $ Model.value job
     App.Log.info $
       F.sformat
-        ("starting " F.% Key.format F.% ": " F.% F.shown)
+        ("starting" F.%+ Key.format F.% ":" F.%+ F.shown)
         (Model.key job)
         task
     before <- IO.liftIO Clock.getMonotonicTime
@@ -29,7 +29,7 @@ run maybeJob = case maybeJob of
     after <- IO.liftIO Clock.getMonotonicTime
     App.Log.info $
       F.sformat
-        ("finished " F.% Key.format F.% ": " F.% F.shown F.% " in " F.% F.fixed 3)
+        ("finished" F.%+ Key.format F.% ":" F.%+ F.shown F.%+ "in" F.%+ F.fixed 3)
         (Model.key job)
         task
         (after - before)

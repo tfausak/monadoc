@@ -24,7 +24,7 @@ runPragmas = do
 
 runPragma :: Query.Query -> App.App ()
 runPragma pragma = do
-  App.Log.debug $ F.sformat ("executing pragma: " F.% F.stext) (Witch.from pragma)
+  App.Log.debug $ F.sformat ("executing pragma:" F.%+ F.stext) (Witch.from pragma)
   App.Sql.execute_ pragma
 
 pragmas :: [Query.Query]

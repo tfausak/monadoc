@@ -22,7 +22,7 @@ run severity message = do
     timestamp <- Timestamp.getCurrentTime
     IO.liftIO . Say.hSay handle $
       F.sformat
-        (F.stext F.% " [" F.% F.string F.% "] " F.% F.stext)
+        (F.stext F.%+ "[" F.% F.string F.% "]" F.%+ F.stext)
         (Witch.from timestamp)
         (Witch.from severity)
         message

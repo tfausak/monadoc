@@ -24,7 +24,7 @@ run = do
     Just (job, cronEntry) -> do
       App.Log.debug $
         F.sformat
-          ("enqueued " F.% Key.format F.% " as " F.% Key.format)
+          ("enqueued" F.%+ Key.format F.%+ "as" F.%+ Key.format)
           (Model.key cronEntry)
           (Model.key job)
       run

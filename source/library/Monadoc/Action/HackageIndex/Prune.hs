@@ -15,8 +15,8 @@ run = do
   case rows of
     [] -> App.Log.debug "no hackage indexes to prune"
     keep : rest -> do
-      App.Log.debug $ F.sformat ("keeping " F.% Key.format) (Model.key keep)
+      App.Log.debug $ F.sformat ("keeping" F.%+ Key.format) (Model.key keep)
       Monad.forM_ rest $ \hackageIndex -> do
-        App.Log.debug $ F.sformat ("pruning " F.% Key.format) (Model.key hackageIndex)
+        App.Log.debug $ F.sformat ("pruning" F.%+ Key.format) (Model.key hackageIndex)
         App.Sql.execute "delete from hackageIndex where key = ?" [Model.key hackageIndex]
         App.Sql.execute "delete from blob where key = ?" [HackageIndex.blob $ Model.value hackageIndex]

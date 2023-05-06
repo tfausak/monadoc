@@ -55,6 +55,6 @@ statusResponse status headers =
   Wai.responseLBS status ((Http.hContentType, ContentType.text) : headers)
     . Witch.via @(Witch.UTF_8 LazyByteString.ByteString)
     $ F.format
-      (F.int F.% " " F.% F.text)
+      (F.int F.%+ F.text)
       (Http.statusCode status)
       (Witch.unsafeInto @LazyText.Text . Witch.into @(Witch.UTF_8 ByteString.ByteString) $ Http.statusMessage status)

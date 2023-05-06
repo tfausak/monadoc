@@ -22,4 +22,4 @@ run = do
       Nothing -> pure ()
       Just guid -> Monad.when (Set.notMember guid toKeep) $ do
         CronEntry.Delete.run guid
-        App.Log.debug $ F.sformat ("deleted static cron entry: " F.% F.stext) (Witch.from guid)
+        App.Log.debug $ F.sformat ("deleted static cron entry:" F.%+ F.stext) (Witch.from guid)

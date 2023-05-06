@@ -16,14 +16,14 @@ run cronEntry =
   case CronEntry.guid cronEntry of
     Nothing -> do
       model <- CronEntry.Insert.run cronEntry
-      App.Log.info $ F.sformat ("inserting dynamic " F.% Key.format) (Model.key model)
+      App.Log.info $ F.sformat ("inserting dynamic" F.%+ Key.format) (Model.key model)
       pure model
     Just guid -> do
       cronEntries <- App.Sql.query "select * from cronEntry where guid = ?" [guid]
       case cronEntries of
         [] -> do
           model <- CronEntry.Insert.run cronEntry
-          App.Log.info $ F.sformat ("inserted static " F.% Key.format) (Model.key model)
+          App.Log.info $ F.sformat ("inserted static" F.%+ Key.format) (Model.key model)
           pure model
         model : _ -> do
           let existing = Model.value model
@@ -33,6 +33,6 @@ run cronEntry =
             then do
               let newModel = model {Model.value = cronEntry}
               CronEntry.Update.run newModel
-              App.Log.info $ F.sformat ("updated static " F.% Key.format) (Model.key newModel)
+              App.Log.info $ F.sformat ("updated static" F.%+ Key.format) (Model.key newModel)
               pure newModel
             else pure model

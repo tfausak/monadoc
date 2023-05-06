@@ -37,6 +37,6 @@ beforeMainLoop context = do
   let config = Context.config context
   App.run context . App.Log.info $
     F.sformat
-      ("listening on " F.% F.shown F.% " port " F.% F.int)
+      ("listening on" F.%+ F.shown F.%+ "port" F.%+ F.int)
       (Config.host config)
       (Witch.into @Int $ Config.port config)

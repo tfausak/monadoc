@@ -24,7 +24,7 @@ render ::
   Html.Html ()
 render context route breadcrumbs package version module_ = do
   let moduleName = Module.name $ Model.value module_
-      title = F.sformat ("Module " F.% F.stext F.% " :: Monadoc") (Witch.from moduleName)
+      title = F.sformat ("Module" F.%+ F.stext F.%+ ":: Monadoc") (Witch.from moduleName)
   Common.base context route breadcrumbs title $ do
     -- TODO: Include identifiers exported by the module. This will require
     -- downloading each package's tarball, finding the sources of each module,

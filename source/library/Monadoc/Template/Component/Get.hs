@@ -51,7 +51,7 @@ render context breadcrumbs package version upload _ component _ modules dependen
             ComponentId.name = Component.name $ Model.value component
           }
       route = Route.Component packageName reversion componentId
-      title = F.sformat ("Component " F.% F.stext F.% " :: Monadoc") (Witch.from componentId)
+      title = F.sformat ("Component" F.%+ F.stext F.%+ ":: Monadoc") (Witch.from componentId)
   Common.base context route breadcrumbs title $ do
     Html.h2_ $ Html.toHtml componentId
     let moduleNames = fmap (\(_ Sql.:. m) -> Module.name $ Model.value m) modules

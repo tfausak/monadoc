@@ -26,7 +26,7 @@ render ::
 render context breadcrumbs package rows hackageUsers = do
   let packageName = Package.name $ Model.value package
       route = Route.Package packageName
-      title = F.sformat ("Package " F.% F.stext F.% " :: Monadoc") (Witch.from packageName)
+      title = F.sformat ("Package" F.%+ F.stext F.%+ ":: Monadoc") (Witch.from packageName)
   Common.base context route breadcrumbs title $ do
     Html.h2_ $ Html.toHtml packageName
     Html.h3_ "Uploads"

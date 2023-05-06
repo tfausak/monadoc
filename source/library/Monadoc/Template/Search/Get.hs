@@ -30,7 +30,7 @@ render ::
   [Package.Model Sql.:. Version.Model Sql.:. Upload.Model Sql.:. Component.Model Sql.:. Module.Model] ->
   Html.Html ()
 render context breadcrumbs query packages hackageUsers modules = do
-  let title = F.sformat ("Search " F.% F.stext F.% " :: Monadoc") (Witch.from query)
+  let title = F.sformat ("Search" F.%+ F.stext F.%+ ":: Monadoc") (Witch.from query)
   Common.base context (Route.Search query) breadcrumbs title $ do
     Html.h2_ "Search"
     Html.form_
