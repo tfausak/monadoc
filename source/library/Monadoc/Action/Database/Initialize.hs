@@ -12,14 +12,14 @@ import qualified Witch
 
 run :: App.App ()
 run = do
-  App.Log.info "initializing database"
+  App.Log.debug "initializing database"
   runPragmas
   runMigrations
   App.Log.debug "initialized database"
 
 runPragmas :: App.App ()
 runPragmas = do
-  App.Log.info "executing pragmas"
+  App.Log.debug "executing pragmas"
   mapM_ runPragma pragmas
 
 runPragma :: Query.Query -> App.App ()
@@ -37,6 +37,6 @@ pragmas =
 
 runMigrations :: App.App ()
 runMigrations = do
-  App.Log.info "running migrations"
+  App.Log.debug "running migrations"
   App.Sql.execute_ Migration.createTable
   mapM_ Migration.Migrate.run Migration.all

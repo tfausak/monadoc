@@ -3,8 +3,11 @@
     "devcontainer": {
       "command": "sh -exc 'while sleep 1m; do :; done'",
       "image": "public.ecr.aws/acilearning/haskell:9.6.1",
+      "init": true,
       "volumes": [
-        ".:/workspaces/monadoc"
+        ".:/workspaces/monadoc",
+        "./volumes/cabal/cache:/home/vscode/.cache/cabal",
+        "./volumes/cabal/state:/home/vscode/.local/state/cabal",
       ],
       "working_dir": "/workspaces/monadoc"
     }

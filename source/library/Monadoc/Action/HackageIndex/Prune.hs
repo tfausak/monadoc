@@ -13,9 +13,9 @@ run :: App.App ()
 run = do
   rows <- App.Sql.query_ "select * from hackageIndex where processedAt is not null order by processedAt desc"
   case rows of
-    [] -> App.Log.info "no hackage indexes to prune"
+    [] -> App.Log.debug "no hackage indexes to prune"
     keep : rest -> do
-      App.Log.info $ F.sformat ("keeping " F.% Key.format) (Model.key keep)
+      App.Log.debug $ F.sformat ("keeping " F.% Key.format) (Model.key keep)
       Monad.forM_ rest $ \hackageIndex -> do
         App.Log.debug $ F.sformat ("pruning " F.% Key.format) (Model.key hackageIndex)
         App.Sql.execute "delete from hackageIndex where key = ?" [Model.key hackageIndex]

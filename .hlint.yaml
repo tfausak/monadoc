@@ -1,56 +1,282 @@
-- flags: [ { default: false } ]
-- group: { name: dollar, enabled: true }
-- group: { name: generalise, enabled: true }
-- ignore: { name: Use infix }
-- ignore: { name: Use lambda-case }
-- ignore: { name: Use list comprehension }
-- ignore: { name: Use section }
-- ignore: { name: Use tuple-section }
-- ignore: { name: Use unless }
-
-- group:
-    name: Monadoc
-    rules:
-      - warn: { lhs: Data.IORef.newIORef, rhs: Control.Concurrent.STM.newTVarIO }
-
-- group:
-    name: Witch
-    rules:
-      - warn: { lhs: Prelude.fromEnum, rhs: Witch.from }
-      - warn: { lhs: Prelude.fromInteger, rhs: Witch.from }
-      - warn: { lhs: Prelude.fromIntegral, rhs: Witch.from }
-      - warn: { lhs: Prelude.fromRational, rhs: Witch.from }
-      - warn: { lhs: Prelude.realToFrac, rhs: Witch.from }
-      - warn: { lhs: Prelude.toEnum, rhs: Witch.from }
-
-# https://github.com/NorfairKing/haskell-dangerous-functions
-- group:
-    name: Danger
-    rules:
-      - warn: { lhs: Prelude.enumFrom, rhs: _, name: Avoid enumFrom }
-      - warn: { lhs: Prelude.enumFromThen, rhs: _, name: Avoid enumFromThen }
-      - warn: { lhs: Prelude.enumFromThenTo, rhs: _, name: Avoid enumFromThenTo }
-      - warn: { lhs: Prelude.enumFromTo, rhs: _, name: Avoid enumFromTo }
-      - warn: { lhs: Prelude.error, rhs: _, name: Avoid error }
-      - warn: { lhs: Prelude.errorWithoutStackTrace, rhs: Prelude.error }
-      - warn: { lhs: Control.Concurrent.forkIO, rhs: Control.Concurrent.Async.async }
-      - warn: { lhs: Prelude.foldl1, rhs: Safe.foldl1May }
-      - warn: { lhs: Prelude.foldr1, rhs: Safe.foldr1May }
-      - warn: { lhs: Data.Maybe.fromJust, rhs: Data.Maybe.fromMaybe Prelude.undefined }
-      - warn: { lhs: Prelude.head, rhs: Data.Maybe.listToMaybe }
-      - warn: { lhs: Prelude.init, rhs: Safe.initMay }
-      - warn: { lhs: Prelude.last, rhs: Safe.lastMay }
-      - warn: { lhs: Prelude.maximum, rhs: Safe.maximumMay }
-      - warn: { lhs: Prelude.minimum, rhs: Safe.minimumMay }
-      - warn: { lhs: Data.List.NonEmpty.fromList, rhs: Data.List.NonEmpty.nonEmpty }
-      - warn: { lhs: Data.List.nub, rhs: Data.Containers.ListUtils.nubOrd }
-      - warn: { lhs: Prelude.pred, rhs: Safe.predMay }
-      - warn: { lhs: Prelude.read, rhs: Text.Read.readMaybe }
-      - warn: { lhs: Prelude.return, rhs: Prelude.pure }
-      - warn: { lhs: Prelude.succ, rhs: Safe.succMay }
-      - warn: { lhs: Prelude.tail, rhs: Safe.tailMay }
-      - warn: { lhs: Control.Exception.throw, rhs: Control.Monad.Catch.throwM }
-      - warn: { lhs: Prelude.undefined, rhs: Prelude.error "undefined" }
-      - warn: { lhs: Control.Monad.unless p, rhs: Control.Monad.when (not p) }
-      - warn: { lhs: (Prelude.!!), rhs: Safe.atMay }
-      - warn: { lhs: (Prelude.^), rhs: _, name: Avoid ^ }
+[
+  {
+    "flags": [
+      {
+        "default": false
+      }
+    ]
+  },
+  {
+    "group": {
+      "enabled": true,
+      "name": "dollar"
+    }
+  },
+  {
+    "group": {
+      "enabled": true,
+      "name": "generalise"
+    }
+  },
+  {
+    "group": {
+      "name": "Monadoc",
+      "rules": [
+        {
+          "warn": {
+            "lhs": "Data.IORef.newIORef",
+            "rhs": "Control.Concurrent.STM.newTVarIO"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "group": {
+      "name": "https://github.com/tfausak/witch",
+      "rules": [
+        {
+          "warn": {
+            "lhs": "Prelude.fromEnum",
+            "rhs": "Witch.from"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.fromInteger",
+            "rhs": "Witch.from"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.fromIntegral",
+            "rhs": "Witch.from"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.fromRational",
+            "rhs": "Witch.from"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.realToFrac",
+            "rhs": "Witch.from"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.toEnum",
+            "rhs": "Witch.from"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "group": {
+      "name": "https://github.com/NorfairKing/haskell-dangerous-functions",
+      "rules": [
+        {
+          "warn": {
+            "lhs": "Prelude.enumFrom",
+            "name": "Avoid enumFrom",
+            "rhs": "_"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.enumFromThen",
+            "name": "Avoid enumFromThen",
+            "rhs": "_"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.enumFromThenTo",
+            "name": "Avoid enumFromThenTo",
+            "rhs": "_"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.enumFromTo",
+            "name": "Avoid enumFromTo",
+            "rhs": "_"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.error",
+            "name": "Avoid error",
+            "rhs": "_"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.errorWithoutStackTrace",
+            "rhs": "Prelude.error"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Control.Concurrent.forkIO",
+            "rhs": "Control.Concurrent.Async.async"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.foldl1",
+            "rhs": "Safe.foldl1May"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.foldr1",
+            "rhs": "Safe.foldr1May"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Data.Maybe.fromJust",
+            "rhs": "Data.Maybe.fromMaybe Prelude.undefined"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.head",
+            "rhs": "Data.Maybe.listToMaybe"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.init",
+            "rhs": "Safe.initMay"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.last",
+            "rhs": "Safe.lastMay"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.maximum",
+            "rhs": "Safe.maximumMay"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.minimum",
+            "rhs": "Safe.minimumMay"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Data.List.NonEmpty.fromList",
+            "rhs": "Data.List.NonEmpty.nonEmpty"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Data.List.nub",
+            "rhs": "Data.Containers.ListUtils.nubOrd"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.pred",
+            "rhs": "Safe.predMay"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.read",
+            "rhs": "Text.Read.readMaybe"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.return",
+            "rhs": "Prelude.pure"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.succ",
+            "rhs": "Safe.succMay"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.tail",
+            "rhs": "Safe.tailMay"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Control.Exception.throw",
+            "rhs": "Control.Monad.Catch.throwM"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Prelude.undefined",
+            "rhs": "Prelude.error \"undefined\""
+          }
+        },
+        {
+          "warn": {
+            "lhs": "Control.Monad.unless p",
+            "rhs": "Control.Monad.when (not p)"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "(Prelude.!!)",
+            "rhs": "Safe.atMay"
+          }
+        },
+        {
+          "warn": {
+            "lhs": "(Prelude.^)",
+            "name": "Avoid ^",
+            "rhs": "_"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "ignore": {
+      "name": "Use infix"
+    }
+  },
+  {
+    "ignore": {
+      "name": "Use lambda-case"
+    }
+  },
+  {
+    "ignore": {
+      "name": "Use list comprehension"
+    }
+  },
+  {
+    "ignore": {
+      "name": "Use section"
+    }
+  },
+  {
+    "ignore": {
+      "name": "Use tuple-section"
+    }
+  },
+  {
+    "ignore": {
+      "name": "Use unless"
+    }
+  }
+]

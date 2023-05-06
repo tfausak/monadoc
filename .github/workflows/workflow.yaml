@@ -1,164 +1,242 @@
-name: Workflow
-
-on:
-  push: null
-  schedule:
-    - cron: '0 12 * * *'
-
-jobs:
-
-  cabal:
-    runs-on: ubuntu-22.04
-    name: Cabal
-    steps:
-      - uses: actions/checkout@v3
-
-      - run: cabal check
-
-  hlint:
-    runs-on: ubuntu-22.04
-    name: HLint
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: haskell/actions/hlint-setup@v2
-        with:
-          version: 3.5
-
-      - uses: haskell/actions/hlint-run@v2
-        with:
-          fail-on: status
-
-  ormolu:
-    runs-on: ubuntu-22.04
-    name: Ormolu
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: mrkkrp/ormolu-action@v11
-
-  build:
-    strategy:
-      matrix:
-        include:
-          - platform: macos
-            version: 12
-          - platform: ubuntu
-            version: 22.04
-          - platform: windows
-            version: 2022
-            extension: .exe
-    runs-on: ${{ matrix.platform }}-${{ matrix.version }}
-    name: Build on ${{ matrix.platform }}
-    steps:
-      - uses: actions/checkout@v3
-
-      - run: mkdir artifact
-
-      - id: artifact
-        shell: bash
-        run: echo 'directory=artifact/${{ matrix.platform }}' >> $GITHUB_OUTPUT
-
-      - run: mkdir ${{ steps.artifact.outputs.directory }}
-
-      - id: setup-haskell
-        uses: haskell/actions/setup@v2
-        with:
-          ghc-version: 9.6.1
-          cabal-version: 3.10.1.0
-
-      - run: cabal sdist --output-dir ${{ steps.artifact.outputs.directory }}
-
-      - run: cabal configure --enable-optimization=2 --enable-tests --flags pedantic --jobs
-
-      - run: cat cabal.project.local
-
-      - run: cp cabal.project.local ${{ steps.artifact.outputs.directory }}
-
-      - run: cabal freeze
-
-      - run: cat cabal.project.freeze
-
-      - run: cp cabal.project.freeze ${{ steps.artifact.outputs.directory }}
-
-      - run: cabal outdated --v2-freeze-file cabal.project.freeze
-
-      - uses: actions/cache@v3
-        with:
-          path: ${{ steps.setup-haskell.outputs.cabal-store }}
-          key: ${{ matrix.platform }}/${{ hashFiles('cabal.project.freeze') }}
-          restore-keys: ${{ matrix.platform }}/
-
-      - run: cabal build --only-download
-
-      - run: cabal build --only-dependencies
-
-      - run: cabal build
-
-      - run: cp "$( cabal list-bin monadoc )" ${{ steps.artifact.outputs.directory }}
-
-      - uses: svenstaro/upx-action@v2
-        with:
-          files: ${{ steps.artifact.outputs.directory }}/monadoc${{ matrix.extension }}
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: monadoc-${{ github.sha }}
-          path: artifact
-
-      - run: echo '::add-matcher::.github/hspec-problem-matcher.json'
-
-      - run: cabal run -- monadoc-test-suite --randomize --strict
-
-  docker:
-    needs: build
-    runs-on: ubuntu-22.04
-    name: Docker
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: actions/download-artifact@v3
-        with:
-          name: monadoc-${{ github.sha }}
-          path: artifact
-
-      - run: cd artifact/ubuntu && tar xf monadoc-*.tar.gz
-
-      - run: mv artifact/ubuntu/monadoc-*/data artifact/ubuntu/monadoc docker
-
-      - run: chmod +x docker/monadoc
-
-      - id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ghcr.io/${{ github.repository }}
-          flavor: latest=false
-          tags: type=sha,format=long
-
-      - uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: docker/build-push-action@v4
-        with:
-          build-args: MONADOC_COMMIT_SHA=${{ github.sha }}
-          context: docker
-          labels: ${{ steps.meta.outputs.labels }}
-          push: ${{ github.event_name != 'schedule' }}
-          tags: ${{ steps.meta.outputs.tags }}
-
-  deploy:
-    needs: docker
-    runs-on: ubuntu-22.04
-    name: Deploy
-    if: github.event_name != 'schedule' && github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: superfly/flyctl-actions/setup-flyctl@dfdfedc86b296f5e5384f755a18bf400409a15d0
-
-      - run: flyctl deploy --app green-hill-3802 --image ghcr.io/tfausak/monadoc:sha-${{ github.sha }}
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+{
+  "jobs": {
+    "build": {
+      "name": "Build on ${{ matrix.platform }}",
+      "runs-on": "${{ matrix.platform }}-${{ matrix.version }}",
+      "steps": [
+        {
+          "uses": "actions/checkout@v3"
+        },
+        {
+          "run": "mkdir artifact"
+        },
+        {
+          "id": "artifact",
+          "run": "echo directory=artifact/${{ matrix.platform }} >> $GITHUB_OUTPUT",
+          "shell": "bash"
+        },
+        {
+          "run": "mkdir ${{ steps.artifact.outputs.directory }}"
+        },
+        {
+          "id": "haskell",
+          "uses": "haskell/actions/setup@v2",
+          "with": {
+            "cabal-version": "3.10.1.0",
+            "ghc-version": "9.6.1"
+          }
+        },
+        {
+          "run": "cabal sdist --output-dir ${{ steps.artifact.outputs.directory }}"
+        },
+        {
+          "run": "cabal configure --enable-optimization=2 --enable-tests --flags pedantic --jobs"
+        },
+        {
+          "run": "cat cabal.project.local"
+        },
+        {
+          "run": "cp cabal.project.local ${{ steps.artifact.outputs.directory }}"
+        },
+        {
+          "run": "cabal freeze"
+        },
+        {
+          "run": "cat cabal.project.freeze"
+        },
+        {
+          "run": "cp cabal.project.freeze ${{ steps.artifact.outputs.directory }}"
+        },
+        {
+          "run": "cabal outdated --v2-freeze-file cabal.project.freeze"
+        },
+        {
+          "uses": "actions/cache@v3",
+          "with": {
+            "key": "${{ matrix.platform }}/${{ hashFiles('cabal.project.freeze') }}",
+            "path": "${{ steps.haskell.outputs.cabal-store }}",
+            "restore-keys": "${{ matrix.platform }}/"
+          }
+        },
+        {
+          "run": "cabal build --only-download"
+        },
+        {
+          "run": "cabal build --only-dependencies"
+        },
+        {
+          "run": "cabal build"
+        },
+        {
+          "run": "cp $( cabal list-bin monadoc ) ${{ steps.artifact.outputs.directory }}"
+        },
+        {
+          "uses": "svenstaro/upx-action@v2",
+          "with": {
+            "file": "${{ steps.artifact.outputs.directory }}/monadoc${{ matrix.extension }}"
+          }
+        },
+        {
+          "uses": "actions/upload-artifact@v3",
+          "with": {
+            "name": "monadoc-${{ github.sha }}",
+            "path": "artifact"
+          }
+        },
+        {
+          "run": "echo ::add-matcher::.github/hspec-problem-matcher.json"
+        },
+        {
+          "run": "cabal run -- monadoc-test-suite --randomize --strict"
+        }
+      ],
+      "strategy": {
+        "matrix": {
+          "include": [
+            {
+              "platform": "macos",
+              "version": 13
+            },
+            {
+              "platform": "ubuntu",
+              "version": 22.04
+            },
+            {
+              "extension": ".exe",
+              "platform": "windows",
+              "version": 2022
+            }
+          ]
+        }
+      }
+    },
+    "cabal": {
+      "name": "Cabal",
+      "runs-on": "ubuntu-22.04",
+      "steps": [
+        {
+          "uses": "actions/checkout@v3"
+        },
+        {
+          "run": "cabal check"
+        }
+      ]
+    },
+    "deploy": {
+      "name": "Deploy",
+      "needs": "docker",
+      "runs-on": "ubuntu-22.04",
+      "steps": [
+        {
+          "uses": "actions/checkout@v3"
+        },
+        {
+          "uses": "superfly/flyctl-actions/setup-flyctl@dfdfedc86b296f5e5384f755a18bf400409a15d0"
+        },
+        {
+          "env": {
+            "FLY_API_TOKEN": "${{ secrets.FLY_API_TOKEN }}",
+            "FLY_APP_NAME": "green-hill-3802"
+          },
+          "run": "flyctl deploy --app $FLY_APP_NAME --image ghcr.io/tfausak/monadoc:sha-${{ github.sha }}"
+        }
+      ]
+    },
+    "docker": {
+      "if": "${{ github.event_name }} != 'schedule' && ${{ github.ref }} == 'refs/heads/main'",
+      "name": "Docker",
+      "needs": "build",
+      "runs-on": "ubuntu-22.04",
+      "steps": [
+        {
+          "uses": "actions/checkout@v3"
+        },
+        {
+          "uses": "actions/download-artifact@v3",
+          "with": {
+            "name": "monadoc-${{ github.sha }}",
+            "path": "artifact"
+          }
+        },
+        {
+          "run": "cd artifact/ubuntu && tar xf monadoc-*.tar.gz"
+        },
+        {
+          "run": "mv artifact/ubuntu/monadoc-*/data artifact/ubuntu/monadoc docker"
+        },
+        {
+          "run": "chmod +x docker/monadoc"
+        },
+        {
+          "id": "meta",
+          "uses": "docker/metadata-action@v4",
+          "with": {
+            "flavor": "latest=false",
+            "images": "ghcr.io/${{ github.repository }}",
+            "tags": "type=sha,format=long"
+          }
+        },
+        {
+          "uses": "docker/login-action@v2",
+          "with": {
+            "password": "${{ secrets.GITHUB_TOKEN }}",
+            "registry": "ghcr.io",
+            "username": "${{ github.actor }}"
+          }
+        },
+        {
+          "uses": "docker/build-push-action@v4",
+          "with": {
+            "build-args": "MONADOC_COMMIT_SHA=${{ github.sha }}",
+            "context": "docker",
+            "labels": "${{ steps.meta.outputs.labels }}",
+            "push": true,
+            "tags": "${{ steps.meta.outputs.tags }}"
+          }
+        }
+      ]
+    },
+    "hlint": {
+      "name": "HLint",
+      "runs-on": "ubuntu-22.04",
+      "steps": [
+        {
+          "uses": "actions/checkout@v3"
+        },
+        {
+          "uses": "haskell/actions/hlint-setup@v2",
+          "with": {
+            "version": 3.5
+          }
+        },
+        {
+          "uses": "haskell/actions/hlint-run@v2",
+          "with": {
+            "fail-on": "status"
+          }
+        }
+      ]
+    },
+    "ormolu": {
+      "name": "Ormolu",
+      "runs-on": "ubuntu-22.04",
+      "steps": [
+        {
+          "uses": "actions/checkout@v3"
+        },
+        {
+          "uses": "mrkkrp/ormolu-action@v11"
+        }
+      ]
+    }
+  },
+  "name": "Workflow",
+  "on": {
+    "push": null,
+    "schedule": [
+      {
+        "cron": "0 12 * * *"
+      }
+    ]
+  }
+}

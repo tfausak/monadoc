@@ -26,7 +26,7 @@ middleware context handle request respond = do
     after <- Clock.getMonotonicTime
     App.run context . App.Log.info $
       F.sformat
-        ("[http/server/response] " F.%+ F.hexPrefix 8 F.%+ F.int F.%+ F.fixed 3)
+        ("[http/server/response]" F.%+ F.hexPrefix 8 F.%+ F.int F.%+ F.fixed 3)
         requestId
         (Http.statusCode $ Wai.responseStatus response)
         (after - before)

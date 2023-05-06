@@ -21,7 +21,7 @@ run migration = do
   models <- App.Sql.query "select * from migration where createdAt = ? limit 1" [createdAt]
   case models of
     [] -> do
-      App.Log.debug $ F.sformat ("running migration: " F.% F.stext) (Witch.from createdAt)
+      App.Log.info $ F.sformat ("running migration: " F.% F.stext) (Witch.from createdAt)
       App.Sql.execute_ query
       Migration.Insert.run migration
     model : _ -> do

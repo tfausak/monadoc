@@ -1,11 +1,22 @@
-packages: .
-
+packages:    .
 allow-newer:
   , lucid2:base
   , simple-sendfile:transformers
 
+-- https://github.com/phadej/cabal-fmt/pull/73
+source-repository-package
+  location: https://github.com/tfausak/cabal-fmt
+  tag:      7b5b6d3bc30ae7368cd5af6fab3deb294e5e4eae
+  type:     git
+
 -- https://github.com/MichaelXavier/cron/pull/49
 source-repository-package
   location: https://github.com/tfausak/cron
-  tag: 36c57481b028cc17f6518b0deed421a54078360d
-  type: git
+  tag:      36c57481b028cc17f6518b0deed421a54078360d
+  type:     git
+
+-- https://github.com/ndmitchell/hlint/pull/1470
+source-repository-package
+  location: https://github.com/ndmitchell/hlint
+  tag:      a37e918f17ed90d236e6066fcd2dc7b1e9d5b2d1
+  type:     git
