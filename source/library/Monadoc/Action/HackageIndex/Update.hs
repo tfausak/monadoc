@@ -75,7 +75,7 @@ run hackageIndex = do
             { Mismatch.expected = newSize,
               Mismatch.actual = actualSize
             }
-        Temp.withSystemTempFile "monadoc" $ \f h -> do
+        Temp.withTempFile "." "monadoc-" $ \f h -> do
           App.Log.debug "copying old blob"
           App.Sql.withConnection $ \connection ->
             Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 oldKey) False $ \oldBlob -> IO.liftIO $ do

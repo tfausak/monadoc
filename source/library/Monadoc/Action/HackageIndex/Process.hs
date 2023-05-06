@@ -66,7 +66,7 @@ run = do
         case xs of
           [] -> Traced.throw NotFound.NotFound
           Sql.Only x : _ -> pure x
-      Temp.withSystemTempFile "monadoc" $ \f h -> do
+      Temp.withTempFile "." "monadoc-" $ \f h -> do
         App.Sql.withConnection $ \connection ->
           Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 blobKey) False $ \blob -> IO.liftIO $ do
             chunks <- Sqlite.unsafeBlobRead blob size 0
