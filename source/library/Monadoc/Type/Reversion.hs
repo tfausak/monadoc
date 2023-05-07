@@ -55,5 +55,5 @@ parseVersion = do
 
 parseRevision :: (Cabal.CabalParsing m) => m Revision.Revision
 parseRevision = do
-  Monad.void $ Cabal.oneOf "-+"
+  Monad.void $ Cabal.char '-'
   Witch.from @Word <$> Cabal.integral

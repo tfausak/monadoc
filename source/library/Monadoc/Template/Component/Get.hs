@@ -16,6 +16,7 @@ import qualified Monadoc.Model.Range as Range
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Template.Common as Common
+import qualified Monadoc.Template.Version.Get as Version.Get
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.ComponentId as ComponentId
 import qualified Monadoc.Type.ComponentName as ComponentName
@@ -32,13 +33,14 @@ render ::
   Package.Model ->
   Version.Model ->
   Upload.Model ->
+  Maybe (Upload.Model, Version.Model) ->
   PackageMeta.Model ->
   Component.Model ->
   PackageMetaComponent.Model ->
   [PackageMetaComponentModule.Model Sql.:. Module.Model] ->
   [Dependency.Model Sql.:. Package.Model Sql.:. Component.Model Sql.:. Range.Model] ->
   Html.Html ()
-render context breadcrumbs package version upload _ component _ modules dependencies = do
+render context breadcrumbs package version upload maybeLatest _ component _ modules dependencies = do
   let packageName = Package.name $ Model.value package
       reversion =
         Reversion.Reversion
@@ -51,8 +53,16 @@ render context breadcrumbs package version upload _ component _ modules dependen
             ComponentId.name = Component.name $ Model.value component
           }
       route = Route.Component packageName reversion componentId
-      title = F.sformat ("Component" F.%+ F.stext F.%+ ":: Monadoc") (Witch.from componentId)
+      title =
+        F.sformat
+          ("Package" F.%+ F.stext F.%+ "version" F.%+ F.stext F.%+ "component" F.%+ F.stext F.%+ ":: Monadoc")
+          (Witch.from packageName)
+          (Witch.from reversion)
+          (Witch.from componentId)
   Common.base context route breadcrumbs title $ do
+    Version.Get.showDeprecationWarning packageName reversion upload
+    -- TODO: Go straight to component (if it exists) rather than just the version.
+    Version.Get.showLatestInfo context packageName maybeLatest
     Html.h2_ $ Html.toHtml componentId
     let moduleNames = fmap (\(_ Sql.:. m) -> Module.name $ Model.value m) modules
     Monad.when (not $ null moduleNames) $ do

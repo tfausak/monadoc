@@ -89,12 +89,12 @@ base ctx rt breadcrumbs title html = do
               $ Breadcrumb.label breadcrumb
       Html.main_ [Html.class_ "my-3"] $
         Html.div_ [Html.class_ "container"] html
-      Html.footer_ [Html.class_ "mb-5 mt-3 text-muted"]
+      Html.footer_ [Html.class_ "mb-5 mt-3 text-secondary"]
         . Html.div_ [Html.class_ "border-top container pt-3"]
         $ do
           "Powered by "
           let github = "https://github.com/tfausak/monadoc" :: Text.Text
-          Html.a_ [Html.href_ github] "Monadoc"
+          Html.a_ [Html.class_ "link-secondary", Html.href_ github] "Monadoc"
           " version "
           Html.toHtml $ Witch.into @VersionNumber.VersionNumber Monadoc.version
           let sha = Config.sha $ Context.config ctx
@@ -103,7 +103,7 @@ base ctx rt breadcrumbs title html = do
             else do
               " commit "
               Html.code_
-                . Html.a_ [Html.href_ $ github <> "/commit/" <> Witch.into @Text.Text sha]
+                . Html.a_ [Html.class_ "link-secondary", Html.href_ $ github <> "/commit/" <> Witch.into @Text.Text sha]
                 . Html.toHtml
                 $ Text.take 7 sha
           ". \x1f516"

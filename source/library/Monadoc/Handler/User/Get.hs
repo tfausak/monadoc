@@ -5,7 +5,6 @@ import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.NotFound as NotFound
-import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Template.User.Get as Template
@@ -22,10 +21,8 @@ handler :: HackageUserName.HackageUserName -> Handler.Handler
 handler hackageUserName _ respond = do
   context <- Reader.ask
   hackageUser <- do
-    rows <- App.Sql.query "select * from hackageUser where name = ?" [hackageUserName]
-    case rows of
-      [] -> Traced.throw NotFound.NotFound
-      row : _ -> pure row
+    rows <- App.Sql.query "select * from hackageUser where name = ? limit 1" [hackageUserName]
+    NotFound.fromList rows
   rows <-
     App.Sql.query
       "select * \
@@ -46,4 +43,10 @@ handler hackageUserName _ respond = do
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text hackageUserName, Breadcrumb.route = Nothing}
         ]
   packages <- App.Sql.query "select * from package where key in ( select distinct package from upload where uploadedBy = ? ) order by name collate nocase asc" [Model.key hackageUser]
-  respond . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)] $ Template.render context breadcrumbs hackageUser rows packages
+  respond
+    . Common.htmlResponse
+      Http.ok200
+      [ (Http.hCacheControl, "max-age=86400, stale-while-revalidate=3600"),
+        (Http.hETag, eTag)
+      ]
+    $ Template.render context breadcrumbs hackageUser rows packages

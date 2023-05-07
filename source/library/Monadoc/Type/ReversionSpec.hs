@@ -17,7 +17,3 @@ spec = Hspec.describe "Monadoc.Type.Reversion" $ do
 
   Hspec.it "can be converted from a string" $ do
     Test.expectTryFrom ("0-0" :: String) (Reversion.Reversion VersionNumber.zero Revision.zero)
-
-  -- TODO: Remove this once these requests stop.
-  Hspec.it "handles legacy string format" $ do
-    Test.expectTryFrom ("0+0" :: String) (Reversion.Reversion VersionNumber.zero Revision.zero)

@@ -11,6 +11,7 @@ import qualified Documentation.Haddock.Parser as Haddock
 import qualified Documentation.Haddock.Types as Haddock
 import qualified Formatting as F
 import qualified Lucid as Html
+import qualified Monadoc.Extra.Ord as Ord
 import qualified Monadoc.Handler.Proxy.Get as Proxy.Get
 import qualified Monadoc.Model.Component as Component
 import qualified Monadoc.Model.HackageUser as HackageUser
@@ -38,7 +39,7 @@ render ::
   Version.Model ->
   Upload.Model ->
   HackageUser.Model ->
-  Maybe (Upload.Model Sql.:. Version.Model) ->
+  Maybe (Upload.Model, Version.Model) ->
   PackageMeta.Model ->
   [PackageMetaComponent.Model Sql.:. Component.Model] ->
   Html.Html ()
@@ -46,35 +47,20 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
   let packageName = Package.name $ Model.value package
       versionNumber = Version.number $ Model.value version
       revision = Upload.revision $ Model.value upload
-      reversion = Reversion.Reversion {Reversion.revision = revision, Reversion.version = versionNumber}
+      reversion =
+        Reversion.Reversion
+          { Reversion.revision = revision,
+            Reversion.version = versionNumber
+          }
       route = Route.Version packageName reversion
-      title = F.sformat ("Version" F.%+ F.stext F.%+ ":: Monadoc") (Witch.from reversion)
+      title =
+        F.sformat
+          ("Package" F.%+ F.stext F.%+ "version" F.%+ F.stext F.%+ ":: Monadoc")
+          (Witch.from packageName)
+          (Witch.from reversion)
   Common.base context route breadcrumbs title $ do
-    Monad.when (not . Upload.isPreferred $ Model.value upload)
-      . Html.div_ [Html.class_ "alert alert-warning"]
-      $ do
-        "Version "
-        Html.toHtml reversion
-        " of "
-        Html.toHtml packageName
-        " is deprecated."
-    case maybeLatest of
-      Nothing -> pure ()
-      Just (upl Sql.:. ver) -> Html.div_ [Html.class_ "alert alert-info"] $ do
-        "The latest version of "
-        Html.toHtml packageName
-        " is "
-        let rev =
-              Reversion.Reversion
-                { Reversion.version = Version.number $ Model.value ver,
-                  Reversion.revision = Upload.revision $ Model.value upl
-                }
-        Html.a_
-          [ Html.class_ "alert-link",
-            Html.href_ . Common.route context $ Route.Version packageName rev
-          ]
-          $ Html.toHtml rev
-        "."
+    showDeprecationWarning packageName reversion upload
+    showLatestInfo context packageName maybeLatest
     Html.h2_ $ Html.toHtml packageName
     Html.p_ $ do
       "Version "
@@ -106,17 +92,17 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
       Html.dt_ "Author"
       Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.author $ Model.value packageMeta
       Html.dt_ "Bug reports"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.bugReports $ Model.value packageMeta
+      Html.dd_ . maybe "n/a" autoLinkUrl . PackageMeta.bugReports $ Model.value packageMeta
       Html.dt_ "Category"
       Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.category $ Model.value packageMeta
       Html.dt_ "Copyright"
       Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.copyright $ Model.value packageMeta
       Html.dt_ "Homepage"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.homepage $ Model.value packageMeta
+      Html.dd_ . maybe "n/a" autoLinkUrl . PackageMeta.homepage $ Model.value packageMeta
       Html.dt_ "Maintainer"
       Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.maintainer $ Model.value packageMeta
       Html.dt_ "Package URL"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.pkgUrl $ Model.value packageMeta
+      Html.dd_ . maybe "n/a" autoLinkUrl . PackageMeta.pkgUrl $ Model.value packageMeta
       Html.dt_ "Stability"
       Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.stability $ Model.value packageMeta
     Html.h3_ "Components"
@@ -128,6 +114,49 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
               }
       Html.a_ [Html.href_ . Common.route context $ Route.Component packageName reversion componentId] $
         Html.toHtml componentId
+
+autoLinkUrl :: Text.Text -> Html.Html ()
+autoLinkUrl text =
+  case Witch.tryInto @Url.Url text of
+    Left _ -> Html.toHtml text
+    Right url ->
+      Html.a_
+        [ Html.href_ $ Witch.into @Text.Text url,
+          Html.rel_ "nofollow"
+        ]
+        . Html.toHtml
+        $ Witch.into @Text.Text url
+
+showDeprecationWarning :: PackageName.PackageName -> Reversion.Reversion -> Upload.Model -> Html.Html ()
+showDeprecationWarning packageName reversion upload = do
+  Monad.when (not . Upload.isPreferred $ Model.value upload)
+    . Html.div_ [Html.class_ "alert alert-warning"]
+    $ do
+      "Version "
+      Html.toHtml reversion
+      " of "
+      Html.toHtml packageName
+      " is deprecated."
+
+showLatestInfo :: Context.Context -> PackageName.PackageName -> Maybe (Upload.Model, Version.Model) -> Html.Html ()
+showLatestInfo context packageName maybeLatest =
+  case maybeLatest of
+    Nothing -> pure ()
+    Just (upl, ver) -> Html.div_ [Html.class_ "alert alert-info"] $ do
+      "The latest version of "
+      Html.toHtml packageName
+      " is "
+      let rev =
+            Reversion.Reversion
+              { Reversion.version = Version.number $ Model.value ver,
+                Reversion.revision = Upload.revision $ Model.value upl
+              }
+      Html.a_
+        [ Html.class_ "alert-link",
+          Html.href_ . Common.route context $ Route.Version packageName rev
+        ]
+        $ Html.toHtml rev
+      "."
 
 sortComponents :: PackageName.PackageName -> [Component.Model] -> [Component.Model]
 sortComponents packageName = List.sortOn $ \component ->
@@ -153,7 +182,7 @@ markup context =
           . Html.toHtml
           . unlines
           $ (">>> " <> Haddock.exampleExpression x) : Haddock.exampleResult x,
-      Haddock.markupHeader = \x -> case clamp 1 6 $ Haddock.headerLevel x of
+      Haddock.markupHeader = \x -> case Ord.clamp 1 6 $ Haddock.headerLevel x of
         1 -> Html.h1_ $ Haddock.headerTitle x
         2 -> Html.h2_ $ Haddock.headerTitle x
         3 -> Html.h3_ $ Haddock.headerTitle x
@@ -221,6 +250,3 @@ markup context =
       Haddock.markupUnorderedList = Html.ul_ . mapM_ Html.li_,
       Haddock.markupWarning = Html.div_ [Html.class_ "alert alert-warning"]
     }
-
-clamp :: (Ord a) => a -> a -> a -> a
-clamp lo hi = max lo . min hi

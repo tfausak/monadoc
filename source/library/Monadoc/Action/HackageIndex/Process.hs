@@ -12,6 +12,7 @@ import qualified Data.List as List
 import qualified Data.Map.Strict as Map
 import qualified Data.Maybe as Maybe
 import qualified Data.Ord as Ord
+import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
 import qualified Distribution.Package as Cabal
 import qualified Distribution.Types.PackageVersionConstraint as Cabal
@@ -62,10 +63,8 @@ run = do
       revisions <- IO.liftIO $ Stm.newTVarIO Map.empty
       let blobKey = HackageIndex.blob $ Model.value hackageIndex
       size <- do
-        xs <- App.Sql.query "select size from blob where key = ?" [blobKey]
-        case xs of
-          [] -> Traced.throw NotFound.NotFound
-          Sql.Only x : _ -> pure x
+        xs <- App.Sql.query "select size from blob where key = ? limit 1" [blobKey]
+        Sql.fromOnly <$> NotFound.fromList xs
       Temp.withSystemTempFile "monadoc-" $ \f h -> do
         App.Sql.withConnection $ \connection ->
           Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 blobKey) False $ \blob -> IO.liftIO $ do
@@ -116,12 +115,12 @@ handlePreference constraints entry pkg = do
   lazyByteString <- case Tar.entryContent entry of
     Tar.NormalFile lazyByteString _ -> pure lazyByteString
     _ -> Traced.throw $ UnexpectedEntry.UnexpectedEntry entry
-  string <- Either.throw . Witch.tryInto @String $ Witch.into @(Witch.UTF_8 LazyByteString.ByteString) lazyByteString
+  text <- Either.throw . Witch.tryInto @Text.Text $ Witch.into @(Witch.UTF_8 LazyByteString.ByteString) lazyByteString
   versionRange <-
-    if null string
+    if Text.null text
       then pure Cabal.anyVersion
       else do
-        Cabal.PackageVersionConstraint name range <- Either.throw $ Cabal.tryParsec string
+        Cabal.PackageVersionConstraint name range <- Either.throw $ Cabal.tryParsec text
         Monad.when (name /= Witch.into @Cabal.PackageName packageName)
           . Traced.throw
           $ UnexpectedEntry.UnexpectedEntry entry

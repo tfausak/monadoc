@@ -1,5 +1,6 @@
 module Monadoc.Type.ComponentName where
 
+import qualified Data.Text as Text
 import qualified Database.SQLite.Simple.FromField as Sql
 import qualified Database.SQLite.Simple.ToField as Sql
 import qualified Distribution.Types.UnqualComponentName as Cabal
@@ -29,6 +30,9 @@ instance Witch.TryFrom String ComponentName where
 instance Witch.From ComponentName String where
   from = Cabal.unUnqualComponentName . Witch.into @Cabal.UnqualComponentName
 
+instance Witch.From ComponentName Text.Text where
+  from = Witch.via @String
+
 instance Sql.FromField ComponentName where
   fromField field = do
     string <- Sql.fromField @String field
@@ -36,7 +40,7 @@ instance Sql.FromField ComponentName where
       Witch.tryFrom string
 
 instance Sql.ToField ComponentName where
-  toField = Sql.toField . Witch.into @String
+  toField = Sql.toField . Witch.into @Text.Text
 
 instance QuickCheck.Arbitrary ComponentName where
   arbitrary = QuickCheck.suchThatMap QuickCheck.arbitrary $ Either.hush . Witch.tryFrom @String
@@ -45,5 +49,5 @@ instance Witch.From PackageName.PackageName ComponentName where
   from = Witch.from . Cabal.packageNameToUnqualComponentName . Witch.from
 
 instance Html.ToHtml ComponentName where
-  toHtml = Html.toHtml . Witch.into @String
-  toHtmlRaw = Html.toHtmlRaw . Witch.into @String
+  toHtml = Html.toHtml . Witch.into @Text.Text
+  toHtmlRaw = Html.toHtmlRaw . Witch.into @Text.Text

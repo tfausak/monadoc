@@ -9,6 +9,7 @@ import qualified Control.Monad.Trans.Reader as Reader
 import qualified Crypto.Hash as Crypto
 import qualified Data.ByteString as ByteString
 import qualified Data.Int as Int
+import qualified Data.Text as Text
 import qualified Data.Time as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite3 as Sqlite
@@ -116,5 +117,5 @@ getSize = do
       . Maybe.note (MissingSize.MissingSize response)
       . lookup Http.hContentLength
       $ Client.responseHeaders response
-  string <- Either.throw . Witch.tryInto @String $ Witch.into @(Witch.UTF_8 ByteString.ByteString) byteString
-  Either.throw $ Read.tryRead string
+  text <- Either.throw . Witch.tryInto @Text.Text $ Witch.into @(Witch.UTF_8 ByteString.ByteString) byteString
+  Either.throw $ Read.tryRead text

@@ -1,17 +1,16 @@
 module Monadoc.Handler.Version.Get where
 
-import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Trans.Reader as Reader
-import qualified Data.Maybe as Maybe
 import qualified Data.Text as Text
+import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.NotFound as NotFound
-import qualified Monadoc.Exception.Traced as Traced
-import qualified Monadoc.Extra.Either as Either
-import qualified Monadoc.Extra.Maybe as Maybe
 import qualified Monadoc.Handler.Common as Common
+import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.Upload as Upload
+import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Template.Version.Get as Template
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.Handler as Handler
 import qualified Monadoc.Type.Model as Model
@@ -30,10 +29,10 @@ handler packageName reversion _ respond = do
   context <- Reader.ask
   package <- do
     packages <- App.Sql.query "select * from package where name = ? limit 1" [packageName]
-    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packages
+    NotFound.fromList packages
   version <- do
     versions <- App.Sql.query "select * from version where number = ? limit 1" [Reversion.version reversion]
-    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe versions
+    NotFound.fromList versions
   let revision = Reversion.revision reversion
   upload <- do
     uploads <-
@@ -45,25 +44,14 @@ handler packageName reversion _ respond = do
         \ and revision = ? \
         \ limit 1"
         (Model.key package, Model.key version, revision)
-    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe uploads
+    NotFound.fromList uploads
   hackageUser <- do
-    hackageUsers <- App.Sql.query "select * from hackageUser where key = ?" [Upload.uploadedBy $ Model.value upload]
-    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe hackageUsers
-  maybeLatest <-
-    Maybe.listToMaybe
-      <$> App.Sql.query
-        "select * \
-        \ from upload \
-        \ inner join version \
-        \ on version.key = upload.version \
-        \ where upload.package = ? \
-        \ and upload.isLatest = true \
-        \ and upload.key != ? \
-        \ limit 1"
-        (Model.key package, Model.key upload)
+    hackageUsers <- App.Sql.query "select * from hackageUser where key = ? limit 1" [Upload.uploadedBy $ Model.value upload]
+    NotFound.fromList hackageUsers
+  maybeLatest <- getLatestUpload (Model.key package) (Model.key upload)
   packageMeta <- do
     packageMetas <- App.Sql.query "select * from packageMeta where upload = ? limit 1" [Model.key upload]
-    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packageMetas
+    NotFound.fromList packageMetas
   components <- App.Sql.query "select * from packageMetaComponent inner join component on component.key = packageMetaComponent.component where packageMetaComponent.packageMeta = ?" [Model.key packageMeta]
   let eTag = Common.makeETag . Upload.uploadedAt $ Model.value upload
       breadcrumbs =
@@ -72,12 +60,26 @@ handler packageName reversion _ respond = do
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text reversion, Breadcrumb.route = Nothing}
         ]
   respond
-    . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)]
+    . Common.htmlResponse
+      Http.ok200
+      [ (Http.hCacheControl, "max-age=86400, stale-while-revalidate=3600"),
+        (Http.hETag, eTag)
+      ]
     $ Template.render context breadcrumbs package version upload hackageUser maybeLatest packageMeta components
 
-selectFirst :: (Exception.MonadThrow m) => m [a] -> m a
-selectFirst query = do
-  rows <- query
-  case rows of
-    [] -> Traced.throw NotFound.NotFound
-    row : _ -> pure row
+getLatestUpload :: Package.Key -> Upload.Key -> App.App (Maybe (Upload.Model, Version.Model))
+getLatestUpload packageKey uploadKey = do
+  rows <-
+    App.Sql.query
+      "select * \
+      \ from upload \
+      \ inner join version \
+      \ on version.key = upload.version \
+      \ where upload.package = ? \
+      \ and upload.isLatest = true \
+      \ and upload.key != ? \
+      \ limit 1"
+      (packageKey, uploadKey)
+  pure $ case rows of
+    [] -> Nothing
+    (upload Sql.:. version) : _ -> Just (upload, version)

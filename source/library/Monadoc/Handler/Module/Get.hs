@@ -2,12 +2,10 @@ module Monadoc.Handler.Module.Get where
 
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Trans.Reader as Reader
-import qualified Data.Maybe as Maybe
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.NotFound as NotFound
-import qualified Monadoc.Extra.Either as Either
-import qualified Monadoc.Extra.Maybe as Maybe
 import qualified Monadoc.Handler.Common as Common
+import qualified Monadoc.Handler.Version.Get as Version.Get
 import qualified Monadoc.Model.Component as Component
 import qualified Monadoc.Model.Module as Module
 import qualified Monadoc.Model.Package as Package
@@ -48,6 +46,7 @@ handler packageName reversion componentId moduleName _ respond = do
   packageMetaComponent <- getPackageMetaComponent (Model.key packageMeta) (Model.key component)
   module_ <- getModule moduleName
   Monad.void $ getPackageMetaComponentModule (Model.key packageMetaComponent) (Model.key module_)
+  maybeLatest <- Version.Get.getLatestUpload (Model.key package) (Model.key upload)
   context <- Reader.ask
   let route = Route.Module packageName reversion componentId moduleName
       breadcrumbs =
@@ -58,8 +57,11 @@ handler packageName reversion componentId moduleName _ respond = do
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.from moduleName, Breadcrumb.route = Nothing}
         ]
   respond
-    . Common.htmlResponse Http.ok200 []
-    $ Template.render context route breadcrumbs package version module_
+    . Common.htmlResponse
+      Http.ok200
+      [ (Http.hCacheControl, "max-age=86400, stale-while-revalidate=3600")
+      ]
+    $ Template.render context route breadcrumbs package version upload maybeLatest component module_
 
 getComponent :: ComponentType.ComponentType -> ComponentName.ComponentName -> App.App Component.Model
 getComponent componentType componentName = do
@@ -67,7 +69,7 @@ getComponent componentType componentName = do
     App.Sql.query
       "select * from component where type = ? and name = ? limit 1"
       (componentType, componentName)
-  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe components
+  NotFound.fromList components
 
 getModule :: ModuleName.ModuleName -> App.App Module.Model
 getModule moduleName = do
@@ -75,7 +77,7 @@ getModule moduleName = do
     App.Sql.query
       "select * from module where name = ? limit 1"
       [moduleName]
-  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe modules
+  NotFound.fromList modules
 
 getPackage :: PackageName.PackageName -> App.App Package.Model
 getPackage packageName = do
@@ -83,7 +85,7 @@ getPackage packageName = do
     App.Sql.query
       "select * from package where name = ? limit 1"
       [packageName]
-  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packages
+  NotFound.fromList packages
 
 getPackageMeta :: Upload.Key -> App.App PackageMeta.Model
 getPackageMeta upload = do
@@ -91,7 +93,7 @@ getPackageMeta upload = do
     App.Sql.query
       "select * from packageMeta where upload = ? limit 1"
       [upload]
-  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packageMetas
+  NotFound.fromList packageMetas
 
 getPackageMetaComponent :: PackageMeta.Key -> Component.Key -> App.App PackageMetaComponent.Model
 getPackageMetaComponent packageMeta component = do
@@ -99,7 +101,7 @@ getPackageMetaComponent packageMeta component = do
     App.Sql.query
       "select * from packageMetaComponent where packageMeta = ? and component = ? limit 1"
       (packageMeta, component)
-  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packageMetaComponents
+  NotFound.fromList packageMetaComponents
 
 getPackageMetaComponentModule :: PackageMetaComponent.Key -> Module.Key -> App.App PackageMetaComponentModule.Model
 getPackageMetaComponentModule packageMetaComponent module_ = do
@@ -107,7 +109,7 @@ getPackageMetaComponentModule packageMetaComponent module_ = do
     App.Sql.query
       "select * from packageMetaComponentModule where packageMetaComponent = ? and module = ? limit 1"
       (packageMetaComponent, module_)
-  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packageMetaComponentModules
+  NotFound.fromList packageMetaComponentModules
 
 getUpload :: Package.Key -> Version.Key -> Revision.Revision -> App.App Upload.Model
 getUpload package version revision = do
@@ -115,7 +117,7 @@ getUpload package version revision = do
     App.Sql.query
       "select * from upload where package = ? and version = ? and revision = ? limit 1"
       (package, version, revision)
-  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe uploads
+  NotFound.fromList uploads
 
 getVersion :: VersionNumber.VersionNumber -> App.App Version.Model
 getVersion versionNumber = do
@@ -123,4 +125,4 @@ getVersion versionNumber = do
     App.Sql.query
       "select * from version where number = ? limit 1"
       [versionNumber]
-  Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe versions
+  NotFound.fromList versions

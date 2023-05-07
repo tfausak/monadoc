@@ -33,6 +33,7 @@ handler context actual url _ respond = do
   request <- Client.requestFromURI $ Witch.from url
   Control.control $ \runInBase ->
     Client.withResponse (Client.ensureUserAgent request) {Client.checkResponse = Client.throwErrorStatusCodes} (Context.manager context) $ \response ->
+      -- TODO: Limit which headers are forwarded?
       runInBase . respond . Wai.responseStream (Client.responseStatus response) (Client.responseHeaders response) $ \send flush ->
         Loops.whileJust_ (readChunk response) $ \chunk -> do
           send $ Builder.byteString chunk

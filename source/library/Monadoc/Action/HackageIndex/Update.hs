@@ -9,6 +9,7 @@ import qualified Crypto.Hash as Crypto
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Int as Int
+import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite3 as Sqlite
 import qualified Formatting as F
@@ -50,11 +51,10 @@ run hackageIndex = do
         \ from hackageIndex \
         \ inner join blob \
         \ on blob.key = hackageIndex.blob \
-        \ where hackageIndex.key = ?"
+        \ where hackageIndex.key = ? \
+        \ limit 1"
         [Model.key hackageIndex]
-    case rows of
-      [] -> Traced.throw NotFound.NotFound
-      (key, size) : _ -> pure (key :: Blob.Key, size)
+    NotFound.fromList rows
   newSize <- HackageIndex.Insert.getSize
   let start = oldSize - 1_024
       end = newSize - 1
@@ -82,7 +82,7 @@ run hackageIndex = do
         Temp.withSystemTempFile "monadoc-" $ \f h -> do
           App.Log.debug "copying old blob"
           App.Sql.withConnection $ \connection ->
-            Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 oldKey) False $ \oldBlob -> IO.liftIO $ do
+            Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.from @Blob.Key oldKey) False $ \oldBlob -> IO.liftIO $ do
               contents <- Sqlite.blobRead oldBlob oldSize 0
               ByteString.hPut h contents
           App.Log.debug "appending new blob"
@@ -99,7 +99,7 @@ getActualSize response = do
   a <- case lookup Header.contentRange $ Client.responseHeaders response of
     Nothing -> Traced.throw $ MissingHeader.MissingHeader Header.contentRange
     Just c -> pure c
-  b <- Either.throw . Witch.tryInto @String . Witch.into @(Witch.UTF_8 ByteString.ByteString) . ByteString.drop 1 . snd $ ByteString.break (== 0x2f) a
+  b <- Either.throw . Witch.tryInto @Text.Text . Witch.into @(Witch.UTF_8 ByteString.ByteString) . ByteString.drop 1 . snd $ ByteString.break (== 0x2f) a
   Either.throw $ Read.tryRead b
 
 -- | This is similar to 'Monadoc.Action.Blob.Upsert.run'. The key difference is
@@ -124,7 +124,7 @@ upsertBlob filePath = do
         [] -> Traced.throw MissingKey.MissingKey
         Sql.Only key : _ -> pure key
       App.Sql.withConnection $ \connection ->
-        Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 key) True $ \blob -> do
-          contents <- IO.liftIO $ ByteString.readFile filePath
-          IO.liftIO $ Sqlite.blobWrite blob contents 0
+        Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 key) True $ \blob -> IO.liftIO $ do
+          contents <- ByteString.readFile filePath
+          Sqlite.blobWrite blob contents 0
       pure key

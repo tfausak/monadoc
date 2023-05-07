@@ -1,12 +1,10 @@
 module Monadoc.Handler.Component.Get where
 
 import qualified Control.Monad.Trans.Reader as Reader
-import qualified Data.Maybe as Maybe
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.NotFound as NotFound
-import qualified Monadoc.Extra.Either as Either
-import qualified Monadoc.Extra.Maybe as Maybe
 import qualified Monadoc.Handler.Common as Common
+import qualified Monadoc.Handler.Version.Get as Version.Get
 import qualified Monadoc.Template.Component.Get as Template
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.ComponentId as ComponentId
@@ -26,10 +24,10 @@ handler ::
 handler packageName reversion componentId _ respond = do
   package <- do
     packages <- App.Sql.query "select * from package where name = ? limit 1" [packageName]
-    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packages
+    NotFound.fromList packages
   version <- do
     versions <- App.Sql.query "select * from version where number = ? limit 1" [Reversion.version reversion]
-    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe versions
+    NotFound.fromList versions
   upload <- do
     uploads <-
       App.Sql.query
@@ -40,13 +38,13 @@ handler packageName reversion componentId _ respond = do
         \ and revision = ? \
         \ limit 1"
         (Model.key package, Model.key version, Reversion.revision reversion)
-    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe uploads
+    NotFound.fromList uploads
   packageMeta <- do
     packageMetas <- App.Sql.query "select * from packageMeta where upload = ? limit 1" [Model.key upload]
-    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packageMetas
+    NotFound.fromList packageMetas
   component <- do
-    components <- App.Sql.query "select * from component where type = ? and name = ?" (ComponentId.type_ componentId, ComponentId.name componentId)
-    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe components
+    components <- App.Sql.query "select * from component where type = ? and name = ? limit 1" (ComponentId.type_ componentId, ComponentId.name componentId)
+    NotFound.fromList components
   packageMetaComponent <- do
     packageMetaComponents <-
       App.Sql.query
@@ -58,7 +56,7 @@ handler packageName reversion componentId _ respond = do
         ( Model.key packageMeta,
           Model.key component
         )
-    Either.throw . Maybe.note NotFound.NotFound $ Maybe.listToMaybe packageMetaComponents
+    NotFound.fromList packageMetaComponents
   packageMetaComponentModules <-
     App.Sql.query
       "select * \
@@ -79,6 +77,7 @@ handler packageName reversion componentId _ respond = do
       \ on range.key = dependency.range \
       \ where dependency.packageMetaComponent = ?"
       [Model.key packageMetaComponent]
+  maybeLatest <- Version.Get.getLatestUpload (Model.key package) (Model.key upload)
   context <- Reader.ask
   let breadcrumbs =
         [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home},
@@ -87,5 +86,8 @@ handler packageName reversion componentId _ respond = do
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.from componentId, Breadcrumb.route = Nothing}
         ]
   respond
-    . Common.htmlResponse Http.ok200 []
-    $ Template.render context breadcrumbs package version upload packageMeta component packageMetaComponent packageMetaComponentModules dependencies
+    . Common.htmlResponse
+      Http.ok200
+      [ (Http.hCacheControl, "max-age=86400, stale-while-revalidate=3600")
+      ]
+    $ Template.render context breadcrumbs package version upload maybeLatest packageMeta component packageMetaComponent packageMetaComponentModules dependencies

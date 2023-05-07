@@ -39,5 +39,9 @@ handler _ respond = do
             Template.rows = rows
           }
   respond
-    . Common.htmlResponse Http.ok200 [(Http.hETag, eTag)]
+    . Common.htmlResponse
+      Http.ok200
+      [ (Http.hCacheControl, "max-age=3600, stale-while-revalidate=60"),
+        (Http.hETag, eTag)
+      ]
     $ Template.render context input

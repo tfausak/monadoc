@@ -71,7 +71,12 @@ handler query _ respond = do
               [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Search", Breadcrumb.route = Just $ Route.Search Search.empty},
                 Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text query, Breadcrumb.route = Nothing}
               ]
-  respond . Common.htmlResponse Http.ok200 [] $ Template.render context breadcrumbs query packages hackageUsers modules
+  respond
+    . Common.htmlResponse
+      Http.ok200
+      [ (Http.hCacheControl, "max-age=86400, stale-while-revalidate=3600")
+      ]
+    $ Template.render context breadcrumbs query packages hackageUsers modules
 
 like :: Search.Search -> Text.Text
 like = Text.cons '%' . flip Text.snoc '%' . escape . Witch.into @Text.Text
