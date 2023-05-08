@@ -5,6 +5,7 @@ import qualified Control.Monad.IO.Class as IO
 import qualified Data.Bifunctor as Bifunctor
 import qualified Data.Map as Map
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
+import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Handler.AppleTouchIcon.Get as AppleTouchIcon.Get
@@ -37,7 +38,7 @@ application context request respond = do
     Either.throw
       . parseMethod
       $ Wai.requestMethod request
-  route <- Route.parse (Wai.pathInfo request) (Wai.queryString request)
+  route <- NotFound.fromMaybe $ Route.parse (Wai.pathInfo request) (Wai.queryString request)
   handler <- getHandler context method route
   App.run context . handler request $ IO.liftIO . respond
 
