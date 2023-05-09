@@ -5,6 +5,7 @@ import qualified Codec.Archive.Tar.Entry as Tar
 import qualified Control.Concurrent.STM as Stm
 import qualified Control.Monad as Monad
 import qualified Control.Monad.IO.Class as IO
+import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Int as Int
@@ -42,6 +43,7 @@ import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Constraint as Constraint
+import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.HackageUserName as HackageUserName
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
@@ -65,7 +67,8 @@ run = do
       size <- do
         xs <- App.Sql.query "select size from blob where key = ? limit 1" [blobKey]
         Sql.fromOnly <$> NotFound.fromList xs
-      Temp.withSystemTempFile "monadoc-" $ \f h -> do
+      context <- Reader.ask
+      Temp.withTempFile (Context.temporaryDirectory context) "monadoc-" $ \f h -> do
         App.Sql.withConnection $ \connection ->
           Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 blobKey) False $ \blob -> IO.liftIO $ do
             chunks <- Sqlite.unsafeBlobRead blob size 0
