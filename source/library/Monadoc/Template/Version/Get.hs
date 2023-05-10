@@ -60,7 +60,7 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
           (Witch.from reversion)
   Common.base context route breadcrumbs title $ do
     showDeprecationWarning packageName reversion upload
-    showLatestInfo context packageName maybeLatest
+    showLatestInfo context packageName maybeLatest $ const Nothing
     Html.h2_ $ Html.toHtml packageName
     Html.p_ $ do
       "Version "
@@ -138,24 +138,30 @@ showDeprecationWarning packageName reversion upload = do
       Html.toHtml packageName
       " is deprecated."
 
-showLatestInfo :: Context.Context -> PackageName.PackageName -> Maybe (Upload.Model, Version.Model) -> Html.Html ()
-showLatestInfo context packageName maybeLatest =
+showLatestInfo ::
+  Context.Context ->
+  PackageName.PackageName ->
+  Maybe (Upload.Model, Version.Model) ->
+  (Reversion.Reversion -> Maybe Route.Route) ->
+  Html.Html ()
+showLatestInfo context packageName maybeLatest makeRoute =
   case maybeLatest of
     Nothing -> pure ()
-    Just (upl, ver) -> Html.div_ [Html.class_ "alert alert-info"] $ do
+    Just (upload, version) -> Html.div_ [Html.class_ "alert alert-info"] $ do
       "The latest version of "
       Html.toHtml packageName
       " is "
-      let rev =
+      let reversion =
             Reversion.Reversion
-              { Reversion.version = Version.number $ Model.value ver,
-                Reversion.revision = Upload.revision $ Model.value upl
+              { Reversion.version = Version.number $ Model.value version,
+                Reversion.revision = Upload.revision $ Model.value upload
               }
+          route = Maybe.fromMaybe (Route.Version packageName reversion) $ makeRoute reversion
       Html.a_
         [ Html.class_ "alert-link",
-          Html.href_ . Common.route context $ Route.Version packageName rev
+          Html.href_ $ Common.route context route
         ]
-        $ Html.toHtml rev
+        $ Html.toHtml reversion
       "."
 
 sortComponents :: PackageName.PackageName -> [Component.Model] -> [Component.Model]
@@ -200,7 +206,7 @@ markup context =
       -- https://hackage.haskell.org/package/haddock-library-1.10.0/docs/Documentation-Haddock-Types.html#t:Namespace
       Haddock.markupIdentifier = \(_, s) -> Html.toHtml s,
       Haddock.markupIdentifierUnchecked = Void.absurd,
-      -- TODO: MathJax
+      -- TODO: MathJax?
       Haddock.markupMathDisplay = Html.pre_ . Html.code_ . Html.toHtml,
       Haddock.markupMathInline = Html.code_ . Html.toHtml,
       Haddock.markupModule = \x ->

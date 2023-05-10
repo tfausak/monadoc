@@ -13,6 +13,7 @@ import qualified GHC.Stack as Stack
 import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Exception.Found as Found
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
+import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
 import qualified Monadoc.Extra.Exception as Exception
@@ -37,49 +38,48 @@ run ::
   App.App ()
 run f exception = Monad.when (shouldNotify exception) $ do
   context <- Reader.ask
-  case Config.dsn $ Context.config context of
-    Nothing -> pure ()
-    Just dsn -> do
-      let manager = Context.manager context
-      event <- IO.liftIO Patrol.Event.new
-      environment <- IO.liftIO Environment.getEnvironment
-      eventId <-
-        IO.liftIO
-          . Patrol.store
-            manager
-            dsn
-          $ f
-            event
-              { Patrol.Event.exception =
-                  Just
-                    Patrol.Exceptions.empty
-                      { Patrol.Exceptions.values =
-                          [ case Exception.fromException exception of
-                              Nothing -> Patrol.Exception.fromSomeException exception
-                              Just (Traced.Traced e s) ->
-                                (Patrol.Exception.fromSomeException e)
-                                  { Patrol.Exception.stacktrace = Just $ makeStacktrace s
-                                  }
-                          ]
-                      },
-                Patrol.Event.release = Config.sha $ Context.config context,
-                Patrol.Event.request =
-                  Just
-                    Patrol.Request.empty
-                      { Patrol.Request.env =
-                          Map.fromList $
-                            fmap (Bifunctor.bimap Text.pack Aeson.toJSON) environment
-                      }
-              }
-      App.Log.warn . Text.pack $ show eventId
+  Monad.forM_ (Config.dsn $ Context.config context) $ \dsn -> do
+    let manager = Context.manager context
+    event <- IO.liftIO Patrol.Event.new
+    environment <- IO.liftIO Environment.getEnvironment
+    eventId <-
+      IO.liftIO
+        . Patrol.store
+          manager
+          dsn
+        $ f
+          event
+            { Patrol.Event.exception =
+                Just
+                  Patrol.Exceptions.empty
+                    { Patrol.Exceptions.values =
+                        [ case Exception.fromException exception of
+                            Nothing -> Patrol.Exception.fromSomeException exception
+                            Just (Traced.Traced e s) ->
+                              (Patrol.Exception.fromSomeException e)
+                                { Patrol.Exception.stacktrace = Just $ makeStacktrace s
+                                }
+                        ]
+                    },
+              Patrol.Event.release = Config.sha $ Context.config context,
+              Patrol.Event.request =
+                Just
+                  Patrol.Request.empty
+                    { Patrol.Request.env =
+                        Map.fromList $
+                          fmap (Bifunctor.bimap Text.pack Aeson.toJSON) environment
+                    }
+            }
+    App.Log.warn . Text.pack $ show eventId
 
 shouldNotify :: Exception.SomeException -> Bool
 shouldNotify e =
   Warp.defaultShouldDisplayException e
     && Exception.isSync e
-    && Exception.isNotType @UnknownRoute.UnknownRoute e
-    && Exception.isNotType @MethodNotAllowed.MethodNotAllowed e
     && Exception.isNotType @Found.Found e
+    && Exception.isNotType @MethodNotAllowed.MethodNotAllowed e
+    && Exception.isNotType @NotFound.NotFound e
+    && Exception.isNotType @UnknownRoute.UnknownRoute e
 
 makeStacktrace :: Stack.CallStack -> Patrol.Stacktrace.Stacktrace
 makeStacktrace callStack =

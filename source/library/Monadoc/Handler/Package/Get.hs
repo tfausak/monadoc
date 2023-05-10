@@ -6,8 +6,10 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Handler.Common as Common
+import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Template.Package.Get as Template
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.Handler as Handler
 import qualified Monadoc.Type.Model as Model
@@ -20,9 +22,7 @@ import qualified Witch
 handler :: PackageName.PackageName -> Handler.Handler
 handler packageName _ respond = do
   context <- Reader.ask
-  package <- do
-    packages <- App.Sql.query "select * from package where name = ? limit 1" [packageName]
-    NotFound.fromList packages
+  package <- getPackage packageName
   rows <-
     App.Sql.query
       "select * \
@@ -34,6 +34,13 @@ handler packageName _ respond = do
       \ where upload.package = ? \
       \ order by upload.uploadedAt desc"
       [Model.key package]
+  hackageUsers <-
+    App.Sql.query
+      "select * \
+      \ from hackageUser \
+      \ where key in (select distinct uploadedBy from upload where upload.package = ?) \
+      \ order by name collate nocase asc"
+      [Model.key package]
   let eTag = Common.makeETag $ case rows of
         (upload Sql.:. _) : _ -> Just . Upload.uploadedAt $ Model.value upload
         _ -> Nothing
@@ -41,7 +48,6 @@ handler packageName _ respond = do
         [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home},
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text packageName, Breadcrumb.route = Nothing}
         ]
-  hackageUsers <- App.Sql.query "select * from hackageUser where key in (select distinct uploadedBy from upload where upload.package = ?) order by name collate nocase asc" [Model.key package]
   respond
     . Common.htmlResponse
       Http.ok200
@@ -49,3 +55,8 @@ handler packageName _ respond = do
         (Http.hETag, eTag)
       ]
     $ Template.render context breadcrumbs package rows hackageUsers
+
+getPackage :: PackageName.PackageName -> App.App Package.Model
+getPackage name = do
+  packages <- App.Sql.query "select * from package where name = ? limit 1" [name]
+  NotFound.fromList packages

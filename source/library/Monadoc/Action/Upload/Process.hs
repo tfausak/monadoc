@@ -155,7 +155,9 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
       Monad.forM_ (componentModules c) $ \(mt, mn) -> do
         module_ <- Module.Upsert.run Module.Module {Module.name = Witch.from mn}
 
-        -- TODO: Handle other module types.
+        -- TODO: Handle other module types. Note that a single module can have
+        -- multiple types. For example the `Paths_*` modules are often *both*
+        -- `Autogen` and `Other`.
         Monad.when (mt == ModuleType.Exposed) $ do
           _packageMetaComponentModule <-
             PackageMetaComponentModule.Upsert.run

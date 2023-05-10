@@ -6,7 +6,10 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Handler.Common as Common
+import qualified Monadoc.Handler.Package.Get as Package.Get
+import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
+import qualified Monadoc.Model.PackageMeta as PackageMeta
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Template.Version.Get as Template
@@ -16,7 +19,9 @@ import qualified Monadoc.Type.Handler as Handler
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.PackageName as PackageName
 import qualified Monadoc.Type.Reversion as Reversion
+import qualified Monadoc.Type.Revision as Revision
 import qualified Monadoc.Type.Route as Route
+import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Network.HTTP.Types as Http
 import qualified Network.HTTP.Types.Header as Http
 import qualified Witch
@@ -27,32 +32,20 @@ handler ::
   Handler.Handler
 handler packageName reversion _ respond = do
   context <- Reader.ask
-  package <- do
-    packages <- App.Sql.query "select * from package where name = ? limit 1" [packageName]
-    NotFound.fromList packages
-  version <- do
-    versions <- App.Sql.query "select * from version where number = ? limit 1" [Reversion.version reversion]
-    NotFound.fromList versions
-  let revision = Reversion.revision reversion
-  upload <- do
-    uploads <-
-      App.Sql.query
-        "select * \
-        \ from upload \
-        \ where package = ? \
-        \ and version = ? \
-        \ and revision = ? \
-        \ limit 1"
-        (Model.key package, Model.key version, revision)
-    NotFound.fromList uploads
-  hackageUser <- do
-    hackageUsers <- App.Sql.query "select * from hackageUser where key = ? limit 1" [Upload.uploadedBy $ Model.value upload]
-    NotFound.fromList hackageUsers
+  package <- Package.Get.getPackage packageName
+  version <- getVersion $ Reversion.version reversion
+  upload <- getUpload (Model.key package) (Model.key version) (Reversion.revision reversion)
+  hackageUser <- getHackageUser . Upload.uploadedBy $ Model.value upload
   maybeLatest <- getLatestUpload (Model.key package) (Model.key upload)
-  packageMeta <- do
-    packageMetas <- App.Sql.query "select * from packageMeta where upload = ? limit 1" [Model.key upload]
-    NotFound.fromList packageMetas
-  components <- App.Sql.query "select * from packageMetaComponent inner join component on component.key = packageMetaComponent.component where packageMetaComponent.packageMeta = ?" [Model.key packageMeta]
+  packageMeta <- getPackageMeta $ Model.key upload
+  components <-
+    App.Sql.query
+      "select * \
+      \ from packageMetaComponent \
+      \ inner join component \
+      \ on component.key = packageMetaComponent.component \
+      \ where packageMetaComponent.packageMeta = ?"
+      [Model.key packageMeta]
   let eTag = Common.makeETag . Upload.uploadedAt $ Model.value upload
       breadcrumbs =
         [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home},
@@ -66,6 +59,34 @@ handler packageName reversion _ respond = do
         (Http.hETag, eTag)
       ]
     $ Template.render context breadcrumbs package version upload hackageUser maybeLatest packageMeta components
+
+getVersion :: VersionNumber.VersionNumber -> App.App Version.Model
+getVersion number = do
+  versions <- App.Sql.query "select * from version where number = ? limit 1" [number]
+  NotFound.fromList versions
+
+getUpload :: Package.Key -> Version.Key -> Revision.Revision -> App.App Upload.Model
+getUpload package version revision = do
+  uploads <-
+    App.Sql.query
+      "select * \
+      \ from upload \
+      \ where package = ? \
+      \ and version = ? \
+      \ and revision = ? \
+      \ limit 1"
+      (package, version, revision)
+  NotFound.fromList uploads
+
+getHackageUser :: HackageUser.Key -> App.App HackageUser.Model
+getHackageUser key = do
+  hackageUsers <- App.Sql.query "select * from hackageUser where key = ? limit 1" [key]
+  NotFound.fromList hackageUsers
+
+getPackageMeta :: Upload.Key -> App.App PackageMeta.Model
+getPackageMeta upload = do
+  packageMetas <- App.Sql.query "select * from packageMeta where upload = ? limit 1" [upload]
+  NotFound.fromList packageMetas
 
 getLatestUpload :: Package.Key -> Upload.Key -> App.App (Maybe (Upload.Model, Version.Model))
 getLatestUpload packageKey uploadKey = do

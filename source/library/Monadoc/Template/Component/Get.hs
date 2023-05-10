@@ -34,13 +34,14 @@ render ::
   Version.Model ->
   Upload.Model ->
   Maybe (Upload.Model, Version.Model) ->
+  Bool ->
   PackageMeta.Model ->
   Component.Model ->
   PackageMetaComponent.Model ->
   [PackageMetaComponentModule.Model Sql.:. Module.Model] ->
   [Dependency.Model Sql.:. Package.Model Sql.:. Component.Model Sql.:. Range.Model] ->
   Html.Html ()
-render context breadcrumbs package version upload maybeLatest _ component _ modules dependencies = do
+render context breadcrumbs package version upload maybeLatest hasComponent _ component _ modules dependencies = do
   let packageName = Package.name $ Model.value package
       reversion =
         Reversion.Reversion
@@ -61,8 +62,10 @@ render context breadcrumbs package version upload maybeLatest _ component _ modu
           (Witch.from componentId)
   Common.base context route breadcrumbs title $ do
     Version.Get.showDeprecationWarning packageName reversion upload
-    -- TODO: Go straight to component (if it exists) rather than just the version.
-    Version.Get.showLatestInfo context packageName maybeLatest
+    Version.Get.showLatestInfo context packageName maybeLatest $ \rev ->
+      if hasComponent
+        then Just $ Route.Component packageName rev componentId
+        else Nothing
     Html.h2_ $ Html.toHtml componentId
     let moduleNames = fmap (\(_ Sql.:. m) -> Module.name $ Model.value m) modules
     Monad.when (not $ null moduleNames) $ do

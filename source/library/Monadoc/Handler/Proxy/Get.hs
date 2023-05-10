@@ -5,6 +5,7 @@ import qualified Control.Monad.Loops as Loops
 import qualified Control.Monad.Trans.Control as Control
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Builder as Builder
+import qualified Data.Set as Set
 import qualified Monadoc.Exception.Mismatch as Mismatch
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Extra.HttpClient as Client
@@ -15,6 +16,7 @@ import qualified Monadoc.Type.Hash as Hash
 import qualified Monadoc.Type.Route as Route
 import qualified Monadoc.Type.Url as Url
 import qualified Network.HTTP.Client as Client
+import qualified Network.HTTP.Types.Header as Http
 import qualified Network.Wai as Wai
 import qualified Witch
 
@@ -32,12 +34,28 @@ handler context actual url _ respond = do
       }
   request <- Client.requestFromURI $ Witch.from url
   Control.control $ \runInBase ->
-    Client.withResponse (Client.ensureUserAgent request) {Client.checkResponse = Client.throwErrorStatusCodes} (Context.manager context) $ \response ->
-      -- TODO: Limit which headers are forwarded?
-      runInBase . respond . Wai.responseStream (Client.responseStatus response) (Client.responseHeaders response) $ \send flush ->
-        Loops.whileJust_ (readChunk response) $ \chunk -> do
-          send $ Builder.byteString chunk
+    -- TODO: Forward headers from the client?
+    Client.withResponse (Client.ensureUserAgent request) {Client.checkResponse = Client.throwErrorStatusCodes} (Context.manager context) $ \response -> do
+      let headers = filter (flip Set.member headersToKeep . fst) $ Client.responseHeaders response
+      runInBase
+        . respond
+        . Wai.responseStream (Client.responseStatus response) headers
+        $ \send flush -> do
+          Loops.whileJust_ (readChunk response) $ send . Builder.byteString
           flush
+
+headersToKeep :: Set.Set Http.HeaderName
+headersToKeep =
+  Set.fromList
+    [ Http.hCacheControl,
+      Http.hContentEncoding,
+      Http.hContentLength,
+      Http.hContentType,
+      Http.hETag,
+      Http.hExpires,
+      Http.hLastModified,
+      Http.hTransferEncoding
+    ]
 
 readChunk :: Client.Response Client.BodyReader -> IO (Maybe ByteString.ByteString)
 readChunk response = do

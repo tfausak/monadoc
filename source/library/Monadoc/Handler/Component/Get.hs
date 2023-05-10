@@ -1,11 +1,19 @@
 module Monadoc.Handler.Component.Get where
 
+import qualified Control.Monad as Monad
+import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.NotFound as NotFound
+import qualified Monadoc.Extra.Exception as Exception
 import qualified Monadoc.Handler.Common as Common
+import qualified Monadoc.Handler.Package.Get as Package.Get
 import qualified Monadoc.Handler.Version.Get as Version.Get
+import qualified Monadoc.Model.Component as Component
+import qualified Monadoc.Model.PackageMeta as PackageMeta
+import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Template.Component.Get as Template
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.ComponentId as ComponentId
 import qualified Monadoc.Type.Handler as Handler
@@ -22,41 +30,12 @@ handler ::
   ComponentId.ComponentId ->
   Handler.Handler
 handler packageName reversion componentId _ respond = do
-  package <- do
-    packages <- App.Sql.query "select * from package where name = ? limit 1" [packageName]
-    NotFound.fromList packages
-  version <- do
-    versions <- App.Sql.query "select * from version where number = ? limit 1" [Reversion.version reversion]
-    NotFound.fromList versions
-  upload <- do
-    uploads <-
-      App.Sql.query
-        "select * \
-        \ from upload \
-        \ where package = ? \
-        \ and version = ? \
-        \ and revision = ? \
-        \ limit 1"
-        (Model.key package, Model.key version, Reversion.revision reversion)
-    NotFound.fromList uploads
-  packageMeta <- do
-    packageMetas <- App.Sql.query "select * from packageMeta where upload = ? limit 1" [Model.key upload]
-    NotFound.fromList packageMetas
-  component <- do
-    components <- App.Sql.query "select * from component where type = ? and name = ? limit 1" (ComponentId.type_ componentId, ComponentId.name componentId)
-    NotFound.fromList components
-  packageMetaComponent <- do
-    packageMetaComponents <-
-      App.Sql.query
-        "select * \
-        \ from packageMetaComponent \
-        \ where packageMeta = ? \
-        \ and component = ? \
-        \ limit 1"
-        ( Model.key packageMeta,
-          Model.key component
-        )
-    NotFound.fromList packageMetaComponents
+  package <- Package.Get.getPackage packageName
+  version <- Version.Get.getVersion $ Reversion.version reversion
+  upload <- Version.Get.getUpload (Model.key package) (Model.key version) (Reversion.revision reversion)
+  packageMeta <- Version.Get.getPackageMeta $ Model.key upload
+  component <- getComponent componentId
+  packageMetaComponent <- getPackageMetaComponent (Model.key packageMeta) (Model.key component)
   packageMetaComponentModules <-
     App.Sql.query
       "select * \
@@ -77,7 +56,14 @@ handler packageName reversion componentId _ respond = do
       \ on range.key = dependency.range \
       \ where dependency.packageMetaComponent = ?"
       [Model.key packageMetaComponent]
+  -- TODO: Get reverse dependencies.
   maybeLatest <- Version.Get.getLatestUpload (Model.key package) (Model.key upload)
+  hasComponent <- case maybeLatest of
+    Nothing -> pure False
+    Just (u, _) -> Exception.handleIf (Exception.isType @NotFound.NotFound) (const $ pure False) $ do
+      pm <- Version.Get.getPackageMeta $ Model.key u
+      Monad.void $ getPackageMetaComponent (Model.key pm) (Model.key component)
+      pure True
   context <- Reader.ask
   let breadcrumbs =
         [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home},
@@ -90,4 +76,24 @@ handler packageName reversion componentId _ respond = do
       Http.ok200
       [ (Http.hCacheControl, "max-age=86400, stale-while-revalidate=3600")
       ]
-    $ Template.render context breadcrumbs package version upload maybeLatest packageMeta component packageMetaComponent packageMetaComponentModules dependencies
+    $ Template.render context breadcrumbs package version upload maybeLatest hasComponent packageMeta component packageMetaComponent packageMetaComponentModules dependencies
+
+getComponent :: ComponentId.ComponentId -> App.App Component.Model
+getComponent componentId = do
+  components <-
+    App.Sql.query
+      "select * from component where type = ? and name = ? limit 1"
+      (ComponentId.type_ componentId, ComponentId.name componentId)
+  NotFound.fromList components
+
+getPackageMetaComponent :: PackageMeta.Key -> Component.Key -> App.App PackageMetaComponent.Model
+getPackageMetaComponent packageMeta component = do
+  packageMetaComponents <-
+    App.Sql.query
+      "select * \
+      \ from packageMetaComponent \
+      \ where packageMeta = ? \
+      \ and component = ? \
+      \ limit 1"
+      (packageMeta, component)
+  NotFound.fromList packageMetaComponents

@@ -12,6 +12,7 @@ import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Template.Common as Common
 import qualified Monadoc.Template.Version.Get as Version.Get
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
+import qualified Monadoc.Type.ComponentId as ComponentId
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Reversion as Reversion
@@ -26,15 +27,21 @@ render ::
   Version.Model ->
   Upload.Model ->
   Maybe (Upload.Model, Version.Model) ->
+  Bool ->
   Component.Model ->
   Module.Model ->
   Html.Html ()
-render context route breadcrumbs package version upload maybeLatest component module_ = do
+render context route breadcrumbs package version upload maybeLatest hasModule component module_ = do
   let packageName = Package.name $ Model.value package
       reversion =
         Reversion.Reversion
           { Reversion.version = Version.number $ Model.value version,
             Reversion.revision = Upload.revision $ Model.value upload
+          }
+      componentId =
+        ComponentId.ComponentId
+          { ComponentId.type_ = Component.type_ $ Model.value component,
+            ComponentId.name = Component.name $ Model.value component
           }
       moduleName = Module.name $ Model.value module_
       title =
@@ -42,12 +49,14 @@ render context route breadcrumbs package version upload maybeLatest component mo
           ("Package" F.%+ F.stext F.%+ "version" F.%+ F.stext F.%+ "component" F.%+ F.stext F.%+ "module" F.%+ F.stext F.%+ ":: Monadoc")
           (Witch.from packageName)
           (Witch.from reversion)
-          (Witch.from . Component.name $ Model.value component)
+          (Witch.from componentId)
           (Witch.from moduleName)
   Common.base context route breadcrumbs title $ do
     Version.Get.showDeprecationWarning packageName reversion upload
-    -- TODO: Go straight to module (if it exists) rather than just the version.
-    Version.Get.showLatestInfo context packageName maybeLatest
+    Version.Get.showLatestInfo context packageName maybeLatest $ \rev ->
+      if hasModule
+        then Just $ Route.Module packageName rev componentId moduleName
+        else Nothing
     -- TODO: Include identifiers exported by the module. This will require
     -- downloading each package's tarball, finding the sources of each module,
     -- and parsing them with GHC.

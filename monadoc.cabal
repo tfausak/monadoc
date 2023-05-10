@@ -1,6 +1,6 @@
 cabal-version:      2.2
 name:               monadoc
-version:            0.2023.5.9
+version:            0.2023.5.10
 build-type:         Simple
 category:           Documentation
 data-dir:           data
