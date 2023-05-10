@@ -2,6 +2,7 @@ module Monadoc.Action.HackageIndex.Process where
 
 import qualified Codec.Archive.Tar as Tar
 import qualified Codec.Archive.Tar.Entry as Tar
+import qualified Codec.Compression.GZip as Gzip
 import qualified Control.Concurrent.STM as Stm
 import qualified Control.Monad as Monad
 import qualified Control.Monad.IO.Class as IO
@@ -77,7 +78,10 @@ run = do
         contents <- IO.liftIO $ LazyByteString.readFile f
         mapM_ (handleItem constraints revisions)
           . Tar.foldEntries ((:) . Right) [] (pure . Left)
-          $ Tar.read contents
+          . Tar.read
+          $ case HackageIndex.size $ Model.value hackageIndex of
+            Nothing -> contents
+            Just _ -> Gzip.decompress contents
       upsertPreferences constraints
       updateLatest
       now <- Timestamp.getCurrentTime

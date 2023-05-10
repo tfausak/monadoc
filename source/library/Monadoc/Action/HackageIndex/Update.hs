@@ -1,5 +1,6 @@
 module Monadoc.Action.HackageIndex.Update where
 
+import qualified Codec.Compression.GZip as Gzip
 import qualified Control.Monad as Monad
 import qualified Control.Monad.IO.Class as IO
 import qualified Control.Monad.Loops as Loops
@@ -9,6 +10,7 @@ import qualified Crypto.Hash as Crypto
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LazyByteString
 import qualified Data.Int as Int
+import qualified Data.Maybe as Maybe
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite3 as Sqlite
@@ -44,7 +46,7 @@ import qualified Witch
 run :: HackageIndex.Model -> App.App ()
 run hackageIndex = do
   App.Log.debug "updating hackage index"
-  (oldKey, oldSize) <- do
+  (oldKey, oldBlobSize) <- do
     rows <-
       App.Sql.query
         "select blob.key, blob.size \
@@ -56,7 +58,8 @@ run hackageIndex = do
         [Model.key hackageIndex]
     NotFound.fromList rows
   newSize <- HackageIndex.Insert.getSize
-  let start = oldSize - 1_024
+  let oldSize = Maybe.fromMaybe oldBlobSize . HackageIndex.size $ Model.value hackageIndex
+      start = oldSize - overlap
       end = newSize - 1
       range = Witch.into @ByteString.ByteString . Witch.into @(Witch.UTF_8 ByteString.ByteString) $ "bytes=" <> show start <> "-" <> show end
   case compare oldSize newSize of
@@ -83,16 +86,18 @@ run hackageIndex = do
           App.Log.debug "copying old blob"
           App.Sql.withConnection $ \connection ->
             Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.from @Blob.Key oldKey) False $ \oldBlob -> IO.liftIO $ do
-              contents <- Sqlite.blobRead oldBlob oldSize 0
-              ByteString.hPut h contents
+              contents <- Sqlite.blobRead oldBlob oldBlobSize 0
+              case HackageIndex.size $ Model.value hackageIndex of
+                Nothing -> ByteString.hPut h contents
+                Just _ -> LazyByteString.hPut h . Gzip.decompress $ Witch.from contents
           App.Log.debug "appending new blob"
           IO.liftIO $ do
-            IO.hSeek h IO.RelativeSeek (-1_024)
+            IO.hSeek h IO.RelativeSeek (-overlap)
             Loops.whileJust_ (Proxy.Get.readChunk response) $ ByteString.hPut h
             IO.hClose h
           App.Log.debug "inserting new blob"
           blobKey <- upsertBlob f
-          Monad.void $ HackageIndex.Insert.insertHackageIndex blobKey
+          HackageIndex.Insert.insertHackageIndex blobKey $ Just newSize
 
 getActualSize :: Client.Response a -> App.App Int
 getActualSize response = do
@@ -102,29 +107,34 @@ getActualSize response = do
   b <- Either.throw . Witch.tryInto @Text.Text . Witch.into @(Witch.UTF_8 ByteString.ByteString) . ByteString.drop 1 . snd $ ByteString.break (== 0x2f) a
   Either.throw $ Read.tryRead b
 
--- | This is similar to 'Monadoc.Action.Blob.Upsert.run'. The key difference is
--- that it operates on a file rather than a byte string. And it attempts to
--- keep resident memory usage at a minimum.
 upsertBlob :: FilePath -> App.App Blob.Key
-upsertBlob filePath = do
-  hash <-
-    fmap (Witch.from @(Crypto.Digest Crypto.SHA256) . Crypto.hashlazy)
-      . IO.liftIO
-      $ LazyByteString.readFile filePath
-  r1 <- App.Sql.query "select key from blob where hash = ? limit 1" [hash]
-  case r1 of
-    Sql.Only key : _ -> pure key
-    [] -> do
-      size <- IO.liftIO $ Directory.getFileSize filePath
-      r2 <-
-        App.Sql.query
-          "insert into blob (size, hash, contents) values (?, ?, zeroblob(?)) returning key"
-          (size, hash :: Hash.Hash, size)
-      key <- case r2 of
-        [] -> Traced.throw MissingKey.MissingKey
-        Sql.Only key : _ -> pure key
-      App.Sql.withConnection $ \connection ->
-        Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 key) True $ \blob -> IO.liftIO $ do
-          contents <- ByteString.readFile filePath
-          Sqlite.blobWrite blob contents 0
-      pure key
+upsertBlob uncompressedFile = do
+  context <- Reader.ask
+  Temp.withTempFile (Context.temporaryDirectory context) "monadoc-" $ \compressedFile handle -> do
+    c1 <- IO.liftIO $ LazyByteString.readFile uncompressedFile
+    IO.liftIO . LazyByteString.hPut handle $ Gzip.compress c1
+    IO.liftIO $ IO.hClose handle
+    hash <-
+      fmap (Witch.from @(Crypto.Digest Crypto.SHA256) . Crypto.hashlazy)
+        . IO.liftIO
+        $ LazyByteString.readFile compressedFile
+    r1 <- App.Sql.query "select key from blob where hash = ? limit 1" [hash]
+    case r1 of
+      Sql.Only key : _ -> pure key
+      [] -> do
+        size <- IO.liftIO $ Directory.getFileSize compressedFile
+        r2 <-
+          App.Sql.query
+            "insert into blob (size, hash, contents) values (?, ?, zeroblob(?)) returning key"
+            (size, hash :: Hash.Hash, size)
+        key <- case r2 of
+          [] -> Traced.throw MissingKey.MissingKey
+          Sql.Only key : _ -> pure key
+        App.Sql.withConnection $ \connection ->
+          Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 key) True $ \blob -> IO.liftIO $ do
+            c2 <- ByteString.readFile compressedFile
+            Sqlite.blobWrite blob c2 0
+        pure key
+
+overlap :: (Integral a) => a
+overlap = 1_024

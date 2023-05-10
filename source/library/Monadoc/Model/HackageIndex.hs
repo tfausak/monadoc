@@ -16,7 +16,8 @@ type Key = Key.Key HackageIndex
 data HackageIndex = HackageIndex
   { blob :: Blob.Key,
     createdAt :: Timestamp.Timestamp,
-    processedAt :: Maybe Timestamp.Timestamp
+    processedAt :: Maybe Timestamp.Timestamp,
+    size :: Maybe Int
   }
   deriving (Eq, Show)
 
@@ -26,18 +27,21 @@ instance Sql.FromRow HackageIndex where
       <$> Sql.field
       <*> Sql.field
       <*> Sql.field
+      <*> Sql.field
 
 instance Sql.ToRow HackageIndex where
   toRow hackageIndex =
     [ Sql.toField $ blob hackageIndex,
       Sql.toField $ createdAt hackageIndex,
-      Sql.toField $ processedAt hackageIndex
+      Sql.toField $ processedAt hackageIndex,
+      Sql.toField $ size hackageIndex
     ]
 
 instance QuickCheck.Arbitrary HackageIndex where
   arbitrary =
     HackageIndex
       <$> QuickCheck.arbitrary
+      <*> QuickCheck.arbitrary
       <*> QuickCheck.arbitrary
       <*> QuickCheck.arbitrary
 
@@ -67,5 +71,8 @@ migrations =
       "create index hackageIndex_processedAt on hackageIndex ( processedAt )",
     Migration.new
       (2022, 5, 23, 6, 52, 0)
-      "create index hackageIndex_createdAt on hackageIndex ( createdAt )"
+      "create index hackageIndex_createdAt on hackageIndex ( createdAt )",
+    Migration.new
+      (2023, 5, 9, 18, 6, 0)
+      "alter table hackageIndex add column size integer"
   ]

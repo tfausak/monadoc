@@ -15,11 +15,13 @@ spec = Hspec.describe "Monadoc.Model.HackageIndex" $ do
       HackageIndex.HackageIndex
         { HackageIndex.blob = Witch.from @Int 1,
           HackageIndex.createdAt = Witch.from $ Time.makeUtcTime 2001 2 3 4 5 6.007,
-          HackageIndex.processedAt = Just . Witch.from $ Time.makeUtcTime 2002 2 3 4 5 6.007
+          HackageIndex.processedAt = Just . Witch.from $ Time.makeUtcTime 2002 2 3 4 5 6.007,
+          HackageIndex.size = Just 2
         }
       [ Sql.SQLInteger 1,
         Sql.SQLText "2001-02-03 04:05:06.007",
-        Sql.SQLText "2002-02-03 04:05:06.007"
+        Sql.SQLText "2002-02-03 04:05:06.007",
+        Sql.SQLInteger 2
       ]
 
   Hspec.it "can be round-tripped through SQL" $

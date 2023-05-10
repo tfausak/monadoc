@@ -1,36 +1,34 @@
 module Monadoc.Action.HackageIndex.Insert where
 
-import qualified Codec.Compression.Zlib.Internal as Zlib
 import qualified Control.Concurrent.STM as Stm
-import qualified Control.Monad as Monad
+import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.IO.Class as IO
+import qualified Control.Monad.Loops as Loops
 import qualified Control.Monad.Trans.Control as Control
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Crypto.Hash as Crypto
 import qualified Data.ByteString as ByteString
 import qualified Data.Int as Int
 import qualified Data.Text as Text
-import qualified Data.Time as Time
 import qualified Database.SQLite.Simple as Sql
 import qualified Database.SQLite3 as Sqlite
 import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Action.App.Sql as App.Sql
+import qualified Monadoc.Exception.MissingHeader as MissingHeader
 import qualified Monadoc.Exception.MissingKey as MissingKey
-import qualified Monadoc.Exception.MissingSize as MissingSize
 import qualified Monadoc.Exception.Traced as Traced
-import qualified Monadoc.Exception.TrailingBytes as TrailingBytes
 import qualified Monadoc.Extra.DirectSqlite as Sqlite
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Extra.HttpClient as Client
 import qualified Monadoc.Extra.Maybe as Maybe
 import qualified Monadoc.Extra.Read as Read
+import qualified Monadoc.Handler.Proxy.Get as Proxy.Get
 import qualified Monadoc.Model.Blob as Blob
 import qualified Monadoc.Model.HackageIndex as HackageIndex
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Hash as Hash
-import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Types as Http
@@ -39,64 +37,48 @@ import qualified Witch
 run :: App.App ()
 run = do
   App.Log.debug "inserting hackage index"
-  size <- getSize
-  key <- insertBlob size
+  uncompressedSize <- getSize
   context <- Reader.ask
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"
-  Control.control $ \runInBase -> Client.withResponse (Client.ensureUserAgent request) (Context.manager context) $ \response -> runInBase $ do
-    hashVar <- IO.liftIO . Stm.newTVarIO $ Crypto.hashInitWith Crypto.SHA256
-    offsetRef <- IO.liftIO $ Stm.newTVarIO 0
-    App.Sql.withConnection $ \connection ->
-      Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 key) True $ \blob ->
-        IO.liftIO
-          . Zlib.foldDecompressStream
-            ( \f -> do
-                chunk <- Client.brRead $ Client.responseBody response
-                f chunk
-            )
-            ( \chunk io -> do
-                offset <- Stm.atomically . Stm.stateTVar offsetRef $ \n -> (n, n + ByteString.length chunk)
-                Sqlite.blobWrite blob chunk offset
-                IO.liftIO . Stm.atomically . Stm.modifyTVar' hashVar $ flip Crypto.hashUpdate chunk
-                io
-            )
-            ( \leftovers ->
-                Monad.when (not $ ByteString.null leftovers)
-                  . Traced.throw
-                  $ TrailingBytes.TrailingBytes leftovers
-            )
-            Traced.throw
-          $ Zlib.decompressIO Zlib.gzipFormat Zlib.defaultDecompressParams
-    hash <- IO.liftIO $ Stm.readTVarIO hashVar
-    App.Sql.execute
-      "update blob set hash = ? where key = ?"
-      (Witch.into @Hash.Hash $ Crypto.hashFinalize hash, key)
-    Monad.void $ insertHackageIndex key
+  Control.control $ \runInBase ->
+    Client.withResponse (Client.ensureUserAgent request) (Context.manager context) $ \response -> runInBase $ do
+      compressedSize <- getContentLength response
+      key <- insertBlob compressedSize
+      hashVar <- IO.liftIO . Stm.newTVarIO $ Crypto.hashInitWith Crypto.SHA256
+      offsetVar <- IO.liftIO $ Stm.newTVarIO 0
+      App.Sql.withConnection $ \connection ->
+        Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 key) True $ \blob -> IO.liftIO $ do
+          Loops.whileJust_ (Proxy.Get.readChunk response) $ \chunk -> do
+            offset <- Stm.atomically $ do
+              Stm.modifyTVar' hashVar $ flip Crypto.hashUpdate chunk
+              Stm.stateTVar offsetVar $ \n -> (n, n + ByteString.length chunk)
+            Sqlite.blobWrite blob chunk offset
+      hash <- IO.liftIO $ Stm.readTVarIO hashVar
+      App.Sql.execute
+        "update blob set hash = ? where key = ?"
+        (Witch.into @Hash.Hash $ Crypto.hashFinalize hash, key)
+      insertHackageIndex key $ Just uncompressedSize
 
-insertHackageIndex :: Blob.Key -> App.App HackageIndex.Model
-insertHackageIndex blob = do
+insertHackageIndex :: Blob.Key -> Maybe Int -> App.App ()
+insertHackageIndex blob size = do
   now <- Timestamp.getCurrentTime
-  let hackageIndex =
-        HackageIndex.HackageIndex
-          { HackageIndex.blob = blob,
-            HackageIndex.createdAt = now,
-            HackageIndex.processedAt = Nothing
-          }
-  rows <-
-    App.Sql.query
-      "insert into hackageIndex (blob, createdAt, processedAt) values (?, ?, null) returning key"
-      (HackageIndex.blob hackageIndex, HackageIndex.createdAt hackageIndex)
-  case rows of
-    [] -> Traced.throw MissingKey.MissingKey
-    Sql.Only key : _ -> pure Model.Model {Model.key = key, Model.value = hackageIndex}
+  App.Sql.execute
+    "insert into hackageIndex (blob, createdAt, processedAt, size) values (?, ?, ?, ?)"
+    HackageIndex.HackageIndex
+      { HackageIndex.blob = blob,
+        HackageIndex.createdAt = now,
+        HackageIndex.processedAt = Nothing,
+        HackageIndex.size = size
+      }
 
 insertBlob :: Int -> App.App Blob.Key
 insertBlob size = do
-  now <- IO.liftIO Time.getCurrentTime
+  now <- Timestamp.getCurrentTime
+  let hash = Hash.new . Witch.via @(Witch.UTF_8 ByteString.ByteString) $ show now
   rows <-
     App.Sql.query
       "insert into blob (size, hash, contents) values (?, ?, zeroblob(?)) returning key"
-      (size, Hash.new . Witch.via @(Witch.UTF_8 ByteString.ByteString) $ show now, size)
+      (size, hash, size)
   case rows of
     [] -> Traced.throw MissingKey.MissingKey
     Sql.Only key : _ -> pure key
@@ -112,10 +94,17 @@ getSize = do
       . IO.liftIO
       . Client.httpNoBody (Client.ensureUserAgent request) {Client.method = Http.methodHead}
       $ Context.manager context
+  getContentLength response
+
+getContentLength :: (Exception.MonadThrow m) => Client.Response a -> m Int
+getContentLength response = do
   byteString <-
     Either.throw
-      . Maybe.note (MissingSize.MissingSize response)
+      . Maybe.note (MissingHeader.MissingHeader Http.hContentLength)
       . lookup Http.hContentLength
       $ Client.responseHeaders response
-  text <- Either.throw . Witch.tryInto @Text.Text $ Witch.into @(Witch.UTF_8 ByteString.ByteString) byteString
+  text <-
+    Either.throw
+      . Witch.tryInto @Text.Text
+      $ Witch.into @(Witch.UTF_8 ByteString.ByteString) byteString
   Either.throw $ Read.tryRead text

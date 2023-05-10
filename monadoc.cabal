@@ -1,6 +1,6 @@
 cabal-version:      2.2
 name:               monadoc
-version:            0.2023.5.8
+version:            0.2023.5.9
 build-type:         Simple
 category:           Documentation
 data-dir:           data
@@ -156,12 +156,10 @@ library
     Monadoc.Exception.Mismatch
     Monadoc.Exception.MissingHeader
     Monadoc.Exception.MissingKey
-    Monadoc.Exception.MissingSize
     Monadoc.Exception.NoNextMatch
     Monadoc.Exception.NotFound
     Monadoc.Exception.Sick
     Monadoc.Exception.Traced
-    Monadoc.Exception.TrailingBytes
     Monadoc.Exception.UnexpectedArgument
     Monadoc.Exception.UnexpectedEntry
     Monadoc.Exception.UnknownOption
