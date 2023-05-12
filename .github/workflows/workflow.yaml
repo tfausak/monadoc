@@ -207,7 +207,11 @@
           "uses": "superfly/flyctl-actions/setup-flyctl@v1"
         },
         {
-          "run": "flyctl config validate"
+          "env": {
+            "FLY_API_TOKEN": "${{ secrets.FLY_API_TOKEN }}",
+            "FLY_APP_NAME": "green-hill-3802"
+          },
+          "run": "flyctl config validate --app $FLY_APP_NAME"
         }
       ]
     },
