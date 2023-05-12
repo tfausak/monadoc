@@ -32,21 +32,23 @@ import qualified Monadoc.Type.Route as Route
 import qualified Monadoc.Type.Url as Url
 import qualified Witch
 
-render ::
-  Context.Context ->
-  [Breadcrumb.Breadcrumb] ->
-  Package.Model ->
-  Version.Model ->
-  Upload.Model ->
-  HackageUser.Model ->
-  Maybe (Upload.Model, Version.Model) ->
-  PackageMeta.Model ->
-  [PackageMetaComponent.Model Sql.:. Component.Model] ->
-  Html.Html ()
-render context breadcrumbs package version upload hackageUser maybeLatest packageMeta components = do
-  let packageName = Package.name $ Model.value package
-      versionNumber = Version.number $ Model.value version
-      revision = Upload.revision $ Model.value upload
+data Input = Input
+  { breadcrumbs :: [Breadcrumb.Breadcrumb],
+    package :: Package.Model,
+    version :: Version.Model,
+    upload :: Upload.Model,
+    hackageUser :: HackageUser.Model,
+    maybeLatest :: Maybe (Upload.Model, Version.Model),
+    packageMeta :: PackageMeta.Model,
+    components :: [PackageMetaComponent.Model Sql.:. Component.Model]
+  }
+  deriving (Eq, Show)
+
+render :: Context.Context -> Input -> Html.Html ()
+render context input = do
+  let packageName = Package.name . Model.value $ package input
+      versionNumber = Version.number . Model.value $ version input
+      revision = Upload.revision . Model.value $ upload input
       reversion =
         Reversion.Reversion
           { Reversion.revision = revision,
@@ -58,9 +60,9 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
           ("Package" F.%+ F.stext F.%+ "version" F.%+ F.stext F.%+ ":: Monadoc")
           (Witch.from packageName)
           (Witch.from reversion)
-  Common.base context route breadcrumbs title $ do
-    showDeprecationWarning packageName reversion upload
-    showLatestInfo context packageName maybeLatest $ const Nothing
+  Common.base context route (breadcrumbs input) title $ do
+    showDeprecationWarning packageName reversion $ upload input
+    showLatestInfo context packageName (maybeLatest input) $ const Nothing
     Html.h2_ $ Html.toHtml packageName
     Html.p_ $ do
       "Version "
@@ -68,17 +70,18 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
       " revision "
       Html.toHtml revision
       " uploaded "
-      Common.timestamp . Upload.uploadedAt $ Model.value upload
+      Common.timestamp . Upload.uploadedAt . Model.value $ upload input
       " by "
-      Html.a_ [Html.href_ . Common.route context . Route.User . HackageUser.name $ Model.value hackageUser]
+      Html.a_ [Html.href_ . Common.route context . Route.User . HackageUser.name . Model.value $ hackageUser input]
         . Html.toHtml
         . HackageUser.name
-        $ Model.value hackageUser
+        . Model.value
+        $ hackageUser input
       "."
     Html.h3_ "Package meta"
     Html.dl_ $ do
       Html.dt_ "Synopsis"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.synopsis $ Model.value packageMeta
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.synopsis . Model.value $ packageMeta input
       Html.dt_ "Description"
       Html.dd_
         . Html.toHtml
@@ -88,25 +91,26 @@ render context breadcrumbs package version upload hackageUser maybeLatest packag
         . Haddock.parseParas Nothing
         . maybe "" (Witch.into @String)
         . PackageMeta.description
-        $ Model.value packageMeta
+        . Model.value
+        $ packageMeta input
       Html.dt_ "Author"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.author $ Model.value packageMeta
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.author . Model.value $ packageMeta input
       Html.dt_ "Bug reports"
-      Html.dd_ . maybe "n/a" autoLinkUrl . PackageMeta.bugReports $ Model.value packageMeta
+      Html.dd_ . maybe "n/a" autoLinkUrl . PackageMeta.bugReports . Model.value $ packageMeta input
       Html.dt_ "Category"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.category $ Model.value packageMeta
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.category . Model.value $ packageMeta input
       Html.dt_ "Copyright"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.copyright $ Model.value packageMeta
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.copyright . Model.value $ packageMeta input
       Html.dt_ "Homepage"
-      Html.dd_ . maybe "n/a" autoLinkUrl . PackageMeta.homepage $ Model.value packageMeta
+      Html.dd_ . maybe "n/a" autoLinkUrl . PackageMeta.homepage . Model.value $ packageMeta input
       Html.dt_ "Maintainer"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.maintainer $ Model.value packageMeta
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.maintainer . Model.value $ packageMeta input
       Html.dt_ "Package URL"
-      Html.dd_ . maybe "n/a" autoLinkUrl . PackageMeta.pkgUrl $ Model.value packageMeta
+      Html.dd_ . maybe "n/a" autoLinkUrl . PackageMeta.pkgUrl . Model.value $ packageMeta input
       Html.dt_ "Stability"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.stability $ Model.value packageMeta
+      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.stability . Model.value $ packageMeta input
     Html.h3_ "Components"
-    Html.ul_ . Monad.forM_ (sortComponents packageName $ fmap (\(_ Sql.:. c) -> c) components) $ \component -> Html.li_ $ do
+    Html.ul_ . Monad.forM_ (sortComponents packageName . fmap (\(_ Sql.:. c) -> c) $ components input) $ \component -> Html.li_ $ do
       let componentId =
             ComponentId.ComponentId
               { ComponentId.type_ = Component.type_ $ Model.value component,
@@ -128,14 +132,14 @@ autoLinkUrl text =
         $ Witch.into @Text.Text url
 
 showDeprecationWarning :: PackageName.PackageName -> Reversion.Reversion -> Upload.Model -> Html.Html ()
-showDeprecationWarning packageName reversion upload = do
-  Monad.when (not . Upload.isPreferred $ Model.value upload)
+showDeprecationWarning pkg rev upl = do
+  Monad.when (not . Upload.isPreferred $ Model.value upl)
     . Html.div_ [Html.class_ "alert alert-warning"]
     $ do
       "Version "
-      Html.toHtml reversion
+      Html.toHtml rev
       " of "
-      Html.toHtml packageName
+      Html.toHtml pkg
       " is deprecated."
 
 showLatestInfo ::
@@ -144,17 +148,17 @@ showLatestInfo ::
   Maybe (Upload.Model, Version.Model) ->
   (Reversion.Reversion -> Maybe Route.Route) ->
   Html.Html ()
-showLatestInfo context packageName maybeLatest makeRoute =
-  case maybeLatest of
+showLatestInfo context packageName m makeRoute =
+  case m of
     Nothing -> pure ()
-    Just (upload, version) -> Html.div_ [Html.class_ "alert alert-info"] $ do
+    Just (upl, ver) -> Html.div_ [Html.class_ "alert alert-info"] $ do
       "The latest version of "
       Html.toHtml packageName
       " is "
       let reversion =
             Reversion.Reversion
-              { Reversion.version = Version.number $ Model.value version,
-                Reversion.revision = Upload.revision $ Model.value upload
+              { Reversion.version = Version.number $ Model.value ver,
+                Reversion.revision = Upload.revision $ Model.value upl
               }
           route = Maybe.fromMaybe (Route.Version packageName reversion) $ makeRoute reversion
       Html.a_

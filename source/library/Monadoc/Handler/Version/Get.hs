@@ -58,7 +58,18 @@ handler packageName reversion _ respond = do
       [ (Http.hCacheControl, "max-age=86400, stale-while-revalidate=3600"),
         (Http.hETag, eTag)
       ]
-    $ Template.render context breadcrumbs package version upload hackageUser maybeLatest packageMeta components
+    $ Template.render
+      context
+      Template.Input
+        { Template.breadcrumbs = breadcrumbs,
+          Template.package = package,
+          Template.version = version,
+          Template.upload = upload,
+          Template.hackageUser = hackageUser,
+          Template.maybeLatest = maybeLatest,
+          Template.packageMeta = packageMeta,
+          Template.components = components
+        }
 
 getVersion :: VersionNumber.VersionNumber -> App.App Version.Model
 getVersion number = do

@@ -27,31 +27,33 @@ import qualified Monadoc.Type.Reversion as Reversion
 import qualified Monadoc.Type.Route as Route
 import qualified Witch
 
-render ::
-  Context.Context ->
-  [Breadcrumb.Breadcrumb] ->
-  Package.Model ->
-  Version.Model ->
-  Upload.Model ->
-  Maybe (Upload.Model, Version.Model) ->
-  Bool ->
-  PackageMeta.Model ->
-  Component.Model ->
-  PackageMetaComponent.Model ->
-  [PackageMetaComponentModule.Model Sql.:. Module.Model] ->
-  [Dependency.Model Sql.:. Package.Model Sql.:. Component.Model Sql.:. Range.Model] ->
-  Html.Html ()
-render context breadcrumbs package version upload maybeLatest hasComponent _ component _ modules dependencies = do
-  let packageName = Package.name $ Model.value package
+data Input = Input
+  { breadcrumbs :: [Breadcrumb.Breadcrumb],
+    package :: Package.Model,
+    version :: Version.Model,
+    upload :: Upload.Model,
+    maybeLatest :: Maybe (Upload.Model, Version.Model),
+    hasComponent :: Bool,
+    packageMeta :: PackageMeta.Model,
+    component :: Component.Model,
+    packageMetaComponent :: PackageMetaComponent.Model,
+    packageMetaComponentModules :: [PackageMetaComponentModule.Model Sql.:. Module.Model],
+    dependencies :: [Dependency.Model Sql.:. Package.Model Sql.:. Component.Model Sql.:. Range.Model]
+  }
+  deriving (Eq, Show)
+
+render :: Context.Context -> Input -> Html.Html ()
+render context input = do
+  let packageName = Package.name . Model.value $ package input
       reversion =
         Reversion.Reversion
-          { Reversion.version = Version.number $ Model.value version,
-            Reversion.revision = Upload.revision $ Model.value upload
+          { Reversion.version = Version.number . Model.value $ version input,
+            Reversion.revision = Upload.revision . Model.value $ upload input
           }
       componentId =
         ComponentId.ComponentId
-          { ComponentId.type_ = Component.type_ $ Model.value component,
-            ComponentId.name = Component.name $ Model.value component
+          { ComponentId.type_ = Component.type_ . Model.value $ component input,
+            ComponentId.name = Component.name . Model.value $ component input
           }
       route = Route.Component packageName reversion componentId
       title =
@@ -60,14 +62,14 @@ render context breadcrumbs package version upload maybeLatest hasComponent _ com
           (Witch.from packageName)
           (Witch.from reversion)
           (Witch.from componentId)
-  Common.base context route breadcrumbs title $ do
-    Version.Get.showDeprecationWarning packageName reversion upload
-    Version.Get.showLatestInfo context packageName maybeLatest $ \rev ->
-      if hasComponent
+  Common.base context route (breadcrumbs input) title $ do
+    Version.Get.showDeprecationWarning packageName reversion $ upload input
+    Version.Get.showLatestInfo context packageName (maybeLatest input) $ \rev ->
+      if hasComponent input
         then Just $ Route.Component packageName rev componentId
         else Nothing
     Html.h2_ $ Html.toHtml componentId
-    let moduleNames = fmap (\(_ Sql.:. m) -> Module.name $ Model.value m) modules
+    let moduleNames = (\(_ Sql.:. m) -> Module.name $ Model.value m) <$> packageMetaComponentModules input
     Monad.when (not $ null moduleNames) $ do
       Html.h3_ "Modules"
       Html.ul_ . Monad.forM_ (List.sort moduleNames) $ \moduleName -> do
@@ -75,9 +77,9 @@ render context breadcrumbs package version upload maybeLatest hasComponent _ com
           . Html.a_ [Html.href_ . Common.route context $ Route.Module packageName reversion componentId moduleName]
           $ Html.toHtml moduleName
     Html.h3_ "Dependencies"
-    if null dependencies
+    if null $ dependencies input
       then Html.p_ "None."
-      else Html.ul_ . Monad.forM_ (List.sortOn packageAndComponent dependencies) $ \(_ Sql.:. p Sql.:. c Sql.:. r) -> Html.li_ $ do
+      else Html.ul_ . Monad.forM_ (List.sortOn packageAndComponent $ dependencies input) $ \(_ Sql.:. p Sql.:. c Sql.:. r) -> Html.li_ $ do
         let pn = Package.name $ Model.value p
         Html.a_
           [Html.href_ . Common.route context $ Route.Package pn]
@@ -95,7 +97,7 @@ render context breadcrumbs package version upload maybeLatest hasComponent _ com
 packageAndComponent ::
   Dependency.Model Sql.:. Package.Model Sql.:. Component.Model Sql.:. Range.Model ->
   (PackageName.PackageName, ComponentName.ComponentName)
-packageAndComponent (_ Sql.:. package Sql.:. component Sql.:. _) =
-  ( Package.name $ Model.value package,
-    Component.name $ Model.value component
+packageAndComponent (_ Sql.:. pkg Sql.:. cmp Sql.:. _) =
+  ( Package.name $ Model.value pkg,
+    Component.name $ Model.value cmp
   )

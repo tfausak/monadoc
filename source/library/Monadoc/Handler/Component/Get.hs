@@ -76,7 +76,21 @@ handler packageName reversion componentId _ respond = do
       Http.ok200
       [ (Http.hCacheControl, "max-age=86400, stale-while-revalidate=3600")
       ]
-    $ Template.render context breadcrumbs package version upload maybeLatest hasComponent packageMeta component packageMetaComponent packageMetaComponentModules dependencies
+    $ Template.render
+      context
+      Template.Input
+        { Template.breadcrumbs = breadcrumbs,
+          Template.package = package,
+          Template.version = version,
+          Template.upload = upload,
+          Template.maybeLatest = maybeLatest,
+          Template.hasComponent = hasComponent,
+          Template.packageMeta = packageMeta,
+          Template.component = component,
+          Template.packageMetaComponent = packageMetaComponent,
+          Template.packageMetaComponentModules = packageMetaComponentModules,
+          Template.dependencies = dependencies
+        }
 
 getComponent :: ComponentId.ComponentId -> App.App Component.Model
 getComponent componentId = do

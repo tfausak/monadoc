@@ -25,6 +25,8 @@ handler _ respond = do
       \ on version.key = upload.version \
       \ inner join hackageUser \
       \ on hackageUser.key = upload.uploadedBy \
+      \ inner join packageMeta \
+      \ on packageMeta.upload = upload.key \
       \ order by upload.uploadedAt desc \
       \ limit 64"
   let eTag = Common.makeETag $ case rows of
@@ -33,15 +35,15 @@ handler _ respond = do
       breadcrumbs =
         [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Nothing}
         ]
-      input =
-        Template.Input
-          { Template.breadcrumbs = breadcrumbs,
-            Template.rows = rows
-          }
   respond
     . Common.htmlResponse
       Http.ok200
       [ (Http.hCacheControl, "max-age=3600, stale-while-revalidate=60"),
         (Http.hETag, eTag)
       ]
-    $ Template.render context input
+    $ Template.render
+      context
+      Template.Input
+        { Template.breadcrumbs = breadcrumbs,
+          Template.rows = rows
+        }

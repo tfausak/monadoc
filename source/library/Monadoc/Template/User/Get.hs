@@ -16,21 +16,23 @@ import qualified Monadoc.Type.Reversion as Reversion
 import qualified Monadoc.Type.Route as Route
 import qualified Witch
 
-render ::
-  Context.Context ->
-  [Breadcrumb.Breadcrumb] ->
-  HackageUser.Model ->
-  [Upload.Model Sql.:. Version.Model Sql.:. Package.Model] ->
-  [Package.Model] ->
-  Html.Html ()
-render context breadcrumbs hackageUser rows packages = do
-  let hackageUserName = HackageUser.name $ Model.value hackageUser
+data Input = Input
+  { breadcrumbs :: [Breadcrumb.Breadcrumb],
+    hackageUser :: HackageUser.Model,
+    rows :: [Upload.Model Sql.:. Version.Model Sql.:. Package.Model],
+    packages :: [Package.Model]
+  }
+  deriving (Eq, Show)
+
+render :: Context.Context -> Input -> Html.Html ()
+render context input = do
+  let hackageUserName = HackageUser.name . Model.value $ hackageUser input
       route = Route.User hackageUserName
       title = F.sformat ("User" F.%+ F.stext F.%+ ":: Monadoc") (Witch.from hackageUserName)
-  Common.base context route breadcrumbs title $ do
-    Html.h2_ . Html.toHtml . HackageUser.name $ Model.value hackageUser
+  Common.base context route (breadcrumbs input) title $ do
+    Html.h2_ . Html.toHtml . HackageUser.name . Model.value $ hackageUser input
     Html.h3_ "Uploads"
-    Html.ul_ . Monad.forM_ rows $ \(upload Sql.:. version Sql.:. package) -> Html.li_ $ do
+    Html.ul_ . Monad.forM_ (rows input) $ \(upload Sql.:. version Sql.:. package) -> Html.li_ $ do
       let reversion =
             Reversion.Reversion
               { Reversion.revision = Upload.revision $ Model.value upload,
@@ -50,7 +52,7 @@ render context breadcrumbs hackageUser rows packages = do
         " "
         Html.span_ [Html.class_ "badge text-bg-warning"] "deprecated"
     Html.h3_ "Packages"
-    Html.ul_ . Monad.forM_ packages $ \package ->
+    Html.ul_ . Monad.forM_ (packages input) $ \package ->
       Html.li_
         . Html.a_ [Html.href_ . Common.route context . Route.Package . Package.name $ Model.value package]
         . Html.toHtml

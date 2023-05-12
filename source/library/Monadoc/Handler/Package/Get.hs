@@ -31,6 +31,8 @@ handler packageName _ respond = do
       \ on version.key = upload.version \
       \ inner join hackageUser \
       \ on hackageUser.key = upload.uploadedBy \
+      \ inner join packageMeta \
+      \ on packageMeta.upload = upload.key \
       \ where upload.package = ? \
       \ order by upload.uploadedAt desc"
       [Model.key package]
@@ -54,7 +56,14 @@ handler packageName _ respond = do
       [ (Http.hCacheControl, "max-age=86400, stale-while-revalidate=3600"),
         (Http.hETag, eTag)
       ]
-    $ Template.render context breadcrumbs package rows hackageUsers
+    $ Template.render
+      context
+      Template.Input
+        { Template.breadcrumbs = breadcrumbs,
+          Template.package = package,
+          Template.rows = rows,
+          Template.hackageUsers = hackageUsers
+        }
 
 getPackage :: PackageName.PackageName -> App.App Package.Model
 getPackage name = do

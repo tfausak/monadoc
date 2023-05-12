@@ -49,4 +49,11 @@ handler hackageUserName _ respond = do
       [ (Http.hCacheControl, "max-age=86400, stale-while-revalidate=3600"),
         (Http.hETag, eTag)
       ]
-    $ Template.render context breadcrumbs hackageUser rows packages
+    $ Template.render
+      context
+      Template.Input
+        { Template.breadcrumbs = breadcrumbs,
+          Template.hackageUser = hackageUser,
+          Template.rows = rows,
+          Template.packages = packages
+        }

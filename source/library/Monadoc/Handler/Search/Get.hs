@@ -76,7 +76,15 @@ handler query _ respond = do
       Http.ok200
       [ (Http.hCacheControl, "max-age=86400, stale-while-revalidate=3600")
       ]
-    $ Template.render context breadcrumbs query packages hackageUsers modules
+    $ Template.render
+      context
+      Template.Input
+        { Template.breadcrumbs = breadcrumbs,
+          Template.query = query,
+          Template.packages = packages,
+          Template.hackageUsers = hackageUsers,
+          Template.modules = modules
+        }
 
 like :: Search.Search -> Text.Text
 like = Text.cons '%' . flip Text.snoc '%' . escape . Witch.into @Text.Text

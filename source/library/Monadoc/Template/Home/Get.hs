@@ -5,6 +5,7 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Lucid as Html
 import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
+import qualified Monadoc.Model.PackageMeta as PackageMeta
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Template.Common as Common
@@ -16,7 +17,7 @@ import qualified Monadoc.Type.Route as Route
 
 data Input = Input
   { breadcrumbs :: [Breadcrumb.Breadcrumb],
-    rows :: [Upload.Model Sql.:. Package.Model Sql.:. Version.Model Sql.:. HackageUser.Model]
+    rows :: [Upload.Model Sql.:. Package.Model Sql.:. Version.Model Sql.:. HackageUser.Model Sql.:. PackageMeta.Model]
   }
   deriving (Eq, Show)
 
@@ -26,7 +27,7 @@ render context input =
     Html.h2_ "Recent Uploads"
     Html.ul_ [] $ do
       Monad.forM_ (rows input) $ \row -> Html.li_ [] $ do
-        let (upload Sql.:. package Sql.:. version Sql.:. hackageUser) = row
+        let (upload Sql.:. package Sql.:. version Sql.:. hackageUser Sql.:. _) = row
             reversion =
               Reversion.Reversion
                 { Reversion.revision = Upload.revision $ Model.value upload,

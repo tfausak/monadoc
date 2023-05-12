@@ -10,6 +10,15 @@
         "./volumes/cabal/state:/home/vscode/.local/state/cabal",
       ],
       "working_dir": "/workspaces/monadoc"
+    },
+    "monadoc": {
+      "command": "sh -exc 'cabal update; cabal test; cabal run -- monadoc --host-preference 0 +RTS -K1k -M1g'",
+      "extends": {
+        "service": "devcontainer"
+      },
+      "ports": [
+        "3000:3000"
+      ]
     }
   }
 }

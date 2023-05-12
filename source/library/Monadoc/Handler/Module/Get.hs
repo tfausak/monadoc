@@ -3,6 +3,7 @@ module Monadoc.Handler.Module.Get where
 import qualified Control.Monad as Monad
 import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Trans.Reader as Reader
+import qualified Data.Maybe as Maybe
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Extra.Exception as Exception
@@ -42,16 +43,18 @@ handler packageName reversion componentId moduleName _ respond = do
   module_ <- getModule moduleName
   Monad.void $ getPackageMetaComponentModule (Model.key packageMetaComponent) (Model.key module_)
   maybeLatest <- Version.Get.getLatestUpload (Model.key package) (Model.key upload)
-  hasModule <- case maybeLatest of
-    Nothing -> pure False
-    Just (u, _) -> Exception.handleIf (Exception.isType @NotFound.NotFound) (const $ pure False) $ do
+  maybePMC <- case maybeLatest of
+    Nothing -> pure Nothing
+    Just (u, _) -> Exception.handleIf (Exception.isType @NotFound.NotFound) (const $ pure Nothing) $ do
       pm <- Version.Get.getPackageMeta $ Model.key u
-      pmc <- Component.Get.getPackageMetaComponent (Model.key pm) (Model.key component)
+      Just <$> Component.Get.getPackageMetaComponent (Model.key pm) (Model.key component)
+  hasModule <- case maybePMC of
+    Nothing -> pure False
+    Just pmc -> Exception.handleIf (Exception.isType @NotFound.NotFound) (const $ pure False) $ do
       Monad.void $ getPackageMetaComponentModule (Model.key pmc) (Model.key module_)
       pure True
   context <- Reader.ask
-  let route = Route.Module packageName reversion componentId moduleName
-      breadcrumbs =
+  let breadcrumbs =
         [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home},
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.from packageName, Breadcrumb.route = Just $ Route.Package packageName},
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.from reversion, Breadcrumb.route = Just $ Route.Version packageName reversion},
@@ -63,7 +66,19 @@ handler packageName reversion componentId moduleName _ respond = do
       Http.ok200
       [ (Http.hCacheControl, "max-age=86400, stale-while-revalidate=3600")
       ]
-    $ Template.render context route breadcrumbs package version upload maybeLatest hasModule component module_
+    $ Template.render
+      context
+      Template.Input
+        { Template.breadcrumbs = breadcrumbs,
+          Template.package = package,
+          Template.version = version,
+          Template.upload = upload,
+          Template.maybeLatest = maybeLatest,
+          Template.hasComponent = Maybe.isJust maybePMC,
+          Template.hasModule = hasModule,
+          Template.component = component,
+          Template.module_ = module_
+        }
 
 getModule :: ModuleName.ModuleName -> App.App Module.Model
 getModule moduleName = do

@@ -19,31 +19,33 @@ import qualified Monadoc.Type.Reversion as Reversion
 import qualified Monadoc.Type.Route as Route
 import qualified Witch
 
-render ::
-  Context.Context ->
-  Route.Route ->
-  [Breadcrumb.Breadcrumb] ->
-  Package.Model ->
-  Version.Model ->
-  Upload.Model ->
-  Maybe (Upload.Model, Version.Model) ->
-  Bool ->
-  Component.Model ->
-  Module.Model ->
-  Html.Html ()
-render context route breadcrumbs package version upload maybeLatest hasModule component module_ = do
-  let packageName = Package.name $ Model.value package
+data Input = Input
+  { breadcrumbs :: [Breadcrumb.Breadcrumb],
+    package :: Package.Model,
+    version :: Version.Model,
+    upload :: Upload.Model,
+    maybeLatest :: Maybe (Upload.Model, Version.Model),
+    hasComponent :: Bool,
+    hasModule :: Bool,
+    component :: Component.Model,
+    module_ :: Module.Model
+  }
+  deriving (Eq, Show)
+
+render :: Context.Context -> Input -> Html.Html ()
+render context input = do
+  let packageName = Package.name . Model.value $ package input
       reversion =
         Reversion.Reversion
-          { Reversion.version = Version.number $ Model.value version,
-            Reversion.revision = Upload.revision $ Model.value upload
+          { Reversion.version = Version.number . Model.value $ version input,
+            Reversion.revision = Upload.revision . Model.value $ upload input
           }
       componentId =
         ComponentId.ComponentId
-          { ComponentId.type_ = Component.type_ $ Model.value component,
-            ComponentId.name = Component.name $ Model.value component
+          { ComponentId.type_ = Component.type_ . Model.value $ component input,
+            ComponentId.name = Component.name . Model.value $ component input
           }
-      moduleName = Module.name $ Model.value module_
+      moduleName = Module.name . Model.value $ module_ input
       title =
         F.sformat
           ("Package" F.%+ F.stext F.%+ "version" F.%+ F.stext F.%+ "component" F.%+ F.stext F.%+ "module" F.%+ F.stext F.%+ ":: Monadoc")
@@ -51,12 +53,16 @@ render context route breadcrumbs package version upload maybeLatest hasModule co
           (Witch.from reversion)
           (Witch.from componentId)
           (Witch.from moduleName)
-  Common.base context route breadcrumbs title $ do
-    Version.Get.showDeprecationWarning packageName reversion upload
-    Version.Get.showLatestInfo context packageName maybeLatest $ \rev ->
-      if hasModule
+      route = Route.Module packageName reversion componentId moduleName
+  Common.base context route (breadcrumbs input) title $ do
+    Version.Get.showDeprecationWarning packageName reversion $ upload input
+    Version.Get.showLatestInfo context packageName (maybeLatest input) $ \rev ->
+      if hasModule input
         then Just $ Route.Module packageName rev componentId moduleName
-        else Nothing
+        else
+          if hasComponent input
+            then Just $ Route.Component packageName rev componentId
+            else Nothing
     -- TODO: Include identifiers exported by the module. This will require
     -- downloading each package's tarball, finding the sources of each module,
     -- and parsing them with GHC.
@@ -68,7 +74,7 @@ render context route breadcrumbs package version upload maybeLatest hasModule co
             F.sformat
               ("https://hackage.haskell.org/package/" F.% F.stext F.% "-" F.% F.stext F.% "/docs/" F.% F.string F.% ".html")
               (Witch.from packageName)
-              (Witch.from . Version.number $ Model.value version)
+              (Witch.from . Version.number . Model.value $ version input)
               (List.intercalate "-" . Cabal.components $ Witch.from moduleName)
       Html.a_ [Html.href_ url] "on Hackage"
       " instead?"

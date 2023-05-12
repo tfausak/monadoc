@@ -12,6 +12,9 @@
     }
   },
   "dockerComposeFile": "compose.yaml",
+  "runServices": [
+    "devcontainer"
+  ],
   "service": "devcontainer",
   "workspaceFolder": "/workspaces/monadoc"
 }

@@ -21,17 +21,19 @@ import qualified Monadoc.Type.Route as Route
 import qualified Monadoc.Type.Search as Search
 import qualified Witch
 
-render ::
-  Context.Context ->
-  [Breadcrumb.Breadcrumb] ->
-  Search.Search ->
-  [Package.Model] ->
-  [HackageUser.Model] ->
-  [Package.Model Sql.:. Version.Model Sql.:. Upload.Model Sql.:. Component.Model Sql.:. Module.Model] ->
-  Html.Html ()
-render context breadcrumbs query packages hackageUsers modules = do
-  let title = F.sformat ("Search" F.%+ F.stext F.%+ ":: Monadoc") (Witch.from query)
-  Common.base context (Route.Search query) breadcrumbs title $ do
+data Input = Input
+  { breadcrumbs :: [Breadcrumb.Breadcrumb],
+    query :: Search.Search,
+    packages :: [Package.Model],
+    hackageUsers :: [HackageUser.Model],
+    modules :: [Package.Model Sql.:. Version.Model Sql.:. Upload.Model Sql.:. Component.Model Sql.:. Module.Model]
+  }
+  deriving (Eq, Show)
+
+render :: Context.Context -> Input -> Html.Html ()
+render context input = do
+  let title = F.sformat ("Search" F.%+ F.stext F.%+ ":: Monadoc") (Witch.from $ query input)
+  Common.base context (Route.Search $ query input) (breadcrumbs input) title $ do
     Html.h2_ "Search"
     Html.form_
       [ Html.action_ . Common.route context . Route.Search $ Witch.from @Text.Text "",
@@ -43,26 +45,26 @@ render context breadcrumbs query packages hackageUsers modules = do
             Html.name_ "query",
             Html.placeholder_ "traverse",
             Html.type_ "search",
-            Html.value_ $ Witch.into @Text.Text query
+            Html.value_ . Witch.into @Text.Text $ query input
           ]
         Html.button_
           [ Html.class_ "btn btn-primary",
             Html.type_ "submit"
           ]
           "Search"
-    Monad.when (not $ Search.isBlank query) $ do
+    Monad.when (not . Search.isBlank $ query input) $ do
       Html.h3_ "Packages"
-      if null packages
+      if null $ packages input
         then Html.p_ "None found."
-        else Html.ul_ . Monad.forM_ packages $ \package -> do
+        else Html.ul_ . Monad.forM_ (packages input) $ \package -> do
           let name = Package.name $ Model.value package
           Html.li_
             . Html.a_ [Html.href_ . Common.route context $ Route.Package name]
             $ Html.toHtml name
       Html.h3_ "Modules"
-      if null modules
+      if null $ modules input
         then Html.p_ "None found."
-        else Html.ul_ . Monad.forM_ modules $ \(package Sql.:. version Sql.:. upload Sql.:. component Sql.:. module_) -> do
+        else Html.ul_ . Monad.forM_ (modules input) $ \(package Sql.:. version Sql.:. upload Sql.:. component Sql.:. module_) -> do
           let packageName = Package.name $ Model.value package
               reversion =
                 Reversion.Reversion
@@ -80,9 +82,9 @@ render context breadcrumbs query packages hackageUsers modules = do
             " in "
             Html.toHtml componentId
       Html.h3_ "Users"
-      if null hackageUsers
+      if null $ hackageUsers input
         then Html.p_ "None found."
-        else Html.ul_ . Monad.forM_ hackageUsers $ \hackageUser -> do
+        else Html.ul_ . Monad.forM_ (hackageUsers input) $ \hackageUser -> do
           let name = HackageUser.name $ Model.value hackageUser
           Html.li_
             . Html.a_ [Html.href_ . Common.route context $ Route.User name]
