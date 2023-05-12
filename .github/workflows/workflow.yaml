@@ -196,6 +196,21 @@
         }
       ]
     },
+    "fly": {
+      "name": "Fly",
+      "runs-on": "ubuntu-22.04",
+      "steps": [
+        {
+          "uses": "actions/checkout@v3"
+        },
+        {
+          "uses": "superfly/flyctl-actions/setup-flyctl@v1"
+        },
+        {
+          "run": "flyctl config validate"
+        }
+      ]
+    },
     "hlint": {
       "name": "HLint",
       "runs-on": "ubuntu-22.04",
