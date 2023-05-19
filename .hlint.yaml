@@ -251,6 +251,11 @@
   },
   {
     "ignore": {
+      "name": "Redundant bracket"
+    }
+  },
+  {
+    "ignore": {
       "name": "Use infix"
     }
   },

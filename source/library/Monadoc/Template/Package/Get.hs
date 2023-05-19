@@ -1,6 +1,7 @@
 module Monadoc.Template.Package.Get where
 
 import qualified Control.Monad as Monad
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Database.SQLite.Simple as Sql
 import qualified Formatting as F
 import qualified Lucid as Html
@@ -20,7 +21,7 @@ import qualified Witch
 data Input = Input
   { breadcrumbs :: [Breadcrumb.Breadcrumb],
     package :: Package.Model,
-    rows :: [Upload.Model Sql.:. Version.Model Sql.:. HackageUser.Model Sql.:. PackageMeta.Model],
+    rows :: NonEmpty.NonEmpty (Upload.Model Sql.:. Version.Model Sql.:. HackageUser.Model Sql.:. PackageMeta.Model),
     hackageUsers :: [HackageUser.Model]
   }
   deriving (Eq, Show)

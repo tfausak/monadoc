@@ -1,21 +1,35 @@
 module Monadoc.Middleware.AddHeaders where
 
+import qualified Data.ByteString as ByteString
 import qualified Data.Function as Function
+import qualified Data.Maybe as Maybe
+import qualified Data.Vault.Lazy as Vault
 import qualified Monadoc.Constant.Header as Header
+import qualified Monadoc.Type.RequestId as RequestId
 import qualified Network.HTTP.Types as Http
 import qualified Network.Wai as Wai
+import qualified Witch
 
-middleware :: Wai.Middleware
-middleware =
-  Wai.modifyResponse . Wai.mapResponseHeaders $
-    addHeaders
-      [ contentSecurityPolicy,
-        (Header.referrerPolicy, "no-referrer"),
-        (Header.contentTypeOptions, "nosniff"),
-        (Header.frameOptions, "DENY"),
-        (Header.xssProtection, "1; mode=block"),
-        strictTransportSecurity
-      ]
+middleware :: Vault.Key RequestId.RequestId -> Wai.Middleware
+middleware key handle request respond =
+  handle request $
+    respond
+      . Wai.mapResponseHeaders
+        ( addHeaders
+            [ contentSecurityPolicy,
+              (Header.contentTypeOptions, "nosniff"),
+              (Header.frameOptions, "DENY"),
+              ( Header.requestId,
+                Witch.into @ByteString.ByteString
+                  . Maybe.fromMaybe RequestId.zero
+                  . Vault.lookup key
+                  $ Wai.vault request
+              ),
+              (Header.referrerPolicy, "no-referrer"),
+              strictTransportSecurity,
+              (Header.xssProtection, "1; mode=block")
+            ]
+        )
 
 contentSecurityPolicy :: Http.Header
 contentSecurityPolicy =

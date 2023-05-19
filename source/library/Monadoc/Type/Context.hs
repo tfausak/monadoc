@@ -5,10 +5,12 @@ import qualified Control.Monad.Catch as Exception
 import qualified Data.Char as Char
 import qualified Data.List as List
 import qualified Data.Pool as Pool
+import qualified Data.Vault.Lazy as Vault
 import qualified Data.Version as Version
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Flag as Flag
+import qualified Monadoc.Type.RequestId as RequestId
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Client.TLS as Tls
 import qualified Paths_monadoc as Monadoc
@@ -19,6 +21,7 @@ import qualified System.Exit as Exit
 
 data Context = Context
   { config :: Config.Config,
+    key :: Vault.Key RequestId.RequestId,
     manager :: Client.Manager,
     pool :: Pool.Pool Sql.Connection,
     temporaryDirectory :: FilePath
@@ -43,6 +46,7 @@ fromConfig name cfg = do
           60
           (if Config.sql cfg == ":memory:" then 1 else 8)
   Context cfg
-    <$> Tls.newTlsManager
+    <$> Vault.newKey
+    <*> Tls.newTlsManager
     <*> Pool.newPool poolConfig
     <*> Directory.getTemporaryDirectory

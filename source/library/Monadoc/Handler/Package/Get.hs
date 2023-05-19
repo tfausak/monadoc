@@ -1,6 +1,7 @@
 module Monadoc.Handler.Package.Get where
 
 import qualified Control.Monad.Trans.Reader as Reader
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Text as Text
 import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Action.App.Sql as App.Sql
@@ -23,19 +24,21 @@ handler :: PackageName.PackageName -> Handler.Handler
 handler packageName _ respond = do
   context <- Reader.ask
   package <- getPackage packageName
-  rows <-
-    App.Sql.query
-      "select * \
-      \ from upload \
-      \ inner join version \
-      \ on version.key = upload.version \
-      \ inner join hackageUser \
-      \ on hackageUser.key = upload.uploadedBy \
-      \ inner join packageMeta \
-      \ on packageMeta.upload = upload.key \
-      \ where upload.package = ? \
-      \ order by upload.uploadedAt desc"
-      [Model.key package]
+  rows <- do
+    xs <-
+      App.Sql.query
+        "select * \
+        \ from upload \
+        \ inner join version \
+        \ on version.key = upload.version \
+        \ inner join hackageUser \
+        \ on hackageUser.key = upload.uploadedBy \
+        \ inner join packageMeta \
+        \ on packageMeta.upload = upload.key \
+        \ where upload.package = ? \
+        \ order by upload.uploadedAt desc"
+        [Model.key package]
+    NotFound.fromMaybe $ NonEmpty.nonEmpty xs
   hackageUsers <-
     App.Sql.query
       "select * \
@@ -43,9 +46,8 @@ handler packageName _ respond = do
       \ where key in (select distinct uploadedBy from upload where upload.package = ?) \
       \ order by name collate nocase asc"
       [Model.key package]
-  let eTag = Common.makeETag $ case rows of
-        (upload Sql.:. _) : _ -> Just . Upload.uploadedAt $ Model.value upload
-        _ -> Nothing
+  let (latest Sql.:. _) NonEmpty.:| _ = rows
+      eTag = Common.makeETag . Just . Upload.uploadedAt $ Model.value latest
       breadcrumbs =
         [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home},
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text packageName, Breadcrumb.route = Nothing}

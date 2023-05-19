@@ -1,6 +1,7 @@
 module Monadoc.Middleware.HandleExceptions where
 
 import qualified Control.Monad.Catch as Exception
+import qualified Data.Aeson as Aeson
 import qualified Data.Bifunctor as Bifunctor
 import qualified Data.ByteString as ByteString
 import qualified Data.CaseInsensitive as CI
@@ -9,6 +10,7 @@ import qualified Data.Maybe as Maybe
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
 import qualified Data.Text.Encoding.Error as Text
+import qualified Data.Vault.Lazy as Vault
 import qualified Monadoc.Action.Exception.Log as Exception.Log
 import qualified Monadoc.Action.Exception.NotifySentry as Exception.NotifySentry
 import qualified Monadoc.Exception.Found as Found
@@ -59,7 +61,8 @@ withRequest context request event =
   let oldRequest = Maybe.fromMaybe Patrol.Request.empty $ Patrol.Event.request event
       newRequest =
         oldRequest
-          { Patrol.Request.headers =
+          { Patrol.Request.env = Map.insert "MONADOC_REQUEST_ID" (Aeson.toJSON . Vault.lookup (Context.key context) $ Wai.vault request) $ Patrol.Request.env oldRequest,
+            Patrol.Request.headers =
               Map.fromList
                 . fmap (Bifunctor.bimap (fromUtf8 . CI.foldedCase) fromUtf8)
                 $ Wai.requestHeaders request,

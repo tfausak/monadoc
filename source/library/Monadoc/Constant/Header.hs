@@ -17,6 +17,9 @@ frameOptions = "X-Frame-Options"
 referrerPolicy :: Http.HeaderName
 referrerPolicy = "Referrer-Policy"
 
+requestId :: Http.HeaderName
+requestId = "Monadoc-Request-Id"
+
 strictTransportSecurity :: Http.HeaderName
 strictTransportSecurity = "Strict-Transport-Security"
 

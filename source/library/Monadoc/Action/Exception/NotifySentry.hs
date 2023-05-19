@@ -25,10 +25,12 @@ import qualified Paths_monadoc as Monadoc
 import qualified Patrol
 import qualified Patrol.Client as Patrol
 import qualified Patrol.Type.Event as Patrol.Event
+import qualified Patrol.Type.EventId as Patrol.EventId
 import qualified Patrol.Type.Exception as Patrol.Exception
 import qualified Patrol.Type.Exceptions as Patrol.Exceptions
 import qualified Patrol.Type.Frame as Patrol.Frame
 import qualified Patrol.Type.Request as Patrol.Request
+import qualified Patrol.Type.Response as Patrol.Response
 import qualified Patrol.Type.Stacktrace as Patrol.Stacktrace
 import qualified System.Environment as Environment
 
@@ -42,7 +44,7 @@ run f exception = Monad.when (shouldNotify exception) $ do
     let manager = Context.manager context
     event <- IO.liftIO Patrol.Event.new
     environment <- IO.liftIO Environment.getEnvironment
-    eventId <-
+    response <-
       IO.liftIO
         . Patrol.store
           manager
@@ -70,7 +72,7 @@ run f exception = Monad.when (shouldNotify exception) $ do
                           fmap (Bifunctor.bimap Text.pack Aeson.toJSON) environment
                     }
             }
-    App.Log.warn . Text.pack $ show eventId
+    App.Log.warn $ "Sentry event ID: " <> Patrol.EventId.intoText (Patrol.Response.id response)
 
 shouldNotify :: Exception.SomeException -> Bool
 shouldNotify e =
