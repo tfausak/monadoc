@@ -66,6 +66,10 @@ render context input = do
     -- TODO: Include identifiers exported by the module. This will require
     -- downloading each package's tarball, finding the sources of each module,
     -- and parsing them with GHC.
+    -- https://github.com/tfausak/monadoc-6/blob/2d7411acffdc2338598f821adf1c0b1d4e4f2ea3/src/lib/Monadoc/Job/FetchDistribution.hs#L28
+    -- https://github.com/tfausak/monadoc-5/blob/22a743f6f672b0af7dd75fda932764ca5574ef35/src/lib/Monadoc/Worker/Main.hs#LL574C9-L574C9
+    -- https://github.com/tfausak/monadoc-3/blob/90e36c1cccffe6bdb09d798a40d399b61a99cb0a/Main.hs#L499
+    -- https://github.com/tfausak/monadoc-2/blob/dac8787a91b245f96e78d528791beb211b567700/source/library/Monadoc.hs#L64
     Html.h2_ $ Html.toHtml moduleName
     Html.p_ $ do
       "Monadoc does not yet provide module details. "

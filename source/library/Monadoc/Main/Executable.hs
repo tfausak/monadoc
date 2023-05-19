@@ -7,6 +7,7 @@ import qualified Control.Monad.Trans.Control as Control
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.Pool as Pool
 import qualified GHC.Conc as Conc
+import qualified GHC.Stack as Stack
 import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Action.Database.Initialize as Database.Initialize
 import qualified Monadoc.Action.Exception.Log as Exception.Log
@@ -19,14 +20,14 @@ import qualified Monadoc.Worker.Main as Worker
 import qualified System.Environment as Environment
 import qualified System.IO as IO
 
-executable :: IO ()
+executable :: (Stack.HasCallStack) => IO ()
 executable = do
   name <- Environment.getProgName
   arguments <- Environment.getArgs
   environment <- Environment.getEnvironment
   mainWith name arguments environment
 
-mainWith :: String -> [String] -> [(String, String)] -> IO ()
+mainWith :: (Stack.HasCallStack) => String -> [String] -> [(String, String)] -> IO ()
 mainWith name arguments environment = do
   mapM_ (flip IO.hSetBuffering IO.LineBuffering) [IO.stdout, IO.stderr]
 
@@ -43,7 +44,7 @@ mainWith name arguments environment = do
 
   App.run context $ Exception.finally start stop
 
-start :: App.App ()
+start :: (Stack.HasCallStack) => App.App ()
 start = do
   App.Log.info "starting up"
   Database.Initialize.run

@@ -14,6 +14,7 @@ import qualified Monadoc.Action.Exception.NotifySentry as Exception.NotifySentry
 import qualified Monadoc.Exception.Found as Found
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Exception.NotFound as NotFound
+import qualified Monadoc.Exception.TimedOut as TimedOut
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
 import qualified Monadoc.Extra.Exception as Exception
@@ -31,9 +32,8 @@ import qualified Witch
 
 middleware :: Context.Context -> Wai.Middleware
 middleware context handle request respond =
-  Exception.handle (handler context request respond)
-    . handle request
-    $ respond
+  Exception.handle (handler context request respond) $
+    handle request respond
 
 handler ::
   Context.Context ->
@@ -89,5 +89,7 @@ onExceptionResponse context e
       Handler.statusResponse Http.notFound404 []
   | Exception.isType @UnknownRoute.UnknownRoute e =
       Handler.statusResponse Http.notFound404 []
+  | Exception.isType @TimedOut.TimedOut e =
+      Handler.statusResponse Http.serviceUnavailable503 []
   | otherwise =
       Handler.statusResponse Http.internalServerError500 []

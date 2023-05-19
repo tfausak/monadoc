@@ -35,14 +35,16 @@ handler context actual url _ respond = do
   request <- Client.requestFromURI $ Witch.from url
   Control.control $ \runInBase ->
     -- TODO: Forward headers from the client?
-    Client.withResponse (Client.ensureUserAgent request) {Client.checkResponse = Client.throwErrorStatusCodes} (Context.manager context) $ \response -> do
-      let headers = filter (flip Set.member headersToKeep . fst) $ Client.responseHeaders response
-      runInBase
-        . respond
-        . Wai.responseStream (Client.responseStatus response) headers
-        $ \send flush -> do
-          Loops.whileJust_ (readChunk response) $ send . Builder.byteString
-          flush
+    Client.withResponse
+      (Client.ensureUserAgent $ Client.setRequestCheckStatus request)
+      (Context.manager context)
+      $ \response -> runInBase $ do
+        let headers = filter (flip Set.member headersToKeep . fst) $ Client.responseHeaders response
+        respond
+          . Wai.responseStream (Client.responseStatus response) headers
+          $ \send flush -> do
+            Loops.whileJust_ (readChunk response) $ send . Builder.byteString
+            flush
 
 headersToKeep :: Set.Set Http.HeaderName
 headersToKeep =

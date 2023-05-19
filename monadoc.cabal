@@ -1,6 +1,6 @@
 cabal-version:      2.2
 name:               monadoc
-version:            0.2023.5.11
+version:            0.2023.5.19
 build-type:         Simple
 category:           Documentation
 data-dir:           data
@@ -159,6 +159,7 @@ library
     Monadoc.Exception.NoNextMatch
     Monadoc.Exception.NotFound
     Monadoc.Exception.Sick
+    Monadoc.Exception.TimedOut
     Monadoc.Exception.Traced
     Monadoc.Exception.UnexpectedArgument
     Monadoc.Exception.UnexpectedEntry
@@ -200,6 +201,7 @@ library
     Monadoc.Middleware.CompressResponses
     Monadoc.Middleware.HandleExceptions
     Monadoc.Middleware.LogResponses
+    Monadoc.Middleware.TimeoutHandlers
     Monadoc.Model.Blob
     Monadoc.Model.Component
     Monadoc.Model.CronEntry

@@ -11,7 +11,7 @@ data ComponentId = ComponentId
   { type_ :: ComponentType.ComponentType,
     name :: ComponentName.ComponentName
   }
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
 
 instance Witch.TryFrom String ComponentId where
   tryFrom = Witch.maybeTryFrom $ \string -> do

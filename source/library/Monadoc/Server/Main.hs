@@ -4,6 +4,7 @@ import qualified Control.Monad.IO.Class as IO
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Data.ByteString as ByteString
 import qualified Formatting as F
+import qualified GHC.Stack as Stack
 import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
 import qualified Monadoc.Server.Application as Application
@@ -14,7 +15,7 @@ import qualified Monadoc.Type.Context as Context
 import qualified Network.Wai.Handler.Warp as Warp
 import qualified Witch
 
-server :: App.App ()
+server :: (Stack.HasCallStack) => App.App ()
 server = do
   context <- Reader.ask
   IO.liftIO

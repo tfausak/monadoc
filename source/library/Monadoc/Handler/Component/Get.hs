@@ -56,7 +56,33 @@ handler packageName reversion componentId _ respond = do
       \ on range.key = dependency.range \
       \ where dependency.packageMetaComponent = ?"
       [Model.key packageMetaComponent]
-  -- TODO: Get reverse dependencies.
+  -- TODO: This currently only gets direct reverse dependencies. It should also
+  -- get indirect ones. And it should try to limit the result set coming back
+  -- from SQL as much as possible.
+  reverseDependencies <-
+    App.Sql.query
+      "select * \
+      \ from dependency \
+      \ inner join packageMetaComponent \
+      \ on packageMetaComponent.key = dependency.packageMetaComponent \
+      \ inner join packageMeta \
+      \ on packageMeta.key = packageMetaComponent.packageMeta \
+      \ inner join upload \
+      \ on upload.key = packageMeta.upload \
+      \ inner join package \
+      \ on package.key = upload.package \
+      \ inner join version \
+      \ on version.key = upload.version \
+      \ inner join range \
+      \ on range.key = dependency.range \
+      \ inner join component \
+      \ on component.key = packageMetaComponent.component \
+      \ where dependency.package = ? \
+      \ and dependency.component = ? \
+      \ limit 64"
+      ( Model.key package,
+        Model.key component
+      )
   maybeLatest <- Version.Get.getLatestUpload (Model.key package) (Model.key upload)
   hasComponent <- case maybeLatest of
     Nothing -> pure False
@@ -89,7 +115,8 @@ handler packageName reversion componentId _ respond = do
           Template.component = component,
           Template.packageMetaComponent = packageMetaComponent,
           Template.packageMetaComponentModules = packageMetaComponentModules,
-          Template.dependencies = dependencies
+          Template.dependencies = dependencies,
+          Template.reverseDependencies = reverseDependencies
         }
 
 getComponent :: ComponentId.ComponentId -> App.App Component.Model

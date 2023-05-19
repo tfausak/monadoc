@@ -12,7 +12,7 @@ data ComponentType
   | ForeignLibrary
   | Library
   | TestSuite
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
 
 instance Witch.TryFrom String ComponentType where
   tryFrom = Witch.maybeTryFrom $ \string -> case string of

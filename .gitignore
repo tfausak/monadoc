@@ -1,5 +1,5 @@
+/.devcontainer/volumes/
 /.vscode/
 /cabal.project.*
 /dist-newstyle/
 /monadoc.sqlite*
-/volumes/

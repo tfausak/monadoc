@@ -6,15 +6,12 @@
         "taylorfausak.purple-yolk"
       ],
       "settings": {
-        "editor.formatOnSave": false,
-        "purple-yolk.haskell.linter.onSave": false
+        "editor.formatOnSave": true
       }
     }
   },
   "dockerComposeFile": "compose.yaml",
-  "runServices": [
-    "devcontainer"
-  ],
+  "postStartCommand": ".devcontainer/post-start.sh",
   "service": "devcontainer",
   "workspaceFolder": "/workspaces/monadoc"
 }

@@ -1,5 +1,5 @@
 [env]
-GHCRTS = "-K1k -M1g"
+GHCRTS = "-K1m -M1g"
 MONADOC_BASE_URL = "https://monadoc.com"
 
 [mounts]

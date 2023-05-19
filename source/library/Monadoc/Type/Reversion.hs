@@ -16,7 +16,7 @@ data Reversion = Reversion
   { version :: VersionNumber.VersionNumber,
     revision :: Revision.Revision
   }
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
 
 instance Witch.From Reversion String where
   from reversion =
