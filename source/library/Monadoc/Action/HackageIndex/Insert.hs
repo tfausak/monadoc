@@ -42,6 +42,7 @@ run = do
   request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"
   Control.control $ \runInBase ->
     Client.withResponse (Client.ensureUserAgent request) (Context.manager context) $ \response -> runInBase $ do
+      Proxy.Get.logResponse response
       compressedSize <- getContentLength response
       key <- insertBlob compressedSize
       hashVar <- IO.liftIO . Stm.newTVarIO $ Crypto.hashInitWith Crypto.SHA256
@@ -94,6 +95,7 @@ getSize = do
       . IO.liftIO
       . Client.httpNoBody (Client.ensureUserAgent request) {Client.method = Http.methodHead}
       $ Context.manager context
+  Proxy.Get.logResponse response
   getContentLength response
 
 getContentLength :: (Exception.MonadThrow m) => Client.Response a -> m Int

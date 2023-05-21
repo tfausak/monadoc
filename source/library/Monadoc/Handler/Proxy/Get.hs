@@ -6,9 +6,13 @@ import qualified Control.Monad.Trans.Control as Control
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Builder as Builder
 import qualified Data.Set as Set
+import qualified Data.Text.Encoding as Text
+import qualified Formatting as F
+import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Exception.Mismatch as Mismatch
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Extra.HttpClient as Client
+import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Monadoc.Type.Handler as Handler
@@ -16,6 +20,7 @@ import qualified Monadoc.Type.Hash as Hash
 import qualified Monadoc.Type.Route as Route
 import qualified Monadoc.Type.Url as Url
 import qualified Network.HTTP.Client as Client
+import qualified Network.HTTP.Types as Http
 import qualified Network.HTTP.Types.Header as Http
 import qualified Network.Wai as Wai
 import qualified Witch
@@ -39,6 +44,7 @@ handler context actual url _ respond = do
       (Client.ensureUserAgent $ Client.setRequestCheckStatus request)
       (Context.manager context)
       $ \response -> runInBase $ do
+        logResponse response
         let headers = filter (flip Set.member headersToKeep . fst) $ Client.responseHeaders response
         respond
           . Wai.responseStream (Client.responseStatus response) headers
@@ -73,3 +79,14 @@ makeHash context =
     . Witch.via @(Witch.UTF_8 ByteString.ByteString)
     . mappend (Config.salt $ Context.config context)
     . Witch.from
+
+logResponse :: Client.Response a -> App.App ()
+logResponse response =
+  App.Log.debug $
+    F.sformat
+      ("[client]" F.%+ F.int F.%+ F.stext F.%+ F.stext F.%+ F.stext F.%+ F.stext)
+      (Http.statusCode $ Client.responseStatus response)
+      (Text.decodeUtf8Lenient . Client.method $ Client.getOriginalRequest response)
+      (Text.decodeUtf8Lenient . Client.host $ Client.getOriginalRequest response)
+      (Text.decodeUtf8Lenient . Client.path $ Client.getOriginalRequest response)
+      (Text.decodeUtf8Lenient . Client.queryString $ Client.getOriginalRequest response)

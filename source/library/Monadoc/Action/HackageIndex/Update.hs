@@ -76,6 +76,7 @@ run hackageIndex = do
       request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar"
       let headers = (Http.hRange, range) : Client.requestHeaders request
       Control.control $ \runInBase -> Client.withResponse (Client.ensureUserAgent request {Client.requestHeaders = headers}) (Context.manager context) $ \response -> runInBase $ do
+        Proxy.Get.logResponse response
         actualSize <- getActualSize response
         Monad.when (actualSize /= newSize) . Traced.throw $
           Mismatch.Mismatch
