@@ -5,6 +5,7 @@ import qualified Control.Monad.Loops as Loops
 import qualified Control.Monad.Trans.Control as Control
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Builder as Builder
+import qualified Data.Maybe as Maybe
 import qualified Data.Set as Set
 import qualified Data.Text.Encoding as Text
 import qualified Formatting as F
@@ -12,6 +13,7 @@ import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Exception.Mismatch as Mismatch
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Extra.HttpClient as Client
+import qualified Monadoc.Middleware.AddHeaders as AddHeaders
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
@@ -30,18 +32,17 @@ handler ::
   Hash.Hash ->
   Url.Url ->
   Handler.Handler
-handler context actual url _ respond = do
+handler context actual url request respond = do
   let expected = makeHash context url
   Monad.when (actual /= expected) . Traced.throw $
     Mismatch.Mismatch
       { Mismatch.expected = expected,
         Mismatch.actual = actual
       }
-  request <- Client.requestFromURI $ Witch.from url
+  proxy <- Client.requestFromURI $ Witch.from url
   Control.control $ \runInBase ->
-    -- TODO: Forward headers from the client?
     Client.withResponse
-      (Client.ensureUserAgent $ Client.setRequestCheckStatus request)
+      (forwardHeaders request . Client.ensureUserAgent $ Client.setRequestCheckStatus proxy)
       (Context.manager context)
       $ \response -> runInBase $ do
         logResponse response
@@ -51,6 +52,12 @@ handler context actual url _ respond = do
           $ \send flush -> do
             Loops.whileJust_ (readChunk response) $ send . Builder.byteString
             flush
+
+forwardHeaders :: Wai.Request -> Client.Request -> Client.Request
+forwardHeaders request proxy =
+  let getHeader name = fmap ((,) name) . lookup name $ Wai.requestHeaders request
+      forwarded = Maybe.mapMaybe getHeader [Http.hAccept, Http.hAcceptEncoding]
+   in proxy {Client.requestHeaders = AddHeaders.addHeaders forwarded $ Client.requestHeaders proxy}
 
 headersToKeep :: Set.Set Http.HeaderName
 headersToKeep =
@@ -81,12 +88,14 @@ makeHash context =
     . Witch.from
 
 logResponse :: Client.Response a -> App.App ()
-logResponse response =
+logResponse response = do
+  let request = Client.getOriginalRequest response
   App.Log.debug $
     F.sformat
-      ("[client]" F.%+ F.int F.%+ F.stext F.%+ F.stext F.%+ F.stext F.%+ F.stext)
+      ("[client]" F.%+ F.int F.%+ F.stext F.%+ F.stext F.% F.stext F.% F.stext F.% F.stext)
       (Http.statusCode $ Client.responseStatus response)
-      (Text.decodeUtf8Lenient . Client.method $ Client.getOriginalRequest response)
-      (Text.decodeUtf8Lenient . Client.host $ Client.getOriginalRequest response)
-      (Text.decodeUtf8Lenient . Client.path $ Client.getOriginalRequest response)
-      (Text.decodeUtf8Lenient . Client.queryString $ Client.getOriginalRequest response)
+      (Text.decodeUtf8Lenient $ Client.method request)
+      (if Client.secure request then "https://" else "http://")
+      (Text.decodeUtf8Lenient $ Client.host request)
+      (Text.decodeUtf8Lenient $ Client.path request)
+      (Text.decodeUtf8Lenient $ Client.queryString request)

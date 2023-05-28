@@ -1,6 +1,6 @@
 cabal-version:      2.2
 name:               monadoc
-version:            0.2023.5.21
+version:            0.2023.5.28
 build-type:         Simple
 category:           Documentation
 data-dir:           data
@@ -48,34 +48,34 @@ library
   import:             library
   autogen-modules:    Paths_monadoc
   build-depends:
-    , aeson ^>=2.1.1
+    , aeson ^>=2.1.2
     , async ^>=2.2.4
-    , bytestring ^>=0.11.3
+    , bytestring ^>=0.11.4
     , Cabal-syntax ^>=3.10.1
     , case-insensitive ^>=1.2.1
-    , containers ^>=0.6.6
+    , containers ^>=0.6.7
     , cron ^>=0.7.0
     , cryptonite ^>=0.30
-    , direct-sqlite ^>=2.3.27
-    , directory ^>=1.3.7
-    , exceptions ^>=0.10.5
-    , filepath ^>=1.4.2
+    , direct-sqlite ^>=2.3.28
+    , directory ^>=1.3.8
+    , exceptions ^>=0.10.7
+    , filepath ^>=1.4.100
     , formatting ^>=7.2.0
     , haddock-library ^>=1.11.0
-    , hashable ^>=1.4.1
+    , hashable ^>=1.4.2
     , hspec ^>=2.11.0
     , http-client ^>=0.7.13
     , http-client-tls ^>=0.3.6
     , http-types ^>=0.12.3
     , lucid2 ^>=0.0.20221012
-    , memory ^>=0.18
+    , memory ^>=0.18.0
     , monad-control ^>=1.0.3
     , monad-loops ^>=0.4.3
     , network-uri ^>=2.6.4
     , patrol ^>=1.0.0
     , QuickCheck ^>=2.14.2
     , random ^>=1.2.1
-    , resource-pool ^>=0.4
+    , resource-pool ^>=0.4.0
     , say ^>=0.1.0
     , sqlite-simple ^>=0.4.18
     , stm ^>=2.5.1
@@ -88,7 +88,7 @@ library
     , vault ^>=0.3.1
     , wai ^>=3.2.3
     , wai-extra ^>=3.1.13
-    , warp ^>=3.3.23
+    , warp ^>=3.3.25
     , witch ^>=1.2.0
     , zlib ^>=0.6.3
 

@@ -1,11 +1,7 @@
 packages:    .
-allow-newer: lucid2:base
 
--- https://github.com/phadej/cabal-fmt/pull/73
-source-repository-package
-  location: https://github.com/tfausak/cabal-fmt
-  tag:      7b5b6d3bc30ae7368cd5af6fab3deb294e5e4eae
-  type:     git
+-- https://github.com/chrisdone/lucid/pull/142
+allow-newer: lucid2:base
 
 -- https://github.com/MichaelXavier/cron/pull/49
 source-repository-package

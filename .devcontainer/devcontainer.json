@@ -11,7 +11,8 @@
     }
   },
   "dockerComposeFile": "compose.yaml",
-  "postStartCommand": ".devcontainer/post-start.sh",
+  "postCreateCommand": "cabal update",
+  "postStartCommand": "git config --global --add safe.directory \"$PWD\"",
   "service": "devcontainer",
   "workspaceFolder": "/workspaces/monadoc"
 }
