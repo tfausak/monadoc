@@ -1,7 +1,4 @@
-packages:    .
-
--- https://github.com/chrisdone/lucid/pull/142
-allow-newer: lucid2:base
+packages: .
 
 -- https://github.com/MichaelXavier/cron/pull/49
 source-repository-package

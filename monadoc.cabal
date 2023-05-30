@@ -1,12 +1,12 @@
 cabal-version:      2.2
 name:               monadoc
-version:            0.2023.5.28
+version:            0.2023.5.30
 build-type:         Simple
 category:           Documentation
 data-dir:           data
 data-files:
   apple-touch-icon.png
-  bootstrap.min.css
+  bootstrap.css
   favicon.ico
   monadoc.js
 

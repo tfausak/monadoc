@@ -11,5 +11,5 @@ handler _ respond = do
     Common.fileResponse
       Http.ok200
       [(Http.hContentType, ContentType.css)]
-      "bootstrap.min.css"
+      "bootstrap.css"
   respond response
