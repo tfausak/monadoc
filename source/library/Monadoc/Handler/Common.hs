@@ -9,6 +9,7 @@ import qualified Data.Text.Lazy as LazyText
 import qualified Formatting as F
 import qualified Lucid as Html
 import qualified Monadoc.Constant.ContentType as ContentType
+import qualified Monadoc.Middleware.AddHeaders as AddHeaders
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
@@ -34,7 +35,7 @@ fileResponse status headers file = do
   pure $
     Wai.responseFile
       status
-      ((Http.hCacheControl, cacheControl) : (Http.hETag, eTag) : headers)
+      (AddHeaders.addHeaders [(Http.hCacheControl, cacheControl), (Http.hETag, eTag)] headers)
       path
       Nothing
 
@@ -44,15 +45,18 @@ htmlResponse ::
   Html.Html () ->
   Wai.Response
 htmlResponse status headers =
-  Wai.responseLBS status ((Http.hContentType, ContentType.html) : headers)
+  Wai.responseLBS status (AddHeaders.addHeaders [(Http.hContentType, ContentType.html)] headers)
     . Html.renderBS
 
 makeETag :: (Hashable.Hashable a) => a -> ByteString.ByteString
-makeETag = Witch.via @(Witch.UTF_8 ByteString.ByteString) . F.format ("\"" F.% F.int F.% "\"") . Hashable.hashWithSalt 0
+makeETag =
+  Witch.via @(Witch.UTF_8 ByteString.ByteString)
+    . F.format ("\"" F.% F.int F.% "\"")
+    . Hashable.hashWithSalt 0
 
 statusResponse :: Http.Status -> Http.ResponseHeaders -> Wai.Response
 statusResponse status headers =
-  Wai.responseLBS status ((Http.hContentType, ContentType.text) : headers)
+  Wai.responseLBS status (AddHeaders.addHeaders [(Http.hContentType, ContentType.text)] headers)
     . Witch.via @(Witch.UTF_8 LazyByteString.ByteString)
     $ F.format
       (F.int F.%+ F.text)

@@ -73,7 +73,7 @@ base ctx rt breadcrumbs title html = do
                 Html.type_ "search"
               ]
       Monad.when (not $ null breadcrumbs)
-        . Html.nav_ [Html.class_ "bg-light"]
+        . Html.nav_ [Html.class_ "bg-body-secondary"]
         . Html.div_ [Html.class_ "container py-2"]
         . Html.ol_ [Html.class_ "breadcrumb mb-0"]
         . Monad.forM_ breadcrumbs

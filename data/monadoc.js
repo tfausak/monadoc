@@ -54,6 +54,14 @@
       };
       loop();
     });
+
+    const prefersDark = '(prefers-color-scheme: dark)';
+    const updateColorScheme = () => document.documentElement.setAttribute(
+      'data-bs-theme',
+      window.matchMedia(prefersDark) ? 'dark' : 'light');
+    window.matchMedia(prefersDark)
+      .addEventListener('change', () => updateColorScheme());
+    updateColorScheme();
   };
 
   if (document.readyState !== 'loading') {
