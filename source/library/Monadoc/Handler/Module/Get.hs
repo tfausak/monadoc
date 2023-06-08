@@ -9,11 +9,11 @@ import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Extra.Exception as Exception
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Handler.Component.Get as Component.Get
-import qualified Monadoc.Handler.Package.Get as Package.Get
 import qualified Monadoc.Handler.Version.Get as Version.Get
 import qualified Monadoc.Model.Module as Module
 import qualified Monadoc.Model.PackageMetaComponent as PackageMetaComponent
 import qualified Monadoc.Model.PackageMetaComponentModule as PackageMetaComponentModule
+import qualified Monadoc.Query.Package as Package.Query
 import qualified Monadoc.Template.Module.Get as Template
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
@@ -34,7 +34,7 @@ handler ::
   ModuleName.ModuleName ->
   Handler.Handler
 handler packageName reversion componentId moduleName _ respond = do
-  package <- Package.Get.getPackage packageName
+  package <- Package.Query.getByName packageName
   version <- Version.Get.getVersion $ Reversion.version reversion
   upload <- Version.Get.getUpload (Model.key package) (Model.key version) (Reversion.revision reversion)
   packageMeta <- Version.Get.getPackageMeta $ Model.key upload

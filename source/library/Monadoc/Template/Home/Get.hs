@@ -56,10 +56,10 @@ render context input =
         "."
         Monad.when (Upload.isLatest $ Model.value upload) $ do
           " "
-          Html.span_ [Html.class_ "badge text-bg-info"] "latest"
+          Html.span_ [Html.class_ "badge bg-info-subtle text-info-emphasis"] "latest"
         Monad.when (not . Upload.isPreferred $ Model.value upload) $ do
           " "
-          Html.span_ [Html.class_ "badge text-bg-warning"] "deprecated"
+          Html.span_ [Html.class_ "badge bg-warning-subtle text-warning-emphasis"] "deprecated"
 
 coreLibraries :: [PackageName.PackageName]
 coreLibraries =

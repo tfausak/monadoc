@@ -1,6 +1,6 @@
 cabal-version:      2.2
 name:               monadoc
-version:            0.2023.6.6
+version:            0.2023.6.7
 build-type:         Simple
 category:           Documentation
 data-dir:           data
@@ -224,6 +224,7 @@ library
     Monadoc.Model.Range
     Monadoc.Model.Upload
     Monadoc.Model.Version
+    Monadoc.Query.Package
     Monadoc.Server.Application
     Monadoc.Server.Main
     Monadoc.Server.Middleware

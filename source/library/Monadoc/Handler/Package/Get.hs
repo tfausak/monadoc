@@ -7,10 +7,9 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Handler.Common as Common
-import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.Upload as Upload
+import qualified Monadoc.Query.Package as Package.Query
 import qualified Monadoc.Template.Package.Get as Template
-import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
 import qualified Monadoc.Type.Handler as Handler
 import qualified Monadoc.Type.Model as Model
@@ -23,7 +22,7 @@ import qualified Witch
 handler :: PackageName.PackageName -> Handler.Handler
 handler packageName _ respond = do
   context <- Reader.ask
-  package <- getPackage packageName
+  package <- Package.Query.getByName packageName
   rows <- do
     xs <-
       App.Sql.query
@@ -66,8 +65,3 @@ handler packageName _ respond = do
           Template.rows = rows,
           Template.hackageUsers = hackageUsers
         }
-
-getPackage :: PackageName.PackageName -> App.App Package.Model
-getPackage name = do
-  packages <- App.Sql.query "select * from package where name = ? limit 1" [name]
-  NotFound.fromList packages

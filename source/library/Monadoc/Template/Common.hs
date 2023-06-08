@@ -56,7 +56,7 @@ base ctx rt breadcrumbs title html = do
         ]
         Text.empty
     Html.body_ $ do
-      Html.header_ [Html.class_ "bg-dark navbar navbar-dark"]
+      Html.header_ [Html.class_ "bg-body-secondary navbar"]
         . Html.div_ [Html.class_ "container"]
         $ do
           Html.h1_ [Html.class_ "h3 lh-1 mb-0"] $
@@ -73,7 +73,7 @@ base ctx rt breadcrumbs title html = do
                 Html.type_ "search"
               ]
       Monad.when (not $ null breadcrumbs)
-        . Html.nav_ [Html.class_ "bg-body-secondary"]
+        . Html.nav_ [Html.class_ "bg-body-tertiary"]
         . Html.div_ [Html.class_ "container py-2"]
         . Html.ol_ [Html.class_ "breadcrumb mb-0"]
         . Monad.forM_ breadcrumbs

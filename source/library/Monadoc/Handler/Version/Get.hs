@@ -6,12 +6,12 @@ import qualified Database.SQLite.Simple as Sql
 import qualified Monadoc.Action.App.Sql as App.Sql
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Handler.Common as Common
-import qualified Monadoc.Handler.Package.Get as Package.Get
 import qualified Monadoc.Model.HackageUser as HackageUser
 import qualified Monadoc.Model.Package as Package
 import qualified Monadoc.Model.PackageMeta as PackageMeta
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
+import qualified Monadoc.Query.Package as Package.Query
 import qualified Monadoc.Template.Version.Get as Template
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
@@ -32,7 +32,7 @@ handler ::
   Handler.Handler
 handler packageName reversion _ respond = do
   context <- Reader.ask
-  package <- Package.Get.getPackage packageName
+  package <- Package.Query.getByName packageName
   version <- getVersion $ Reversion.version reversion
   upload <- getUpload (Model.key package) (Model.key version) (Reversion.revision reversion)
   hackageUser <- getHackageUser . Upload.uploadedBy $ Model.value upload
