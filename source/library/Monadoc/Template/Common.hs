@@ -59,19 +59,13 @@ base ctx rt breadcrumbs title html = do
       Html.header_ [Html.class_ "bg-body-secondary navbar"]
         . Html.div_ [Html.class_ "container"]
         $ do
-          Html.h1_ [Html.class_ "h3 lh-1 mb-0"] $
-            Html.a_
-              [ Html.class_ "navbar-brand",
-                Html.href_ $ route ctx Route.Home
-              ]
-              "Monadoc"
-          Html.form_ [Html.action_ . route ctx $ Route.Search Search.empty] $
-            Html.input_
-              [ Html.class_ "form-control",
-                Html.name_ "query",
-                Html.placeholder_ "Search",
-                Html.type_ "search"
-              ]
+          Html.a_
+            [ Html.class_ "navbar-brand",
+              Html.href_ $ route ctx Route.Home
+            ]
+            "Monadoc"
+          Html.ul_ [Html.class_ "flex-grow-1 navbar-nav"] $ do
+            Html.li_ [Html.class_ "nav-item"] $ Html.a_ [Html.class_ "nav-link", Html.href_ . route ctx $ Route.Search Search.empty] "Search"
       Monad.when (not $ null breadcrumbs)
         . Html.nav_ [Html.class_ "bg-body-tertiary"]
         . Html.div_ [Html.class_ "container py-2"]

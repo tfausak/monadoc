@@ -48,6 +48,10 @@ import qualified Monadoc.Model.PreferenceSpec
 import qualified Monadoc.Model.RangeSpec
 import qualified Monadoc.Model.UploadSpec
 import qualified Monadoc.Model.VersionSpec
+import qualified Monadoc.Query.BlobSpec
+import qualified Monadoc.Query.CronEntrySpec
+import qualified Monadoc.Query.PackageSpec
+import qualified Monadoc.Query.VersionSpec
 import qualified Monadoc.Type.BuildTypeSpec
 import qualified Monadoc.Type.ComponentIdSpec
 import qualified Monadoc.Type.ComponentNameSpec
@@ -127,6 +131,10 @@ spec = do
   Monadoc.Model.RangeSpec.spec
   Monadoc.Model.UploadSpec.spec
   Monadoc.Model.VersionSpec.spec
+  Monadoc.Query.BlobSpec.spec
+  Monadoc.Query.CronEntrySpec.spec
+  Monadoc.Query.PackageSpec.spec
+  Monadoc.Query.VersionSpec.spec
   Monadoc.Type.BuildTypeSpec.spec
   Monadoc.Type.ComponentIdSpec.spec
   Monadoc.Type.ComponentNameSpec.spec

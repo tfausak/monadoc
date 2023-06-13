@@ -12,6 +12,7 @@ import qualified Monadoc.Model.PackageMeta as PackageMeta
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
 import qualified Monadoc.Query.Package as Package.Query
+import qualified Monadoc.Query.Version as Version.Query
 import qualified Monadoc.Template.Version.Get as Template
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Breadcrumb as Breadcrumb
@@ -21,7 +22,6 @@ import qualified Monadoc.Type.PackageName as PackageName
 import qualified Monadoc.Type.Reversion as Reversion
 import qualified Monadoc.Type.Revision as Revision
 import qualified Monadoc.Type.Route as Route
-import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Network.HTTP.Types as Http
 import qualified Network.HTTP.Types.Header as Http
 import qualified Witch
@@ -32,8 +32,8 @@ handler ::
   Handler.Handler
 handler packageName reversion _ respond = do
   context <- Reader.ask
-  package <- Package.Query.getByName packageName
-  version <- getVersion $ Reversion.version reversion
+  package <- NotFound.fromMaybe =<< Package.Query.getByName packageName
+  version <- NotFound.fromMaybe =<< Version.Query.getByNumber (Reversion.version reversion)
   upload <- getUpload (Model.key package) (Model.key version) (Reversion.revision reversion)
   hackageUser <- getHackageUser . Upload.uploadedBy $ Model.value upload
   maybeLatest <- getLatestUpload (Model.key package) (Model.key upload)
@@ -70,11 +70,6 @@ handler packageName reversion _ respond = do
           Template.packageMeta = packageMeta,
           Template.components = components
         }
-
-getVersion :: VersionNumber.VersionNumber -> App.App Version.Model
-getVersion number = do
-  versions <- App.Sql.query "select * from version where number = ? limit 1" [number]
-  NotFound.fromList versions
 
 getUpload :: Package.Key -> Version.Key -> Revision.Revision -> App.App Upload.Model
 getUpload package version revision = do

@@ -22,7 +22,7 @@ import qualified Witch
 handler :: PackageName.PackageName -> Handler.Handler
 handler packageName _ respond = do
   context <- Reader.ask
-  package <- Package.Query.getByName packageName
+  package <- NotFound.fromMaybe =<< Package.Query.getByName packageName
   rows <- do
     xs <-
       App.Sql.query
