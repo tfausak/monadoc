@@ -20,3 +20,13 @@ spec = Hspec.describe "Monadoc.Query.Package" $ do
       name <- Test.arbitrary
       result <- Package.Query.getByName name
       IO.liftIO $ result `Hspec.shouldBe` Nothing
+
+  Hspec.describe "getKeys" $ do
+    Hspec.it "works with no packages" . Test.run $ do
+      result <- Package.Query.getKeys
+      IO.liftIO $ result `Hspec.shouldBe` []
+
+    Hspec.it "works with a package" . Test.run $ do
+      package <- Factory.newPackage
+      result <- Package.Query.getKeys
+      IO.liftIO $ result `Hspec.shouldBe` [Model.key package]

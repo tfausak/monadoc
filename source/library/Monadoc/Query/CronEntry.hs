@@ -12,3 +12,9 @@ getByGuid =
   fmap Maybe.listToMaybe
     . App.Sql.query "select * from cronEntry where guid = ? limit 1"
     . List.singleton
+
+getByKey :: CronEntry.Key -> App.App (Maybe CronEntry.Model)
+getByKey =
+  fmap Maybe.listToMaybe
+    . App.Sql.query "select * from cronEntry where key = ? limit 1"
+    . List.singleton

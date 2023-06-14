@@ -10,6 +10,7 @@ import qualified Monadoc.Action.CronEntry.Insert as CronEntry.Insert
 import qualified Monadoc.Extra.Either as Either
 import qualified Monadoc.Model.CronEntry as CronEntry
 import qualified Monadoc.Model.Job as Job
+import qualified Monadoc.Query.CronEntry as CronEntry.Query
 import qualified Monadoc.Test as Test
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Timestamp as Timestamp
@@ -27,12 +28,12 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Enqueue" $ do
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.runAt = now, CronEntry.schedule = schedule}
     model <- CronEntry.Insert.run cronEntry
     CronEntry.Enqueue.run
-    actual <- App.Sql.query "select * from cronEntry where key = ?" [Model.key model]
+    actual <- CronEntry.Query.getByKey $ Model.key model
     let expected =
-          [ model
+          Just
+            model
               { Model.value = cronEntry {CronEntry.runAt = nextMinute now}
               }
-          ]
     IO.liftIO $ actual `Hspec.shouldBe` expected
 
   Hspec.it "inserts a job" . Test.run $ do

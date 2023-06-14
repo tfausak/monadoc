@@ -42,6 +42,7 @@ import qualified Monadoc.Model.Preference as Preference
 import qualified Monadoc.Model.Range as Range
 import qualified Monadoc.Model.Upload as Upload
 import qualified Monadoc.Model.Version as Version
+import qualified Monadoc.Query.Package as Package.Query
 import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Constraint as Constraint
 import qualified Monadoc.Type.Context as Context
@@ -217,8 +218,8 @@ upsertPreference packageName constraint = do
 
 updateLatest :: App.App ()
 updateLatest = do
-  keys <- App.Sql.query_ "select key from package"
-  Monad.forM_ keys $ \(Sql.Only key) -> do
+  keys <- Package.Query.getKeys
+  Monad.forM_ keys $ \key -> do
     rows <-
       App.Sql.query
         "select * \
