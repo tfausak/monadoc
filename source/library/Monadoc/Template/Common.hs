@@ -49,23 +49,23 @@ base ctx rt breadcrumbs title html = do
       og "url" canonical
       og "image" $ route ctx Route.AppleTouchIcon
       og "description" description
-      Html.script_
-        [ Html.async_ "",
-          Html.defer_ "",
-          Html.src_ $ route ctx Route.Script
-        ]
-        Text.empty
+      Html.script_ [Html.src_ $ route ctx Route.Script] Text.empty
     Html.body_ $ do
       Html.header_ [Html.class_ "bg-body-secondary navbar"]
-        . Html.div_ [Html.class_ "container"]
+        . Html.div_ [Html.class_ "container justify-content-start"]
         $ do
           Html.a_
             [ Html.class_ "navbar-brand",
               Html.href_ $ route ctx Route.Home
             ]
             "Monadoc"
-          Html.ul_ [Html.class_ "flex-grow-1 navbar-nav"] $ do
-            Html.li_ [Html.class_ "nav-item"] $ Html.a_ [Html.class_ "nav-link", Html.href_ . route ctx $ Route.Search Search.empty] "Search"
+          Html.ul_ [Html.class_ "navbar-nav"]
+            . Html.li_ [Html.class_ "nav-item"]
+            $ Html.a_
+              [ Html.class_ "nav-link",
+                Html.href_ . route ctx $ Route.Search Search.empty
+              ]
+              "Search"
       Monad.when (not $ null breadcrumbs)
         . Html.nav_ [Html.class_ "bg-body-tertiary"]
         . Html.div_ [Html.class_ "container py-2"]
