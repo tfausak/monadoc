@@ -3,7 +3,6 @@ module Monadoc.Type.Icon where
 import qualified Data.Aeson as Aeson
 import qualified Data.Hashable as Hashable
 import qualified Data.Text as Text
-import qualified Monadoc.Extra.Aeson as Aeson
 
 data Icon = Icon
   { sizes :: Text.Text,
@@ -16,10 +15,10 @@ data Icon = Icon
 instance Aeson.ToJSON Icon where
   toJSON icon =
     Aeson.object
-      [ Aeson.pair "sizes" $ sizes icon,
-        Aeson.pair "purpose" $ purpose icon,
-        Aeson.pair "src" $ src icon,
-        Aeson.pair "type" $ type_ icon
+      [ "sizes" Aeson..= sizes icon,
+        "purpose" Aeson..= purpose icon,
+        "src" Aeson..= src icon,
+        "type" Aeson..= type_ icon
       ]
 
 instance Hashable.Hashable Icon where

@@ -1,6 +1,6 @@
-cabal-version:      2.2
+cabal-version:      3.0
 name:               monadoc
-version:            0.2023.6.24
+version:            0.2023.7.22
 build-type:         Simple
 category:           Documentation
 data-dir:           data
@@ -48,13 +48,12 @@ library
   import:             library
   autogen-modules:    Paths_monadoc
   build-depends:
-    , aeson ^>=2.1.2.1
+    , aeson ^>=2.2.0.0
     , async ^>=2.2.4
     , bytestring ^>=0.11.4.0
     , Cabal-syntax ^>=3.10.1.0
     , case-insensitive ^>=1.2.1.0
     , containers ^>=0.6.7
-    , cron ^>=0.7.0
     , crypton ^>=0.31
     , direct-sqlite ^>=2.3.28
     , directory ^>=1.3.8.1
@@ -63,19 +62,20 @@ library
     , formatting ^>=7.2.0
     , haddock-library ^>=1.11.0
     , hashable ^>=1.4.2.0
-    , hspec ^>=2.11.1
+    , hspec ^>=2.11.4
     , http-client ^>=0.7.13.1
     , http-client-tls ^>=0.3.6.2
     , http-types ^>=0.12.3
-    , lucid2 ^>=0.0.20221012
+    , lucid2 ^>=0.0.20230706
     , memory ^>=0.18.0
     , monad-control ^>=1.0.3.1
     , monad-loops ^>=0.4.3
     , network-uri ^>=2.6.4.2
-    , patrol ^>=1.0.0.4
+    , patrol ^>=1.0.0.5
     , QuickCheck ^>=2.14.3
     , random ^>=1.2.1.1
     , resource-pool ^>=0.4.0.0
+    , saturn:{saturn, spec} ^>=0.3.1.0
     , say ^>=0.1.0.1
     , sqlite-simple ^>=0.4.18.2
     , stm ^>=2.5.1.0
@@ -88,7 +88,7 @@ library
     , vault ^>=0.3.1.5
     , wai ^>=3.2.3
     , wai-extra ^>=3.1.13.0
-    , warp ^>=3.3.27
+    , warp ^>=3.3.28
     , witch ^>=1.2.0.2
     , zlib ^>=0.6.3.0
 
@@ -168,7 +168,6 @@ library
     Monadoc.Exception.UnexpectedEntry
     Monadoc.Exception.UnknownOption
     Monadoc.Exception.UnknownRoute
-    Monadoc.Extra.Aeson
     Monadoc.Extra.Cabal
     Monadoc.Extra.DirectSqlite
     Monadoc.Extra.Either

@@ -1,19 +1,1 @@
 packages: .
-
--- https://github.com/MichaelXavier/cron/pull/49
-source-repository-package
-  location: https://github.com/tfausak/cron
-  tag:      36c57481b028cc17f6518b0deed421a54078360d
-  type:     git
-
--- https://github.com/ndmitchell/hlint/pull/1470
-source-repository-package
-  location: https://github.com/ndmitchell/hlint
-  tag:      4c57e57ac8cf263265df539476d846de708b6d04
-  type:     git
-
--- https://github.com/ocharles/weeder/pull/120
-source-repository-package
-  location: https://github.com/ocharles/weeder
-  tag:      e39cd7d9867c88f9fd3545fb6d2a2c6bfb5e1538
-  type:     git

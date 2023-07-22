@@ -13,7 +13,7 @@ import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Key as Key
 import qualified Monadoc.Type.Model as Model
 import qualified Monadoc.Type.Timestamp as Timestamp
-import qualified System.Cron as Cron
+import qualified Saturn
 import qualified Witch
 
 run :: App.App ()
@@ -57,6 +57,6 @@ updateRunAt cronEntry = do
 nextRunAt :: Timestamp.Timestamp -> CronEntry.Model -> App.App Timestamp.Timestamp
 nextRunAt now cronEntry = do
   let schedule = CronEntry.schedule $ Model.value cronEntry
-  case Cron.nextMatch (Witch.from schedule) (Witch.from now) of
+  case Saturn.nextMatch (Witch.from now) (Witch.from schedule) of
     Nothing -> Traced.throw $ NoNextMatch.NoNextMatch now schedule
     Just nextMatch -> pure $ Witch.into @Timestamp.Timestamp nextMatch

@@ -13,6 +13,8 @@ type Key = Key.Key Component
 
 type Model = Model.Model Component
 
+-- TODO: Handle private components?
+-- https://cabal.readthedocs.io/en/stable/cabal-package.html#pkg-field-library-visibility
 data Component = Component
   { type_ :: ComponentType.ComponentType,
     name :: ComponentName.ComponentName
