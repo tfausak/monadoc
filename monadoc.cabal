@@ -1,6 +1,6 @@
 cabal-version:      3.0
 name:               monadoc
-version:            0.2023.7.22
+version:            0.2023.7.24
 build-type:         Simple
 category:           Documentation
 data-dir:           data
@@ -75,7 +75,7 @@ library
     , QuickCheck ^>=2.14.3
     , random ^>=1.2.1.1
     , resource-pool ^>=0.4.0.0
-    , saturn:{saturn, spec} ^>=0.3.1.0
+    , saturn:{saturn, spec} ^>=1.0.0.0
     , say ^>=0.1.0.1
     , sqlite-simple ^>=0.4.18.2
     , stm ^>=2.5.1.0
