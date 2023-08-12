@@ -50,6 +50,8 @@ base ctx rt breadcrumbs title html = do
       og "image" $ route ctx Route.AppleTouchIcon
       og "description" description
       Html.script_ [Html.src_ $ route ctx Route.Script] Text.empty
+      -- TODO: Implement better handling of static routes.
+      Html.script_ [Html.src_ "/static/mathjax/tex-chtml-full.js"] Text.empty
     Html.body_ $ do
       Html.header_ [Html.class_ "bg-body-secondary navbar"]
         . Html.div_ [Html.class_ "container justify-content-start"]

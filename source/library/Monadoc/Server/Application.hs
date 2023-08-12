@@ -8,10 +8,8 @@ import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Exception.NotFound as NotFound
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Extra.Either as Either
-import qualified Monadoc.Handler.AppleTouchIcon.Get as AppleTouchIcon.Get
 import qualified Monadoc.Handler.Common as Common
 import qualified Monadoc.Handler.Component.Get as Component.Get
-import qualified Monadoc.Handler.Favicon.Get as Favicon.Get
 import qualified Monadoc.Handler.HealthCheck.Get as HealthCheck.Get
 import qualified Monadoc.Handler.Home.Get as Home.Get
 import qualified Monadoc.Handler.Manifest.Get as Manifest.Get
@@ -19,9 +17,7 @@ import qualified Monadoc.Handler.Module.Get as Module.Get
 import qualified Monadoc.Handler.Package.Get as Package.Get
 import qualified Monadoc.Handler.Proxy.Get as Proxy.Get
 import qualified Monadoc.Handler.Robots.Get as Robots.Get
-import qualified Monadoc.Handler.Script.Get as Script.Get
 import qualified Monadoc.Handler.Search.Get as Search.Get
-import qualified Monadoc.Handler.Stylesheet.Get as Stylesheet.Get
 import qualified Monadoc.Handler.User.Get as User.Get
 import qualified Monadoc.Handler.Version.Get as Version.Get
 import qualified Monadoc.Type.App as App
@@ -52,9 +48,10 @@ getHandler ::
   Route.Route ->
   m Handler.Handler
 getHandler context method route = case route of
-  Route.AppleTouchIcon -> resource method route $ Map.singleton Http.GET AppleTouchIcon.Get.handler
+  -- TODO: Implement better handling for static routes.
+  Route.AppleTouchIcon -> Exception.throwM NotFound.NotFound
   Route.Component p v c -> resource method route . Map.singleton Http.GET $ Component.Get.handler p v c
-  Route.Favicon -> resource method route $ Map.singleton Http.GET Favicon.Get.handler
+  Route.Favicon -> Exception.throwM NotFound.NotFound
   Route.HealthCheck -> resource method route $ Map.singleton Http.GET HealthCheck.Get.handler
   Route.Home -> resource method route $ Map.singleton Http.GET Home.Get.handler
   Route.Manifest -> resource method route $ Map.singleton Http.GET Manifest.Get.handler
@@ -62,9 +59,9 @@ getHandler context method route = case route of
   Route.Package p -> resource method route . Map.singleton Http.GET $ Package.Get.handler p
   Route.Proxy h u -> resource method route . Map.singleton Http.GET $ Proxy.Get.handler context h u
   Route.Robots -> resource method route $ Map.singleton Http.GET Robots.Get.handler
-  Route.Script -> resource method route $ Map.singleton Http.GET Script.Get.handler
+  Route.Script -> Exception.throwM NotFound.NotFound
   Route.Search q -> resource method route . Map.singleton Http.GET $ Search.Get.handler q
-  Route.Stylesheet -> resource method route $ Map.singleton Http.GET Stylesheet.Get.handler
+  Route.Stylesheet -> Exception.throwM NotFound.NotFound
   Route.User u -> resource method route . Map.singleton Http.GET $ User.Get.handler u
   Route.Version p v -> resource method route . Map.singleton Http.GET $ Version.Get.handler p v
 

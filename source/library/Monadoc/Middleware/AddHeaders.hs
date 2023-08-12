@@ -33,12 +33,14 @@ contentSecurityPolicy =
       "; "
       [ "base-uri 'none'",
         "default-src 'none'",
+        "font-src 'self'",
         "form-action 'self'",
         "frame-ancestors 'none'",
         "img-src 'self' data:",
         "manifest-src 'self'",
         "script-src 'self'",
-        "style-src 'self'"
+        -- TODO: MathJax requires `unsafe-inline` here.
+        "style-src 'self' 'unsafe-inline'"
       ]
 
 requestId :: Vault.Key RequestId.RequestId -> Wai.Request -> ByteString.ByteString

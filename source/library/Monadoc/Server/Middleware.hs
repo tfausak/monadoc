@@ -7,7 +7,9 @@ import qualified Monadoc.Middleware.CacheResponses as CacheResponses
 import qualified Monadoc.Middleware.CompressResponses as CompressResponses
 import qualified Monadoc.Middleware.HandleExceptions as HandleExceptions
 import qualified Monadoc.Middleware.LogResponses as LogResponses
+import qualified Monadoc.Middleware.ServeStaticFiles as ServeStaticFiles
 import qualified Monadoc.Middleware.TimeoutHandlers as TimeoutHandlers
+import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Network.Wai as Wai
 
@@ -20,3 +22,6 @@ middleware context =
     . AddHeaders.middleware (Context.key context)
     . HandleExceptions.middleware context
     . TimeoutHandlers.middleware
+    . ServeStaticFiles.middleware
+      (Context.cacheContainer context)
+      (Config.data_ $ Context.config context)

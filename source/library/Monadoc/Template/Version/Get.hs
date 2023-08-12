@@ -206,13 +206,15 @@ markup context =
           ]
           . Maybe.fromMaybe (Html.toHtml $ Haddock.hyperlinkUrl x)
           $ Haddock.hyperlinkLabel x,
-      -- TODO: Handle namespaces?
-      -- https://hackage.haskell.org/package/haddock-library-1.10.0/docs/Documentation-Haddock-Types.html#t:Namespace
-      Haddock.markupIdentifier = \(_, s) -> Html.toHtml s,
+      Haddock.markupIdentifier = \(namespace, identifier) ->
+        Html.a_
+          [Html.name_ . Witch.from $ Haddock.renderNs namespace <> identifier]
+          $ Html.toHtml identifier,
       Haddock.markupIdentifierUnchecked = Void.absurd,
-      -- TODO: MathJax?
-      Haddock.markupMathDisplay = Html.pre_ . Html.code_ . Html.toHtml,
-      Haddock.markupMathInline = Html.code_ . Html.toHtml,
+      Haddock.markupMathDisplay = \x ->
+        Html.span_ [Html.class_ "mathjax"] . Html.toHtml $ "\\[" <> x <> "\\]",
+      Haddock.markupMathInline = \x ->
+        Html.span_ [Html.class_ "mathjax"] . Html.toHtml $ "\\(" <> x <> "\\)",
       Haddock.markupModule = \x ->
         -- TODO: Search for module specifically.
         Html.a_ [Html.href_ . Common.route context . Route.Search . Witch.via @Text.Text $ Haddock.modLinkName x]

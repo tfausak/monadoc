@@ -1,6 +1,6 @@
 cabal-version:      3.0
 name:               monadoc
-version:            0.2023.7.24
+version:            0.2023.8.12
 build-type:         Simple
 category:           Documentation
 data-dir:           data
@@ -88,6 +88,7 @@ library
     , vault ^>=0.3.1.5
     , wai ^>=3.2.3
     , wai-extra ^>=3.1.13.0
+    , wai-middleware-static ^>=0.9.2
     , warp ^>=3.3.28
     , witch ^>=1.2.0.2
     , zlib ^>=0.6.3.0
@@ -180,10 +181,8 @@ library
     Monadoc.Extra.ResourcePool
     Monadoc.Extra.Time
     Monadoc.Factory
-    Monadoc.Handler.AppleTouchIcon.Get
     Monadoc.Handler.Common
     Monadoc.Handler.Component.Get
-    Monadoc.Handler.Favicon.Get
     Monadoc.Handler.HealthCheck.Get
     Monadoc.Handler.Home.Get
     Monadoc.Handler.Manifest.Get
@@ -191,9 +190,7 @@ library
     Monadoc.Handler.Package.Get
     Monadoc.Handler.Proxy.Get
     Monadoc.Handler.Robots.Get
-    Monadoc.Handler.Script.Get
     Monadoc.Handler.Search.Get
-    Monadoc.Handler.Stylesheet.Get
     Monadoc.Handler.User.Get
     Monadoc.Handler.Version.Get
     Monadoc.Main.Executable
@@ -204,6 +201,7 @@ library
     Monadoc.Middleware.CompressResponses
     Monadoc.Middleware.HandleExceptions
     Monadoc.Middleware.LogResponses
+    Monadoc.Middleware.ServeStaticFiles
     Monadoc.Middleware.TimeoutHandlers
     Monadoc.Model.Blob
     Monadoc.Model.Component

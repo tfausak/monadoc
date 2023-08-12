@@ -13,6 +13,9 @@ import qualified Monadoc.Type.Flag as Flag
 import qualified Monadoc.Type.RequestId as RequestId
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Client.TLS as Tls
+import qualified Network.HTTP.Types as Http
+import qualified Network.HTTP.Types.Header as Http
+import qualified Network.Wai.Middleware.Static as Static
 import qualified Paths_monadoc as Monadoc
 import qualified Say
 import qualified System.Console.GetOpt as Console
@@ -20,7 +23,8 @@ import qualified System.Directory as Directory
 import qualified System.Exit as Exit
 
 data Context = Context
-  { config :: Config.Config,
+  { cacheContainer :: Static.CacheContainer,
+    config :: Config.Config,
     key :: Vault.Key RequestId.RequestId,
     manager :: Client.Manager,
     pool :: Pool.Pool Sql.Connection,
@@ -45,8 +49,14 @@ fromConfig name cfg = do
           Sql.close
           60
           (if Config.sql cfg == ":memory:" then 1 else 8)
-  Context cfg
-    <$> Vault.newKey
+  let cachingStrategy = Static.CustomCaching $ \fileMeta ->
+        [ (Http.hCacheControl, "max-age=604800, stale-while-revalidate=86400"),
+          (Http.hETag, Static.fm_etag fileMeta)
+        ]
+  Context
+    <$> Static.initCaching cachingStrategy
+    <*> pure cfg
+    <*> Vault.newKey
     <*> Tls.newTlsManager
     <*> Pool.newPool poolConfig
     <*> Directory.getTemporaryDirectory
