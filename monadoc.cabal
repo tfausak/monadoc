@@ -8,6 +8,9 @@ data-files:
   apple-touch-icon.png
   bootstrap.css
   favicon.ico
+  mathjax/**/*.js
+  mathjax/**/*.json
+  mathjax/**/*.woff
   monadoc.js
 
 description:        Monadoc provides worse Haskell documentation.
