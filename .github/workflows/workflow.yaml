@@ -5,7 +5,7 @@
       "runs-on": "${{ matrix.platform }}-${{ matrix.version }}",
       "steps": [
         {
-          "uses": "actions/checkout@v3"
+          "uses": "actions/checkout@v4"
         },
         {
           "run": "mkdir artifact"
@@ -115,7 +115,7 @@
       "runs-on": "ubuntu-22.04",
       "steps": [
         {
-          "uses": "actions/checkout@v3"
+          "uses": "actions/checkout@v4"
         },
         {
           "run": "cabal check"
@@ -128,7 +128,7 @@
       "runs-on": "ubuntu-22.04",
       "steps": [
         {
-          "uses": "actions/checkout@v3"
+          "uses": "actions/checkout@v4"
         },
         {
           "uses": "superfly/flyctl-actions/setup-flyctl@v1"
@@ -149,7 +149,7 @@
       "runs-on": "ubuntu-22.04",
       "steps": [
         {
-          "uses": "actions/checkout@v3"
+          "uses": "actions/checkout@v4"
         },
         {
           "uses": "actions/download-artifact@v3",
@@ -201,7 +201,7 @@
       "runs-on": "ubuntu-22.04",
       "steps": [
         {
-          "uses": "actions/checkout@v3"
+          "uses": "actions/checkout@v4"
         },
         {
           "uses": "superfly/flyctl-actions/setup-flyctl@v1"
@@ -220,7 +220,7 @@
       "runs-on": "ubuntu-22.04",
       "steps": [
         {
-          "uses": "actions/checkout@v3"
+          "uses": "actions/checkout@v4"
         },
         {
           "uses": "haskell/actions/hlint-setup@v2",
@@ -241,7 +241,7 @@
       "runs-on": "ubuntu-22.04",
       "steps": [
         {
-          "uses": "actions/checkout@v3"
+          "uses": "actions/checkout@v4"
         },
         {
           "uses": "haskell-actions/run-ormolu@v14"
