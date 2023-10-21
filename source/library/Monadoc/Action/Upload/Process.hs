@@ -233,10 +233,10 @@ salt :: ByteString.ByteString
 salt = "2022-08-08"
 
 hashBlob :: Blob.Model -> Hash.Hash
-hashBlob = Hash.new . mappend salt . Witch.from . (.hash) . (.value)
+hashBlob = Hash.new . mappend salt . Witch.from . (.value.hash)
 
 hashPackageMeta :: PackageMeta.Model -> Hash.Hash
-hashPackageMeta = (.hash) . (.value)
+hashPackageMeta = (.value.hash)
 
 shortTextToMaybeText :: Cabal.ShortText -> Maybe Text.Text
 shortTextToMaybeText shortText =

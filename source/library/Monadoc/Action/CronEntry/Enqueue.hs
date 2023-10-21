@@ -44,7 +44,7 @@ runOne cronEntry = do
   pure (job, newCronEntry)
 
 enqueueJob :: CronEntry.Model -> App.App Job.Model
-enqueueJob = Job.Enqueue.run . (.task) . (.value)
+enqueueJob = Job.Enqueue.run . (.value.task)
 
 updateRunAt :: CronEntry.Model -> App.App CronEntry.Model
 updateRunAt cronEntry = do
