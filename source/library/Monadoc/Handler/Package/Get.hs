@@ -36,7 +36,7 @@ handler packageName _ respond = do
         \ on packageMeta.upload = upload.key \
         \ where upload.package = ? \
         \ order by upload.uploadedAt desc"
-        [Model.key package]
+        [package.key]
     NotFound.fromMaybe $ NonEmpty.nonEmpty xs
   hackageUsers <-
     App.Sql.query
@@ -44,9 +44,9 @@ handler packageName _ respond = do
       \ from hackageUser \
       \ where key in (select distinct uploadedBy from upload where upload.package = ?) \
       \ order by name collate nocase asc"
-      [Model.key package]
+      [package.key]
   let (latest Sql.:. _) NonEmpty.:| _ = rows
-      eTag = Common.makeETag . Just . Upload.uploadedAt $ Model.value latest
+      eTag = Common.makeETag $ Just latest.value.uploadedAt
       breadcrumbs =
         [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home},
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text packageName, Breadcrumb.route = Nothing}

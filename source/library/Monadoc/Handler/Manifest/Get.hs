@@ -35,7 +35,7 @@ makeManifest context =
   Manifest.Manifest
     { Manifest.schema = "https://json.schemastore.org/web-manifest-combined.json",
       Manifest.name = "Monadoc",
-      Manifest.startUrl = Config.base $ Context.config context,
+      Manifest.startUrl = context.config.base,
       Manifest.display = "minimal-ui",
       Manifest.icons =
         [ Icon.Icon

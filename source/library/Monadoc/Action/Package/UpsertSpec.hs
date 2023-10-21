@@ -33,4 +33,4 @@ spec = Hspec.describe "Monadoc.Action.Package.Upsert" $ do
     package2 <- do
       x <- Test.arbitraryWith $ \y -> y {Package.name = Witch.unsafeFrom @String "b"}
       Package.Upsert.run x
-    IO.liftIO $ Model.key package1 `Hspec.shouldNotBe` Model.key package2
+    IO.liftIO $ package1.key `Hspec.shouldNotBe` package2.key

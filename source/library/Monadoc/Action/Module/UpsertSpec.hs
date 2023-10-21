@@ -30,4 +30,4 @@ spec = Hspec.describe "Monadoc.Action.Module.Upsert" $ do
     model1 <- Module.Upsert.run module1
     module2 <- Test.arbitrary
     model2 <- Module.Upsert.run module2
-    IO.liftIO $ Model.key model1 `Hspec.shouldNotBe` Model.key model2
+    IO.liftIO $ model1.key `Hspec.shouldNotBe` model2.key

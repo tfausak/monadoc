@@ -28,39 +28,35 @@ data Input = Input
 
 render :: Context.Context -> Input -> Html.Html ()
 render context input = do
-  let packageName = Package.name . Model.value $ package input
+  let packageName = input.package.value.name
       route = Route.Package packageName
       title = F.sformat ("Package" F.%+ F.stext F.%+ ":: Monadoc") (Witch.from packageName)
-  Common.base context route (breadcrumbs input) title $ do
+  Common.base context route input.breadcrumbs title $ do
     Html.h2_ $ Html.toHtml packageName
     Html.h3_ "Uploads"
-    Html.ul_ . Monad.forM_ (rows input) $ \(upload Sql.:. version Sql.:. hackageUser Sql.:. _) -> Html.li_ $ do
-      let versionNumber = Version.number $ Model.value version
+    Html.ul_ . Monad.forM_ input.rows $ \(upload Sql.:. version Sql.:. hackageUser Sql.:. _) -> Html.li_ $ do
+      let versionNumber = version.value.number
           reversion =
             Reversion.Reversion
-              { Reversion.revision = Upload.revision $ Model.value upload,
+              { Reversion.revision = upload.value.revision,
                 Reversion.version = versionNumber
               }
       Html.a_ [Html.href_ . Common.route context $ Route.Version packageName reversion] $ do
         Html.toHtml reversion
       " uploaded "
-      Common.timestamp . Upload.uploadedAt $ Model.value upload
+      Common.timestamp upload.value.uploadedAt
       " by "
-      Html.a_ [Html.href_ . Common.route context . Route.User . HackageUser.name $ Model.value hackageUser]
-        . Html.toHtml
-        . HackageUser.name
-        $ Model.value hackageUser
+      Html.a_ [Html.href_ . Common.route context $ Route.User hackageUser.value.name] $
+        Html.toHtml hackageUser.value.name
       "."
-      Monad.when (Upload.isLatest $ Model.value upload) $ do
+      Monad.when upload.value.isLatest $ do
         " "
         Html.span_ [Html.class_ "badge bg-info-subtle text-info-emphasis"] "latest"
-      Monad.when (not . Upload.isPreferred $ Model.value upload) $ do
+      Monad.when (not upload.value.isPreferred) $ do
         " "
         Html.span_ [Html.class_ "badge bg-warning-subtle text-warning-emphasis"] "deprecated"
     Html.h3_ "Uploaders"
-    Html.ul_ . Monad.forM_ (hackageUsers input) $ \hackageUser ->
+    Html.ul_ . Monad.forM_ input.hackageUsers $ \hackageUser ->
       Html.li_
-        . Html.a_ [Html.href_ . Common.route context . Route.User . HackageUser.name $ Model.value hackageUser]
-        . Html.toHtml
-        . HackageUser.name
-        $ Model.value hackageUser
+        . Html.a_ [Html.href_ . Common.route context $ Route.User hackageUser.value.name]
+        $ Html.toHtml hackageUser.value.name

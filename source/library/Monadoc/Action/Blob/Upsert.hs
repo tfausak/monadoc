@@ -7,7 +7,7 @@ import qualified Monadoc.Type.App as App
 
 run :: Blob.Blob -> App.App Blob.Model
 run blob = do
-  maybeModel <- Blob.Query.getByHash $ Blob.hash blob
+  maybeModel <- Blob.Query.getByHash blob.hash
   case maybeModel of
     Nothing -> Blob.Insert.run blob
     Just model -> pure model

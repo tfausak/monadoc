@@ -103,7 +103,9 @@ library
     FlexibleContexts
     FlexibleInstances
     MultiParamTypeClasses
+    NoFieldSelectors
     NumericUnderscores
+    OverloadedRecordDot
     OverloadedStrings
     ScopedTypeVariables
     TypeApplications

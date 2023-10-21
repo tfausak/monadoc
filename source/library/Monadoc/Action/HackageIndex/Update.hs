@@ -55,10 +55,10 @@ run hackageIndex = do
         \ on blob.key = hackageIndex.blob \
         \ where hackageIndex.key = ? \
         \ limit 1"
-        [Model.key hackageIndex]
+        [hackageIndex.key]
     NotFound.fromList rows
   newSize <- HackageIndex.Insert.getSize
-  let oldSize = Maybe.fromMaybe oldBlobSize . HackageIndex.size $ Model.value hackageIndex
+  let oldSize = Maybe.fromMaybe oldBlobSize hackageIndex.value.size
       start = oldSize - overlap
       end = newSize - 1
       range = Witch.into @ByteString.ByteString . Witch.into @(Witch.UTF_8 ByteString.ByteString) $ "bytes=" <> show start <> "-" <> show end
@@ -73,9 +73,9 @@ run hackageIndex = do
     LT -> do
       context <- Reader.ask
       App.Log.debug $ F.sformat ("new index to get:" F.%+ F.int) (newSize - oldSize)
-      request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar"
+      request <- Client.parseUrlThrow $ context.config.hackage <> "01-index.tar"
       let headers = (Http.hRange, range) : Client.requestHeaders request
-      Control.control $ \runInBase -> Client.withResponse (Client.ensureUserAgent request {Client.requestHeaders = headers}) (Context.manager context) $ \response -> runInBase $ do
+      Control.control $ \runInBase -> Client.withResponse (Client.ensureUserAgent request {Client.requestHeaders = headers}) context.manager $ \response -> runInBase $ do
         Proxy.Get.logResponse response
         actualSize <- getActualSize response
         Monad.when (actualSize /= newSize) . Traced.throw $
@@ -83,12 +83,12 @@ run hackageIndex = do
             { Mismatch.expected = newSize,
               Mismatch.actual = actualSize
             }
-        Temp.withTempFile (Context.temporaryDirectory context) "monadoc-" $ \f h -> do
+        Temp.withTempFile context.temporaryDirectory "monadoc-" $ \f h -> do
           App.Log.debug "copying old blob"
           App.Sql.withConnection $ \connection ->
             Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.from @Blob.Key oldKey) False $ \oldBlob -> IO.liftIO $ do
               contents <- Sqlite.blobRead oldBlob oldBlobSize 0
-              case HackageIndex.size $ Model.value hackageIndex of
+              case hackageIndex.value.size of
                 Nothing -> ByteString.hPut h contents
                 Just _ -> LazyByteString.hPut h . Gzip.decompress $ Witch.from contents
           App.Log.debug "appending new blob"
@@ -111,7 +111,7 @@ getActualSize response = do
 upsertBlob :: FilePath -> App.App Blob.Key
 upsertBlob uncompressedFile = do
   context <- Reader.ask
-  Temp.withTempFile (Context.temporaryDirectory context) "monadoc-" $ \compressedFile handle -> do
+  Temp.withTempFile context.temporaryDirectory "monadoc-" $ \compressedFile handle -> do
     c1 <- IO.liftIO $ LazyByteString.readFile uncompressedFile
     IO.liftIO . LazyByteString.hPut handle $ Gzip.compress c1
     IO.liftIO $ IO.hClose handle

@@ -27,8 +27,8 @@ instance Sql.FromRow Preference where
 
 instance Sql.ToRow Preference where
   toRow preference =
-    [ Sql.toField $ package preference,
-      Sql.toField $ range preference
+    [ Sql.toField preference.package,
+      Sql.toField preference.range
     ]
 
 instance QuickCheck.Arbitrary Preference where

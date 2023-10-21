@@ -68,10 +68,10 @@ handleRow ::
   (Upload.Model Sql.:. Blob.Model Sql.:. Package.Model Sql.:. Version.Model) ->
   App.App ()
 handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
-  packageMetas <- App.Sql.query "select * from packageMeta where upload = ? limit 1" [Model.key upload]
+  packageMetas <- App.Sql.query "select * from packageMeta where upload = ? limit 1" [upload.key]
   let hash = hashBlob blob
   Monad.when (fmap hashPackageMeta packageMetas /= [hash]) $ do
-    let bs = Blob.contents $ Model.value blob
+    let bs = blob.value.contents
     gpd <- case Cabal.parseGenericPackageDescriptionMaybe bs of
       Nothing -> Traced.throw $ InvalidGenericPackageDescription.InvalidGenericPackageDescription bs
       Just gpd -> pure gpd
@@ -92,10 +92,10 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
       PackageMeta.Upsert.run
         PackageMeta.PackageMeta
           { PackageMeta.buildType = Witch.from $ Cabal.buildType pd,
-            PackageMeta.cabalVersion = Model.key cabalVersion,
+            PackageMeta.cabalVersion = cabalVersion.key,
             PackageMeta.hash = hash,
-            PackageMeta.license = Model.key license,
-            PackageMeta.upload = Model.key upload,
+            PackageMeta.license = license.key,
+            PackageMeta.upload = upload.key,
             PackageMeta.author = shortTextToMaybeText $ Cabal.author pd,
             PackageMeta.bugReports = shortTextToMaybeText $ Cabal.bugReports pd,
             PackageMeta.category = shortTextToMaybeText $ Cabal.category pd,
@@ -119,8 +119,8 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
       packageMetaComponent <-
         PackageMetaComponent.Upsert.run
           PackageMetaComponent.PackageMetaComponent
-            { PackageMetaComponent.packageMeta = Model.key packageMeta,
-              PackageMetaComponent.component = Model.key component
+            { PackageMetaComponent.packageMeta = packageMeta.key,
+              PackageMetaComponent.component = component.key
             }
 
       Monad.forM_ (Cabal.fromDepMap $ Cabal.toDepMap ds) $ \dep -> do
@@ -146,10 +146,10 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
           Monad.void $
             Dependency.Upsert.run
               Dependency.Dependency
-                { Dependency.packageMetaComponent = Model.key packageMetaComponent,
-                  Dependency.package = Model.key pkg,
-                  Dependency.component = Model.key cmp,
-                  Dependency.range = Model.key rng
+                { Dependency.packageMetaComponent = packageMetaComponent.key,
+                  Dependency.package = pkg.key,
+                  Dependency.component = cmp.key,
+                  Dependency.range = rng.key
                 }
 
       Monad.forM_ (componentModules c) $ \(mt, mn) -> do
@@ -162,8 +162,8 @@ handleRow (upload Sql.:. blob Sql.:. package Sql.:. version) = do
           _packageMetaComponentModule <-
             PackageMetaComponentModule.Upsert.run
               PackageMetaComponentModule.PackageMetaComponentModule
-                { PackageMetaComponentModule.packageMetaComponent = Model.key packageMetaComponent,
-                  PackageMetaComponentModule.module_ = Model.key module_
+                { PackageMetaComponentModule.packageMetaComponent = packageMetaComponent.key,
+                  PackageMetaComponentModule.module_ = module_.key
                 }
           pure ()
 
@@ -209,7 +209,7 @@ buildInfoModules bi =
 
 checkPackageName :: Package.Model -> Cabal.PackageDescription -> App.App ()
 checkPackageName p pd = do
-  let expected = Witch.into @Cabal.PackageName . Package.name $ Model.value p
+  let expected = Witch.into @Cabal.PackageName p.value.name
       actual = Cabal.pkgName $ Cabal.package pd
   Monad.when (actual /= expected) $
     Traced.throw
@@ -220,7 +220,7 @@ checkPackageName p pd = do
 
 checkPackageVersion :: Version.Model -> Cabal.PackageDescription -> App.App ()
 checkPackageVersion v pd = do
-  let expected = Witch.into @Cabal.Version . Version.number $ Model.value v
+  let expected = Witch.into @Cabal.Version v.value.number
       actual = Cabal.pkgVersion $ Cabal.package pd
   Monad.when (actual /= expected) $
     Traced.throw
@@ -233,10 +233,10 @@ salt :: ByteString.ByteString
 salt = "2022-08-08"
 
 hashBlob :: Blob.Model -> Hash.Hash
-hashBlob = Hash.new . mappend salt . Witch.from . Blob.hash . Model.value
+hashBlob = Hash.new . mappend salt . Witch.from . (.hash) . (.value)
 
 hashPackageMeta :: PackageMeta.Model -> Hash.Hash
-hashPackageMeta = PackageMeta.hash . Model.value
+hashPackageMeta = (.hash) . (.value)
 
 shortTextToMaybeText :: Cabal.ShortText -> Maybe Text.Text
 shortTextToMaybeText shortText =

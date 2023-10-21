@@ -15,8 +15,8 @@ spec = Hspec.describe "Monadoc.Action.Job.Enqueue" $ do
     task <- Test.arbitrary
     model <- Job.Enqueue.run task
     IO.liftIO $ do
-      Model.key model `Hspec.shouldBe` Witch.from @Int 1
-      Job.finishedAt (Model.value model) `Hspec.shouldBe` Nothing
-      Job.startedAt (Model.value model) `Hspec.shouldBe` Nothing
-      Job.status (Model.value model) `Hspec.shouldBe` Status.Queued
-      Job.task (Model.value model) `Hspec.shouldBe` task
+      model.key `Hspec.shouldBe` Witch.from @Int 1
+      model.value.finishedAt `Hspec.shouldBe` Nothing
+      model.value.startedAt `Hspec.shouldBe` Nothing
+      model.value.status `Hspec.shouldBe` Status.Queued
+      model.value.task `Hspec.shouldBe` task

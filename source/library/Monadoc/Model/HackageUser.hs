@@ -24,7 +24,7 @@ instance Sql.FromRow HackageUser where
 
 instance Sql.ToRow HackageUser where
   toRow hackageUser =
-    [ Sql.toField $ name hackageUser
+    [ Sql.toField hackageUser.name
     ]
 
 instance QuickCheck.Arbitrary HackageUser where

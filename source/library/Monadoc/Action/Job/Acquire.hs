@@ -16,5 +16,5 @@ run = do
       now <- Timestamp.getCurrentTime
       App.Sql.execute
         "update job set startedAt = ?, status = ? where key = ?"
-        (now, Status.Locked, Model.key job)
+        (now, Status.Locked, job.key)
       pure $ Just job

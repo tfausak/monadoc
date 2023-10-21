@@ -31,10 +31,10 @@ instance Sql.FromRow HackageIndex where
 
 instance Sql.ToRow HackageIndex where
   toRow hackageIndex =
-    [ Sql.toField $ blob hackageIndex,
-      Sql.toField $ createdAt hackageIndex,
-      Sql.toField $ processedAt hackageIndex,
-      Sql.toField $ size hackageIndex
+    [ Sql.toField hackageIndex.blob,
+      Sql.toField hackageIndex.createdAt,
+      Sql.toField hackageIndex.processedAt,
+      Sql.toField hackageIndex.size
     ]
 
 instance QuickCheck.Arbitrary HackageIndex where

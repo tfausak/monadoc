@@ -12,7 +12,7 @@ import qualified Monadoc.Type.Model as Model
 run :: Package.Package -> App.App Package.Model
 run package = do
   maybeModel <-
-    Package.Query.getByName $ Package.name package
+    Package.Query.getByName package.name
   case maybeModel of
     Just model -> pure model
     Nothing -> do

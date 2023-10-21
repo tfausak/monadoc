@@ -30,7 +30,7 @@ handler _ respond = do
       \ order by upload.uploadedAt desc \
       \ limit 64"
   let eTag = Common.makeETag $ case rows of
-        (upload Sql.:. _) : _ -> Just . Upload.uploadedAt $ Model.value upload
+        (upload Sql.:. _) : _ -> Just upload.value.uploadedAt
         _ -> Nothing
       breadcrumbs =
         [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Nothing}

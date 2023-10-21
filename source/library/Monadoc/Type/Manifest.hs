@@ -19,22 +19,22 @@ data Manifest = Manifest
 instance Aeson.ToJSON Manifest where
   toJSON manifest =
     Aeson.object
-      [ "background_color" Aeson..= backgroundColor manifest,
-        "display" Aeson..= display manifest,
-        "icons" Aeson..= icons manifest,
-        "name" Aeson..= name manifest,
-        "$schema" Aeson..= schema manifest,
-        "start_url" Aeson..= startUrl manifest,
-        "theme_color" Aeson..= themeColor manifest
+      [ "background_color" Aeson..= manifest.backgroundColor,
+        "display" Aeson..= manifest.display,
+        "icons" Aeson..= manifest.icons,
+        "name" Aeson..= manifest.name,
+        "$schema" Aeson..= manifest.schema,
+        "start_url" Aeson..= manifest.startUrl,
+        "theme_color" Aeson..= manifest.themeColor
       ]
 
 instance Hashable.Hashable Manifest where
   hashWithSalt s x =
     s
-      `Hashable.hashWithSalt` backgroundColor x
-      `Hashable.hashWithSalt` display x
-      `Hashable.hashWithSalt` icons x
-      `Hashable.hashWithSalt` name x
-      `Hashable.hashWithSalt` schema x
-      `Hashable.hashWithSalt` startUrl x
-      `Hashable.hashWithSalt` themeColor x
+      `Hashable.hashWithSalt` x.backgroundColor
+      `Hashable.hashWithSalt` x.display
+      `Hashable.hashWithSalt` x.icons
+      `Hashable.hashWithSalt` x.name
+      `Hashable.hashWithSalt` x.schema
+      `Hashable.hashWithSalt` x.startUrl
+      `Hashable.hashWithSalt` x.themeColor

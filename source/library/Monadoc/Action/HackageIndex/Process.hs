@@ -59,18 +59,18 @@ import qualified Witch
 
 run :: App.App ()
 run = do
-  rows <- App.Sql.query_ "select * from hackageIndex where processedAt is null order by createdAt asc limit 1"
+  rows <- App.Sql.query_ @HackageIndex.Model "select * from hackageIndex where processedAt is null order by createdAt asc limit 1"
   case rows of
     [] -> App.Log.debug "no new hackage index to process"
     hackageIndex : _ -> do
       constraints <- IO.liftIO $ Stm.newTVarIO Map.empty
       revisions <- IO.liftIO $ Stm.newTVarIO Map.empty
-      let blobKey = HackageIndex.blob $ Model.value hackageIndex
+      let blobKey = hackageIndex.value.blob
       size <- do
         xs <- App.Sql.query "select size from blob where key = ? limit 1" [blobKey]
         Sql.fromOnly <$> NotFound.fromList xs
       context <- Reader.ask
-      Temp.withTempFile (Context.temporaryDirectory context) "monadoc-" $ \f h -> do
+      Temp.withTempFile context.temporaryDirectory "monadoc-" $ \f h -> do
         App.Sql.withConnection $ \connection ->
           Sqlite.withBlobLifted (Sql.connectionHandle connection) "main" "blob" "contents" (Witch.into @Int.Int64 blobKey) False $ \blob -> IO.liftIO $ do
             chunks <- Sqlite.unsafeBlobRead blob size 0
@@ -80,13 +80,13 @@ run = do
         mapM_ (handleItem constraints revisions)
           . Tar.foldEntries ((:) . Right) [] (pure . Left)
           . Tar.read
-          $ case HackageIndex.size $ Model.value hackageIndex of
+          $ case hackageIndex.value.size of
             Nothing -> contents
             Just _ -> Gzip.decompress contents
       upsertPreferences constraints
       updateLatest
       now <- Timestamp.getCurrentTime
-      App.Sql.execute "update hackageIndex set processedAt = ? where key = ?" (Just now, Model.key hackageIndex)
+      App.Sql.execute "update hackageIndex set processedAt = ? where key = ?" (Just now, hackageIndex.key)
 
 handleItem ::
   Stm.TVar (Map.Map PackageName.PackageName Constraint.Constraint) ->
@@ -180,12 +180,12 @@ handleCabal revisions entry pkg ver = do
   Monad.void $
     Upload.Upsert.run
       Upload.Upload
-        { Upload.blob = Model.key blob,
-          Upload.package = Model.key package,
+        { Upload.blob = blob.key,
+          Upload.package = package.key,
           Upload.revision = revision,
           Upload.uploadedAt = Witch.from $ Tar.entryTime entry,
-          Upload.uploadedBy = Model.key hackageUser,
-          Upload.version = Model.key version,
+          Upload.uploadedBy = hackageUser.key,
+          Upload.version = version.key,
           Upload.isPreferred = True,
           Upload.isLatest = False
         }
@@ -207,36 +207,39 @@ upsertPreference packageName constraint = do
   Monad.void $
     Preference.Upsert.run
       Preference.Preference
-        { Preference.package = Model.key package,
-          Preference.range = Model.key range
+        { Preference.package = package.key,
+          Preference.range = range.key
         }
-  rows <- App.Sql.query "select * from upload inner join version on version.key = upload.version where upload.package = ?" [Model.key package]
+  rows <- App.Sql.query @(Upload.Model Sql.:. Version.Model) "select * from upload inner join version on version.key = upload.version where upload.package = ?" [package.key]
   Monad.forM_ rows $ \(upload Sql.:. version) -> do
-    let isPreferred = Constraint.includes (Version.number $ Model.value version) constraint
-    Monad.when (Upload.isPreferred (Model.value upload) /= isPreferred) $
-      App.Sql.execute "update upload set isPreferred = ? where key = ?" (isPreferred, Model.key upload)
+    let isPreferred = Constraint.includes version.value.number constraint
+    Monad.when (upload.value.isPreferred /= isPreferred) $
+      App.Sql.execute "update upload set isPreferred = ? where key = ?" (isPreferred, upload.key)
 
 updateLatest :: App.App ()
 updateLatest = do
   keys <- Package.Query.getKeys
   Monad.forM_ keys $ \key -> do
     rows <-
-      App.Sql.query
+      App.Sql.query @(Upload.Model Sql.:. Version.Model)
         "select * \
         \ from upload \
         \ inner join version \
         \ on version.key = upload.version \
         \ where upload.package = ?"
         [key :: Package.Key]
-    let f (upload Sql.:. version) =
+    let f ::
+          Upload.Model Sql.:. Version.Model ->
+          Ord.Down (Bool, VersionNumber.VersionNumber, Revision.Revision)
+        f (upload Sql.:. version) =
           Ord.Down
-            ( Upload.isPreferred $ Model.value upload,
-              Version.number $ Model.value version,
-              Upload.revision $ Model.value upload
+            ( upload.value.isPreferred,
+              version.value.number,
+              upload.value.revision
             )
     case Maybe.listToMaybe $ List.sortOn f rows of
       Nothing -> pure ()
       Just (upload Sql.:. _) ->
         App.Sql.execute
           "update upload set isLatest = (key = ?) where package = ?"
-          (Model.key upload, key)
+          (upload.key, key)

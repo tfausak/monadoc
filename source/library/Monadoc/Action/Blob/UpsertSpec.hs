@@ -29,4 +29,4 @@ spec = Hspec.describe "Monadoc.Action.Blob.Upsert" $ do
   Hspec.it "inserts two blobs" . Test.run $ do
     blob1 <- Blob.Upsert.run $ Blob.new "a"
     blob2 <- Blob.Upsert.run $ Blob.new "b"
-    IO.liftIO $ Model.key blob1 `Hspec.shouldNotBe` Model.key blob2
+    IO.liftIO $ blob1.key `Hspec.shouldNotBe` blob2.key

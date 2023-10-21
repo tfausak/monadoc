@@ -33,4 +33,4 @@ spec = Hspec.describe "Monadoc.Action.Component.Upsert" $ do
     component2 <- do
       x <- Test.arbitraryWith $ \y -> y {Component.name = Witch.unsafeFrom @String "b"}
       Component.Upsert.run x
-    IO.liftIO $ Model.key component1 `Hspec.shouldNotBe` Model.key component2
+    IO.liftIO $ component1.key `Hspec.shouldNotBe` component2.key

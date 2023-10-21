@@ -13,7 +13,7 @@ spec = Hspec.describe "Monadoc.Query.Blob" $ do
   Hspec.describe "getByHash" $ do
     Hspec.it "works" . Test.run $ do
       blob <- Factory.newBlob
-      result <- Blob.Query.getByHash . Blob.hash $ Model.value blob
+      result <- Blob.Query.getByHash blob.value.hash
       IO.liftIO $ result `Hspec.shouldBe` Just blob
 
     Hspec.it "returns nothing when the hash doesn't exist" . Test.run $ do

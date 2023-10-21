@@ -24,7 +24,7 @@ instance Sql.FromRow Module where
 
 instance Sql.ToRow Module where
   toRow package =
-    [ Sql.toField $ name package
+    [ Sql.toField package.name
     ]
 
 instance QuickCheck.Arbitrary Module where

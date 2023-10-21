@@ -31,4 +31,4 @@ spec = Hspec.describe "Monadoc.Action.License.Upsert" $ do
     license2 <- Test.arbitraryWith $ \x -> x {License.spdx = Witch.unsafeFrom @String "ISC"}
     model1 <- License.Upsert.run license1
     model2 <- License.Upsert.run license2
-    IO.liftIO $ Model.key model1 `Hspec.shouldNotBe` Model.key model2
+    IO.liftIO $ model1.key `Hspec.shouldNotBe` model2.key

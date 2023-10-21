@@ -17,7 +17,7 @@ import qualified Witch
 run :: Severity.Severity -> Text.Text -> App.App ()
 run severity message = do
   context <- Reader.ask
-  Monad.when (severity >= Config.severity (Context.config context)) $ do
+  Monad.when (severity >= context.config.severity) $ do
     let handle = if severity >= Severity.Warn then IO.stderr else IO.stdout
     timestamp <- Timestamp.getCurrentTime
     IO.liftIO . Say.hSay handle $

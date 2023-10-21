@@ -16,15 +16,15 @@ data ComponentId = ComponentId
 instance Witch.TryFrom String ComponentId where
   tryFrom = Witch.maybeTryFrom $ \string -> do
     let (before, after) = break ((==) ':') string
-    ct <- Either.hush $ Witch.tryFrom before
-    cn <- Either.hush . Witch.tryFrom $ drop 1 after
-    pure ComponentId {type_ = ct, name = cn}
+    type_ <- Either.hush $ Witch.tryFrom before
+    name <- Either.hush . Witch.tryFrom $ drop 1 after
+    pure ComponentId {type_ = type_, name = name}
 
 instance Witch.TryFrom Text.Text ComponentId where
   tryFrom = Witch.eitherTryFrom $ Witch.tryFrom . Witch.into @String
 
 instance Witch.From ComponentId String where
-  from ci = Witch.from (type_ ci) <> ":" <> Witch.from (name ci)
+  from ci = Witch.from ci.type_ <> ":" <> Witch.from ci.name
 
 instance Witch.From ComponentId Text.Text where
   from = Witch.via @String

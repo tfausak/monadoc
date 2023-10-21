@@ -13,7 +13,7 @@ run hackageUser = do
   r1 <-
     App.Sql.query
       "select key from hackageUser where name = ? limit 1"
-      [HackageUser.name hackageUser]
+      [hackageUser.name]
   key <- case r1 of
     Sql.Only key : _ -> pure key
     [] -> do

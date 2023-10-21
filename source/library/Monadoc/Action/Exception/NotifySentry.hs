@@ -40,8 +40,8 @@ run ::
   App.App ()
 run f exception = Monad.when (shouldNotify exception) $ do
   context <- Reader.ask
-  Monad.forM_ (Config.dsn $ Context.config context) $ \dsn -> do
-    let manager = Context.manager context
+  Monad.forM_ context.config.dsn $ \dsn -> do
+    let manager = context.manager
     event <- IO.liftIO Patrol.Event.new
     environment <- IO.liftIO Environment.getEnvironment
     response <-
@@ -63,7 +63,7 @@ run f exception = Monad.when (shouldNotify exception) $ do
                                 }
                         ]
                     },
-              Patrol.Event.release = Config.sha $ Context.config context,
+              Patrol.Event.release = context.config.sha,
               Patrol.Event.request =
                 Just
                   Patrol.Request.empty

@@ -15,16 +15,16 @@ data Icon = Icon
 instance Aeson.ToJSON Icon where
   toJSON icon =
     Aeson.object
-      [ "sizes" Aeson..= sizes icon,
-        "purpose" Aeson..= purpose icon,
-        "src" Aeson..= src icon,
-        "type" Aeson..= type_ icon
+      [ "sizes" Aeson..= icon.sizes,
+        "purpose" Aeson..= icon.purpose,
+        "src" Aeson..= icon.src,
+        "type" Aeson..= icon.type_
       ]
 
 instance Hashable.Hashable Icon where
   hashWithSalt s x =
     s
-      `Hashable.hashWithSalt` sizes x
-      `Hashable.hashWithSalt` purpose x
-      `Hashable.hashWithSalt` src x
-      `Hashable.hashWithSalt` type_ x
+      `Hashable.hashWithSalt` x.sizes
+      `Hashable.hashWithSalt` x.purpose
+      `Hashable.hashWithSalt` x.src
+      `Hashable.hashWithSalt` x.type_

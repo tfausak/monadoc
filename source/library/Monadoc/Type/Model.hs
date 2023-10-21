@@ -15,7 +15,7 @@ instance (Sql.FromRow a) => Sql.FromRow (Model a) where
   fromRow = Model <$> Sql.field <*> Sql.fromRow
 
 instance (Sql.ToRow a) => Sql.ToRow (Model a) where
-  toRow model = Sql.toField (key model) : Sql.toRow (value model)
+  toRow model = Sql.toField model.key : Sql.toRow model.value
 
 instance (QuickCheck.Arbitrary a) => QuickCheck.Arbitrary (Model a) where
   arbitrary =

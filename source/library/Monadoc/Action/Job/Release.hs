@@ -22,4 +22,4 @@ run maybeJob exitCase = case maybeJob of
           Exception.ExitCaseAbort -> Status.Failed
     App.Sql.execute
       "update job set finishedAt = ?, status = ? where key = ?"
-      (now, status, Model.key job)
+      (now, status, job.key)

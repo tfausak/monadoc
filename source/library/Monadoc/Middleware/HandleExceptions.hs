@@ -61,7 +61,7 @@ withRequest context request event =
   let oldRequest = Maybe.fromMaybe Patrol.Request.empty $ Patrol.Event.request event
       newRequest =
         oldRequest
-          { Patrol.Request.env = Map.insert "MONADOC_REQUEST_ID" (Aeson.toJSON . Vault.lookup (Context.key context) $ Wai.vault request) $ Patrol.Request.env oldRequest,
+          { Patrol.Request.env = Map.insert "MONADOC_REQUEST_ID" (Aeson.toJSON . Vault.lookup context.key $ Wai.vault request) $ Patrol.Request.env oldRequest,
             Patrol.Request.headers =
               Map.fromList
                 . fmap (Bifunctor.bimap (fromUtf8 . CI.foldedCase) fromUtf8)
@@ -73,7 +73,7 @@ withRequest context request event =
                 . Http.parseQueryText
                 $ Wai.rawQueryString request,
             Patrol.Request.url =
-              (Text.pack . Config.base $ Context.config context)
+              (Text.pack context.config.base)
                 <> (Text.drop 1 . fromUtf8 $ Wai.rawPathInfo request)
           }
    in event {Patrol.Event.request = Just newRequest}

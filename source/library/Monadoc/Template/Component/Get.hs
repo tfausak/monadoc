@@ -58,17 +58,17 @@ type RevDep =
 
 render :: Context.Context -> Input -> Html.Html ()
 render context input = do
-  let packageName = Package.name . Model.value $ package input
-      versionNumber = Version.number . Model.value $ version input
+  let packageName = input.package.value.name
+      versionNumber = input.version.value.number
       reversion =
         Reversion.Reversion
           { Reversion.version = versionNumber,
-            Reversion.revision = Upload.revision . Model.value $ upload input
+            Reversion.revision = input.upload.value.revision
           }
       componentId =
         ComponentId.ComponentId
-          { ComponentId.type_ = Component.type_ . Model.value $ component input,
-            ComponentId.name = Component.name . Model.value $ component input
+          { ComponentId.type_ = input.component.value.type_,
+            ComponentId.name = input.component.value.name
           }
       route = Route.Component packageName reversion componentId
       title =
@@ -77,14 +77,14 @@ render context input = do
           (Witch.from packageName)
           (Witch.from reversion)
           (Witch.from componentId)
-  Common.base context route (breadcrumbs input) title $ do
-    Version.Get.showDeprecationWarning packageName reversion $ upload input
-    Version.Get.showLatestInfo context packageName (maybeLatest input) $ \rev ->
-      if hasComponent input
+  Common.base context route input.breadcrumbs title $ do
+    Version.Get.showDeprecationWarning packageName reversion input.upload
+    Version.Get.showLatestInfo context packageName input.maybeLatest $ \rev ->
+      if input.hasComponent
         then Just $ Route.Component packageName rev componentId
         else Nothing
     Html.h2_ $ Html.toHtml componentId
-    let moduleNames = (\(_ Sql.:. m) -> Module.name $ Model.value m) <$> packageMetaComponentModules input
+    let moduleNames = (\(_ Sql.:. m) -> m.value.name) <$> input.packageMetaComponentModules
     Monad.when (not $ null moduleNames) $ do
       Html.h3_ "Modules"
       Html.ul_ . Monad.forM_ (List.sort moduleNames) $ \moduleName -> do
@@ -92,28 +92,28 @@ render context input = do
           . Html.a_ [Html.href_ . Common.route context $ Route.Module packageName reversion componentId moduleName]
           $ Html.toHtml moduleName
     Html.h3_ "Dependencies"
-    if null $ dependencies input
+    if null input.dependencies
       then Html.p_ "None."
-      else Html.ul_ . Monad.forM_ (List.sortOn packageAndComponent $ dependencies input) $ \(_ Sql.:. p Sql.:. c Sql.:. r) -> Html.li_ $ do
-        let pn = Package.name $ Model.value p
+      else Html.ul_ . Monad.forM_ (List.sortOn packageAndComponent input.dependencies) $ \(_ Sql.:. p Sql.:. c Sql.:. r) -> Html.li_ $ do
+        let pn = p.value.name
         Html.a_
           [Html.href_ . Common.route context $ Route.Package pn]
           $ Html.toHtml pn
         " "
         let ci =
               ComponentId.ComponentId
-                { ComponentId.type_ = Component.type_ $ Model.value c,
-                  ComponentId.name = Component.name $ Model.value c
+                { ComponentId.type_ = c.value.type_,
+                  ComponentId.name = c.value.name
                 }
         Html.toHtml ci
         " "
-        Html.toHtml . Range.constraint $ Model.value r
+        Html.toHtml r.value.constraint
     Html.h3_ "Reverse dependencies"
-    if null $ reverseDependencies input
+    if null input.reverseDependencies
       then Html.p_ "None."
       else do
         Html.p_ "Direct only. Not exhaustive."
-        Html.ul_ . Monad.forM_ (Map.toAscList . toMap . fmap toTriple . filter (isRelevant versionNumber) $ reverseDependencies input) $ \((p, c), r) ->
+        Html.ul_ . Monad.forM_ (Map.toAscList . toMap . fmap toTriple $ filter (isRelevant versionNumber) input.reverseDependencies) $ \((p, c), r) ->
           Html.li_ $ do
             Html.a_ [Html.href_ . Common.route context $ Route.Component p r c] $ Html.toHtml p
             " "
@@ -123,24 +123,24 @@ packageAndComponent ::
   Dependency.Model Sql.:. Package.Model Sql.:. Component.Model Sql.:. Range.Model ->
   (PackageName.PackageName, ComponentName.ComponentName)
 packageAndComponent (_ Sql.:. pkg Sql.:. cmp Sql.:. _) =
-  ( Package.name $ Model.value pkg,
-    Component.name $ Model.value cmp
+  ( pkg.value.name,
+    cmp.value.name
   )
 
 isRelevant :: VersionNumber.VersionNumber -> RevDep -> Bool
 isRelevant versionNumber (_ Sql.:. _ Sql.:. _ Sql.:. _ Sql.:. _ Sql.:. _ Sql.:. r Sql.:. _) =
-  Constraint.includes versionNumber . Range.constraint $ Model.value r
+  Constraint.includes versionNumber r.value.constraint
 
 toTriple :: RevDep -> (PackageName.PackageName, Reversion.Reversion, ComponentId.ComponentId)
 toTriple (_ Sql.:. _ Sql.:. _ Sql.:. u Sql.:. p Sql.:. v Sql.:. _ Sql.:. c) =
-  ( Package.name $ Model.value p,
+  ( p.value.name,
     Reversion.Reversion
-      { Reversion.version = Version.number $ Model.value v,
-        Reversion.revision = Upload.revision $ Model.value u
+      { Reversion.version = v.value.number,
+        Reversion.revision = u.value.revision
       },
     ComponentId.ComponentId
-      { ComponentId.type_ = Component.type_ $ Model.value c,
-        ComponentId.name = Component.name $ Model.value c
+      { ComponentId.type_ = c.value.type_,
+        ComponentId.name = c.value.name
       }
   )
 

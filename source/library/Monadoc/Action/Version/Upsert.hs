@@ -11,7 +11,7 @@ import qualified Monadoc.Type.Model as Model
 
 run :: Version.Version -> App.App Version.Model
 run version = do
-  maybeModel <- Version.Query.getByNumber $ Version.number version
+  maybeModel <- Version.Query.getByNumber version.number
   case maybeModel of
     Just model -> pure model
     Nothing -> do

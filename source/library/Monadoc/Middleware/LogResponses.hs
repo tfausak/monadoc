@@ -17,7 +17,7 @@ middleware context handle request respond = do
   before <- Clock.getMonotonicTime
   handle request $ \response -> do
     after <- Clock.getMonotonicTime
-    let requestId = Maybe.fromMaybe RequestId.zero . Vault.lookup (Context.key context) $ Wai.vault request
+    let requestId = Maybe.fromMaybe RequestId.zero . Vault.lookup context.key $ Wai.vault request
     App.run context . App.Log.info $
       F.sformat
         ("[server]" F.%+ RequestId.format F.%+ F.int F.%+ F.stext F.%+ F.stext F.% F.stext F.%+ F.fixed 3)

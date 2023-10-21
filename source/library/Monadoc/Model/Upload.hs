@@ -43,14 +43,14 @@ instance Sql.FromRow Upload where
 
 instance Sql.ToRow Upload where
   toRow upload =
-    [ Sql.toField $ blob upload,
-      Sql.toField $ package upload,
-      Sql.toField $ revision upload,
-      Sql.toField $ uploadedAt upload,
-      Sql.toField $ uploadedBy upload,
-      Sql.toField $ version upload,
-      Sql.toField $ isPreferred upload,
-      Sql.toField $ isLatest upload
+    [ Sql.toField upload.blob,
+      Sql.toField upload.package,
+      Sql.toField upload.revision,
+      Sql.toField upload.uploadedAt,
+      Sql.toField upload.uploadedBy,
+      Sql.toField upload.version,
+      Sql.toField upload.isPreferred,
+      Sql.toField upload.isLatest
     ]
 
 instance QuickCheck.Arbitrary Upload where

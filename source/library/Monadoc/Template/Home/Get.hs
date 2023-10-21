@@ -26,7 +26,7 @@ data Input = Input
 
 render :: Context.Context -> Input -> Html.Html ()
 render context input =
-  Common.base context Route.Home (breadcrumbs input) "Monadoc" $ do
+  Common.base context Route.Home input.breadcrumbs "Monadoc" $ do
     Html.h2_ "Core Libraries"
     Html.ul_ . Monad.forM_ coreLibraries $ \packageName ->
       Html.li_
@@ -34,30 +34,28 @@ render context input =
         $ Html.toHtml packageName
     Html.h2_ "Recent Uploads"
     Html.ul_ $ do
-      Monad.forM_ (rows input) $ \row -> Html.li_ $ do
+      Monad.forM_ input.rows $ \row -> Html.li_ $ do
         let (upload Sql.:. package Sql.:. version Sql.:. hackageUser Sql.:. _) = row
             reversion =
               Reversion.Reversion
-                { Reversion.revision = Upload.revision $ Model.value upload,
-                  Reversion.version = Version.number $ Model.value version
+                { Reversion.revision = upload.value.revision,
+                  Reversion.version = version.value.number
                 }
-            packageName = Package.name $ Model.value package
+            packageName = package.value.name
         Html.a_ [Html.href_ . Common.route context $ Route.Version packageName reversion] $ do
           Html.toHtml packageName
           "@"
           Html.toHtml reversion
         " uploaded "
-        Common.timestamp . Upload.uploadedAt $ Model.value upload
+        Common.timestamp upload.value.uploadedAt
         " by "
-        Html.a_ [Html.href_ . Common.route context . Route.User . HackageUser.name $ Model.value hackageUser]
-          . Html.toHtml
-          . HackageUser.name
-          $ Model.value hackageUser
+        Html.a_ [Html.href_ . Common.route context $ Route.User hackageUser.value.name] $
+          Html.toHtml hackageUser.value.name
         "."
-        Monad.when (Upload.isLatest $ Model.value upload) $ do
+        Monad.when upload.value.isLatest $ do
           " "
           Html.span_ [Html.class_ "badge bg-info-subtle text-info-emphasis"] "latest"
-        Monad.when (not . Upload.isPreferred $ Model.value upload) $ do
+        Monad.when (not $ upload.value.isPreferred) $ do
           " "
           Html.span_ [Html.class_ "badge bg-warning-subtle text-warning-emphasis"] "deprecated"
 

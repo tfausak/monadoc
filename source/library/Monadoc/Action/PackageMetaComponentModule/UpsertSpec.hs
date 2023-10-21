@@ -16,8 +16,8 @@ spec = Hspec.describe "Monadoc.Action.PackageMetaComponentModule.Upsert" $ do
     module_ <- Factory.newModule
     packageMetaComponentModule <- Test.arbitraryWith $ \x ->
       x
-        { PackageMetaComponentModule.packageMetaComponent = Model.key packageMetaComponent,
-          PackageMetaComponentModule.module_ = Model.key module_
+        { PackageMetaComponentModule.packageMetaComponent = packageMetaComponent.key,
+          PackageMetaComponentModule.module_ = module_.key
         }
     actual <- PackageMetaComponentModule.Upsert.run packageMetaComponentModule
     let expected =
@@ -32,8 +32,8 @@ spec = Hspec.describe "Monadoc.Action.PackageMetaComponentModule.Upsert" $ do
     module_ <- Factory.newModule
     packageMetaComponentModule <- Test.arbitraryWith $ \x ->
       x
-        { PackageMetaComponentModule.packageMetaComponent = Model.key packageMetaComponent,
-          PackageMetaComponentModule.module_ = Model.key module_
+        { PackageMetaComponentModule.packageMetaComponent = packageMetaComponent.key,
+          PackageMetaComponentModule.module_ = module_.key
         }
     old <- PackageMetaComponentModule.Upsert.run packageMetaComponentModule
     new <- PackageMetaComponentModule.Upsert.run packageMetaComponentModule
@@ -44,15 +44,15 @@ spec = Hspec.describe "Monadoc.Action.PackageMetaComponentModule.Upsert" $ do
     module1 <- Factory.newModule
     packageMetaComponentModule1 <- Test.arbitraryWith $ \x ->
       x
-        { PackageMetaComponentModule.packageMetaComponent = Model.key packageMetaComponent,
-          PackageMetaComponentModule.module_ = Model.key module1
+        { PackageMetaComponentModule.packageMetaComponent = packageMetaComponent.key,
+          PackageMetaComponentModule.module_ = module1.key
         }
     model1 <- PackageMetaComponentModule.Upsert.run packageMetaComponentModule1
     module2 <- Factory.newModule
     packageMetaComponentModule2 <- Test.arbitraryWith $ \x ->
       x
-        { PackageMetaComponentModule.packageMetaComponent = Model.key packageMetaComponent,
-          PackageMetaComponentModule.module_ = Model.key module2
+        { PackageMetaComponentModule.packageMetaComponent = packageMetaComponent.key,
+          PackageMetaComponentModule.module_ = module2.key
         }
     model2 <- PackageMetaComponentModule.Upsert.run packageMetaComponentModule2
-    IO.liftIO $ Model.key model1 `Hspec.shouldNotBe` Model.key model2
+    IO.liftIO $ model1.key `Hspec.shouldNotBe` model2.key

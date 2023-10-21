@@ -20,7 +20,7 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Prune" $ do
       x <- Test.arbitraryWith $ \y -> y {CronEntry.guid = Nothing}
       CronEntry.Insert.run x
     CronEntry.Prune.run
-    result <- CronEntry.Query.getByKey $ Model.key cronEntry
+    result <- CronEntry.Query.getByKey cronEntry.key
     IO.liftIO $ result `Hspec.shouldBe` Just cronEntry
 
   Hspec.it "removes a cron entry with a guid" . Test.run $ do
@@ -29,16 +29,16 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Prune" $ do
       x <- Test.arbitraryWith $ \y -> y {CronEntry.guid = Just guid}
       CronEntry.Insert.run x
     CronEntry.Prune.run
-    result <- CronEntry.Query.getByKey $ Model.key cronEntry
+    result <- CronEntry.Query.getByKey cronEntry.key
     IO.liftIO $ result `Hspec.shouldBe` Nothing
 
   Hspec.it "keeps a cron entry with a static guid" . Test.run $
-    case fmap CronEntry.guid CronEntry.all of
+    case fmap (.guid) CronEntry.all of
       Just guid : _ -> do
         cronEntry <- do
           x <- Test.arbitraryWith $ \y -> y {CronEntry.guid = Just guid}
           CronEntry.Insert.run x
         CronEntry.Prune.run
-        result <- CronEntry.Query.getByKey $ Model.key cronEntry
+        result <- CronEntry.Query.getByKey cronEntry.key
         IO.liftIO $ result `Hspec.shouldBe` Just cronEntry
       _ -> IO.liftIO $ False `Hspec.shouldBe` True

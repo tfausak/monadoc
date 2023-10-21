@@ -33,10 +33,10 @@ instance Sql.FromRow Dependency where
 
 instance Sql.ToRow Dependency where
   toRow packageMeta =
-    [ Sql.toField $ packageMetaComponent packageMeta,
-      Sql.toField $ package packageMeta,
-      Sql.toField $ component packageMeta,
-      Sql.toField $ range packageMeta
+    [ Sql.toField packageMeta.packageMetaComponent,
+      Sql.toField packageMeta.package,
+      Sql.toField packageMeta.component,
+      Sql.toField packageMeta.range
     ]
 
 instance QuickCheck.Arbitrary Dependency where

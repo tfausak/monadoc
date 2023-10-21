@@ -102,21 +102,21 @@ instance Sql.FromRow PackageMeta where
 
 instance Sql.ToRow PackageMeta where
   toRow packageMeta =
-    [ Sql.toField $ buildType packageMeta,
-      Sql.toField $ cabalVersion packageMeta,
-      Sql.toField $ hash packageMeta,
-      Sql.toField $ license packageMeta,
-      Sql.toField $ upload packageMeta,
-      Sql.toField $ author packageMeta,
-      Sql.toField $ bugReports packageMeta,
-      Sql.toField $ category packageMeta,
-      Sql.toField $ copyright packageMeta,
-      Sql.toField $ description packageMeta,
-      Sql.toField $ homepage packageMeta,
-      Sql.toField $ maintainer packageMeta,
-      Sql.toField $ pkgUrl packageMeta,
-      Sql.toField $ stability packageMeta,
-      Sql.toField $ synopsis packageMeta
+    [ Sql.toField packageMeta.buildType,
+      Sql.toField packageMeta.cabalVersion,
+      Sql.toField packageMeta.hash,
+      Sql.toField packageMeta.license,
+      Sql.toField packageMeta.upload,
+      Sql.toField packageMeta.author,
+      Sql.toField packageMeta.bugReports,
+      Sql.toField packageMeta.category,
+      Sql.toField packageMeta.copyright,
+      Sql.toField packageMeta.description,
+      Sql.toField packageMeta.homepage,
+      Sql.toField packageMeta.maintainer,
+      Sql.toField packageMeta.pkgUrl,
+      Sql.toField packageMeta.stability,
+      Sql.toField packageMeta.synopsis
     ]
 
 instance QuickCheck.Arbitrary PackageMeta where

@@ -13,7 +13,7 @@ run license = do
   r1 <-
     App.Sql.query
       "select key from license where spdx = ? limit 1"
-      [License.spdx license]
+      [license.spdx]
   key <- case r1 of
     Sql.Only key : _ -> pure key
     [] -> do

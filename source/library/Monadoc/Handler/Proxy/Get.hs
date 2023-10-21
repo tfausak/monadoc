@@ -43,7 +43,7 @@ handler context actual url request respond = do
   Control.control $ \runInBase ->
     Client.withResponse
       (forwardHeaders request . Client.ensureUserAgent $ Client.setRequestCheckStatus proxy)
-      (Context.manager context)
+      context.manager
       $ \response -> runInBase $ do
         logResponse response
         let headers = filter (flip Set.member headersToKeep . fst) $ Client.responseHeaders response
@@ -84,7 +84,7 @@ makeHash :: Context.Context -> Url.Url -> Hash.Hash
 makeHash context =
   Hash.new
     . Witch.via @(Witch.UTF_8 ByteString.ByteString)
-    . mappend (Config.salt $ Context.config context)
+    . mappend context.config.salt
     . Witch.from
 
 logResponse :: Client.Response a -> App.App ()

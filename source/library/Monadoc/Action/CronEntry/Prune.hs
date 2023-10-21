@@ -15,10 +15,10 @@ import qualified Witch
 
 run :: App.App ()
 run = do
-  let toKeep = Set.fromList $ Maybe.mapMaybe CronEntry.guid CronEntry.all
-  cronEntries <- App.Sql.query_ "select * from cronEntry where guid is not null"
+  let toKeep = Set.fromList $ Maybe.mapMaybe (.guid) CronEntry.all
+  cronEntries <- App.Sql.query_ @CronEntry.Model "select * from cronEntry where guid is not null"
   Monad.forM_ cronEntries $ \cronEntry ->
-    case CronEntry.guid $ Model.value cronEntry of
+    case cronEntry.value.guid of
       Nothing -> pure ()
       Just guid -> Monad.when (Set.notMember guid toKeep) $ do
         CronEntry.Delete.run guid

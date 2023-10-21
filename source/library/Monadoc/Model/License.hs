@@ -24,7 +24,7 @@ instance Sql.FromRow License where
 
 instance Sql.ToRow License where
   toRow license =
-    [ Sql.toField $ spdx license
+    [ Sql.toField license.spdx
     ]
 
 instance QuickCheck.Arbitrary License where

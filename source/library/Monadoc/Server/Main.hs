@@ -25,19 +25,19 @@ server = do
 
 getSettings :: Context.Context -> Warp.Settings
 getSettings context =
-  let config = Context.config context
+  let config = context.config
    in Warp.setBeforeMainLoop (beforeMainLoop context)
-        . Warp.setHost (Config.host config)
+        . Warp.setHost config.host
         . Warp.setOnException (HandleExceptions.onException context)
         . Warp.setOnExceptionResponse (HandleExceptions.onExceptionResponse context)
-        . Warp.setPort (Witch.into @Int $ Config.port config)
+        . Warp.setPort (Witch.into @Int config.port)
         $ Warp.setServerName ByteString.empty Warp.defaultSettings
 
 beforeMainLoop :: Context.Context -> IO ()
 beforeMainLoop context = do
-  let config = Context.config context
+  let config = context.config
   App.run context . App.Log.info $
     F.sformat
       ("listening on" F.%+ F.shown F.%+ "port" F.%+ F.int)
-      (Config.host config)
-      (Witch.into @Int $ Config.port config)
+      config.host
+      (Witch.into @Int config.port)

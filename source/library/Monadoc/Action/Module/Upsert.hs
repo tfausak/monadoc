@@ -13,7 +13,7 @@ run module_ = do
   r1 <-
     App.Sql.query
       "select key from module where name = ? limit 1"
-      [Module.name module_]
+      [module_.name]
   key <- case r1 of
     Sql.Only key : _ -> pure key
     [] -> do

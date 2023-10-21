@@ -28,7 +28,7 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Enqueue" $ do
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.runAt = now, CronEntry.schedule = schedule}
     model <- CronEntry.Insert.run cronEntry
     CronEntry.Enqueue.run
-    actual <- CronEntry.Query.getByKey $ Model.key model
+    actual <- CronEntry.Query.getByKey model.key
     let expected =
           Just
             model

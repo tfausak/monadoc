@@ -73,16 +73,14 @@ base ctx rt breadcrumbs title html = do
         . Html.div_ [Html.class_ "container py-2"]
         . Html.ol_ [Html.class_ "breadcrumb mb-0"]
         . Monad.forM_ breadcrumbs
-        $ \breadcrumb -> case Breadcrumb.route breadcrumb of
+        $ \breadcrumb -> case breadcrumb.route of
           Just bcrt ->
             Html.li_ [Html.class_ "breadcrumb-item"]
               . Html.a_ [Html.href_ $ route ctx bcrt]
-              . Html.toHtml
-              $ Breadcrumb.label breadcrumb
+              $ Html.toHtml breadcrumb.label
           Nothing ->
-            Html.li_ [Html.class_ "breadcrumb-item active"]
-              . Html.toHtml
-              $ Breadcrumb.label breadcrumb
+            Html.li_ [Html.class_ "breadcrumb-item active"] $
+              Html.toHtml breadcrumb.label
       Html.main_ [Html.class_ "my-3"] $
         Html.div_ [Html.class_ "container"] html
       Html.footer_ [Html.class_ "mb-5 mt-3 text-secondary"]
@@ -93,7 +91,7 @@ base ctx rt breadcrumbs title html = do
           Html.a_ [Html.class_ "link-secondary", Html.href_ github] "Monadoc"
           " version "
           Html.toHtml $ Witch.into @VersionNumber.VersionNumber Monadoc.version
-          let sha = Config.sha $ Context.config ctx
+          let sha = ctx.config.sha
           if Text.null sha
             then ""
             else do
@@ -115,7 +113,7 @@ route :: Context.Context -> Route.Route -> Text.Text
 route c r =
   let (p, q) = Route.render r
    in mconcat
-        [ Text.pack . Config.base $ Context.config c,
+        [ Text.pack c.config.base,
           Text.intercalate "/" p,
           if null q
             then Text.empty

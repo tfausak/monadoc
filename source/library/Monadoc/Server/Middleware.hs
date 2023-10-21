@@ -15,13 +15,13 @@ import qualified Network.Wai as Wai
 
 middleware :: (Stack.HasCallStack) => Context.Context -> Wai.Middleware
 middleware context =
-  AddRequestId.middleware (Context.key context)
+  AddRequestId.middleware context.key
     . LogResponses.middleware context
     . CacheResponses.middleware
-    . CompressResponses.middleware (Context.temporaryDirectory context)
-    . AddHeaders.middleware (Context.key context)
+    . CompressResponses.middleware context.temporaryDirectory
+    . AddHeaders.middleware context.key
     . HandleExceptions.middleware context
     . TimeoutHandlers.middleware
     . ServeStaticFiles.middleware
-      (Context.cacheContainer context)
-      (Config.data_ $ Context.config context)
+      context.cacheContainer
+      context.config.data_

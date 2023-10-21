@@ -29,9 +29,9 @@ instance Sql.FromRow Blob where
 
 instance Sql.ToRow Blob where
   toRow blob =
-    [ Sql.toField $ size blob,
-      Sql.toField $ hash blob,
-      Sql.toField $ contents blob
+    [ Sql.toField blob.size,
+      Sql.toField blob.hash,
+      Sql.toField blob.contents
     ]
 
 instance QuickCheck.Arbitrary Blob where
@@ -49,9 +49,9 @@ migrations =
   ]
 
 new :: ByteString.ByteString -> Blob
-new byteString =
+new contents =
   Blob
-    { contents = byteString,
-      hash = Hash.new byteString,
-      size = ByteString.length byteString
+    { contents = contents,
+      hash = Hash.new contents,
+      size = ByteString.length contents
     }

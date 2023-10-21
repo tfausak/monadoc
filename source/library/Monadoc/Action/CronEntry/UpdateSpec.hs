@@ -19,14 +19,14 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Update" $ do
       x <- Test.arbitrary
       CronEntry.Insert.run x
     CronEntry.Update.run cronEntry
-    result <- CronEntry.Query.getByKey $ Model.key cronEntry
+    result <- CronEntry.Query.getByKey cronEntry.key
     IO.liftIO $ result `Hspec.shouldBe` Just cronEntry
 
   Hspec.it "updates a cron entry" . Test.run $ do
     cronEntry1 <- do
       x <- Test.arbitrary
       CronEntry.Insert.run x
-    cronEntry2 <- Test.arbitraryWith $ \x -> x {Model.key = Model.key cronEntry1}
+    cronEntry2 <- Test.arbitraryWith $ \x -> x {Model.key = cronEntry1.key}
     CronEntry.Update.run cronEntry2
-    result <- CronEntry.Query.getByKey $ Model.key cronEntry2
+    result <- CronEntry.Query.getByKey cronEntry2.key
     IO.liftIO $ result `Hspec.shouldBe` Just cronEntry2
