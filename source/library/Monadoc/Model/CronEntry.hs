@@ -33,10 +33,10 @@ instance Sql.FromRow CronEntry where
 
 instance Sql.ToRow CronEntry where
   toRow cronEntry =
-    [ Sql.toField $ guid cronEntry,
-      Sql.toField $ runAt cronEntry,
-      Sql.toField $ schedule cronEntry,
-      Sql.toField $ task cronEntry
+    [ Sql.toField cronEntry.guid,
+      Sql.toField cronEntry.runAt,
+      Sql.toField cronEntry.schedule,
+      Sql.toField cronEntry.task
     ]
 
 instance QuickCheck.Arbitrary CronEntry where

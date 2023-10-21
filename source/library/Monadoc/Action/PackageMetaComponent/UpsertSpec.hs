@@ -16,8 +16,8 @@ spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Upsert" $ do
     component <- Factory.newComponent
     packageMetaComponent <- Test.arbitraryWith $ \x ->
       x
-        { PackageMetaComponent.packageMeta = Model.key packageMeta,
-          PackageMetaComponent.component = Model.key component
+        { PackageMetaComponent.packageMeta = packageMeta.key,
+          PackageMetaComponent.component = component.key
         }
     model <- PackageMetaComponent.Upsert.run packageMetaComponent
     IO.liftIO $
@@ -32,8 +32,8 @@ spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Upsert" $ do
     component <- Factory.newComponent
     packageMetaComponent <- Test.arbitraryWith $ \x ->
       x
-        { PackageMetaComponent.packageMeta = Model.key packageMeta,
-          PackageMetaComponent.component = Model.key component
+        { PackageMetaComponent.packageMeta = packageMeta.key,
+          PackageMetaComponent.component = component.key
         }
     old <- PackageMetaComponent.Upsert.run packageMetaComponent
     new <- PackageMetaComponent.Upsert.run packageMetaComponent
@@ -44,15 +44,15 @@ spec = Hspec.describe "Monadoc.Action.PackageMetaComponent.Upsert" $ do
     component1 <- Factory.newComponent
     packageMetaComponent1 <- Test.arbitraryWith $ \x ->
       x
-        { PackageMetaComponent.packageMeta = Model.key packageMeta,
-          PackageMetaComponent.component = Model.key component1
+        { PackageMetaComponent.packageMeta = packageMeta.key,
+          PackageMetaComponent.component = component1.key
         }
     model1 <- PackageMetaComponent.Upsert.run packageMetaComponent1
     component2 <- Factory.newComponent
     packageMetaComponent2 <- Test.arbitraryWith $ \x ->
       x
-        { PackageMetaComponent.packageMeta = Model.key packageMeta,
-          PackageMetaComponent.component = Model.key component2
+        { PackageMetaComponent.packageMeta = packageMeta.key,
+          PackageMetaComponent.component = component2.key
         }
     model2 <- PackageMetaComponent.Upsert.run packageMetaComponent2
-    IO.liftIO $ Model.key model1 `Hspec.shouldNotBe` Model.key model2
+    IO.liftIO $ model1.key `Hspec.shouldNotBe` model2.key

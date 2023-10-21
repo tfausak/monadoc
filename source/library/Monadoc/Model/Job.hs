@@ -34,11 +34,11 @@ instance Sql.FromRow Job where
 
 instance Sql.ToRow Job where
   toRow job =
-    [ Sql.toField $ createdAt job,
-      Sql.toField $ finishedAt job,
-      Sql.toField $ startedAt job,
-      Sql.toField $ status job,
-      Sql.toField $ task job
+    [ Sql.toField job.createdAt,
+      Sql.toField job.finishedAt,
+      Sql.toField job.startedAt,
+      Sql.toField job.status,
+      Sql.toField job.task
     ]
 
 instance QuickCheck.Arbitrary Job where

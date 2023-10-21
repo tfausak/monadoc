@@ -39,9 +39,9 @@ run = do
   App.Log.debug "inserting hackage index"
   uncompressedSize <- getSize
   context <- Reader.ask
-  request <- Client.parseUrlThrow $ Config.hackage (Context.config context) <> "01-index.tar.gz"
+  request <- Client.parseUrlThrow $ context.config.hackage <> "01-index.tar.gz"
   Control.control $ \runInBase ->
-    Client.withResponse (Client.ensureUserAgent request) (Context.manager context) $ \response -> runInBase $ do
+    Client.withResponse (Client.ensureUserAgent request) context.manager $ \response -> runInBase $ do
       Proxy.Get.logResponse response
       compressedSize <- getContentLength response
       key <- insertBlob compressedSize
@@ -89,12 +89,13 @@ getSize = do
   context <- Reader.ask
   request <-
     Client.parseUrlThrow $
-      Config.hackage (Context.config context) <> "01-index.tar"
+      context.config.hackage <> "01-index.tar"
   response <-
     Traced.wrap
       . IO.liftIO
-      . Client.httpNoBody (Client.ensureUserAgent request) {Client.method = Http.methodHead}
-      $ Context.manager context
+      $ Client.httpNoBody
+        (Client.ensureUserAgent request) {Client.method = Http.methodHead}
+        context.manager
   Proxy.Get.logResponse response
   getContentLength response
 

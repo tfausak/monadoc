@@ -22,7 +22,7 @@ import qualified Monadoc.Model.Version as Version
 
 all :: [Migration.Migration]
 all =
-  List.sortOn Migration.createdAt $
+  List.sortOn (.createdAt) $
     mconcat
       [ Blob.migrations,
         Component.migrations,

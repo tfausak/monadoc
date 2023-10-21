@@ -29,8 +29,8 @@ instance Sql.FromRow Component where
 
 instance Sql.ToRow Component where
   toRow packageMeta =
-    [ Sql.toField $ type_ packageMeta,
-      Sql.toField $ name packageMeta
+    [ Sql.toField packageMeta.type_,
+      Sql.toField packageMeta.name
     ]
 
 instance QuickCheck.Arbitrary Component where

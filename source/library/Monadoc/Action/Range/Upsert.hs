@@ -13,7 +13,7 @@ run range = do
   r1 <-
     App.Sql.query
       "select key from range where \"constraint\" = ? limit 1"
-      [Range.constraint range]
+      [range.constraint]
   key <- case r1 of
     Sql.Only key : _ -> pure key
     [] -> do

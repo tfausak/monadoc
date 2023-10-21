@@ -18,10 +18,10 @@ spec = Hspec.describe "Monadoc.Action.Dependency.Upsert" $ do
     range <- Factory.newRange
     dependency <- Test.arbitraryWith $ \x ->
       x
-        { Dependency.packageMetaComponent = Model.key packageMetaComponent,
-          Dependency.package = Model.key package,
-          Dependency.component = Model.key component,
-          Dependency.range = Model.key range
+        { Dependency.packageMetaComponent = packageMetaComponent.key,
+          Dependency.package = package.key,
+          Dependency.component = component.key,
+          Dependency.range = range.key
         }
     actual <- Dependency.Upsert.run dependency
     let expected = Model.Model {Model.key = Witch.from @Int 1, Model.value = dependency}
@@ -34,10 +34,10 @@ spec = Hspec.describe "Monadoc.Action.Dependency.Upsert" $ do
     range <- Factory.newRange
     dependency <- Test.arbitraryWith $ \x ->
       x
-        { Dependency.packageMetaComponent = Model.key packageMetaComponent,
-          Dependency.package = Model.key package,
-          Dependency.component = Model.key component,
-          Dependency.range = Model.key range
+        { Dependency.packageMetaComponent = packageMetaComponent.key,
+          Dependency.package = package.key,
+          Dependency.component = component.key,
+          Dependency.range = range.key
         }
     old <- Dependency.Upsert.run dependency
     new <- Dependency.Upsert.run dependency
@@ -50,19 +50,19 @@ spec = Hspec.describe "Monadoc.Action.Dependency.Upsert" $ do
     component1 <- Factory.newComponent
     dependency1 <- Test.arbitraryWith $ \x ->
       x
-        { Dependency.packageMetaComponent = Model.key packageMetaComponent,
-          Dependency.package = Model.key package,
-          Dependency.component = Model.key component1,
-          Dependency.range = Model.key range
+        { Dependency.packageMetaComponent = packageMetaComponent.key,
+          Dependency.package = package.key,
+          Dependency.component = component1.key,
+          Dependency.range = range.key
         }
     model1 <- Dependency.Upsert.run dependency1
     component2 <- Factory.newComponent
     dependency2 <- Test.arbitraryWith $ \x ->
       x
-        { Dependency.packageMetaComponent = Model.key packageMetaComponent,
-          Dependency.package = Model.key package,
-          Dependency.component = Model.key component2,
-          Dependency.range = Model.key range
+        { Dependency.packageMetaComponent = packageMetaComponent.key,
+          Dependency.package = package.key,
+          Dependency.component = component2.key,
+          Dependency.range = range.key
         }
     model2 <- Dependency.Upsert.run dependency2
-    IO.liftIO $ Model.key model2 `Hspec.shouldNotBe` Model.key model1
+    IO.liftIO $ model2.key `Hspec.shouldNotBe` model1.key

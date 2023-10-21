@@ -13,7 +13,7 @@ run component = do
   r1 <-
     App.Sql.query
       "select key from component where type = ? and name = ? limit 1"
-      (Component.type_ component, Component.name component)
+      (component.type_, component.name)
   key <- case r1 of
     Sql.Only key : _ -> pure key
     [] -> do

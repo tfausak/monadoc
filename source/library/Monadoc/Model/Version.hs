@@ -24,7 +24,7 @@ instance Sql.FromRow Version where
 
 instance Sql.ToRow Version where
   toRow version =
-    [ Sql.toField $ number version
+    [ Sql.toField version.number
     ]
 
 instance QuickCheck.Arbitrary Version where

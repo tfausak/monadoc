@@ -13,26 +13,26 @@ import qualified Monadoc.Type.Model as Model
 
 run :: CronEntry.CronEntry -> App.App CronEntry.Model
 run cronEntry =
-  case CronEntry.guid cronEntry of
+  case cronEntry.guid of
     Nothing -> do
       model <- CronEntry.Insert.run cronEntry
-      App.Log.info $ F.sformat ("inserting dynamic" F.%+ Key.format) (Model.key model)
+      App.Log.info $ F.sformat ("inserting dynamic" F.%+ Key.format) model.key
       pure model
     Just guid -> do
       maybeCronEntry <- CronEntry.Query.getByGuid guid
       case maybeCronEntry of
         Nothing -> do
           model <- CronEntry.Insert.run cronEntry
-          App.Log.info $ F.sformat ("inserted static" F.%+ Key.format) (Model.key model)
+          App.Log.info $ F.sformat ("inserted static" F.%+ Key.format) model.key
           pure model
         Just model -> do
-          let existing = Model.value model
-              differentSchedule = Function.on (/=) CronEntry.schedule existing cronEntry
-              differentTask = Function.on (/=) CronEntry.task existing cronEntry
+          let existing = model.value
+              differentSchedule = Function.on (/=) (.schedule) existing cronEntry
+              differentTask = Function.on (/=) (.task) existing cronEntry
           if differentSchedule || differentTask
             then do
               let newModel = model {Model.value = cronEntry}
               CronEntry.Update.run newModel
-              App.Log.info $ F.sformat ("updated static" F.%+ Key.format) (Model.key newModel)
+              App.Log.info $ F.sformat ("updated static" F.%+ Key.format) newModel.key
               pure newModel
             else pure model

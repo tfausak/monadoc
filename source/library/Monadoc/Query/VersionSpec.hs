@@ -13,7 +13,7 @@ spec = Hspec.describe "Monadoc.Query.Version" $ do
   Hspec.describe "getByNumber" $ do
     Hspec.it "works" . Test.run $ do
       version <- Factory.newVersion
-      result <- Version.Query.getByNumber . Version.number $ Model.value version
+      result <- Version.Query.getByNumber version.value.number
       IO.liftIO $ result `Hspec.shouldBe` Just version
 
     Hspec.it "returns nothing when the number doesn't exist" . Test.run $ do

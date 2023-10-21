@@ -20,9 +20,9 @@ data Reversion = Reversion
 
 instance Witch.From Reversion String where
   from reversion =
-    Witch.into @String (version reversion)
+    Witch.into @String reversion.version
       <> "-"
-      <> Witch.into @String (revision reversion)
+      <> Witch.into @String reversion.revision
 
 instance Witch.From Reversion Text.Text where
   from = Witch.via @String

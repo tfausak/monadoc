@@ -27,7 +27,7 @@ spec = Hspec.describe "Monadoc.Query.CronEntry" $ do
   Hspec.describe "getByKey" $ do
     Hspec.it "works" . Test.run $ do
       cronEntry <- Factory.newCronEntry
-      result <- CronEntry.Query.getByKey $ Model.key cronEntry
+      result <- CronEntry.Query.getByKey cronEntry.key
       IO.liftIO $ result `Hspec.shouldBe` Just cronEntry
 
     Hspec.it "returns nothing when the key doesn't exist" . Test.run $ do

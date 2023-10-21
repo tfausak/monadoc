@@ -57,4 +57,4 @@ stop :: App.App ()
 stop = do
   App.Log.info "shutting down"
   context <- Reader.ask
-  IO.liftIO . Pool.destroyAllResources $ Context.pool context
+  IO.liftIO $ Pool.destroyAllResources context.pool

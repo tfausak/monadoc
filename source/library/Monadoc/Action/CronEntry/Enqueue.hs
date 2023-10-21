@@ -25,8 +25,8 @@ run = do
       App.Log.debug $
         F.sformat
           ("[worker] enqueued" F.%+ Key.format F.%+ "as" F.%+ Key.format)
-          (Model.key cronEntry)
-          (Model.key job)
+          cronEntry.key
+          job.key
       run
 
 maybeRunOne :: App.App (Maybe (Job.Model, CronEntry.Model))
@@ -44,19 +44,19 @@ runOne cronEntry = do
   pure (job, newCronEntry)
 
 enqueueJob :: CronEntry.Model -> App.App Job.Model
-enqueueJob = Job.Enqueue.run . CronEntry.task . Model.value
+enqueueJob = Job.Enqueue.run . (.value.task)
 
 updateRunAt :: CronEntry.Model -> App.App CronEntry.Model
 updateRunAt cronEntry = do
   now <- Timestamp.getCurrentTime
   runAt <- nextRunAt now cronEntry
-  let newCronEntry = cronEntry {Model.value = (Model.value cronEntry) {CronEntry.runAt = runAt}}
+  let newCronEntry = cronEntry {Model.value = cronEntry.value {CronEntry.runAt = runAt}}
   CronEntry.Update.run newCronEntry
   pure newCronEntry
 
 nextRunAt :: Timestamp.Timestamp -> CronEntry.Model -> App.App Timestamp.Timestamp
 nextRunAt now cronEntry = do
-  let schedule = CronEntry.schedule $ Model.value cronEntry
+  let schedule = cronEntry.value.schedule
   case Saturn.nextMatch (Witch.from now) (Witch.from schedule) of
     Nothing -> Traced.throw $ NoNextMatch.NoNextMatch now schedule
     Just nextMatch -> pure $ Witch.into @Timestamp.Timestamp nextMatch

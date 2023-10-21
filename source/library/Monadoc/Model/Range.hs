@@ -24,7 +24,7 @@ instance Sql.FromRow Range where
 
 instance Sql.ToRow Range where
   toRow version =
-    [ Sql.toField $ constraint version
+    [ Sql.toField version.constraint
     ]
 
 instance QuickCheck.Arbitrary Range where

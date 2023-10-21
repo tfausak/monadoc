@@ -29,10 +29,10 @@ spec = Hspec.describe "Monadoc.Action.Upload.Upsert" $ do
       Version.Upsert.run x
     upload <- Test.arbitraryWith $ \x ->
       x
-        { Upload.blob = Model.key blob,
-          Upload.package = Model.key package,
-          Upload.uploadedBy = Model.key hackageUser,
-          Upload.version = Model.key version
+        { Upload.blob = blob.key,
+          Upload.package = package.key,
+          Upload.uploadedBy = hackageUser.key,
+          Upload.version = version.key
         }
     model <- Upload.Upsert.run upload
     IO.liftIO $
@@ -57,10 +57,10 @@ spec = Hspec.describe "Monadoc.Action.Upload.Upsert" $ do
       Version.Upsert.run x
     upload <- Test.arbitraryWith $ \x ->
       x
-        { Upload.blob = Model.key blob,
-          Upload.package = Model.key package,
-          Upload.uploadedBy = Model.key hackageUser,
-          Upload.version = Model.key version
+        { Upload.blob = blob.key,
+          Upload.package = package.key,
+          Upload.uploadedBy = hackageUser.key,
+          Upload.version = version.key
         }
     old <- Upload.Upsert.run upload
     new <- Upload.Upsert.run upload
@@ -81,11 +81,11 @@ spec = Hspec.describe "Monadoc.Action.Upload.Upsert" $ do
       Version.Upsert.run x
     upload <- Test.arbitraryWith $ \x ->
       x
-        { Upload.blob = Model.key blob,
-          Upload.package = Model.key package,
-          Upload.uploadedBy = Model.key hackageUser,
-          Upload.version = Model.key version
+        { Upload.blob = blob.key,
+          Upload.package = package.key,
+          Upload.uploadedBy = hackageUser.key,
+          Upload.version = version.key
         }
     model1 <- Upload.Upsert.run upload {Upload.revision = Witch.from @Word 1}
     model2 <- Upload.Upsert.run upload {Upload.revision = Witch.from @Word 2}
-    IO.liftIO $ Model.key model1 `Hspec.shouldNotBe` Model.key model2
+    IO.liftIO $ model1.key `Hspec.shouldNotBe` model2.key

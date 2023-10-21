@@ -34,18 +34,18 @@ data Input = Input
 
 render :: Context.Context -> Input -> Html.Html ()
 render context input = do
-  let packageName = Package.name . Model.value $ package input
+  let packageName = input.package.value.name
       reversion =
         Reversion.Reversion
-          { Reversion.version = Version.number . Model.value $ version input,
-            Reversion.revision = Upload.revision . Model.value $ upload input
+          { Reversion.version = input.version.value.number,
+            Reversion.revision = input.upload.value.revision
           }
       componentId =
         ComponentId.ComponentId
-          { ComponentId.type_ = Component.type_ . Model.value $ component input,
-            ComponentId.name = Component.name . Model.value $ component input
+          { ComponentId.type_ = input.component.value.type_,
+            ComponentId.name = input.component.value.name
           }
-      moduleName = Module.name . Model.value $ module_ input
+      moduleName = input.module_.value.name
       title =
         F.sformat
           ("Package" F.%+ F.stext F.%+ "version" F.%+ F.stext F.%+ "component" F.%+ F.stext F.%+ "module" F.%+ F.stext F.%+ ":: Monadoc")
@@ -54,13 +54,13 @@ render context input = do
           (Witch.from componentId)
           (Witch.from moduleName)
       route = Route.Module packageName reversion componentId moduleName
-  Common.base context route (breadcrumbs input) title $ do
-    Version.Get.showDeprecationWarning packageName reversion $ upload input
-    Version.Get.showLatestInfo context packageName (maybeLatest input) $ \rev ->
-      if hasModule input
+  Common.base context route input.breadcrumbs title $ do
+    Version.Get.showDeprecationWarning packageName reversion input.upload
+    Version.Get.showLatestInfo context packageName input.maybeLatest $ \rev ->
+      if input.hasModule
         then Just $ Route.Module packageName rev componentId moduleName
         else
-          if hasComponent input
+          if input.hasComponent
             then Just $ Route.Component packageName rev componentId
             else Nothing
     -- TODO: Include identifiers exported by the module. This will require
@@ -78,7 +78,7 @@ render context input = do
             F.sformat
               ("https://hackage.haskell.org/package/" F.% F.stext F.% "-" F.% F.stext F.% "/docs/" F.% F.string F.% ".html")
               (Witch.from packageName)
-              (Witch.from . Version.number . Model.value $ version input)
+              (Witch.from input.version.value.number)
               (List.intercalate "-" . Cabal.components $ Witch.from moduleName)
       Html.a_ [Html.href_ url] "on Hackage"
       " instead?"

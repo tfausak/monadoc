@@ -46,9 +46,9 @@ data Input = Input
 
 render :: Context.Context -> Input -> Html.Html ()
 render context input = do
-  let packageName = Package.name . Model.value $ package input
-      versionNumber = Version.number . Model.value $ version input
-      revision = Upload.revision . Model.value $ upload input
+  let packageName = input.package.value.name
+      versionNumber = input.version.value.number
+      revision = input.upload.value.revision
       reversion =
         Reversion.Reversion
           { Reversion.revision = revision,
@@ -60,9 +60,9 @@ render context input = do
           ("Package" F.%+ F.stext F.%+ "version" F.%+ F.stext F.%+ ":: Monadoc")
           (Witch.from packageName)
           (Witch.from reversion)
-  Common.base context route (breadcrumbs input) title $ do
-    showDeprecationWarning packageName reversion $ upload input
-    showLatestInfo context packageName (maybeLatest input) $ const Nothing
+  Common.base context route input.breadcrumbs title $ do
+    showDeprecationWarning packageName reversion input.upload
+    showLatestInfo context packageName input.maybeLatest $ const Nothing
     Html.h2_ $ Html.toHtml packageName
     Html.p_ $ do
       "Version "
@@ -70,18 +70,15 @@ render context input = do
       " revision "
       Html.toHtml revision
       " uploaded "
-      Common.timestamp . Upload.uploadedAt . Model.value $ upload input
+      Common.timestamp input.upload.value.uploadedAt
       " by "
-      Html.a_ [Html.href_ . Common.route context . Route.User . HackageUser.name . Model.value $ hackageUser input]
-        . Html.toHtml
-        . HackageUser.name
-        . Model.value
-        $ hackageUser input
+      Html.a_ [Html.href_ . Common.route context $ Route.User input.hackageUser.value.name] $
+        Html.toHtml input.hackageUser.value.name
       "."
     Html.h3_ "Package meta"
     Html.dl_ $ do
       Html.dt_ "Synopsis"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.synopsis . Model.value $ packageMeta input
+      Html.dd_ . maybe "n/a" Html.toHtml $ input.packageMeta.value.synopsis
       Html.dt_ "Description"
       Html.dd_
         . Html.toHtml
@@ -89,32 +86,29 @@ render context input = do
         . Haddock.overIdentifier (curry Just)
         . Haddock._doc
         . Haddock.parseParas Nothing
-        . maybe "" (Witch.into @String)
-        . PackageMeta.description
-        . Model.value
-        $ packageMeta input
+        $ maybe "" (Witch.into @String) input.packageMeta.value.description
       Html.dt_ "Author"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.author . Model.value $ packageMeta input
+      Html.dd_ $ maybe "n/a" Html.toHtml input.packageMeta.value.author
       Html.dt_ "Bug reports"
-      Html.dd_ . maybe "n/a" autoLinkUrl . PackageMeta.bugReports . Model.value $ packageMeta input
+      Html.dd_ $ maybe "n/a" autoLinkUrl input.packageMeta.value.bugReports
       Html.dt_ "Category"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.category . Model.value $ packageMeta input
+      Html.dd_ $ maybe "n/a" Html.toHtml input.packageMeta.value.category
       Html.dt_ "Copyright"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.copyright . Model.value $ packageMeta input
+      Html.dd_ $ maybe "n/a" Html.toHtml input.packageMeta.value.copyright
       Html.dt_ "Homepage"
-      Html.dd_ . maybe "n/a" autoLinkUrl . PackageMeta.homepage . Model.value $ packageMeta input
+      Html.dd_ $ maybe "n/a" autoLinkUrl input.packageMeta.value.homepage
       Html.dt_ "Maintainer"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.maintainer . Model.value $ packageMeta input
+      Html.dd_ $ maybe "n/a" Html.toHtml input.packageMeta.value.maintainer
       Html.dt_ "Package URL"
-      Html.dd_ . maybe "n/a" autoLinkUrl . PackageMeta.pkgUrl . Model.value $ packageMeta input
+      Html.dd_ $ maybe "n/a" autoLinkUrl input.packageMeta.value.pkgUrl
       Html.dt_ "Stability"
-      Html.dd_ . maybe "n/a" Html.toHtml . PackageMeta.stability . Model.value $ packageMeta input
+      Html.dd_ $ maybe "n/a" Html.toHtml input.packageMeta.value.stability
     Html.h3_ "Components"
-    Html.ul_ . Monad.forM_ (sortComponents packageName . fmap (\(_ Sql.:. c) -> c) $ components input) $ \component -> Html.li_ $ do
+    Html.ul_ . Monad.forM_ (sortComponents packageName $ fmap (\(_ Sql.:. c) -> c) input.components) $ \component -> Html.li_ $ do
       let componentId =
             ComponentId.ComponentId
-              { ComponentId.type_ = Component.type_ $ Model.value component,
-                ComponentId.name = Component.name $ Model.value component
+              { ComponentId.type_ = component.value.type_,
+                ComponentId.name = component.value.name
               }
       Html.a_ [Html.href_ . Common.route context $ Route.Component packageName reversion componentId] $
         Html.toHtml componentId
@@ -133,7 +127,7 @@ autoLinkUrl text =
 
 showDeprecationWarning :: PackageName.PackageName -> Reversion.Reversion -> Upload.Model -> Html.Html ()
 showDeprecationWarning pkg rev upl = do
-  Monad.when (not . Upload.isPreferred $ Model.value upl)
+  Monad.when (not upl.value.isPreferred)
     . Html.div_ [Html.class_ "alert alert-warning"]
     $ do
       "Version "
@@ -157,8 +151,8 @@ showLatestInfo context packageName m makeRoute =
       " is "
       let reversion =
             Reversion.Reversion
-              { Reversion.version = Version.number $ Model.value ver,
-                Reversion.revision = Upload.revision $ Model.value upl
+              { Reversion.version = ver.value.number,
+                Reversion.revision = upl.value.revision
               }
           route = Maybe.fromMaybe (Route.Version packageName reversion) $ makeRoute reversion
       Html.a_
@@ -170,10 +164,10 @@ showLatestInfo context packageName m makeRoute =
 
 sortComponents :: PackageName.PackageName -> [Component.Model] -> [Component.Model]
 sortComponents packageName = List.sortOn $ \component ->
-  let it = Model.value component
-   in ( Component.type_ it /= ComponentType.Library || Component.name it /= Witch.from packageName,
-        Witch.into @String $ Component.type_ it,
-        Witch.into @String $ Component.name it
+  let it = component.value
+   in ( it.type_ /= ComponentType.Library || it.name /= Witch.from packageName,
+        Witch.into @String it.type_,
+        Witch.into @String it.name
       )
 
 markup :: Context.Context -> Haddock.DocMarkupH Void.Void (Haddock.Namespace, String) (Html.Html ())

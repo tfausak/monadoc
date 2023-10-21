@@ -36,23 +36,23 @@ handler ::
   Handler.Handler
 handler packageName reversion componentId moduleName _ respond = do
   package <- NotFound.fromMaybe =<< Package.Query.getByName packageName
-  version <- NotFound.fromMaybe =<< Version.Query.getByNumber (Reversion.version reversion)
-  upload <- Version.Get.getUpload (Model.key package) (Model.key version) (Reversion.revision reversion)
-  packageMeta <- Version.Get.getPackageMeta $ Model.key upload
+  version <- NotFound.fromMaybe =<< Version.Query.getByNumber reversion.version
+  upload <- Version.Get.getUpload package.key version.key reversion.revision
+  packageMeta <- Version.Get.getPackageMeta upload.key
   component <- Component.Get.getComponent componentId
-  packageMetaComponent <- Component.Get.getPackageMetaComponent (Model.key packageMeta) (Model.key component)
+  packageMetaComponent <- Component.Get.getPackageMetaComponent packageMeta.key component.key
   module_ <- getModule moduleName
-  Monad.void $ getPackageMetaComponentModule (Model.key packageMetaComponent) (Model.key module_)
-  maybeLatest <- Version.Get.getLatestUpload (Model.key package) (Model.key upload)
+  Monad.void $ getPackageMetaComponentModule packageMetaComponent.key module_.key
+  maybeLatest <- Version.Get.getLatestUpload package.key upload.key
   maybePMC <- case maybeLatest of
     Nothing -> pure Nothing
     Just (u, _) -> Exception.handleIf (Exception.isType @NotFound.NotFound) (const $ pure Nothing) $ do
-      pm <- Version.Get.getPackageMeta $ Model.key u
-      Just <$> Component.Get.getPackageMetaComponent (Model.key pm) (Model.key component)
+      pm <- Version.Get.getPackageMeta u.key
+      Just <$> Component.Get.getPackageMetaComponent pm.key component.key
   hasModule <- case maybePMC of
     Nothing -> pure False
     Just pmc -> Exception.handleIf (Exception.isType @NotFound.NotFound) (const $ pure False) $ do
-      Monad.void $ getPackageMetaComponentModule (Model.key pmc) (Model.key module_)
+      Monad.void $ getPackageMetaComponentModule pmc.key module_.key
       pure True
   context <- Reader.ask
   let breadcrumbs =

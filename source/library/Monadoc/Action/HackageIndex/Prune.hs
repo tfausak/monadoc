@@ -11,12 +11,12 @@ import qualified Monadoc.Type.Model as Model
 
 run :: App.App ()
 run = do
-  rows <- App.Sql.query_ "select * from hackageIndex where processedAt is not null order by processedAt desc"
+  rows <- App.Sql.query_ @HackageIndex.Model "select * from hackageIndex where processedAt is not null order by processedAt desc"
   case rows of
     [] -> App.Log.debug "no hackage indexes to prune"
     keep : rest -> do
-      App.Log.debug $ F.sformat ("keeping" F.%+ Key.format) (Model.key keep)
+      App.Log.debug $ F.sformat ("keeping" F.%+ Key.format) keep.key
       Monad.forM_ rest $ \hackageIndex -> do
-        App.Log.debug $ F.sformat ("pruning" F.%+ Key.format) (Model.key hackageIndex)
-        App.Sql.execute "delete from hackageIndex where key = ?" [Model.key hackageIndex]
-        App.Sql.execute "delete from blob where key = ?" [HackageIndex.blob $ Model.value hackageIndex]
+        App.Log.debug $ F.sformat ("pruning" F.%+ Key.format) hackageIndex.key
+        App.Sql.execute "delete from hackageIndex where key = ?" [hackageIndex.key]
+        App.Sql.execute "delete from blob where key = ?" [hackageIndex.value.blob]

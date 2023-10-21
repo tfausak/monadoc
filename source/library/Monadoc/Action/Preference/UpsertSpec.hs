@@ -26,8 +26,8 @@ spec = Hspec.describe "Monadoc.Action.Preference.Upsert" $ do
       Range.Upsert.run x
     let preference =
           Preference.Preference
-            { Preference.package = Model.key package,
-              Preference.range = Model.key range
+            { Preference.package = package.key,
+              Preference.range = range.key
             }
     model <- Preference.Upsert.run preference
     IO.liftIO $
@@ -41,13 +41,13 @@ spec = Hspec.describe "Monadoc.Action.Preference.Upsert" $ do
     old <- upsertPreference (Witch.unsafeFrom @String "a") (Witch.unsafeFrom @String ">1")
     new <- upsertPreference (Witch.unsafeFrom @String "a") (Witch.unsafeFrom @String ">2")
     IO.liftIO $ do
-      Model.key new `Hspec.shouldBe` Model.key old
-      Preference.range (Model.value new) `Hspec.shouldNotBe` Preference.range (Model.value old)
+      new.key `Hspec.shouldBe` old.key
+      new.value.range `Hspec.shouldNotBe` old.value.range
 
   Hspec.it "inserts two preferences" . Test.run $ do
     preference1 <- upsertPreference (Witch.unsafeFrom @String "a") (Witch.unsafeFrom @String ">1")
     preference2 <- upsertPreference (Witch.unsafeFrom @String "b") (Witch.unsafeFrom @String ">1")
-    IO.liftIO $ Model.key preference1 `Hspec.shouldNotBe` Model.key preference2
+    IO.liftIO $ preference1.key `Hspec.shouldNotBe` preference2.key
 
 upsertPreference ::
   PackageName.PackageName ->
@@ -58,6 +58,6 @@ upsertPreference packageName constraint = do
   range <- Range.Upsert.run Range.Range {Range.constraint = constraint}
   Preference.Upsert.run
     Preference.Preference
-      { Preference.package = Model.key package,
-        Preference.range = Model.key range
+      { Preference.package = package.key,
+        Preference.range = range.key
       }

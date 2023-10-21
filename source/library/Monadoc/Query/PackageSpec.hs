@@ -13,7 +13,7 @@ spec = Hspec.describe "Monadoc.Query.Package" $ do
   Hspec.describe "getByName" $ do
     Hspec.it "works" . Test.run $ do
       package <- Factory.newPackage
-      result <- Package.Query.getByName . Package.name $ Model.value package
+      result <- Package.Query.getByName package.value.name
       IO.liftIO $ result `Hspec.shouldBe` Just package
 
     Hspec.it "returns nothing when the name doesn't exist" . Test.run $ do
@@ -29,4 +29,4 @@ spec = Hspec.describe "Monadoc.Query.Package" $ do
     Hspec.it "works with a package" . Test.run $ do
       package <- Factory.newPackage
       result <- Package.Query.getKeys
-      IO.liftIO $ result `Hspec.shouldBe` [Model.key package]
+      IO.liftIO $ result `Hspec.shouldBe` [package.key]

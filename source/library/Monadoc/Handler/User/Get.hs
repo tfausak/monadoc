@@ -34,15 +34,15 @@ handler hackageUserName _ respond = do
       \ where upload.uploadedBy = ? \
       \ order by upload.uploadedAt desc \
       \ limit 64"
-      [Model.key hackageUser]
+      [hackageUser.key]
   let eTag = Common.makeETag $ case rows of
-        (upload Sql.:. _) : _ -> Just . Upload.uploadedAt $ Model.value upload
+        (upload Sql.:. _) : _ -> Just upload.value.uploadedAt
         _ -> Nothing
       breadcrumbs =
         [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home},
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text hackageUserName, Breadcrumb.route = Nothing}
         ]
-  packages <- App.Sql.query "select * from package where key in ( select distinct package from upload where uploadedBy = ? ) order by name collate nocase asc" [Model.key hackageUser]
+  packages <- App.Sql.query "select * from package where key in ( select distinct package from upload where uploadedBy = ? ) order by name collate nocase asc" [hackageUser.key]
   respond
     . Common.htmlResponse
       Http.ok200

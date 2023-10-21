@@ -55,7 +55,7 @@ newDependency = do
   package <- newPackage
   component <- newComponent
   range <- newRange
-  newDependencyWith (Model.key packageMetaComponent) (Model.key package) (Model.key component) (Model.key range)
+  newDependencyWith packageMetaComponent.key package.key component.key range.key
 
 newDependencyWith ::
   PackageMetaComponent.Key ->
@@ -98,7 +98,7 @@ newPackageMeta = do
   version <- newVersion
   license <- newLicense
   upload <- newUpload
-  newPackageMetaWith (Model.key version) (Model.key license) (Model.key upload)
+  newPackageMetaWith version.key license.key upload.key
 
 newPackageMetaWith ::
   Version.Key ->
@@ -118,7 +118,7 @@ newPackageMetaComponent :: App.App PackageMetaComponent.Model
 newPackageMetaComponent = do
   packageMeta <- newPackageMeta
   component <- newComponent
-  newPackageMetaComponentWith (Model.key packageMeta) (Model.key component)
+  newPackageMetaComponentWith packageMeta.key component.key
 
 newPackageMetaComponentWith ::
   PackageMeta.Key ->
@@ -136,7 +136,7 @@ newPackageMetaComponentModule :: App.App PackageMetaComponentModule.Model
 newPackageMetaComponentModule = do
   packageMetaComponent <- newPackageMetaComponent
   module_ <- newModule
-  newPackageMetaComponentModuleWith (Model.key packageMetaComponent) (Model.key module_)
+  newPackageMetaComponentModuleWith packageMetaComponent.key module_.key
 
 newPackageMetaComponentModuleWith ::
   PackageMetaComponent.Key ->
@@ -154,7 +154,7 @@ newPreference :: App.App Preference.Model
 newPreference = do
   package <- newPackage
   range <- newRange
-  newPreferenceWith (Model.key package) (Model.key range)
+  newPreferenceWith package.key range.key
 
 newPreferenceWith ::
   Package.Key ->
@@ -179,7 +179,7 @@ newUpload = do
   package <- newPackage
   hackageUser <- newHackageUser
   version <- newVersion
-  newUploadWith (Model.key blob) (Model.key package) (Model.key hackageUser) (Model.key version)
+  newUploadWith blob.key package.key hackageUser.key version.key
 
 newUploadWith ::
   Blob.Key ->

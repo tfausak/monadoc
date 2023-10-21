@@ -17,19 +17,19 @@ run :: Maybe Job.Model -> App.App ()
 run maybeJob = case maybeJob of
   Nothing -> IO.liftIO $ Concurrent.threadDelay 1_000_000
   Just job -> do
-    let task = Job.task $ Model.value job
+    let task = job.value.task
     App.Log.info $
       F.sformat
         ("[worker] starting" F.%+ Key.format F.% ":" F.%+ F.shown)
-        (Model.key job)
+        job.key
         task
     before <- IO.liftIO Clock.getMonotonicTime
     () <- Control.control $ \runInBase ->
-      Async.withAsync (runInBase . Task.Perform.run . Job.task $ Model.value job) Async.wait
+      Async.withAsync (runInBase $ Task.Perform.run job.value.task) Async.wait
     after <- IO.liftIO Clock.getMonotonicTime
     App.Log.info $
       F.sformat
         ("[worker] finished" F.%+ Key.format F.% ":" F.%+ F.shown F.%+ "in" F.%+ F.fixed 3)
-        (Model.key job)
+        job.key
         task
         (after - before)

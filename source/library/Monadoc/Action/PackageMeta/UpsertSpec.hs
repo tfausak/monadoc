@@ -28,11 +28,11 @@ spec = Hspec.describe "Monadoc.Action.PackageMeta.Upsert" $ do
     packageMeta2 <- makePackageMeta
     model1 <- PackageMeta.Upsert.run packageMeta1
     model2 <- PackageMeta.Upsert.run packageMeta2
-    IO.liftIO $ Model.key model1 `Hspec.shouldNotBe` Model.key model2
+    IO.liftIO $ model1.key `Hspec.shouldNotBe` model2.key
 
   Hspec.it "updates an existing package meta" . Test.run $ do
     model <- Factory.newPackageMeta
-    let packageMeta = (Model.value model) {PackageMeta.hash = Hash.new "updated"}
+    let packageMeta = model.value {PackageMeta.hash = Hash.new "updated"}
     result <- PackageMeta.Upsert.run packageMeta
     IO.liftIO $ result `Hspec.shouldBe` model {Model.value = packageMeta}
 
@@ -43,7 +43,7 @@ makePackageMeta = do
   upload <- Factory.newUpload
   Test.arbitraryWith $ \packageMeta ->
     packageMeta
-      { PackageMeta.cabalVersion = Model.key version,
-        PackageMeta.license = Model.key license,
-        PackageMeta.upload = Model.key upload
+      { PackageMeta.cabalVersion = version.key,
+        PackageMeta.license = license.key,
+        PackageMeta.upload = upload.key
       }

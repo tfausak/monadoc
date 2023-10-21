@@ -26,35 +26,33 @@ data Input = Input
 
 render :: Context.Context -> Input -> Html.Html ()
 render context input = do
-  let hackageUserName = HackageUser.name . Model.value $ hackageUser input
+  let hackageUserName = input.hackageUser.value.name
       route = Route.User hackageUserName
       title = F.sformat ("User" F.%+ F.stext F.%+ ":: Monadoc") (Witch.from hackageUserName)
-  Common.base context route (breadcrumbs input) title $ do
-    Html.h2_ . Html.toHtml . HackageUser.name . Model.value $ hackageUser input
+  Common.base context route input.breadcrumbs title $ do
+    Html.h2_ . Html.toHtml $ input.hackageUser.value.name
     Html.h3_ "Uploads"
-    Html.ul_ . Monad.forM_ (rows input) $ \(upload Sql.:. version Sql.:. package) -> Html.li_ $ do
+    Html.ul_ . Monad.forM_ input.rows $ \(upload Sql.:. version Sql.:. package) -> Html.li_ $ do
       let reversion =
             Reversion.Reversion
-              { Reversion.revision = Upload.revision $ Model.value upload,
-                Reversion.version = Version.number $ Model.value version
+              { Reversion.revision = upload.value.revision,
+                Reversion.version = version.value.number
               }
-      Html.a_ [Html.href_ . Common.route context $ Route.Version (Package.name $ Model.value package) reversion] $ do
-        Html.toHtml . Package.name $ Model.value package
+      Html.a_ [Html.href_ . Common.route context $ Route.Version package.value.name reversion] $ do
+        Html.toHtml package.value.name
         "@"
         Html.toHtml reversion
       " uploaded "
-      Common.timestamp . Upload.uploadedAt $ Model.value upload
+      Common.timestamp upload.value.uploadedAt
       "."
-      Monad.when (Upload.isLatest $ Model.value upload) $ do
+      Monad.when upload.value.isLatest $ do
         " "
         Html.span_ [Html.class_ "badge bg-info-subtle text-info-emphasis"] "latest"
-      Monad.when (not . Upload.isPreferred $ Model.value upload) $ do
+      Monad.when (not upload.value.isPreferred) $ do
         " "
         Html.span_ [Html.class_ "badge bg-warning-subtle text-warning-emphasis"] "deprecated"
     Html.h3_ "Packages"
-    Html.ul_ . Monad.forM_ (packages input) $ \package ->
+    Html.ul_ . Monad.forM_ input.packages $ \package ->
       Html.li_
-        . Html.a_ [Html.href_ . Common.route context . Route.Package . Package.name $ Model.value package]
-        . Html.toHtml
-        . Package.name
-        $ Model.value package
+        . Html.a_ [Html.href_ . Common.route context $ Route.Package package.value.name]
+        $ Html.toHtml package.value.name

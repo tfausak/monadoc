@@ -27,8 +27,8 @@ instance Sql.FromRow PackageMetaComponentModule where
 
 instance Sql.ToRow PackageMetaComponentModule where
   toRow cronEntry =
-    [ Sql.toField $ packageMetaComponent cronEntry,
-      Sql.toField $ module_ cronEntry
+    [ Sql.toField cronEntry.packageMetaComponent,
+      Sql.toField cronEntry.module_
     ]
 
 instance QuickCheck.Arbitrary PackageMetaComponentModule where

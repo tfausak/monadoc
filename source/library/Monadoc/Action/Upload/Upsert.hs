@@ -13,7 +13,7 @@ run upload = do
   r1 <-
     App.Sql.query
       "select key from upload where package = ? and version = ? and revision = ? limit 1"
-      (Upload.package upload, Upload.version upload, Upload.revision upload)
+      (upload.package, upload.version, upload.revision)
   key <- case r1 of
     Sql.Only key : _ -> pure key
     [] -> do

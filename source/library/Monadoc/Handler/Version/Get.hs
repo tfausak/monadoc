@@ -33,11 +33,11 @@ handler ::
 handler packageName reversion _ respond = do
   context <- Reader.ask
   package <- NotFound.fromMaybe =<< Package.Query.getByName packageName
-  version <- NotFound.fromMaybe =<< Version.Query.getByNumber (Reversion.version reversion)
-  upload <- getUpload (Model.key package) (Model.key version) (Reversion.revision reversion)
-  hackageUser <- getHackageUser . Upload.uploadedBy $ Model.value upload
-  maybeLatest <- getLatestUpload (Model.key package) (Model.key upload)
-  packageMeta <- getPackageMeta $ Model.key upload
+  version <- NotFound.fromMaybe =<< Version.Query.getByNumber reversion.version
+  upload <- getUpload package.key version.key reversion.revision
+  hackageUser <- getHackageUser upload.value.uploadedBy
+  maybeLatest <- getLatestUpload package.key upload.key
+  packageMeta <- getPackageMeta upload.key
   components <-
     App.Sql.query
       "select * \
@@ -45,8 +45,8 @@ handler packageName reversion _ respond = do
       \ inner join component \
       \ on component.key = packageMetaComponent.component \
       \ where packageMetaComponent.packageMeta = ?"
-      [Model.key packageMeta]
-  let eTag = Common.makeETag . Upload.uploadedAt $ Model.value upload
+      [packageMeta.key]
+  let eTag = Common.makeETag upload.value.uploadedAt
       breadcrumbs =
         [ Breadcrumb.Breadcrumb {Breadcrumb.label = "Home", Breadcrumb.route = Just Route.Home},
           Breadcrumb.Breadcrumb {Breadcrumb.label = Witch.into @Text.Text packageName, Breadcrumb.route = Just $ Route.Package packageName},

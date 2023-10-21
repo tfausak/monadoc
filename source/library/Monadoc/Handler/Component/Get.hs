@@ -32,11 +32,11 @@ handler ::
   Handler.Handler
 handler packageName reversion componentId _ respond = do
   package <- NotFound.fromMaybe =<< Package.Query.getByName packageName
-  version <- NotFound.fromMaybe =<< Version.Query.getByNumber (Reversion.version reversion)
-  upload <- Version.Get.getUpload (Model.key package) (Model.key version) (Reversion.revision reversion)
-  packageMeta <- Version.Get.getPackageMeta $ Model.key upload
+  version <- NotFound.fromMaybe =<< Version.Query.getByNumber reversion.version
+  upload <- Version.Get.getUpload package.key version.key reversion.revision
+  packageMeta <- Version.Get.getPackageMeta upload.key
   component <- getComponent componentId
-  packageMetaComponent <- getPackageMetaComponent (Model.key packageMeta) (Model.key component)
+  packageMetaComponent <- getPackageMetaComponent packageMeta.key component.key
   packageMetaComponentModules <-
     App.Sql.query
       "select * \
@@ -44,7 +44,7 @@ handler packageName reversion componentId _ respond = do
       \ inner join module \
       \ on module.key = packageMetaComponentModule.module \
       \ where packageMetaComponentModule.packageMetaComponent = ?"
-      [Model.key packageMetaComponent]
+      [packageMetaComponent.key]
   dependencies <-
     App.Sql.query
       "select * \
@@ -56,7 +56,7 @@ handler packageName reversion componentId _ respond = do
       \ inner join range \
       \ on range.key = dependency.range \
       \ where dependency.packageMetaComponent = ?"
-      [Model.key packageMetaComponent]
+      [packageMetaComponent.key]
   -- TODO: This currently only gets direct reverse dependencies. It should also
   -- get indirect ones. And it should try to limit the result set coming back
   -- from SQL as much as possible.
@@ -81,15 +81,15 @@ handler packageName reversion componentId _ respond = do
       \ where dependency.package = ? \
       \ and dependency.component = ? \
       \ limit 64"
-      ( Model.key package,
-        Model.key component
+      ( package.key,
+        component.key
       )
-  maybeLatest <- Version.Get.getLatestUpload (Model.key package) (Model.key upload)
+  maybeLatest <- Version.Get.getLatestUpload package.key upload.key
   hasComponent <- case maybeLatest of
     Nothing -> pure False
     Just (u, _) -> Exception.handleIf (Exception.isType @NotFound.NotFound) (const $ pure False) $ do
-      pm <- Version.Get.getPackageMeta $ Model.key u
-      Monad.void $ getPackageMetaComponent (Model.key pm) (Model.key component)
+      pm <- Version.Get.getPackageMeta u.key
+      Monad.void $ getPackageMetaComponent pm.key component.key
       pure True
   context <- Reader.ask
   let breadcrumbs =
@@ -125,7 +125,7 @@ getComponent componentId = do
   components <-
     App.Sql.query
       "select * from component where type = ? and name = ? limit 1"
-      (ComponentId.type_ componentId, ComponentId.name componentId)
+      (componentId.type_, componentId.name)
   NotFound.fromList components
 
 getPackageMetaComponent :: PackageMeta.Key -> Component.Key -> App.App PackageMetaComponent.Model

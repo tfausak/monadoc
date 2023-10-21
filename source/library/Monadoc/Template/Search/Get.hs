@@ -32,8 +32,8 @@ data Input = Input
 
 render :: Context.Context -> Input -> Html.Html ()
 render context input = do
-  let title = F.sformat ("Search" F.%+ F.stext F.%+ ":: Monadoc") (Witch.from $ query input)
-  Common.base context (Route.Search $ query input) (breadcrumbs input) title $ do
+  let title = F.sformat ("Search" F.%+ F.stext F.%+ ":: Monadoc") (Witch.from input.query)
+  Common.base context (Route.Search input.query) input.breadcrumbs title $ do
     Html.h2_ "Search"
     Html.form_
       [ Html.action_ . Common.route context . Route.Search $ Witch.from @Text.Text "",
@@ -45,47 +45,47 @@ render context input = do
             Html.name_ "query",
             Html.placeholder_ "traverse",
             Html.type_ "search",
-            Html.value_ . Witch.into @Text.Text $ query input
+            Html.value_ $ Witch.into @Text.Text input.query
           ]
         Html.button_
           [ Html.class_ "btn btn-primary",
             Html.type_ "submit"
           ]
           "Search"
-    Monad.when (not . Search.isBlank $ query input) $ do
+    Monad.when (not $ Search.isBlank input.query) $ do
       Html.h3_ "Packages"
-      if null $ packages input
+      if null input.packages
         then Html.p_ "None found."
-        else Html.ul_ . Monad.forM_ (packages input) $ \package -> do
-          let name = Package.name $ Model.value package
+        else Html.ul_ . Monad.forM_ input.packages $ \package -> do
+          let name = package.value.name
           Html.li_
             . Html.a_ [Html.href_ . Common.route context $ Route.Package name]
             $ Html.toHtml name
       Html.h3_ "Modules"
-      if null $ modules input
+      if null input.modules
         then Html.p_ "None found."
-        else Html.ul_ . Monad.forM_ (modules input) $ \(package Sql.:. version Sql.:. upload Sql.:. component Sql.:. module_) -> do
-          let packageName = Package.name $ Model.value package
+        else Html.ul_ . Monad.forM_ input.modules $ \(package Sql.:. version Sql.:. upload Sql.:. component Sql.:. module_) -> do
+          let packageName = package.value.name
               reversion =
                 Reversion.Reversion
-                  { Reversion.version = Version.number $ Model.value version,
-                    Reversion.revision = Upload.revision $ Model.value upload
+                  { Reversion.version = version.value.number,
+                    Reversion.revision = upload.value.revision
                   }
               componentId =
                 ComponentId.ComponentId
-                  { ComponentId.type_ = Component.type_ $ Model.value component,
-                    ComponentId.name = Component.name $ Model.value component
+                  { ComponentId.type_ = component.value.type_,
+                    ComponentId.name = component.value.name
                   }
-              moduleName = Module.name $ Model.value module_
+              moduleName = module_.value.name
           Html.li_ $ do
             Html.a_ [Html.href_ . Common.route context $ Route.Module packageName reversion componentId moduleName] $ Html.toHtml moduleName
             " in "
             Html.toHtml componentId
       Html.h3_ "Users"
-      if null $ hackageUsers input
+      if null input.hackageUsers
         then Html.p_ "None found."
-        else Html.ul_ . Monad.forM_ (hackageUsers input) $ \hackageUser -> do
-          let name = HackageUser.name $ Model.value hackageUser
+        else Html.ul_ . Monad.forM_ input.hackageUsers $ \hackageUser -> do
+          let name = hackageUser.value.name
           Html.li_
             . Html.a_ [Html.href_ . Common.route context $ Route.User name]
             $ Html.toHtml name

@@ -13,7 +13,7 @@ run packageMetaComponentModule = do
   r1 <-
     App.Sql.query
       "select key from packageMetaComponentModule where packageMetaComponent = ? and module = ? limit 1"
-      (PackageMetaComponentModule.packageMetaComponent packageMetaComponentModule, PackageMetaComponentModule.module_ packageMetaComponentModule)
+      (packageMetaComponentModule.packageMetaComponent, packageMetaComponentModule.module_)
   key <- case r1 of
     Sql.Only key : _ -> pure key
     [] -> do

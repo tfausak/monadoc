@@ -16,30 +16,30 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Upsert" $ do
   Hspec.it "inserts a dynamic cron entry" . Test.run $ do
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Nothing}
     Monad.void $ CronEntry.Upsert.run cronEntry
-    cronEntries <- App.Sql.query_ "select * from cronEntry"
-    IO.liftIO $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry]
+    cronEntries <- App.Sql.query_ @CronEntry.Model "select * from cronEntry"
+    IO.liftIO $ fmap (.value) cronEntries `Hspec.shouldBe` [cronEntry]
 
   Hspec.it "duplicates a dynamic cron entry" . Test.run $ do
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Nothing}
     Monad.void $ CronEntry.Upsert.run cronEntry
     Monad.void $ CronEntry.Upsert.run cronEntry
-    cronEntries <- App.Sql.query_ "select * from cronEntry"
-    IO.liftIO $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry, cronEntry]
+    cronEntries <- App.Sql.query_ @CronEntry.Model "select * from cronEntry"
+    IO.liftIO $ fmap (.value) cronEntries `Hspec.shouldBe` [cronEntry, cronEntry]
 
   Hspec.it "inserts a static cron entry" . Test.run $ do
     guid <- Test.arbitrary
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Just guid}
     Monad.void $ CronEntry.Upsert.run cronEntry
-    cronEntries <- App.Sql.query_ "select * from cronEntry"
-    IO.liftIO $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry]
+    cronEntries <- App.Sql.query_ @CronEntry.Model "select * from cronEntry"
+    IO.liftIO $ fmap (.value) cronEntries `Hspec.shouldBe` [cronEntry]
 
   Hspec.it "does not duplicate a static cron entry" . Test.run $ do
     guid <- Test.arbitrary
     cronEntry <- Test.arbitraryWith $ \x -> x {CronEntry.guid = Just guid}
     Monad.void $ CronEntry.Upsert.run cronEntry
     Monad.void $ CronEntry.Upsert.run cronEntry
-    cronEntries <- App.Sql.query_ "select * from cronEntry"
-    IO.liftIO $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry]
+    cronEntries <- App.Sql.query_ @CronEntry.Model "select * from cronEntry"
+    IO.liftIO $ fmap (.value) cronEntries `Hspec.shouldBe` [cronEntry]
 
   Hspec.it "updates a static cron entry" . Test.run $ do
     guid <- Test.arbitrary
@@ -55,8 +55,8 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Upsert" $ do
         }
     Monad.void $ CronEntry.Upsert.run cronEntry1
     Monad.void $ CronEntry.Upsert.run cronEntry2
-    cronEntries <- App.Sql.query_ "select * from cronEntry"
-    IO.liftIO $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry2]
+    cronEntries <- App.Sql.query_ @CronEntry.Model "select * from cronEntry"
+    IO.liftIO $ fmap (.value) cronEntries `Hspec.shouldBe` [cronEntry2]
 
   Hspec.it "does not update a static cron entry with the same schedule and task" . Test.run $ do
     guid <- Test.arbitrary
@@ -64,10 +64,10 @@ spec = Hspec.describe "Monadoc.Action.CronEntry.Upsert" $ do
     cronEntry2 <- Test.arbitraryWith $ \x ->
       x
         { CronEntry.guid = Just guid,
-          CronEntry.schedule = CronEntry.schedule cronEntry1,
-          CronEntry.task = CronEntry.task cronEntry1
+          CronEntry.schedule = cronEntry1.schedule,
+          CronEntry.task = cronEntry1.task
         }
     Monad.void $ CronEntry.Upsert.run cronEntry1
     Monad.void $ CronEntry.Upsert.run cronEntry2
-    cronEntries <- App.Sql.query_ "select * from cronEntry"
-    IO.liftIO $ fmap Model.value cronEntries `Hspec.shouldBe` [cronEntry1]
+    cronEntries <- App.Sql.query_ @CronEntry.Model "select * from cronEntry"
+    IO.liftIO $ fmap (.value) cronEntries `Hspec.shouldBe` [cronEntry1]

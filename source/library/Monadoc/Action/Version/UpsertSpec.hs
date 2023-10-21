@@ -33,4 +33,4 @@ spec = Hspec.describe "Monadoc.Action.Version.Upsert" $ do
     version2 <- do
       x <- Test.arbitraryWith $ \y -> y {Version.number = Witch.unsafeFrom @String "2"}
       Version.Upsert.run x
-    IO.liftIO $ Model.key version1 `Hspec.shouldNotBe` Model.key version2
+    IO.liftIO $ version1.key `Hspec.shouldNotBe` version2.key

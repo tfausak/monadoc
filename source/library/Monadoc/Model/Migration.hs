@@ -30,8 +30,8 @@ instance Sql.FromRow Migration where
 
 instance Sql.ToRow Migration where
   toRow migration =
-    [ Sql.toField $ createdAt migration,
-      Sql.toField $ query migration
+    [ Sql.toField migration.createdAt,
+      Sql.toField migration.query
     ]
 
 instance QuickCheck.Arbitrary Migration where

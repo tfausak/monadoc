@@ -16,7 +16,7 @@ withConnection ::
   App.AppT m a
 withConnection callback = do
   context <- Reader.ask
-  Pool.withResourceLifted (Context.pool context) callback
+  Pool.withResourceLifted context.pool callback
 
 query :: (Sql.FromRow r, Sql.ToRow q) => Query.Query -> q -> App.App [r]
 query q r = withConnection $ \c -> IO.liftIO $ Sql.query c (Witch.from q) r

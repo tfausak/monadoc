@@ -34,4 +34,4 @@ spec = Hspec.describe "Monadoc.Action.HackageUser.Upsert" $ do
     hackageUser2 <- do
       x <- Test.arbitraryWith $ \y -> y {HackageUser.name = Witch.unsafeFrom @Text.Text "b"}
       HackageUser.Upsert.run x
-    IO.liftIO $ Model.key hackageUser1 `Hspec.shouldNotBe` Model.key hackageUser2
+    IO.liftIO $ hackageUser1.key `Hspec.shouldNotBe` hackageUser2.key

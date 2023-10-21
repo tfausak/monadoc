@@ -16,8 +16,8 @@ run ::
   Migration.Migration ->
   App.App Migration.Model
 run migration = do
-  let createdAt = Migration.createdAt migration
-      query = Migration.query migration
+  let createdAt = migration.createdAt
+      query = migration.query
   models <- App.Sql.query "select * from migration where createdAt = ? limit 1" [createdAt]
   case models of
     [] -> do
@@ -25,7 +25,7 @@ run migration = do
       App.Sql.execute_ query
       Migration.Insert.run migration
     model : _ -> do
-      let oldQuery = Migration.query $ Model.value model
+      let oldQuery = model.value.query
       Monad.when (oldQuery /= query) $
         Traced.throw
           Mismatch.Mismatch

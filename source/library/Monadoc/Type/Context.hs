@@ -34,21 +34,21 @@ data Context = Context
 fromConfig :: String -> Config.Config -> IO Context
 fromConfig name cfg = do
   let version = Version.showVersion Monadoc.version
-  Monad.when (Config.help cfg) $ do
+  Monad.when cfg.help $ do
     let header = unwords [name, "version", version]
     Say.sayString
       . List.dropWhileEnd Char.isSpace
       $ Console.usageInfo header Flag.options
     Exception.throwM Exit.ExitSuccess
-  Monad.when (Config.version cfg) $ do
+  Monad.when cfg.version $ do
     Say.sayString version
     Exception.throwM Exit.ExitSuccess
   let poolConfig =
         Pool.defaultPoolConfig
-          (Sql.open $ Config.sql cfg)
+          (Sql.open cfg.sql)
           Sql.close
           60
-          (if Config.sql cfg == ":memory:" then 1 else 8)
+          (if cfg.sql == ":memory:" then 1 else 8)
   let cachingStrategy = Static.CustomCaching $ \fileMeta ->
         [ (Http.hCacheControl, "max-age=604800, stale-while-revalidate=86400"),
           (Http.hETag, Static.fm_etag fileMeta)
