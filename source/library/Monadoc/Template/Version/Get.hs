@@ -88,21 +88,21 @@ render context input = do
         . Haddock.parseParas Nothing
         $ maybe "" (Witch.into @String) input.packageMeta.value.description
       Html.dt_ "Author"
-      Html.dd_ . maybe "n/a" Html.toHtml $ input.packageMeta.value.author
+      Html.dd_ $ maybe "n/a" Html.toHtml input.packageMeta.value.author
       Html.dt_ "Bug reports"
-      Html.dd_ . maybe "n/a" autoLinkUrl $ input.packageMeta.value.bugReports
+      Html.dd_ $ maybe "n/a" autoLinkUrl input.packageMeta.value.bugReports
       Html.dt_ "Category"
-      Html.dd_ . maybe "n/a" Html.toHtml $ input.packageMeta.value.category
+      Html.dd_ $ maybe "n/a" Html.toHtml input.packageMeta.value.category
       Html.dt_ "Copyright"
-      Html.dd_ . maybe "n/a" Html.toHtml $ input.packageMeta.value.copyright
+      Html.dd_ $ maybe "n/a" Html.toHtml input.packageMeta.value.copyright
       Html.dt_ "Homepage"
-      Html.dd_ . maybe "n/a" autoLinkUrl $ input.packageMeta.value.homepage
+      Html.dd_ $ maybe "n/a" autoLinkUrl input.packageMeta.value.homepage
       Html.dt_ "Maintainer"
-      Html.dd_ . maybe "n/a" Html.toHtml $ input.packageMeta.value.maintainer
+      Html.dd_ $ maybe "n/a" Html.toHtml input.packageMeta.value.maintainer
       Html.dt_ "Package URL"
-      Html.dd_ . maybe "n/a" autoLinkUrl $ input.packageMeta.value.pkgUrl
+      Html.dd_ $ maybe "n/a" autoLinkUrl input.packageMeta.value.pkgUrl
       Html.dt_ "Stability"
-      Html.dd_ . maybe "n/a" Html.toHtml $ input.packageMeta.value.stability
+      Html.dd_ $ maybe "n/a" Html.toHtml input.packageMeta.value.stability
     Html.h3_ "Components"
     Html.ul_ . Monad.forM_ (sortComponents packageName $ fmap (\(_ Sql.:. c) -> c) input.components) $ \component -> Html.li_ $ do
       let componentId =
