@@ -123,13 +123,14 @@
       ]
     },
     "deploy": {
+      "if": "${{ github.ref == 'refs/heads/main' }}",
       "name": "Deploy",
       "needs": "docker",
       "secrets": "inherit",
       "uses": "./.github/workflows/deploy.yaml"
     },
     "docker": {
-      "if": "${{ github.event_name != 'schedule' && github.ref == 'refs/heads/main' }}",
+      "if": "${{ github.event_name != 'schedule' }}",
       "name": "Docker",
       "needs": "build",
       "runs-on": "ubuntu-22.04",
