@@ -123,6 +123,7 @@
       ]
     },
     "deploy": {
+      "if": "${{ github.ref }} == 'refs/heads/main'",
       "name": "Deploy",
       "needs": "docker",
       "secrets": "inherit",
