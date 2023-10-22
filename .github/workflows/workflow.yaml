@@ -123,6 +123,8 @@
       ]
     },
     "deploy": {
+      "concurrency": "deploy",
+      "environment": "production",
       "name": "Deploy",
       "needs": "docker",
       "runs-on": "ubuntu-22.04",
