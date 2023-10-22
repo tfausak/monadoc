@@ -4,6 +4,7 @@
     "deploy": {
       "environment": "production",
       "name": "Deploy",
+      "needs": "docker",
       "runs-on": "ubuntu-22.04",
       "steps": [
         {
