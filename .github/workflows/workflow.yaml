@@ -145,7 +145,7 @@
       ]
     },
     "docker": {
-      "if": "false",
+      "if": "github.event_name != 'schedule' && github.ref == 'refs/heads/main'",
       "name": "Docker",
       "needs": "build",
       "runs-on": "ubuntu-22.04",
