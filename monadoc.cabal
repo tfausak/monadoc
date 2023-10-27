@@ -167,6 +167,7 @@ library
     Monadoc.Exception.MissingKey
     Monadoc.Exception.NoNextMatch
     Monadoc.Exception.NotFound
+    Monadoc.Exception.ProxyError
     Monadoc.Exception.Sick
     Monadoc.Exception.TimedOut
     Monadoc.Exception.Traced

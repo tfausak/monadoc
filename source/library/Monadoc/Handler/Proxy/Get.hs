@@ -1,6 +1,7 @@
 module Monadoc.Handler.Proxy.Get where
 
 import qualified Control.Monad as Monad
+import qualified Control.Monad.Catch as Exception
 import qualified Control.Monad.Loops as Loops
 import qualified Control.Monad.Trans.Control as Control
 import qualified Data.ByteString as ByteString
@@ -11,6 +12,7 @@ import qualified Data.Text.Encoding as Text
 import qualified Formatting as F
 import qualified Monadoc.Action.App.Log as App.Log
 import qualified Monadoc.Exception.Mismatch as Mismatch
+import qualified Monadoc.Exception.ProxyError as ProxyError
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Extra.HttpClient as Client
 import qualified Monadoc.Middleware.AddHeaders as AddHeaders
@@ -41,9 +43,10 @@ handler context actual url request respond = do
       }
   proxy <- Client.requestFromURI $ Witch.from url
   Control.control $ \runInBase ->
-    Client.withResponse
-      (forwardHeaders request . Client.ensureUserAgent $ Client.setRequestCheckStatus proxy)
-      context.manager
+    Exception.handle (Exception.throwM . ProxyError.ProxyError)
+      . Client.withResponse
+        (forwardHeaders request . Client.ensureUserAgent $ Client.setRequestCheckStatus proxy)
+        context.manager
       $ \response -> runInBase $ do
         logResponse response
         let headers = filter (flip Set.member headersToKeep . fst) $ Client.responseHeaders response
