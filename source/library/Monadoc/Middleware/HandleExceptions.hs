@@ -16,6 +16,7 @@ import qualified Monadoc.Action.Exception.NotifySentry as Exception.NotifySentry
 import qualified Monadoc.Exception.Found as Found
 import qualified Monadoc.Exception.MethodNotAllowed as MethodNotAllowed
 import qualified Monadoc.Exception.NotFound as NotFound
+import qualified Monadoc.Exception.ProxyError as ProxyError
 import qualified Monadoc.Exception.TimedOut as TimedOut
 import qualified Monadoc.Exception.Traced as Traced
 import qualified Monadoc.Exception.UnknownRoute as UnknownRoute
@@ -94,5 +95,7 @@ onExceptionResponse context e
       Handler.statusResponse Http.notFound404 []
   | Exception.isType @TimedOut.TimedOut e =
       Handler.statusResponse Http.serviceUnavailable503 []
+  | Exception.isType @ProxyError.ProxyError e =
+      Handler.statusResponse Http.badGateway502 []
   | otherwise =
       Handler.statusResponse Http.internalServerError500 []
