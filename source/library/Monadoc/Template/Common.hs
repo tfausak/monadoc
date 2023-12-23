@@ -13,7 +13,7 @@ import qualified Monadoc.Type.Search as Search
 import qualified Monadoc.Type.Timestamp as Timestamp
 import qualified Monadoc.Type.VersionNumber as VersionNumber
 import qualified Network.HTTP.Types as Http
-import qualified Paths_monadoc as Monadoc
+import qualified PackageInfo_monadoc as Monadoc
 import qualified Witch
 
 base ::

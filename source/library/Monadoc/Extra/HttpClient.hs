@@ -5,7 +5,7 @@ import qualified Data.Version as Version
 import qualified Monadoc.Middleware.AddHeaders as AddHeaders
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Types as Http
-import qualified Paths_monadoc as Monadoc
+import qualified PackageInfo_monadoc as Monadoc
 import qualified Witch
 
 ensureUserAgent :: Client.Request -> Client.Request
