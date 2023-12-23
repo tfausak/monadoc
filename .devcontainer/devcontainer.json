@@ -14,5 +14,5 @@
   "postCreateCommand": "cabal update",
   "postStartCommand": "git config --global --add safe.directory \"$PWD\"",
   "service": "devcontainer",
-  "workspaceFolder": "/workspaces/monadoc"
+  "workspaceFolder": "/workspace"
 }
