@@ -60,7 +60,7 @@ render context input = do
           ("Package" F.%+ F.stext F.%+ "version" F.%+ F.stext F.%+ ":: Monadoc")
           (Witch.from packageName)
           (Witch.from reversion)
-  Common.base context route input.breadcrumbs title $ do
+  Common.base context route Nothing input.breadcrumbs title $ do
     showDeprecationWarning packageName reversion input.upload
     showLatestInfo context packageName input.maybeLatest $ const Nothing
     Html.h2_ $ Html.toHtml packageName

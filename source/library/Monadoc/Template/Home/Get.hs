@@ -26,7 +26,7 @@ data Input = Input
 
 render :: Context.Context -> Input -> Html.Html ()
 render context input =
-  Common.base context Route.Home input.breadcrumbs "Monadoc" $ do
+  Common.base context Route.Home Nothing input.breadcrumbs "Monadoc" $ do
     Html.h2_ "Core Libraries"
     Html.ul_ . Monad.forM_ coreLibraries $ \packageName ->
       Html.li_

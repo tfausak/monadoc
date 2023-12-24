@@ -2,6 +2,7 @@ module Monadoc.Template.Common where
 
 import qualified Control.Monad as Monad
 import qualified Data.ByteString as ByteString
+import qualified Data.Maybe as Maybe
 import qualified Data.Text as Text
 import qualified Lucid as Html
 import qualified Lucid.Base as Html
@@ -19,11 +20,12 @@ import qualified Witch
 base ::
   Context.Context ->
   Route.Route ->
+  Maybe Search.Search ->
   [Breadcrumb.Breadcrumb] ->
   Text.Text ->
   Html.Html () ->
   Html.Html ()
-base ctx rt breadcrumbs title html = do
+base ctx rt maybeQuery breadcrumbs title html = do
   Html.doctype_
   Html.html_ [Html.lang_ "en-US"] $ do
     Html.head_ $ do
@@ -53,21 +55,32 @@ base ctx rt breadcrumbs title html = do
       -- TODO: Implement better handling of static routes.
       Html.script_ [Html.src_ "/static/mathjax/tex-chtml-full.js"] Text.empty
     Html.body_ $ do
-      Html.header_ [Html.class_ "bg-body-secondary navbar"]
+      Html.header_ [Html.class_ "bg-dark navbar"]
         . Html.div_ [Html.class_ "container justify-content-start"]
+        $ Html.a_
+          [ Html.class_ "navbar-brand text-light",
+            Html.href_ $ route ctx Route.Home
+          ]
+          "Monadoc"
+      Html.div_ [Html.class_ "bg-body-secondary"]
+        . Html.div_ [Html.class_ "container py-2"]
+        . Html.form_
+          [ Html.action_ . route ctx . Route.Search $ Witch.from @Text.Text "",
+            Html.class_ "d-flex"
+          ]
         $ do
-          Html.a_
-            [ Html.class_ "navbar-brand",
-              Html.href_ $ route ctx Route.Home
+          Html.input_
+            [ Html.class_ "form-control me-1",
+              Html.name_ "query",
+              Html.placeholder_ "traverse",
+              Html.type_ "search",
+              Html.value_ . Witch.into @Text.Text $ Maybe.fromMaybe Search.empty maybeQuery
             ]
-            "Monadoc"
-          Html.ul_ [Html.class_ "navbar-nav"]
-            . Html.li_ [Html.class_ "nav-item"]
-            $ Html.a_
-              [ Html.class_ "nav-link",
-                Html.href_ . route ctx $ Route.Search Search.empty
-              ]
-              "Search"
+          Html.button_
+            [ Html.class_ "btn btn-outline-primary",
+              Html.type_ "submit"
+            ]
+            "Search"
       Monad.when (not $ null breadcrumbs)
         . Html.nav_ [Html.class_ "bg-body-tertiary"]
         . Html.div_ [Html.class_ "container py-2"]

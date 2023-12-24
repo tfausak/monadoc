@@ -31,7 +31,7 @@ render context input = do
   let packageName = input.package.value.name
       route = Route.Package packageName
       title = F.sformat ("Package" F.%+ F.stext F.%+ ":: Monadoc") (Witch.from packageName)
-  Common.base context route input.breadcrumbs title $ do
+  Common.base context route Nothing input.breadcrumbs title $ do
     Html.h2_ $ Html.toHtml packageName
     Html.h3_ "Uploads"
     Html.ul_ . Monad.forM_ input.rows $ \(upload Sql.:. version Sql.:. hackageUser Sql.:. _) -> Html.li_ $ do
