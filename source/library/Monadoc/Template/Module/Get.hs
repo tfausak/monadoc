@@ -54,7 +54,7 @@ render context input = do
           (Witch.from componentId)
           (Witch.from moduleName)
       route = Route.Module packageName reversion componentId moduleName
-  Common.base context route input.breadcrumbs title $ do
+  Common.base context route Nothing input.breadcrumbs title $ do
     Version.Get.showDeprecationWarning packageName reversion input.upload
     Version.Get.showLatestInfo context packageName input.maybeLatest $ \rev ->
       if input.hasModule
