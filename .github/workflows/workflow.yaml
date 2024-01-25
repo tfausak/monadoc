@@ -8,11 +8,8 @@
           "uses": "actions/checkout@v4"
         },
         {
-          "run": "mkdir artifact"
-        },
-        {
           "id": "artifact",
-          "run": "echo directory=artifact/${{ matrix.platform }} >> $GITHUB_OUTPUT",
+          "run": "echo directory=artifact-${{ matrix.platform }} >> $GITHUB_OUTPUT",
           "shell": "bash"
         },
         {
@@ -51,7 +48,7 @@
           "run": "cabal outdated --v2-freeze-file cabal.project.freeze"
         },
         {
-          "uses": "actions/cache@v3",
+          "uses": "actions/cache@v4",
           "with": {
             "key": "${{ matrix.platform }}/${{ hashFiles('cabal.project.freeze') }}",
             "path": "${{ steps.haskell.outputs.cabal-store }}",
@@ -77,10 +74,10 @@
           }
         },
         {
-          "uses": "actions/upload-artifact@v3",
+          "uses": "actions/upload-artifact@v4",
           "with": {
             "name": "monadoc-${{ github.sha }}",
-            "path": "artifact"
+            "path": "${{ steps.artifact.outputs.directory }}"
           }
         },
         {
@@ -139,17 +136,17 @@
           "uses": "actions/checkout@v4"
         },
         {
-          "uses": "actions/download-artifact@v3",
+          "uses": "actions/download-artifact@v4",
           "with": {
             "name": "monadoc-${{ github.sha }}",
-            "path": "artifact"
+            "path": "artifact-ubuntu"
           }
         },
         {
-          "run": "cd artifact/ubuntu && tar xf monadoc-*.tar.gz"
+          "run": "cd artifact-ubuntu && tar xf monadoc-*.tar.gz"
         },
         {
-          "run": "mv artifact/ubuntu/monadoc-*/data artifact/ubuntu/monadoc docker"
+          "run": "mv artifact-ubuntu/monadoc-*/data artifact-ubuntu/monadoc docker"
         },
         {
           "run": "chmod +x docker/monadoc"
@@ -191,7 +188,7 @@
           "uses": "actions/checkout@v4"
         },
         {
-          "uses": "superfly/flyctl-actions/setup-flyctl@v1"
+          "uses": "superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be"
         },
         {
           "env": {
