@@ -8,12 +8,7 @@
           "uses": "actions/checkout@v4"
         },
         {
-          "id": "artifact",
-          "run": "echo directory=artifact-${{ matrix.platform }} >> $GITHUB_OUTPUT",
-          "shell": "bash"
-        },
-        {
-          "run": "mkdir ${{ steps.artifact.outputs.directory }}"
+          "run": "mkdir artifact"
         },
         {
           "id": "haskell",
@@ -24,7 +19,7 @@
           }
         },
         {
-          "run": "cabal sdist --output-dir ${{ steps.artifact.outputs.directory }}"
+          "run": "cabal sdist --output-dir artifact"
         },
         {
           "run": "cabal configure --enable-optimization=2 --enable-tests --flags pedantic --jobs"
@@ -33,7 +28,7 @@
           "run": "cat cabal.project.local"
         },
         {
-          "run": "cp cabal.project.local ${{ steps.artifact.outputs.directory }}"
+          "run": "cp cabal.project.local artifact"
         },
         {
           "run": "cabal freeze"
@@ -42,7 +37,7 @@
           "run": "cat cabal.project.freeze"
         },
         {
-          "run": "cp cabal.project.freeze ${{ steps.artifact.outputs.directory }}"
+          "run": "cp cabal.project.freeze artifact"
         },
         {
           "run": "cabal outdated --v2-freeze-file cabal.project.freeze"
@@ -65,19 +60,19 @@
           "run": "cabal build"
         },
         {
-          "run": "cp $( cabal list-bin monadoc ) ${{ steps.artifact.outputs.directory }}"
+          "run": "cp $( cabal list-bin monadoc ) artifact"
         },
         {
           "uses": "svenstaro/upx-action@v2",
           "with": {
-            "file": "${{ steps.artifact.outputs.directory }}/monadoc${{ matrix.extension }}"
+            "file": "artifact/monadoc${{ matrix.extension }}"
           }
         },
         {
           "uses": "actions/upload-artifact@v4",
           "with": {
-            "name": "monadoc-${{ github.sha }}",
-            "path": "${{ steps.artifact.outputs.directory }}"
+            "name": "monadoc-${{ matrix.platform }}-${{ github.sha }}",
+            "path": "artifact"
           }
         },
         {
@@ -138,15 +133,15 @@
         {
           "uses": "actions/download-artifact@v4",
           "with": {
-            "name": "monadoc-${{ github.sha }}",
-            "path": "artifact-ubuntu"
+            "name": "monadoc-ubuntu-${{ github.sha }}",
+            "path": "artifact"
           }
         },
         {
-          "run": "cd artifact-ubuntu && tar xf monadoc-*.tar.gz"
+          "run": "cd artifact && tar xf monadoc-*.tar.gz"
         },
         {
-          "run": "mv artifact-ubuntu/monadoc-*/data artifact-ubuntu/monadoc docker"
+          "run": "mv artifact/monadoc-*/data artifact/monadoc docker"
         },
         {
           "run": "chmod +x docker/monadoc"
