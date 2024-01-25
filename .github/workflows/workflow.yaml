@@ -65,7 +65,7 @@
         {
           "uses": "svenstaro/upx-action@v2",
           "with": {
-            "file": "artifact/monadoc${{ matrix.extension }}"
+            "files": "artifact/monadoc${{ matrix.extension }}"
           }
         },
         {
