@@ -16,9 +16,9 @@ data ComponentId = ComponentId
 instance Witch.TryFrom String ComponentId where
   tryFrom = Witch.maybeTryFrom $ \string -> do
     let (before, after) = break ((==) ':') string
-    type_ <- Either.hush $ Witch.tryFrom before
-    name <- Either.hush . Witch.tryFrom $ drop 1 after
-    pure ComponentId {type_ = type_, name = name}
+    t <- Either.hush $ Witch.tryFrom before
+    n <- Either.hush . Witch.tryFrom $ drop 1 after
+    pure ComponentId {type_ = t, name = n}
 
 instance Witch.TryFrom Text.Text ComponentId where
   tryFrom = Witch.eitherTryFrom $ Witch.tryFrom . Witch.into @String

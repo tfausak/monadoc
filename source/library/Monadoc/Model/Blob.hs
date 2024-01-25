@@ -49,9 +49,9 @@ migrations =
   ]
 
 new :: ByteString.ByteString -> Blob
-new contents =
+new c =
   Blob
-    { contents = contents,
-      hash = Hash.new contents,
-      size = ByteString.length contents
+    { contents = c,
+      hash = Hash.new c,
+      size = ByteString.length c
     }
