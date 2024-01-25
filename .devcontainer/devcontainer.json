@@ -11,6 +11,7 @@
     }
   },
   "dockerComposeFile": "compose.yaml",
+  "initializeCommand": "docker volume create cabal-state",
   "postCreateCommand": "cabal update",
   "postStartCommand": "git config --global --add safe.directory \"$PWD\"",
   "service": "devcontainer",
