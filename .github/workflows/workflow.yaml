@@ -54,7 +54,7 @@
           "run": "cabal build --only-download"
         },
         {
-          "run": "cabal build --only-dependencies --verbose=3"
+          "run": "cabal build --only-dependencies"
         },
         {
           "run": "cabal build"
