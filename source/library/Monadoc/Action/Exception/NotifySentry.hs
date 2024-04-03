@@ -21,7 +21,7 @@ import qualified Monadoc.Type.App as App
 import qualified Monadoc.Type.Config as Config
 import qualified Monadoc.Type.Context as Context
 import qualified Network.Wai.Handler.Warp as Warp
-import qualified PackageInfo_monadoc as Monadoc
+import qualified Paths_monadoc as Monadoc
 import qualified Patrol
 import qualified Patrol.Client as Patrol
 import qualified Patrol.Type.Event as Patrol.Event

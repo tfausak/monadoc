@@ -2,6 +2,6 @@ roots = [
   "^Main[.]main$",
   "^Monadoc[.]Main[.]Executable[.]executable$",
   "^Monadoc[.]Main[.]TestSuite[.]testSuite$",
-  "^PackageInfo_",
+  "^Paths_",
 ]
 type-class-roots = true

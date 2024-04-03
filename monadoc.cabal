@@ -50,7 +50,7 @@ common executable
 
 library
   import:             library
-  autogen-modules:    PackageInfo_monadoc
+  autogen-modules:    Paths_monadoc
   build-depends:
     , aeson ^>=2.2.1.0
     , async ^>=2.2.5
@@ -364,7 +364,7 @@ library
     Monadoc.Type.UrlSpec
     Monadoc.Type.VersionNumberSpec
     MonadocSpec
-    PackageInfo_monadoc
+    Paths_monadoc
 
 executable monadoc
   import:         executable
