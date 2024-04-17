@@ -193,6 +193,24 @@
         }
       ]
     },
+    "gild": {
+      "name": "Gild",
+      "runs-on": "ubuntu-22.04",
+      "steps": [
+        {
+          "uses": "actions/checkout@v4"
+        },
+        {
+          "uses": "tfausak/cabal-gild-setup-action@v2",
+          "with": {
+            "version": "1.3.0.1"
+          }
+        },
+        {
+          "run": "cabal-gild --input monadoc.cabal --mode check"
+        }
+      ]
+    },
     "hlint": {
       "name": "HLint",
       "runs-on": "ubuntu-22.04",

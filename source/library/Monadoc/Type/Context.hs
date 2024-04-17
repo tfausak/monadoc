@@ -16,7 +16,7 @@ import qualified Network.HTTP.Client.TLS as Tls
 import qualified Network.HTTP.Types as Http
 import qualified Network.HTTP.Types.Header as Http
 import qualified Network.Wai.Middleware.Static as Static
-import qualified PackageInfo_monadoc as Monadoc
+import qualified Paths_monadoc as Monadoc
 import qualified Say
 import qualified System.Console.GetOpt as Console
 import qualified System.Directory as Directory
