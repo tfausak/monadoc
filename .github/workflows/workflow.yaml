@@ -124,7 +124,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - uses: haskell-actions/run-ormolu@v15
+      - uses: haskell-actions/run-ormolu@v16
         with:
           version: 0.7.3.0
 name: Workflow
