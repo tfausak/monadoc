@@ -1,6 +1,5 @@
 jobs:
   build:
-    fail-fast: false # TODO
     name: Build on ${{ matrix.platform }}
     runs-on: ${{ matrix.platform }}-${{ matrix.version }}
     steps:
@@ -37,6 +36,7 @@ jobs:
       - run: echo ::add-matcher::.github/hspec-problem-matcher.json
       - run: cabal run -- monadoc-test-suite --randomize --strict
     strategy:
+      fail-fast: false # TODO
       matrix:
         include:
           - platform: macos
