@@ -8,7 +8,8 @@ jobs:
       - id: haskell
         uses: haskell-actions/setup@v2
         with:
-          ghc-version: 9.8
+          ghc-version: '9.10'
+      - run: ghc-pkg list
       - run: cabal sdist --output-dir artifact
       - run: cabal configure --enable-optimization=2 --enable-tests --flags pedantic --jobs
       - run: cat cabal.project.local
@@ -16,7 +17,7 @@ jobs:
       - run: cabal freeze
       - run: cat cabal.project.freeze
       - run: cp cabal.project.freeze artifact
-      - run: cabal outdated --v2-freeze-file cabal.project.freeze
+      - run: cabal outdated --v2-freeze-file
       - uses: actions/cache@v4
         with:
           key: ${{ matrix.platform }}/${{ hashFiles('cabal.project.freeze') }}

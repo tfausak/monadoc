@@ -1,1 +1,7 @@
 packages: .
+allow-newer:
+  , lucid2:base
+  , time-compat:time
+  , unix-compat:time
+  , uuid:time
+  , wai-middleware-static:time
