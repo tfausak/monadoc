@@ -12,6 +12,7 @@ spec = Hspec.describe "Monadoc.Type.Task" $ do
     Test.expectJson Task.ProcessHackageIndex "{\"tag\":\"ProcessHackageIndex\"}"
     Test.expectJson Task.ProcessUploads "{\"tag\":\"ProcessUploads\"}"
     Test.expectJson Task.PruneHackageIndex "{\"tag\":\"PruneHackageIndex\"}"
+    Test.expectJson Task.PruneJobs "{\"tag\":\"PruneJobs\"}"
     Test.expectJson Task.UpsertHackageIndex "{\"tag\":\"UpsertHackageIndex\"}"
     Test.expectJson Task.Vacuum "{\"tag\":\"Vacuum\"}"
 
@@ -22,6 +23,7 @@ spec = Hspec.describe "Monadoc.Type.Task" $ do
     Test.expectSqlField Task.ProcessHackageIndex $ Sql.SQLBlob "{\"tag\":\"ProcessHackageIndex\"}"
     Test.expectSqlField Task.ProcessUploads $ Sql.SQLBlob "{\"tag\":\"ProcessUploads\"}"
     Test.expectSqlField Task.PruneHackageIndex $ Sql.SQLBlob "{\"tag\":\"PruneHackageIndex\"}"
+    Test.expectSqlField Task.PruneJobs $ Sql.SQLBlob "{\"tag\":\"PruneJobs\"}"
     Test.expectSqlField Task.UpsertHackageIndex $ Sql.SQLBlob "{\"tag\":\"UpsertHackageIndex\"}"
     Test.expectSqlField Task.Vacuum $ Sql.SQLBlob "{\"tag\":\"Vacuum\"}"
 

@@ -10,6 +10,7 @@ data Task
   = ProcessHackageIndex
   | ProcessUploads
   | PruneHackageIndex
+  | PruneJobs
   | UpsertHackageIndex
   | Vacuum
   deriving (Eq, Show)
@@ -21,6 +22,7 @@ instance Aeson.FromJSON Task where
       "ProcessHackageIndex" -> pure ProcessHackageIndex
       "ProcessUploads" -> pure ProcessUploads
       "PruneHackageIndex" -> pure PruneHackageIndex
+      "PruneJobs" -> pure PruneJobs
       "UpsertHackageIndex" -> pure UpsertHackageIndex
       "Vacuum" -> pure Vacuum
       _ -> fail $ "unknown tag: " <> show tag
@@ -31,6 +33,7 @@ instance Aeson.ToJSON Task where
           ProcessHackageIndex -> "ProcessHackageIndex"
           ProcessUploads -> "ProcessUploads"
           PruneHackageIndex -> "PruneHackageIndex"
+          PruneJobs -> "PruneJobs"
           UpsertHackageIndex -> "UpsertHackageIndex"
           Vacuum -> "Vacuum" :: Text.Text
      in Aeson.object ["tag" Aeson..= tag]
@@ -50,6 +53,7 @@ instance QuickCheck.Arbitrary Task where
       [ ProcessHackageIndex,
         ProcessUploads,
         PruneHackageIndex,
+        PruneJobs,
         UpsertHackageIndex,
         Vacuum
       ]

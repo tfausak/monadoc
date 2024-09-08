@@ -38,5 +38,11 @@ all =
         CronEntry.runAt = Witch.from Time.epoch,
         CronEntry.schedule = Witch.from Saturn.everyMinute,
         CronEntry.task = Task.ProcessUploads
+      },
+    CronEntry.CronEntry
+      { CronEntry.guid = Just . Witch.from $ Uuid.fromWords64 0x93d6a4f13095437e 0xb674b903eb514c43,
+        CronEntry.runAt = Witch.from Time.epoch,
+        CronEntry.schedule = Witch.from Saturn.hourly,
+        CronEntry.task = Task.PruneJobs
       }
   ]
