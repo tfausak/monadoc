@@ -1,5 +1,6 @@
 jobs:
   build:
+    fail-fast: false # TODO
     name: Build on ${{ matrix.platform }}
     runs-on: ${{ matrix.platform }}-${{ matrix.version }}
     steps:
