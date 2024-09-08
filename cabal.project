@@ -4,3 +4,4 @@ allow-newer:
   , time-compat:time
   , uuid:time
   , wai-middleware-static:time
+  , Win32:filepath
