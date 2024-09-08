@@ -121,6 +121,7 @@ library
     TypeApplications
     TypeOperators
 
+  -- cabal-gild: discover source/library --exclude=**/*Spec.hs
   exposed-modules:
     Monadoc
     Monadoc.Action.App.Log
@@ -148,6 +149,7 @@ library
     Monadoc.Action.Job.Acquire
     Monadoc.Action.Job.Enqueue
     Monadoc.Action.Job.Perform
+    Monadoc.Action.Job.Prune
     Monadoc.Action.Job.Release
     Monadoc.Action.License.Upsert
     Monadoc.Action.Migration.Insert
@@ -238,13 +240,9 @@ library
     Monadoc.Model.Upload
     Monadoc.Model.Version
     Monadoc.Query.Blob
-    Monadoc.Query.BlobSpec
     Monadoc.Query.CronEntry
-    Monadoc.Query.CronEntrySpec
     Monadoc.Query.Package
-    Monadoc.Query.PackageSpec
     Monadoc.Query.Version
-    Monadoc.Query.VersionSpec
     Monadoc.Server.Application
     Monadoc.Server.Main
     Monadoc.Server.Middleware
@@ -296,6 +294,7 @@ library
     Monadoc.Worker.Main
 
   hs-source-dirs: source/library
+  -- cabal-gild: discover source/library --include=**/*Spec.hs
   other-modules:
     Monadoc.Action.Blob.InsertSpec
     Monadoc.Action.Blob.UpsertSpec
@@ -345,6 +344,10 @@ library
     Monadoc.Model.RangeSpec
     Monadoc.Model.UploadSpec
     Monadoc.Model.VersionSpec
+    Monadoc.Query.BlobSpec
+    Monadoc.Query.CronEntrySpec
+    Monadoc.Query.PackageSpec
+    Monadoc.Query.VersionSpec
     Monadoc.Type.BuildTypeSpec
     Monadoc.Type.ComponentIdSpec
     Monadoc.Type.ComponentNameSpec
@@ -373,7 +376,8 @@ library
     Monadoc.Type.UrlSpec
     Monadoc.Type.VersionNumberSpec
     MonadocSpec
-    Paths_monadoc
+
+  other-modules: Paths_monadoc
 
 executable monadoc
   import: executable
