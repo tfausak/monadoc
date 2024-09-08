@@ -8,7 +8,7 @@ jobs:
       - id: haskell
         uses: haskell-actions/setup@v2
         with:
-          ghc-version: 9.10
+          ghc-version: '9.10'
       - run: cabal sdist --output-dir artifact
       - run: cabal configure --enable-optimization=2 --enable-tests --flags pedantic --jobs
       - run: cat cabal.project.local
