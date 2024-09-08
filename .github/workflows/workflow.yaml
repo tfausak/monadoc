@@ -17,7 +17,7 @@ jobs:
       - run: cabal freeze
       - run: cat cabal.project.freeze
       - run: cp cabal.project.freeze artifact
-      - run: cabal outdated --v2-freeze-file cabal.project.freeze
+      - run: cabal outdated --v2-freeze-file
       - uses: actions/cache@v4
         with:
           key: ${{ matrix.platform }}/${{ hashFiles('cabal.project.freeze') }}
@@ -34,7 +34,6 @@ jobs:
       - run: echo ::add-matcher::.github/hspec-problem-matcher.json
       - run: cabal run -- monadoc-test-suite --randomize --strict
     strategy:
-      fail-fast: false # TODO
       matrix:
         include:
           - platform: macos
