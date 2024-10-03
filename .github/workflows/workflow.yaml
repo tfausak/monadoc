@@ -127,5 +127,3 @@ jobs:
 name: Workflow
 on:
   push: null
-  schedule:
-    - cron: 0 0 * * 1
