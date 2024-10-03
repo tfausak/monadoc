@@ -55,7 +55,6 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/deploy.yaml
   docker:
-    if: ${{ github.event_name != 'schedule' }}
     name: Docker
     needs: build
     runs-on: ubuntu-22.04
@@ -127,5 +126,3 @@ jobs:
 name: Workflow
 on:
   push: null
-  schedule:
-    - cron: 0 0 * * 1
