@@ -6,6 +6,6 @@ import qualified Network.Wai.Middleware.Gzip as Gzip
 middleware :: FilePath -> Wai.Middleware
 middleware temporaryDirectory =
   Gzip.gzip
-    Gzip.def
+    Gzip.defaultGzipSettings
       { Gzip.gzipFiles = Gzip.GzipCacheFolder temporaryDirectory
       }
